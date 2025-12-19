@@ -4112,7 +4112,6 @@ function renderEslestirmeKarma(container, question) {
     karmaSelectedItem = null;
     
     karmaMatchPairs = question.pairs.map(p => ({ ...p, matched: false }));
-    let selectedArabic = null;
     
     const arabicItems = shuffleArray([...question.pairs]);
     const turkishItems = shuffleArray([...question.pairs]);
@@ -4465,18 +4464,6 @@ function resetAllData() {
     
     // Close all modals
     closeAllModals();
-    
-    // Reset reading mode indices
-    currentAyetIndex = 0;
-    currentDuaIndex = 0;
-    currentHadisIndex = 0;
-    
-    // Reset submode tracking
-    currentKelimeSubmode = 'classic';
-    currentElifBaSubmode = 'harfler';
-    
-    // Reset onboarding
-    onboardingSlideIndex = 0;
     
     // Reset current game state
     currentGameMode = null;
