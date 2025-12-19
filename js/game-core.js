@@ -333,6 +333,9 @@ async function initApp() {
     // Register service worker
     registerServiceWorker();
     
+    // Setup PWA install banner
+    setupPWAInstall();
+    
     // Hide loading screen
     setTimeout(() => {
         document.getElementById('loadingScreen').classList.add('hidden');
@@ -578,6 +581,102 @@ function registerServiceWorker() {
         navigator.serviceWorker.register('./sw.js')
             .then(reg => console.log('✅ Service Worker registered'))
             .catch(err => console.warn('⚠️ Service Worker registration failed:', err));
+    }
+}
+
+/**
+ * Setup PWA Install Banner
+ */
+let deferredPrompt = null;
+
+function setupPWAInstall() {
+    // Sadece mobil cihazlarda göster
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (!isMobile) return;
+    
+    // Zaten yüklü mü kontrol et
+    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+        return; // Zaten PWA olarak yüklü
+    }
+    
+    // Daha önce reddedildi mi kontrol et
+    const installDismissed = localStorage.getItem('hasene_install_dismissed');
+    if (installDismissed) {
+        const dismissedDate = new Date(installDismissed);
+        const daysSinceDismissed = (Date.now() - dismissedDate.getTime()) / (1000 * 60 * 60 * 24);
+        if (daysSinceDismissed < 7) {
+            return; // 7 gün içinde reddedildiyse tekrar gösterme
+        }
+    }
+    
+    // beforeinstallprompt event'ini yakala
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        
+        // Banner'ı göster
+        const banner = document.getElementById('install-banner');
+        if (banner) {
+            banner.classList.remove('hidden');
+            banner.style.display = 'block';
+        }
+    });
+    
+    // Install butonu
+    const installBtn = document.getElementById('install-btn');
+    if (installBtn) {
+        installBtn.addEventListener('click', async () => {
+            if (!deferredPrompt) {
+                // iOS Safari için manuel talimatlar
+                showIOSInstallInstructions();
+                return;
+            }
+            
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            
+            if (outcome === 'accepted') {
+                console.log('✅ PWA yükleme kabul edildi');
+            } else {
+                console.log('❌ PWA yükleme reddedildi');
+            }
+            
+            deferredPrompt = null;
+            hideInstallBanner();
+        });
+    }
+    
+    // Dismiss butonu
+    const dismissBtn = document.getElementById('install-dismiss');
+    if (dismissBtn) {
+        dismissBtn.addEventListener('click', () => {
+            localStorage.setItem('hasene_install_dismissed', new Date().toISOString());
+            hideInstallBanner();
+        });
+    }
+    
+    // PWA yüklendiğinde banner'ı gizle
+    window.addEventListener('appinstalled', () => {
+        console.log('✅ PWA yüklendi');
+        hideInstallBanner();
+        deferredPrompt = null;
+    });
+}
+
+function hideInstallBanner() {
+    const banner = document.getElementById('install-banner');
+    if (banner) {
+        banner.classList.add('hidden');
+        banner.style.display = 'none';
+    }
+}
+
+function showIOSInstallInstructions() {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    if (isIOS) {
+        showToast('📱 iOS: Paylaş butonuna (⬆️) basın ve "Ana Ekrana Ekle" seçeneğini seçin', 'info', 5000);
+    } else {
+        showToast('📱 Tarayıcı menüsünden "Ana ekrana ekle" seçeneğini kullanın', 'info', 4000);
     }
 }
 
