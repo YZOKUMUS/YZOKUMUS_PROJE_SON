@@ -94,6 +94,40 @@ async function firestoreGet(collection, docId) {
 }
 
 /**
+ * Delete document from Firestore
+ * @param {string} collection - Collection name
+ * @param {string} docId - Document ID
+ * @returns {Promise<boolean>} Success status
+ */
+async function firestoreDelete(collection, docId) {
+    const backendType = getBackendTypeFromAuth();
+    
+    if (backendType !== 'firebase' || !window.firestore) {
+        return false;
+    }
+    
+    // Check if user is authenticated
+    const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : null;
+    if (!user || user.id.startsWith('local-')) {
+        return false;
+    }
+    
+    // Check Firebase auth
+    if (window.firebaseAuth && !window.firebaseAuth.currentUser) {
+        return false;
+    }
+    
+    try {
+        await window.firestore.collection(collection).doc(docId).delete();
+        console.log('✅ Firestore delete successful:', { collection, docId });
+        return true;
+    } catch (error) {
+        console.error('❌ Firestore delete error:', error);
+        return false;
+    }
+}
+
+/**
  * Set document in Firestore
  * @param {string} collection - Collection name
  * @param {string} docId - Document ID
@@ -398,6 +432,7 @@ if (typeof window !== 'undefined') {
     window.saveToIndexedDB = saveToIndexedDB;
     window.firestoreGet = firestoreGet;
     window.firestoreSet = firestoreSet;
+    window.firestoreDelete = firestoreDelete;
     window.loadUserStats = loadUserStats;
     window.saveUserStats = saveUserStats;
     window.loadDailyTasks = loadDailyTasks;

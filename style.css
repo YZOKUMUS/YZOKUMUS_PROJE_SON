@@ -128,7 +128,27 @@ body {
 }
 
 .loading-subtitle {
-    font-size: 1rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-xl);
+    font-style: italic;
+    max-width: 85%;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.6;
+    padding: 0 10px;
+}
+
+.loading-footer {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.85rem;
+    color: rgba(26, 26, 46, 0.6);
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
     color: var(--text-secondary);
     margin-bottom: var(--spacing-xl);
 }
@@ -2276,19 +2296,30 @@ body {
 }
 
 .match-item.matched {
-    opacity: 0.5;
+    /* Duolingo style: Eşleşmiş öğeler yeşil, disabled, görünür kalır */
+    border-color: var(--accent-success);
+    background: rgba(16, 185, 129, 0.15);
+    opacity: 1;
     pointer-events: none;
+    cursor: not-allowed;
+    position: relative;
 }
 
-.match-item.matched.correct {
-    border-color: var(--accent-success);
-    background: rgba(16, 185, 129, 0.2);
+.match-item.matched::after {
+    content: '✓';
+    position: absolute;
+    top: 4px;
+    right: 8px;
+    color: var(--accent-success);
+    font-weight: bold;
+    font-size: 1.2rem;
 }
 
 .match-item.wrong {
+    /* Duolingo style: Yanlış eşleşme kırmızı, shake animasyonu */
     border-color: var(--accent-error);
     background: rgba(239, 68, 68, 0.2);
-    animation: shake 0.3s;
+    animation: shake 0.4s ease-in-out;
 }
 
 @keyframes shake {

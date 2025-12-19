@@ -40,7 +40,8 @@ const CONFIG = {
         GAME_STATS: 'hasene_gameStats',
         DAILY_GOAL: 'hasene_dailyGoal',
         DAILY_PROGRESS: 'hasene_dailyProgress',
-        ACHIEVEMENTS: 'hasene_achievements'
+        ACHIEVEMENTS: 'hasene_achievements',
+        DIFFICULTY: 'hasene_difficulty'
     },
 
     // Audio Settings

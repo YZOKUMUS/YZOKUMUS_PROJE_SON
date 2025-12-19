@@ -291,9 +291,38 @@ async function initApp() {
     // Load stats
     await loadStats();
     
+    // Load difficulty setting from localStorage
+    const savedDifficulty = localStorage.getItem('hasene_difficulty');
+    if (savedDifficulty && ['easy', 'medium', 'hard'].includes(savedDifficulty)) {
+        currentDifficulty = savedDifficulty;
+    }
+    
     // Setup UI
     setupEventListeners();
+    
+    // Update difficulty UI to match loaded setting
+    document.querySelectorAll('.difficulty-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.difficulty === currentDifficulty) {
+            btn.classList.add('active');
+        }
+    });
+    
     updateStatsDisplay(); // This also calls updateUserStatusDisplay()
+    
+    // Setup page visibility change listener to check for day change
+    // This ensures tasks reset when user switches tabs/apps and comes back after midnight
+    document.addEventListener('visibilitychange', async () => {
+        if (!document.hidden) {
+            // Page became visible, check if day changed
+            const today = getLocalDateString();
+            if (dailyTasks.lastTaskDate !== today) {
+                console.log('👁️ Sayfa görünür oldu, gün kontrolü yapılıyor...');
+                await checkDailyTasks();
+                updateStatsDisplay();
+            }
+        }
+    });
     
     // Browser geri tuşu dinleyicisi
     setupBackButtonHandler();
@@ -566,6 +595,9 @@ function setupEventListeners() {
             document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             currentDifficulty = btn.dataset.difficulty;
+            // Save difficulty to localStorage
+            localStorage.setItem('hasene_difficulty', currentDifficulty);
+            console.log(`📊 Difficulty changed to: ${currentDifficulty}`);
         });
     });
     
@@ -687,6 +719,12 @@ function setupNavigationButtons() {
  */
 async function startGame(gameMode) {
     console.log(`🎮 Starting game: ${gameMode}`);
+    
+    // Check if day has changed (in case user kept app open past midnight)
+    const today = getLocalDateString();
+    if (dailyTasks.lastTaskDate !== today) {
+        await checkDailyTasks();
+    }
     
     // Check if username is set (per README: "Kullanıcı adı ile direkt giriş yapılır")
     const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : null;
@@ -1316,15 +1354,12 @@ function checkKelimeAnswer(index, selectedAnswer) {
         
         // Rozet ve başarıları kontrol et (her puan kazanınca)
         checkBadgesAndAchievementsAfterPoints();
-        
-        showToast(`+${gained} Hasene! 🔥 Combo: ${comboCount}`, 'success', 1000);
     } else {
         // Wrong answer
         wrongCount++;
         comboCount = 0;
         
         buttons[index].classList.add('wrong');
-        showToast('Yanlış! Doğru cevap gösterildi.', 'error', 1000);
     }
     
     // Günlük vird gösterimini güncelle
@@ -1950,7 +1985,13 @@ async function startDinleBulGame() {
         filtered = data.filter(w => w.ses_dosyasi || w.audio);
     }
     
-    currentQuestions = getRandomItems(filtered, CONFIG.QUESTIONS_PER_GAME);
+    // Use intelligent word selection to prioritize wrong answers (SM-2 algorithm)
+    if (filtered.length > CONFIG.QUESTIONS_PER_GAME) {
+        currentQuestions = selectIntelligentWords(filtered, CONFIG.QUESTIONS_PER_GAME, false);
+        console.log('🧠 Dinle Bul: Akıllı kelime seçimi kullanıldı');
+    } else {
+        currentQuestions = getRandomItems(filtered, Math.min(filtered.length, CONFIG.QUESTIONS_PER_GAME));
+    }
     
     document.getElementById('dinle-bul-screen').classList.remove('hidden');
     document.getElementById('dinle-total-questions').textContent = CONFIG.QUESTIONS_PER_GAME;
@@ -2009,6 +2050,7 @@ function loadDinleQuestion() {
 
 function checkDinleAnswer(index, selectedAnswer) {
     const correctAnswer = currentQuestion.anlam || currentQuestion.translation;
+    const wordId = currentQuestion.id || currentQuestion.kelime_id;
     const buttons = document.querySelectorAll('#dinle-options .answer-option');
     
     buttons.forEach(btn => btn.classList.add('disabled'));
@@ -2017,6 +2059,11 @@ function checkDinleAnswer(index, selectedAnswer) {
             btn.classList.add('correct');
         }
     });
+    
+    // Update word statistics (SM-2 algorithm)
+    if (wordId) {
+        updateWordStats(wordId, selectedAnswer === correctAnswer);
+    }
     
     if (selectedAnswer === correctAnswer) {
         correctCount++;
@@ -2031,13 +2078,10 @@ function checkDinleAnswer(index, selectedAnswer) {
         
         // Rozet ve başarıları kontrol et (her puan kazanınca)
         checkBadgesAndAchievementsAfterPoints();
-        
-        showToast(`+${gained} Hasene! 🔥 Combo: ${comboCount}`, 'success', 1000);
     } else {
         wrongCount++;
         comboCount = 0;
         buttons[index].classList.add('wrong');
-        showToast('Yanlış!', 'error', 1000);
     }
     
     // Günlük vird gösterimini güncelle
@@ -2130,6 +2174,8 @@ function loadBoslukQuestion() {
 
 function checkBoslukAnswer(index, selectedWord) {
     const correctWord = currentQuestion._correctWord;
+    // For ayet-based questions, we can't track word stats easily, 
+    // but we'll try to find the word ID from kelimeData if possible
     const buttons = document.querySelectorAll('#bosluk-options .answer-option');
     
     buttons.forEach(btn => btn.classList.add('disabled'));
@@ -2138,6 +2184,17 @@ function checkBoslukAnswer(index, selectedWord) {
             btn.classList.add('correct');
         }
     });
+    
+    // Try to update word stats if we can find the word in kelimeData
+    // Note: Boşluk Doldur uses ayet words, so word stats tracking may be limited
+    if (window.kelimeData && correctWord) {
+        const matchingWord = window.kelimeData.find(w => 
+            w.kelime === correctWord || w.arabic === correctWord
+        );
+        if (matchingWord && matchingWord.id) {
+            updateWordStats(matchingWord.id, selectedWord === correctWord);
+        }
+    }
     
     if (selectedWord === correctWord) {
         correctCount++;
@@ -2160,13 +2217,10 @@ function checkBoslukAnswer(index, selectedWord) {
         
         // Rozet ve başarıları kontrol et (her puan kazanınca)
         checkBadgesAndAchievementsAfterPoints();
-        
-        showToast(`+${gained} Hasene! 🔥 Combo: ${comboCount}`, 'success', 1000);
     } else {
         wrongCount++;
         comboCount = 0;
         buttons[index].classList.add('wrong');
-        showToast('Yanlış!', 'error', 1000);
     }
     
     // Günlük vird gösterimini güncelle
@@ -2391,12 +2445,18 @@ async function startElifKelimelerGame(harfData) {
         return;
     }
     
+    // Filter by difficulty first
+    let filteredKelime = filterByDifficulty(kelimeData, currentDifficulty);
+    if (filteredKelime.length < 20) {
+        filteredKelime = kelimeData; // Fallback if not enough words
+    }
+    
     // Create questions - match words with their starting letter
     const questions = [];
     const usedHarfler = shuffleArray([...harfData]).slice(0, CONFIG.QUESTIONS_PER_GAME);
     
     for (const harf of usedHarfler) {
-        const matchingWords = kelimeData.filter(w => {
+        const matchingWords = filteredKelime.filter(w => {
             const kelime = w.kelime || w.arabic || '';
             return kelime.startsWith(harf.harf);
         });
@@ -2484,13 +2544,10 @@ function checkElifKelimelerAnswer(index, selectedAnswer) {
         
         // Rozet ve başarıları kontrol et (her puan kazanınca)
         checkBadgesAndAchievementsAfterPoints();
-        
-        showToast(`+${gained} Hasene! 🔥 Combo: ${comboCount}`, 'success', 1000);
     } else {
         wrongCount++;
         comboCount = 0;
         buttons[index].classList.add('wrong');
-        showToast('Yanlış!', 'error', 1000);
     }
     
     // Günlük vird gösterimini güncelle
@@ -2600,13 +2657,10 @@ function checkElifHarekelerAnswer(index, selectedAnswer) {
         
         // Rozet ve başarıları kontrol et (her puan kazanınca)
         checkBadgesAndAchievementsAfterPoints();
-        
-        showToast(`+${gained} Hasene! 🔥 Combo: ${comboCount}`, 'success', 1000);
     } else {
         wrongCount++;
         comboCount = 0;
         buttons[index].classList.add('wrong');
-        showToast('Yanlış!', 'error', 1000);
     }
     
     // Günlük vird gösterimini güncelle
@@ -2674,13 +2728,10 @@ function checkElifAnswer(index, selectedAnswer) {
         
         // Rozet ve başarıları kontrol et (her puan kazanınca)
         checkBadgesAndAchievementsAfterPoints();
-        
-        showToast(`+${gained} Hasene! 🔥 Combo: ${comboCount}`, 'success', 1000);
     } else {
         wrongCount++;
         comboCount = 0;
         buttons[index].classList.add('wrong');
-        showToast('Yanlış!', 'error', 1000);
     }
     
     // Günlük vird gösterimini güncelle
@@ -2704,9 +2755,17 @@ function playCurrentLetterAudio() {
 
 async function checkDailyTasks() {
     const today = getLocalDateString();
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    
+    // Load daily tasks
     dailyTasks = loadFromStorage(CONFIG.STORAGE_KEYS.DAILY_TASKS, dailyTasks);
     
+    // Check if date has changed (new day started)
     if (dailyTasks.lastTaskDate !== today) {
+        console.log(`📅 Yeni gün başladı! Eski tarih: ${dailyTasks.lastTaskDate || 'yok'}, Yeni tarih: ${today}, Saat: ${String(currentHour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')}`);
+        
         // New day, reset tasks
         dailyTasks = {
             lastTaskDate: today,
@@ -2723,10 +2782,24 @@ async function checkDailyTasks() {
             }
         };
         saveToStorage(CONFIG.STORAGE_KEYS.DAILY_TASKS, dailyTasks);
+        
+        // Also reset daily progress for new day
+        dailyProgress = 0;
+        saveToStorage(CONFIG.STORAGE_KEYS.DAILY_PROGRESS, { date: today, points: 0 });
+        localStorage.removeItem('hasene_last_daily_goal_completed');
+        
+        // Update UI
+        updateStatsDisplay();
     }
 }
 
 function updateTaskProgress(type, value) {
+    // Check if day has changed before updating (in case user kept app open past midnight)
+    const today = getLocalDateString();
+    if (dailyTasks.lastTaskDate !== today) {
+        checkDailyTasks();
+    }
+    
     if (!dailyTasks.tasks) return;
     
     // Update stats
@@ -3734,7 +3807,7 @@ let karmaMatchPairs = [];
  * Combines all game types: Kelime Çevir, Dinle Bul, Eşleştirme, Boşluk Doldur
  */
 async function startKarmaGame() {
-    console.log('🎲 Karma Oyun başlatılıyor...');
+    console.log('🔀 Karma Oyun başlatılıyor...');
     
     // Reset session
     sessionScore = 0;
@@ -3762,8 +3835,12 @@ async function startKarmaGame() {
     // Generate mixed questions (15 total)
     const questionCount = 15;
     
-    // 1. Kelime Çevir soruları (4 adet)
-    const kelimeQuestions = getRandomItems(kelimeData, 4).map(word => ({
+    // 1. Kelime Çevir soruları (4 adet) - Akıllı seçim ile yanlış cevaplanan kelimeler öncelikli
+    const filteredKelime = filterByDifficulty(kelimeData, currentDifficulty);
+    const selectedKelime = filteredKelime.length > 4 
+        ? selectIntelligentWords(filteredKelime, 4, false)
+        : getRandomItems(filteredKelime, Math.min(4, filteredKelime.length));
+    const kelimeQuestions = selectedKelime.map(word => ({
         type: 'kelime-cevir',
         data: word,
         question: word.kelime,
@@ -3771,21 +3848,28 @@ async function startKarmaGame() {
         options: generateOptions(word.anlam, kelimeData.map(w => w.anlam))
     }));
     
-    // 2. Dinle Bul soruları (3 adet)
-    const audioWords = kelimeData.filter(w => w.ses_dosyasi);
-    const dinleQuestions = getRandomItems(audioWords, 3).map(word => ({
+    // 2. Dinle Bul soruları (3 adet) - Akıllı seçim ile yanlış cevaplanan kelimeler öncelikli
+    const audioWords = kelimeData.filter(w => w.ses_dosyasi || w.audio);
+    const filteredAudio = filterByDifficulty(audioWords, currentDifficulty);
+    const selectedAudio = filteredAudio.length > 3 
+        ? selectIntelligentWords(filteredAudio, 3, false)
+        : getRandomItems(filteredAudio, Math.min(3, filteredAudio.length));
+    const dinleQuestions = selectedAudio.map(word => ({
         type: 'dinle-bul',
         data: word,
         question: '🔊 Dinle ve doğru anlamı seç',
-        audioUrl: word.ses_dosyasi,
+        audioUrl: word.ses_dosyasi || word.audio,
         correctAnswer: word.anlam,
         options: generateOptions(word.anlam, kelimeData.map(w => w.anlam))
     }));
     
-    // 3. Eşleştirme sorusu (2 adet - her biri 4 çift)
+    // 3. Eşleştirme sorusu (2 adet - her biri 4 çift) - Akıllı seçim ile
     const matchQuestions = [];
     for (let i = 0; i < 2; i++) {
-        const matchWords = getRandomItems(kelimeData, 4);
+        const filteredMatch = filterByDifficulty(kelimeData, currentDifficulty);
+        const matchWords = filteredMatch.length > 4 
+            ? selectIntelligentWords(filteredMatch, 4, false)
+            : getRandomItems(filteredMatch, Math.min(4, filteredMatch.length));
         matchQuestions.push({
             type: 'eslestirme',
             pairs: matchWords.map(w => ({
@@ -3836,7 +3920,7 @@ async function startKarmaGame() {
         ...harfQuestions
     ]);
     
-    console.log(`🎲 ${karmaQuestions.length} karma soru oluşturuldu`);
+    console.log(`🔀 ${karmaQuestions.length} karma soru oluşturuldu`);
     
     // Show karma game screen
     hideAllScreens();
@@ -3929,6 +4013,10 @@ function renderDinleBulKarma(container, question) {
 }
 
 function renderEslestirmeKarma(container, question) {
+    // Yeni eşleştirme sorusu için sayaçları sıfırla
+    karmaMatchedCount = 0;
+    karmaSelectedItem = null;
+    
     karmaMatchPairs = question.pairs.map(p => ({ ...p, matched: false }));
     let selectedArabic = null;
     
@@ -3961,40 +4049,56 @@ let karmaSelectedItem = null;
 let karmaMatchedCount = 0;
 
 function selectKarmaMatch(element, type, id) {
+    // Eşleşmiş öğeleri seçemezsin
     if (element.classList.contains('matched')) return;
     
     if (!karmaSelectedItem) {
-        // First selection
+        // İlk seçim - öğeyi seçili yap
         karmaSelectedItem = { element, type, id };
         element.classList.add('selected');
+    } else if (karmaSelectedItem.element === element) {
+        // Aynı öğeye tekrar tıklandı - seçimi kaldır
+        element.classList.remove('selected');
+        karmaSelectedItem = null;
     } else if (karmaSelectedItem.type === type) {
-        // Same column - switch selection
+        // Aynı sütunda farklı öğe seçildi - önceki seçimi kaldır, yenisini seç
         karmaSelectedItem.element.classList.remove('selected');
         karmaSelectedItem = { element, type, id };
         element.classList.add('selected');
     } else {
-        // Different column - check match
+        // Farklı sütun - eşleşme kontrolü (Duolingo mantığı)
         if (karmaSelectedItem.id === id) {
-            // Correct match!
-            karmaSelectedItem.element.classList.remove('selected');
-            karmaSelectedItem.element.classList.add('matched', 'correct');
-            element.classList.add('matched', 'correct');
+            // ✅ DOĞRU EŞLEŞME (Duolingo: Yeşil, eşleşmiş, disabled)
+            const firstElement = karmaSelectedItem.element;
+            
+            // Seçili class'ını kaldır
+            firstElement.classList.remove('selected');
+            element.classList.remove('selected');
+            
+            // Eşleşmiş olarak işaretle (yeşil, disabled)
+            firstElement.classList.add('matched');
+            element.classList.add('matched');
+            firstElement.disabled = true;
+            element.disabled = true;
+            
             karmaMatchedCount++;
             
+            // Puan hesapla
             comboCount++;
             const basePoints = getBasePoints(currentDifficulty);
             const comboBonus = CONFIG.COMBO_BONUS_PER_CORRECT;
             const points = basePoints + comboBonus;
             sessionScore += points;
-            dailyProgress += points; // Günlük vird'e ekle
-            updateTaskProgress('correct', 1); // Görev ilerlemesine ekle (her eşleşme için)
+            dailyProgress += points;
+            updateTaskProgress('correct', 1);
             
-            // Rozet ve başarıları kontrol et (her puan kazanınca)
+            // Rozet ve başarıları kontrol et
             checkBadgesAndAchievementsAfterPoints();
             
-            showToast(`+${points} Hasene! 🔥 Combo: ${comboCount}`, 'success', 800);
+            // UI güncellemeleri
+            updateDailyGoalDisplay();
             
-            // Check if all matched
+            // Tüm çiftler eşleşti mi kontrol et
             if (karmaMatchedCount >= 4) {
                 correctCount++;
                 maxCombo = Math.max(maxCombo, comboCount);
@@ -4005,24 +4109,29 @@ function selectKarmaMatch(element, type, id) {
                 }, 1000);
             }
         } else {
-            // Wrong match
-            karmaSelectedItem.element.classList.remove('selected');
-            karmaSelectedItem.element.classList.add('wrong');
+            // ❌ YANLIŞ EŞLEŞME (Duolingo: Kırmızı, sonra geri döner)
+            const firstElement = karmaSelectedItem.element;
+            
+            // Kırmızı yap
+            firstElement.classList.add('wrong');
             element.classList.add('wrong');
             comboCount = 0;
             
+            // Kısa süre sonra geri döndür (seçimi kaldır)
             setTimeout(() => {
-                karmaSelectedItem.element.classList.remove('wrong');
-                element.classList.remove('wrong');
-            }, 500);
+                firstElement.classList.remove('selected', 'wrong');
+                element.classList.remove('selected', 'wrong');
+            }, 800); // 800ms Duolingo benzeri
         }
+        
+        // Seçimi sıfırla
         karmaSelectedItem = null;
     }
 }
 
 function renderBoslukDoldurKarma(container, question) {
     container.innerHTML = `
-        <div class="karma-type-badge">📖 Boşluk Doldur</div>
+        <div class="karma-type-badge">✍️ Boşluk Doldur</div>
         <div class="karma-arabic bosluk">${question.question}</div>
         <div class="karma-translation">${question.translation}</div>
         <div class="karma-options">
@@ -4082,8 +4191,6 @@ function checkKarmaAnswer(selected, correct) {
         // Rozet ve başarıları kontrol et (her puan kazanınca)
         checkBadgesAndAchievementsAfterPoints();
         
-        showToast(`+${gained} Hasene! 🔥 Combo: ${comboCount}`, 'success', 1000);
-        
         if (wordId) updateWordStats(wordId, true);
     } else {
         wrongCount++;
@@ -4095,8 +4202,6 @@ function checkKarmaAnswer(selected, correct) {
                 btn.classList.add('wrong');
             }
         });
-        
-        showToast('Yanlış!', 'error', 1000);
         
         if (wordId) updateWordStats(wordId, false);
     }
@@ -4140,6 +4245,7 @@ function resetAllData() {
         CONFIG.STORAGE_KEYS.DAILY_GOAL,
         CONFIG.STORAGE_KEYS.DAILY_PROGRESS,
         CONFIG.STORAGE_KEYS.ACHIEVEMENTS,
+        CONFIG.STORAGE_KEYS.DIFFICULTY,
         
         // Game data
         'hasene_word_stats',
@@ -4280,12 +4386,32 @@ function resetAllData() {
     
     // Reset current game state
     currentGameMode = null;
-    currentDifficulty = 'medium';
+    currentDifficulty = 'easy';
     currentQuestions = [];
     currentQuestion = null;
     currentOptions = [];
     
-    console.log('✅ Tüm veriler sıfırlandı (puanlar, rozetler, başarımlar, favoriler, kelime istatistikleri, günlük görevler, takvim, haftalık XP, lider tablosu). Sayfa yenileniyor...');
+    // Delete Firebase data if Firebase user (async operation)
+    const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : null;
+    if (user && !user.id.startsWith('local-') && typeof window.firestoreDelete === 'function') {
+        console.log('🔥 Firebase verileri siliniyor...');
+        // Use Promise.all for parallel deletion
+        Promise.all([
+            window.firestoreDelete('user_stats', user.id),
+            window.firestoreDelete('daily_tasks', user.id)
+        ]).then(() => {
+            console.log('✅ Firebase verileri silindi');
+        }).catch(error => {
+            console.warn('⚠️ Firebase veri silme hatası:', error);
+        });
+    }
+    
+    // Initialize new daily tasks before reload
+    checkDailyTasks().then(() => {
+        console.log('✅ Yeni günlük vazifeler oluşturuldu');
+    });
+    
+    console.log('✅ Tüm veriler sıfırlandı (puanlar, rozetler, başarımlar, favoriler, kelime istatistikleri, günlük görevler, takvim, haftalık XP, lider tablosu, zorluk seviyesi). Sayfa yenileniyor...');
     
     // Immediately reload page to properly reinitialize everything
     window.location.reload();

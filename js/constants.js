@@ -318,37 +318,22 @@ const ISLAMIC_TEACHINGS = [
     }
 ];
 
-// Onboarding Slides
+// Onboarding Slides - Basit ve net tanıtım
 const ONBOARDING_SLIDES = [
     {
         icon: '🕌',
         title: 'Hasene\'ye Hoş Geldiniz!',
-        description: 'Kuran kelimeleri ve İslami içeriklerle dolu eğlenceli bir öğrenme yolculuğuna başlayın.'
+        description: 'Kuran\'daki Arapça kelimeleri oyunlaştırılmış yöntemlerle öğrenin. Eğlenceli ve etkili bir öğrenme deneyimi sizi bekliyor.'
     },
     {
-        icon: '🎯',
-        title: 'Kimler İçin?',
-        description: 'Kuran\'daki Arapça kelimeleri öğrenmek isteyen herkes için tasarlandı. Başlangıç seviyesinden ileri seviyeye kadar.'
+        icon: '🎮',
+        title: 'Nasıl Oynanır?',
+        description: 'Oyun modlarından birini seçin, soruları cevaplayın. Her doğru cevap Hasene puanı kazandırır. Combo yaparak bonus puan toplayın!'
     },
     {
-        icon: '📚',
-        title: '7 Oyun Modu',
-        description: 'Kelime Çevir, Dinle Bul, Boşluk Doldur, Ayet Oku, Dua Et, Hadis Oku ve Elif Ba modlarıyla öğrenin.'
-    },
-    {
-        icon: '💰',
-        title: 'Hasene Puan Sistemi',
-        description: 'Her doğru cevap için Hasene kazanın. Combo yaparak bonus puan toplayın. 250 Hasene = 1 Yıldız!'
-    },
-    {
-        icon: '📅',
-        title: 'Günlük Görevler & Seri',
-        description: 'Günlük görevleri tamamlayın, seri yapın ve özel ödüller kazanın. Düzenli çalışma başarının anahtarıdır.'
-    },
-    {
-        icon: '🏆',
-        title: '44 Başarım & 42 Rozet',
-        description: 'Başarımlar kazanın, rozetler toplayın ve seviyenizi yükseltin. Hedef: Kurra Hafız olmak!'
+        icon: '⭐',
+        title: 'Ödüller ve İlerleme',
+        description: 'Hasene puanlarıyla yıldız kazanın, günlük görevleri tamamlayın, rozetler ve başarımlar toplayın. Düzenli çalışarak seviyenizi yükseltin!'
     }
 ];
 
