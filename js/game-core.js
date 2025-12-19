@@ -4006,8 +4006,8 @@ async function startKarmaGame() {
         type: 'harf-bul',
         data: harf,
         question: harf.harf,
-        correctAnswer: harf.okunusu,
-        options: generateOptions(harf.okunusu, harfData.map(h => h.okunusu))
+        correctAnswer: harf.okunus || harf.isim,
+        options: generateOptions(harf.okunus || harf.isim, harfData.map(h => h.okunus || h.isim))
     }));
     
     // Combine and shuffle all questions
