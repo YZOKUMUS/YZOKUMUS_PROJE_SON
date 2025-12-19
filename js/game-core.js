@@ -4648,8 +4648,6 @@ if (typeof window !== 'undefined') {
     window.useHint = useHint;
     window.handleUserLogout = handleUserLogout;
     window.updateUserStatusDisplay = updateUserStatusDisplay;
-    window.handleUserLogout = handleUserLogout;
-    window.updateUserStatusDisplay = updateUserStatusDisplay;
     window.showUsernameLoginModal = showUsernameLoginModal;
     window.confirmUsername = confirmUsername;
     window.resetAllData = resetAllData;
