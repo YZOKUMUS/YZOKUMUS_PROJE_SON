@@ -288,6 +288,39 @@ async function initApp() {
         console.log('👤 Current user:', user);
     }
     
+    // Cleanup: After reset, remove any remaining Firebase entries by saved username
+    // This handles cases where old entries weren't deleted during reset
+    const resetUsername = localStorage.getItem('hasene_reset_username');
+    if (resetUsername && window.firestore && window.firestore.collection && typeof window.firestoreDelete === 'function') {
+        try {
+            console.log('🧹 Reset sonrası temizlik: Username ile eski veriler kontrol ediliyor...', resetUsername);
+            
+            // Check if there are any weekly_leaderboard entries with this username
+            const cleanupQuery = await window.firestore
+                .collection('weekly_leaderboard')
+                .where('username', '==', resetUsername)
+                .limit(100)
+                .get();
+            
+            if (!cleanupQuery.empty) {
+                console.log(`⚠️ Reset sonrası ${cleanupQuery.size} eski kayıt bulundu, siliniyor...`);
+                const cleanupPromises = [];
+                cleanupQuery.forEach(doc => {
+                    cleanupPromises.push(window.firestoreDelete('weekly_leaderboard', doc.id));
+                });
+                await Promise.all(cleanupPromises);
+                console.log('✅ Reset sonrası temizlik tamamlandı');
+            }
+            
+            // Remove the reset flag after cleanup
+            localStorage.removeItem('hasene_reset_username');
+        } catch (cleanupError) {
+            console.warn('⚠️ Reset sonrası temizlik hatası (normal olabilir):', cleanupError);
+            // Remove the flag even if cleanup failed
+            localStorage.removeItem('hasene_reset_username');
+        }
+    }
+    
     // Load stats
     await loadStats();
     
@@ -4599,7 +4632,7 @@ async function resetAllData() {
     const savedUsername = localStorage.getItem('hasene_username');
     
     // Delete Firebase data if Firebase user (async operation - MUST WAIT)
-    // IMPORTANT: Do this BEFORE signOut to ensure we can delete with current user ID
+    // IMPORTANT: Delete with CURRENT user ID BEFORE signOut
     const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : null;
     if (user && !user.id.startsWith('local-') && typeof window.firestoreDelete === 'function') {
         console.log('🔥 Firebase verileri siliniyor (user ID:', user.id + ')...');
@@ -4648,24 +4681,28 @@ async function resetAllData() {
                     console.log(`🔥 Ek haftalık XP kaydı siliniyor (user_id ile): ${doc.id}`);
                 });
                 
-                // Also try to delete by username (in case user_id changed but username is same)
-                // This is a safety measure for reset operations
-                const username = localStorage.getItem('hasene_username') || user.username;
-                if (username && username !== 'Anonim Kullanıcı' && username !== 'Kullanıcı') {
+                // Also try to delete by username (for reset operations - safety measure)
+                // This ensures old entries are deleted even if user_id format changed
+                const username = savedUsername || localStorage.getItem('hasene_username') || user.username;
+                if (username && username !== 'Anonim Kullanıcı' && username !== 'Kullanıcı' && username !== 'Misafir') {
                     try {
                         const usernameQuerySnapshot = await window.firestore
                             .collection('weekly_leaderboard')
                             .where('username', '==', username)
-                            .limit(50)
+                            .limit(100) // Increased limit for thorough cleanup
                             .get();
                         
+                        let usernameDeleteCount = 0;
                         usernameQuerySnapshot.forEach(doc => {
                             const data = doc.data();
-                            // Only delete if it's not the current user (to avoid deleting other users with same username)
-                            // But since we're resetting, we want to delete all entries with this username
+                            // During reset, delete all entries with this username (it's our own reset)
                             deletePromises.push(window.firestoreDelete('weekly_leaderboard', doc.id));
-                            console.log(`🔥 Ek haftalık XP kaydı siliniyor (username ile): ${doc.id}`);
+                            usernameDeleteCount++;
+                            console.log(`🔥 Ek haftalık XP kaydı siliniyor (username: ${username}): ${doc.id}`);
                         });
+                        if (usernameDeleteCount > 0) {
+                            console.log(`📊 Toplam ${usernameDeleteCount} username kaydı siliniyor`);
+                        }
                     } catch (usernameQueryError) {
                         console.warn('⚠️ Username query hatası (normal olabilir):', usernameQueryError);
                     }
