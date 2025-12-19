@@ -1,6 +1,6 @@
 // Hasene Service Worker - Offline + Cache
-const CACHE_NAME = 'hasene-v2';
-const DATA_CACHE_NAME = 'hasene-data-v2';
+const CACHE_NAME = 'hasene-v3';
+const DATA_CACHE_NAME = 'hasene-data-v3';
 
 const urlsToCache = [
     './',

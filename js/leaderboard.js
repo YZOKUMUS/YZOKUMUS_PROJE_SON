@@ -50,12 +50,26 @@ function getWeekStartString() {
 
 /**
  * Get current weekly XP
+ * Loads from localStorage (primary) or Firebase if available
  * @returns {number} Current weekly XP
  */
 function getCurrentWeeklyXP() {
     const weekStart = getWeekStartString();
     const key = `hasene_weekly_xp_${weekStart}`;
-    return parseInt(localStorage.getItem(key) || '0');
+    
+    // First check localStorage (fastest)
+    const localXP = localStorage.getItem(key);
+    if (localXP !== null && localXP !== '') {
+        const xp = parseInt(localXP || '0');
+        console.log('📊 getCurrentWeeklyXP from localStorage:', xp, '(key:', key + ')');
+        return xp;
+    }
+    
+    // If not in localStorage, return 0 (Firebase will sync on next update)
+    // This ensures reset works correctly - after reset, localStorage is cleared
+    // and Firebase data should also be deleted, so we return 0
+    console.log('📊 getCurrentWeeklyXP: 0 (localStorage empty for key:', key + ')');
+    return 0;
 }
 
 /**
@@ -220,11 +234,14 @@ async function getUserPosition() {
     const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : null;
     if (!user) return null;
     
+    // ALWAYS use getCurrentWeeklyXP() - this reads from localStorage which is the source of truth
+    // Firebase leaderboard is for ranking only, not for user's own XP value
     const weeklyXP = getCurrentWeeklyXP();
     const league = getUserLeague();
     const leaderboard = await loadLeaderboard();
     
-    // Find user position
+    // Find user position in leaderboard (if user exists in Firebase leaderboard)
+    // Note: After reset, user might not be in leaderboard if Firebase data was cleared
     const userIndex = leaderboard.findIndex(u => u.user_id === user.id);
     const position = userIndex >= 0 ? userIndex + 1 : null;
     
@@ -232,11 +249,12 @@ async function getUserPosition() {
     const leagueUsers = leaderboard.filter(u => u.league.id === league.id);
     const leaguePosition = leagueUsers.findIndex(u => u.user_id === user.id);
     
+    // Return user position with weeklyXP from localStorage (source of truth)
     return {
         position: position,
         leaguePosition: leaguePosition >= 0 ? leaguePosition + 1 : null,
-        weeklyXP: weeklyXP,
-        league: league,
+        weeklyXP: weeklyXP, // Always from localStorage via getCurrentWeeklyXP()
+        league: league, // Calculated from weeklyXP (from localStorage)
         totalUsers: leaderboard.length,
         totalInLeague: leagueUsers.length
     };
@@ -268,6 +286,10 @@ async function showLeaderboardModal() {
     try {
         const leaderboard = await loadLeaderboard();
         const userPos = await getUserPosition();
+        
+        console.log('📊 Leaderboard loaded, userPos:', userPos);
+        console.log('📊 userPos.weeklyXP:', userPos?.weeklyXP);
+        console.log('📊 getCurrentWeeklyXP():', getCurrentWeeklyXP());
         
         renderLeaderboard(leaderboard, userPos);
     } catch (error) {

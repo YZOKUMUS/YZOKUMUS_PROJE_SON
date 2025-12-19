@@ -324,6 +324,27 @@ async function initApp() {
         }
     });
     
+    // Setup window focus listener (for mobile PWA when app comes to foreground)
+    window.addEventListener('focus', async () => {
+        const today = getLocalDateString();
+        if (dailyTasks.lastTaskDate !== today) {
+            console.log('📱 Uygulama ön plana geldi, gün kontrolü yapılıyor...');
+            await checkDailyTasks();
+            updateStatsDisplay();
+        }
+    });
+    
+    // Setup periodic check for day change (every 60 seconds)
+    // This ensures tasks reset even if page stays open past midnight
+    setInterval(async () => {
+        const today = getLocalDateString();
+        if (dailyTasks.lastTaskDate && dailyTasks.lastTaskDate !== today) {
+            console.log('⏰ Periyodik kontrol: Yeni gün tespit edildi, vazifeler sıfırlanıyor...');
+            await checkDailyTasks();
+            updateStatsDisplay();
+        }
+    }, 60000); // Check every 60 seconds
+    
     // Browser geri tuşu dinleyicisi
     setupBackButtonHandler();
     
@@ -746,9 +767,16 @@ function setupEventListeners() {
         btn.addEventListener('click', () => {
             document.querySelectorAll('.goal-option').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            dailyGoal = parseInt(btn.dataset.goal);
+            const newGoal = parseInt(btn.dataset.goal);
+            dailyGoal = newGoal;
             saveStats();
             updateDailyGoalDisplay();
+            
+            // IMPORTANT: If goal is changed during the day, check if new goal is already reached
+            // This prevents issues like: user has 2000 points, changes goal from 2700 to 1300,
+            // and should get bonus if not already awarded today
+            checkDailyGoal();
+            
             closeModal('goal-settings-modal');
         });
     });
@@ -955,7 +983,7 @@ function checkBadgesAndAchievementsAfterPoints() {
     badges.forEach(badge => {
         if (!badgesUnlocked[badge.id] && badge.threshold && tempTotalPoints >= badge.threshold) {
             badgesUnlocked[badge.id] = today;
-            showToast(`🏅 "${badge.name}" rozeti kazandınız!`, 'success', 3000);
+            // Toast mesajı kaldırıldı - gereksiz pop-up, endGame'de zaten kontrol ediliyor
         }
     });
     
@@ -964,7 +992,7 @@ function checkBadgesAndAchievementsAfterPoints() {
         periodBadges.forEach(badge => {
             if (!badgesUnlocked[badge.id] && badge.threshold && tempTotalPoints >= badge.threshold) {
                 badgesUnlocked[badge.id] = today;
-                showToast(`🕌 Asr-ı Saadet: "${badge.name}" rozeti kazandınız!`, 'success', 4000);
+                // Toast mesajı kaldırıldı - gereksiz pop-up, endGame'de zaten kontrol ediliyor
             }
         });
     });
@@ -1139,12 +1167,14 @@ function endGame() {
     if (wrongCount === 0 && correctCount >= 3) {
         perfectBonus = CONFIG.PERFECT_BONUS;
         sessionScore += perfectBonus;
+        // Perfect bonus'u dailyProgress'e de ekle (mantık tutarlılığı için)
+        dailyProgress += perfectBonus;
         gameStats.perfectLessons = (gameStats.perfectLessons || 0) + 1;
     }
     
     // Add to total points
     totalPoints += sessionScore;
-    // NOT: dailyProgress zaten her soruda güncelleniyor, burada tekrar eklemeye gerek yok
+    // NOT: dailyProgress zaten her soruda + perfect bonus ekleniyor, burada tekrar eklemeye gerek yok
     
     // Update game stats
     gameStats.totalCorrect = (gameStats.totalCorrect || 0) + correctCount;
@@ -1294,7 +1324,7 @@ async function startKelimeCevirGame(submode = 'classic') {
             });
             console.log(`🕌 30. Cüz kelimeleri bulundu: ${filtered.length}`);
             if (filtered.length < 10) {
-                showToast('30. cüz kelimesi yeterli değil, tüm kelimeler kullanılıyor', 'info');
+                // Toast mesajı kaldırıldı - gereksiz pop-up
                 filtered = filterByDifficulty(data, currentDifficulty);
             }
             useIntelligentSelection = true;
@@ -1335,9 +1365,9 @@ async function startKelimeCevirGame(submode = 'classic') {
             
             if (uniqueReviewIds.length >= 5) {
                 filtered = filtered.filter(w => uniqueReviewIds.includes(w.id));
-                showToast(`${uniqueReviewIds.length} zorlandığın kelime tekrarlanacak`, 'info');
+                // Toast mesajı kaldırıldı - gereksiz pop-up
             } else {
-                showToast('Yeterli tekrar edilecek kelime yok, akıllı seçim kullanılıyor', 'info');
+                // Toast mesajı kaldırıldı - gereksiz pop-up
                 useIntelligentSelection = true;
             }
             break;
@@ -1505,18 +1535,18 @@ const MAX_HINTS_PER_DAY = 10;
 
 function useHint() {
     if (hintUsedThisQuestion) {
-        showToast('Bu soru için ipucu zaten kullanıldı', 'info');
+        // Toast mesajı kaldırıldı - gereksiz pop-up
         return;
     }
     
     if (hintsUsedToday >= MAX_HINTS_PER_DAY) {
-        showToast(`Günlük ipucu hakkınız bitti (${MAX_HINTS_PER_DAY})`, 'warning');
+        // Toast mesajı kaldırıldı - gereksiz pop-up
         return;
     }
     
     const options = document.querySelectorAll('#kelime-options .answer-option:not(.eliminated)');
     if (options.length <= 2) {
-        showToast('Yeterli şık yok', 'info');
+        // Toast mesajı kaldırıldı - gereksiz pop-up
         return;
     }
     
@@ -1547,7 +1577,7 @@ function useHint() {
         hintBtn.title = `İpucu kullanıldı (${MAX_HINTS_PER_DAY - hintsUsedToday} kaldı)`;
     }
     
-    showToast(`💡 1 yanlış şık elendi! (${MAX_HINTS_PER_DAY - hintsUsedToday} ipucu kaldı)`, 'success', 2000);
+    // Toast mesajı kaldırıldı - gereksiz pop-up, buton zaten güncelleniyor
 }
 
 /**
@@ -1562,11 +1592,11 @@ function toggleCurrentWordFavorite() {
     if (favorites.includes(wordId)) {
         favorites = favorites.filter(id => id !== wordId);
         if (favBtn) favBtn.textContent = '♡';
-        showToast('Favorilerden çıkarıldı', 'info', 1000);
+        // Toast mesajı kaldırıldı - gereksiz pop-up, UI'da zaten gösteriliyor
     } else {
         favorites.push(wordId);
         if (favBtn) favBtn.textContent = '❤️';
-        showToast('Favorilere eklendi!', 'success', 1000);
+        // Toast mesajı kaldırıldı - gereksiz pop-up, UI'da zaten gösteriliyor
     }
     
     debouncedSaveStats();
@@ -3228,7 +3258,7 @@ function checkDailyGoal() {
     // Check if daily goal is reached and not already completed today
     if (dailyProgress >= dailyGoal && lastGoalCompleted !== today) {
         // Daily goal completed!
-        showToast(`🎯 Günlük hedef tamamlandı! +${CONFIG.DAILY_GOAL_BONUS} Hasene`, 'success', 3000);
+        // Toast mesajı kaldırıldı - gereksiz pop-up
         totalPoints += CONFIG.DAILY_GOAL_BONUS;
         dailyProgress += CONFIG.DAILY_GOAL_BONUS; // Bonus da günlük vird'e eklenir
         
@@ -3323,6 +3353,38 @@ async function handleUserLogout() {
 }
 
 function updateDailyGoalDisplay() {
+    // Mantık açıklaması:
+    // - totalPoints: Tüm zamanlardan birikmiş toplam Hasene (birikimli, sıfırlanmaz)
+    // - dailyProgress: Sadece bugün kazanılan Hasene (her gün sıfırlanır)
+    // 
+    // Normal durum: totalPoints >= dailyProgress
+    //   - İlk oyunda: totalPoints = dailyProgress (eşit)
+    //   - Sonraki günlerde: totalPoints > dailyProgress (çünkü önceki günlerden birikmiş)
+    //
+    // Ancak mantık hatası varsa (örneğin dailyProgress yanlış kaydedilmişse), düzelt:
+    // Eğer dailyProgress > totalPoints ise (ve önceki günlerden birikim yoksa), bu hata demektir
+    // Çünkü dailyProgress sadece bugünkü puan, totalPoints ise birikimli
+    
+    // İlk oyunda (totalPoints = 0 veya çok küçükse) ve dailyProgress fazlaysa, hata var
+    // Ancak önceki günlerden birikim varsa (totalPoints büyükse), fark normaldir
+    if (totalPoints < 500 && dailyProgress > totalPoints) {
+        // İlk oyunda veya az puan varsa, dailyProgress toplam puandan fazla olamaz
+        console.warn(`⚠️ Mantık hatası: İlk oyunda dailyProgress (${dailyProgress}) > totalPoints (${totalPoints}). Düzeltiliyor...`);
+        const today = getLocalDateString();
+        const savedProgress = loadFromStorage(CONFIG.STORAGE_KEYS.DAILY_PROGRESS, { date: '', points: 0 });
+        if (savedProgress.date !== today) {
+            // Tarih farklıysa, dailyProgress'i 0 yap (yeni gün)
+            dailyProgress = 0;
+        } else {
+            // Aynı günse, totalPoints'e eşitle
+            dailyProgress = totalPoints;
+        }
+        saveToStorage(CONFIG.STORAGE_KEYS.DAILY_PROGRESS, { 
+            date: getLocalDateString(), 
+            points: dailyProgress 
+        });
+    }
+    
     document.getElementById('daily-goal-text').textContent = 
         `${formatNumber(dailyProgress)} / ${formatNumber(dailyGoal)}`;
     
@@ -4533,19 +4595,119 @@ async function resetAllData() {
     currentQuestion = null;
     currentOptions = [];
     
-    // Delete Firebase data if Firebase user (async operation)
+    // Delete Firebase data if Firebase user (async operation - MUST WAIT)
     const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : null;
     if (user && !user.id.startsWith('local-') && typeof window.firestoreDelete === 'function') {
         console.log('🔥 Firebase verileri siliniyor...');
-        // Use Promise.all for parallel deletion
-        Promise.all([
+        
+        // Delete weekly leaderboard entries for all weeks (current week and past weeks)
+        const deletePromises = [
             window.firestoreDelete('user_stats', user.id),
             window.firestoreDelete('daily_tasks', user.id)
-        ]).then(() => {
-            console.log('✅ Firebase verileri silindi');
-        }).catch(error => {
+        ];
+        
+        // Delete current week's leaderboard entry
+        if (typeof window.getWeekStartString === 'function') {
+            const weekStart = window.getWeekStartString();
+            const leaderboardDocId = `${user.id}_${weekStart}`;
+            deletePromises.push(window.firestoreDelete('weekly_leaderboard', leaderboardDocId));
+            console.log(`🔥 Haftalık XP kaydı siliniyor: ${leaderboardDocId}`);
+        }
+        
+        // Also try to delete last few weeks (just in case) - up to 8 weeks back
+        const now = new Date();
+        for (let weeksAgo = 1; weeksAgo <= 8; weeksAgo++) {
+            const pastWeek = new Date(now);
+            pastWeek.setDate(pastWeek.getDate() - (weeksAgo * 7));
+            const day = pastWeek.getDay();
+            const diff = pastWeek.getDate() - day + (day === 0 ? -6 : 1);
+            const pastMonday = new Date(pastWeek.setDate(diff));
+            pastMonday.setHours(0, 0, 0, 0);
+            const pastWeekStart = pastMonday.toISOString().split('T')[0];
+            const pastLeaderboardDocId = `${user.id}_${pastWeekStart}`;
+            deletePromises.push(window.firestoreDelete('weekly_leaderboard', pastLeaderboardDocId));
+        }
+        
+        // CRITICAL: Also try to delete ALL weekly_leaderboard entries for this user_id
+        // This handles cases where the document ID format might be different
+        if (window.firestore && window.firestore.collection) {
+            try {
+                // Delete by user_id
+                const querySnapshot = await window.firestore
+                    .collection('weekly_leaderboard')
+                    .where('user_id', '==', user.id)
+                    .limit(50) // Limit to prevent excessive reads
+                    .get();
+                
+                querySnapshot.forEach(doc => {
+                    deletePromises.push(window.firestoreDelete('weekly_leaderboard', doc.id));
+                    console.log(`🔥 Ek haftalık XP kaydı siliniyor (user_id ile): ${doc.id}`);
+                });
+                
+                // Also try to delete by username (in case user_id changed but username is same)
+                // This is a safety measure for reset operations
+                const username = localStorage.getItem('hasene_username') || user.username;
+                if (username && username !== 'Anonim Kullanıcı' && username !== 'Kullanıcı') {
+                    try {
+                        const usernameQuerySnapshot = await window.firestore
+                            .collection('weekly_leaderboard')
+                            .where('username', '==', username)
+                            .limit(50)
+                            .get();
+                        
+                        usernameQuerySnapshot.forEach(doc => {
+                            const data = doc.data();
+                            // Only delete if it's not the current user (to avoid deleting other users with same username)
+                            // But since we're resetting, we want to delete all entries with this username
+                            deletePromises.push(window.firestoreDelete('weekly_leaderboard', doc.id));
+                            console.log(`🔥 Ek haftalık XP kaydı siliniyor (username ile): ${doc.id}`);
+                        });
+                    } catch (usernameQueryError) {
+                        console.warn('⚠️ Username query hatası (normal olabilir):', usernameQueryError);
+                    }
+                }
+            } catch (queryError) {
+                console.warn('⚠️ Weekly leaderboard query hatası (normal olabilir):', queryError);
+            }
+        }
+        
+        // IMPORTANT: Wait for Firebase deletion to complete before reloading
+        try {
+            const deleteResults = await Promise.all(deletePromises);
+            const successCount = deleteResults.filter(r => r === true).length;
+            console.log(`✅ Firebase verileri silindi: ${successCount}/${deletePromises.length} başarılı (user_stats, daily_tasks, weekly_leaderboard)`);
+            
+            // If any deletion failed, log warning
+            if (successCount < deletePromises.length) {
+                console.warn('⚠️ Bazı Firebase verileri silinemedi. Firebase Console\'dan manuel kontrol edin.');
+            }
+        } catch (error) {
             console.warn('⚠️ Firebase veri silme hatası:', error);
-        });
+        }
+    }
+    
+    // CRITICAL: Clear weekly XP from localStorage (ensures it's reset even if Firebase delete fails)
+    const weekStart = typeof window.getWeekStartString === 'function' ? window.getWeekStartString() : null;
+    if (weekStart) {
+        const weeklyXPKey = `hasene_weekly_xp_${weekStart}`;
+        localStorage.removeItem(weeklyXPKey);
+        console.log(`✓ Removed weekly XP: ${weeklyXPKey}`);
+        
+        // Also clear any past week's XP keys (just in case)
+        for (let i = 0; i < 10; i++) {
+            const pastDate = new Date();
+            pastDate.setDate(pastDate.getDate() - (i * 7));
+            const day = pastDate.getDay();
+            const diff = pastDate.getDate() - day + (day === 0 ? -6 : 1);
+            const pastMonday = new Date(pastDate.setDate(diff));
+            pastMonday.setHours(0, 0, 0, 0);
+            const pastWeekStart = pastMonday.toISOString().split('T')[0];
+            const pastXPKey = `hasene_weekly_xp_${pastWeekStart}`;
+            if (localStorage.getItem(pastXPKey)) {
+                localStorage.removeItem(pastXPKey);
+                console.log(`✓ Removed past weekly XP: ${pastXPKey}`);
+            }
+        }
     }
     
     // Initialize new daily tasks before reload (WAIT for it to complete)
@@ -4561,10 +4723,26 @@ async function resetAllData() {
         console.error('⚠️ Günlük görev oluşturma hatası:', error);
     }
     
-    console.log('✅ Tüm veriler sıfırlandı (puanlar, rozetler, başarımlar, favoriler, kelime istatistikleri, günlük görevler, takvim, haftalık XP, lider tablosu, zorluk seviyesi). Sayfa yenileniyor...');
+    console.log('✅ Tüm veriler sıfırlandı. Firebase çıkış yapılıyor...');
+    
+    // Sign out from Firebase to ensure a new anonymous user is created on next load
+    // This ensures old Firebase data is truly cleared
+    if (user && !user.id.startsWith('local-') && typeof window.signOutFirebase === 'function') {
+        try {
+            await window.signOutFirebase();
+            console.log('✅ Firebase çıkış yapıldı');
+        } catch (error) {
+            console.warn('⚠️ Firebase çıkış hatası:', error);
+        }
+    }
+    
+    console.log('✅ Sayfa yenileniyor...');
     
     // Immediately reload page to properly reinitialize everything
-    window.location.reload();
+    // Use setTimeout to ensure all async operations complete before reload
+    setTimeout(() => {
+        window.location.reload();
+    }, 200);
 }
 
 // ========================================
