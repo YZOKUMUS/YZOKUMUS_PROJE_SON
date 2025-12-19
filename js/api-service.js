@@ -84,11 +84,29 @@ async function firestoreGet(collection, docId) {
         return null;
     }
     
+    // Check if user is authenticated (required for Firestore rules)
+    const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : null;
+    if (!user || user.id.startsWith('local-')) {
+        // Local user, skip Firebase
+        return null;
+    }
+    
+    // Check Firebase auth (required for Firestore security rules)
+    if (window.firebaseAuth && !window.firebaseAuth.currentUser) {
+        console.warn('⚠️ Firebase user not authenticated, cannot read from Firestore');
+        return null;
+    }
+    
     try {
         const doc = await window.firestore.collection(collection).doc(docId).get();
         return doc.exists ? doc.data() : null;
     } catch (error) {
-        console.error('Firestore get error:', error);
+        // Permission errors are expected if user is not authenticated
+        if (error.code === 'permission-denied') {
+            console.warn('⚠️ Firestore permission denied, falling back to localStorage');
+        } else {
+            console.error('Firestore get error:', error);
+        }
         return null;
     }
 }
