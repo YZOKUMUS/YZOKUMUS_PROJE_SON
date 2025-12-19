@@ -388,11 +388,27 @@ async function loadStats() {
                     badgesUnlocked = firebaseStats.badges;
                 }
                 
+                // Update achievements from Firebase
+                if (firebaseStats.achievements) {
+                    unlockedAchievements = firebaseStats.achievements;
+                }
+                
+                // Update daily progress and goal from Firebase
+                if (firebaseStats.daily_progress !== undefined) {
+                    dailyProgress = firebaseStats.daily_progress;
+                }
+                if (firebaseStats.daily_goal !== undefined) {
+                    dailyGoal = firebaseStats.daily_goal;
+                }
+                
                 // Sync to localStorage for offline access
                 saveToStorage(CONFIG.STORAGE_KEYS.TOTAL_POINTS, totalPoints);
                 saveToStorage(CONFIG.STORAGE_KEYS.STREAK_DATA, streakData);
                 saveToStorage(CONFIG.STORAGE_KEYS.GAME_STATS, gameStats);
                 saveToStorage('hasene_badges', badgesUnlocked);
+                saveToStorage('hasene_achievements', unlockedAchievements);
+                saveToStorage(CONFIG.STORAGE_KEYS.DAILY_PROGRESS, { date: getLocalDateString(), points: dailyProgress });
+                saveToStorage(CONFIG.STORAGE_KEYS.DAILY_GOAL, dailyGoal);
                 
                 console.log('✅ Stats loaded from Firebase:', { totalPoints, currentLevel });
             }
@@ -416,36 +432,47 @@ async function loadStats() {
     }
     currentLevel = calculateLevel(totalPoints);
     
-    // Merge localStorage data (in case Firebase doesn't have all fields)
+    // Merge localStorage data (in case Firebase doesn't have all fields or for local users)
     const localStreakData = loadFromStorage(CONFIG.STORAGE_KEYS.STREAK_DATA, {});
-    if (Object.keys(localStreakData).length > 0) {
+    if (Object.keys(localStreakData).length > 0 && (!isFirebaseUser || Object.keys(streakData).length === 0)) {
         streakData = { ...streakData, ...localStreakData };
     }
     
     const localGameStats = loadFromStorage(CONFIG.STORAGE_KEYS.GAME_STATS, {});
-    if (Object.keys(localGameStats).length > 0) {
+    if (Object.keys(localGameStats).length > 0 && (!isFirebaseUser || Object.keys(gameStats).length === 0)) {
         gameStats = { ...gameStats, ...localGameStats };
     }
     
     const localBadges = loadFromStorage('hasene_badges', {});
-    if (Object.keys(localBadges).length > 0) {
+    if (Object.keys(localBadges).length > 0 && (!isFirebaseUser || Object.keys(badgesUnlocked).length === 0)) {
         badgesUnlocked = { ...badgesUnlocked, ...localBadges };
     }
     
-    // Daily goal
-    dailyGoal = loadFromStorage(CONFIG.STORAGE_KEYS.DAILY_GOAL, 2700);
+    // Achievements - merge only if Firebase didn't load them or for local users
+    const localAchievements = loadFromStorage('hasene_achievements', []);
+    if (localAchievements.length > 0 && (!isFirebaseUser || unlockedAchievements.length === 0)) {
+        unlockedAchievements = localAchievements;
+    }
     
-    // Daily progress (check date)
+    // Daily goal - use Firebase value if available, otherwise localStorage
+    if (!isFirebaseUser || dailyGoal === undefined || dailyGoal === 2700) {
+        dailyGoal = loadFromStorage(CONFIG.STORAGE_KEYS.DAILY_GOAL, 2700);
+    }
+    
+    // Daily progress (check date) - use Firebase value if available, otherwise localStorage
     const today = getLocalDateString();
     const savedProgress = loadFromStorage(CONFIG.STORAGE_KEYS.DAILY_PROGRESS, { date: '', points: 0 });
     
-    if (savedProgress.date === today) {
-        dailyProgress = savedProgress.points;
-    } else {
-        dailyProgress = 0;
-        saveToStorage(CONFIG.STORAGE_KEYS.DAILY_PROGRESS, { date: today, points: 0 });
-        // Reset daily goal completion flag for new day
-        localStorage.removeItem('hasene_last_daily_goal_completed');
+    // If Firebase didn't load dailyProgress or we're a local user, use localStorage
+    if (!isFirebaseUser || (dailyProgress === undefined || dailyProgress === 0)) {
+        if (savedProgress.date === today) {
+            dailyProgress = savedProgress.points;
+        } else {
+            dailyProgress = 0;
+            saveToStorage(CONFIG.STORAGE_KEYS.DAILY_PROGRESS, { date: today, points: 0 });
+            // Reset daily goal completion flag for new day
+            localStorage.removeItem('hasene_last_daily_goal_completed');
+        }
     }
     
     // Word stats (localStorage only for now)
@@ -504,6 +531,9 @@ async function saveStats() {
                 streak_data: streakData,
                 game_stats: gameStats,
                 perfect_lessons_count: gameStats.perfectLessons || 0,
+                achievements: unlockedAchievements, // Sync achievements
+                daily_progress: dailyProgress, // Sync daily progress
+                daily_goal: dailyGoal, // Sync daily goal
                 username: username // Explicitly include username
             }).then(success => {
                 if (success) {
@@ -2853,11 +2883,42 @@ async function checkDailyTasks() {
     const currentHour = now.getHours();
     const currentMinute = now.getMinutes();
     
-    // Load daily tasks
-    dailyTasks = loadFromStorage(CONFIG.STORAGE_KEYS.DAILY_TASKS, dailyTasks);
+    // Load daily tasks - try Firebase first for Firebase users, then localStorage
+    const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : null;
+    const isFirebaseUser = user && !user.id.startsWith('local-');
+    
+    if (isFirebaseUser && typeof window.loadDailyTasks === 'function') {
+        try {
+            const firebaseTasks = await window.loadDailyTasks();
+            if (firebaseTasks && firebaseTasks.tasks && firebaseTasks.tasks.length > 0) {
+                dailyTasks = firebaseTasks;
+            }
+        } catch (error) {
+            console.warn('⚠️ Firebase daily tasks load failed, using localStorage:', error);
+        }
+    }
+    
+    // If still empty, load from localStorage
+    if (!dailyTasks || !dailyTasks.tasks || dailyTasks.tasks.length === 0) {
+        const savedTasks = loadFromStorage(CONFIG.STORAGE_KEYS.DAILY_TASKS, {
+            lastTaskDate: '',
+            tasks: [],
+            bonusTasks: [],
+            todayStats: {
+                toplamDogru: 0,
+                toplamPuan: 0,
+                comboCount: 0,
+                allGameModes: [],
+                ayet_oku: 0,
+                dua_et: 0,
+                hadis_oku: 0
+            }
+        });
+        dailyTasks = savedTasks;
+    }
     
     // Check if date has changed (new day started)
-    if (dailyTasks.lastTaskDate !== today) {
+    if (!dailyTasks.lastTaskDate || dailyTasks.lastTaskDate !== today) {
         console.log(`📅 Yeni gün başladı! Eski tarih: ${dailyTasks.lastTaskDate || 'yok'}, Yeni tarih: ${today}, Saat: ${String(currentHour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')}`);
         
         // New day, reset tasks
@@ -4316,7 +4377,7 @@ function checkKarmaAnswer(selected, correct) {
 /**
  * Reset all game data - TEST FUNCTION (Remove before production)
  */
-function resetAllData() {
+async function resetAllData() {
     if (!confirm('⚠️ TÜM VERİLER SİLİNECEK!\n\nBu işlem geri alınamaz. Devam etmek istediğinize emin misiniz?')) {
         return;
     }
@@ -4487,10 +4548,18 @@ function resetAllData() {
         });
     }
     
-    // Initialize new daily tasks before reload
-    checkDailyTasks().then(() => {
+    // Initialize new daily tasks before reload (WAIT for it to complete)
+    try {
+        await checkDailyTasks();
         console.log('✅ Yeni günlük vazifeler oluşturuldu');
-    });
+        
+        // Also save to Firebase if Firebase user (before reload)
+        if (user && !user.id.startsWith('local-') && typeof window.saveDailyTasks === 'function') {
+            await window.saveDailyTasks(dailyTasks);
+        }
+    } catch (error) {
+        console.error('⚠️ Günlük görev oluşturma hatası:', error);
+    }
     
     console.log('✅ Tüm veriler sıfırlandı (puanlar, rozetler, başarımlar, favoriler, kelime istatistikleri, günlük görevler, takvim, haftalık XP, lider tablosu, zorluk seviyesi). Sayfa yenileniyor...');
     

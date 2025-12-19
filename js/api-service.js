@@ -404,6 +404,8 @@ async function syncAllDataToBackend() {
         const dailyTasks = JSON.parse(localStorage.getItem('hasene_dailyTasks') || '{}');
         const badges = JSON.parse(localStorage.getItem('hasene_badges') || '{}');
         const achievements = JSON.parse(localStorage.getItem('hasene_achievements') || '[]');
+        const dailyProgress = JSON.parse(localStorage.getItem('hasene_dailyProgress') || '{"date":"","points":0}');
+        const dailyGoal = parseInt(localStorage.getItem('hasene_dailyGoal') || '2700');
         
         // Save to Firebase
         await firestoreSet('user_stats', user.id, {
@@ -411,7 +413,10 @@ async function syncAllDataToBackend() {
             badges: badges,
             streak_data: streakData,
             game_stats: gameStats,
-            perfect_lessons_count: gameStats.perfectLessons || 0
+            perfect_lessons_count: gameStats.perfectLessons || 0,
+            achievements: achievements,
+            daily_progress: dailyProgress.points || 0,
+            daily_goal: dailyGoal
         });
         
         await firestoreSet('daily_tasks', user.id, dailyTasks);
