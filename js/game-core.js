@@ -840,11 +840,6 @@ async function startGame(gameMode) {
     
     currentGameMode = gameMode;
     
-    // Show login success message when entering game (username already defined above)
-    if (username && username !== 'Misafir' && username !== 'Kullanıcı' && username !== 'Anonim Kullanıcı') {
-        showToast(`🎮 Oyuna giriş yapıldı: ${username}`, 'success', 2000);
-    }
-    
     // Hide main container
     document.getElementById('main-container').classList.add('hidden');
     
