@@ -259,7 +259,7 @@ async function showLeaderboardModal() {
     // Show loading
     const content = document.getElementById('leaderboard-content');
     if (content) {
-        content.innerHTML = '<div style="text-align: center; padding: 40px;"><div class="loading-spinner"></div><p>Liderlik tablosu yükleniyor...</p></div>';
+        content.innerHTML = '<div style="text-align: center; padding: 30px;"><div class="loading-spinner"></div><p style="margin-top: 10px; font-size: 0.9rem;">Liderlik tablosu yükleniyor...</p></div>';
     }
     
     openModal('leaderboard-modal');
@@ -273,7 +273,7 @@ async function showLeaderboardModal() {
     } catch (error) {
         console.error('Leaderboard load error:', error);
         if (content) {
-            content.innerHTML = '<div style="text-align: center; padding: 40px; color: rgba(255,255,255,0.7);">Liderlik tablosu yüklenemedi. Lütfen tekrar deneyin.</div>';
+            content.innerHTML = '<div style="text-align: center; padding: 30px; color: rgba(26,26,46,0.8); font-size: 0.9rem;">Liderlik tablosu yüklenemedi. Lütfen tekrar deneyin.</div>';
         }
     }
 }
@@ -293,9 +293,9 @@ function renderLeaderboard(leaderboard, userPos) {
     weekEndDate.setDate(weekEndDate.getDate() + 6);
     
     let html = `
-        <div class="leaderboard-header">
-            <h2>🏆 Haftalık Liderlik Tablosu</h2>
-            <p class="leaderboard-week-info">
+        <div class="leaderboard-header" style="margin-bottom: 8px;">
+            <h2 style="font-size: 1rem; margin: 0 0 2px 0;">🏆 Haftalık Liderlik Tablosu</h2>
+            <p class="leaderboard-week-info" style="font-size: 0.7rem; color: rgba(26,26,46,0.7); margin: 0;">
                 ${formatDate(weekStartDate)} - ${formatDate(weekEndDate)}
             </p>
         </div>
@@ -304,17 +304,16 @@ function renderLeaderboard(leaderboard, userPos) {
     // User's current league and position
     if (userPos) {
         html += `
-            <div class="user-league-info" style="background: linear-gradient(135deg, ${userPos.league.color}22, ${userPos.league.color}11); border: 2px solid ${userPos.league.color}; border-radius: 12px; padding: 16px; margin-bottom: 20px;">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <div style="font-size: 32px;">${userPos.league.icon}</div>
-                    <div style="flex: 1;">
-                        <div style="font-size: 18px; font-weight: bold; color: ${userPos.league.color};">
+            <div class="user-league-info" style="background: linear-gradient(135deg, ${userPos.league.color}22, ${userPos.league.color}11); border: 1.5px solid ${userPos.league.color}; border-radius: 6px; padding: 6px 10px; margin-bottom: 8px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="font-size: 18px; line-height: 1;">${userPos.league.icon}</div>
+                    <div style="flex: 1; min-width: 0;">
+                        <div style="font-size: 12px; font-weight: bold; color: ${userPos.league.color}; line-height: 1.2;">
                             ${userPos.league.name} (${userPos.league.arabic})
                         </div>
-                        <div style="font-size: 14px; color: rgba(255,255,255,0.7); margin-top: 4px;">
-                            Haftalık XP: ${formatNumber(userPos.weeklyXP)} | 
-                            ${userPos.position ? `Genel Sıra: #${userPos.position}` : 'Sıralamada değil'}
-                            ${userPos.leaguePosition ? ` | Lig İçi: #${userPos.leaguePosition}` : ''}
+                        <div style="font-size: 10px; color: rgba(26,26,46,0.75); margin-top: 1px; line-height: 1.2;">
+                            XP: ${formatNumber(userPos.weeklyXP)} | ${userPos.position ? `#${userPos.position}` : 'Sıralamada değil'}
+                            ${userPos.leaguePosition ? ` | Lig: #${userPos.leaguePosition}` : ''}
                         </div>
                     </div>
                 </div>
@@ -325,19 +324,19 @@ function renderLeaderboard(leaderboard, userPos) {
     // Leaderboard list
     if (leaderboard.length === 0) {
         html += `
-            <div style="text-align: center; padding: 40px; color: rgba(255,255,255,0.7);">
-                <p>Henüz liderlik tablosu verisi yok.</p>
-                <p style="margin-top: 10px; font-size: 14px;">Oyun oynayarak haftalık XP kazanın!</p>
+            <div style="text-align: center; padding: 30px; color: rgba(26,26,46,0.8);">
+                <p style="font-size: 0.9rem;">Henüz liderlik tablosu verisi yok.</p>
+                <p style="margin-top: 8px; font-size: 0.8rem;">Oyun oynayarak haftalık XP kazanın!</p>
             </div>
         `;
     } else {
         html += `
             <div class="leaderboard-list">
-                <div class="leaderboard-tabs" style="display: flex; gap: 8px; margin-bottom: 16px;">
-                    <button class="leaderboard-tab active" data-tab="all" onclick="switchLeaderboardTab('all')">
+                <div class="leaderboard-tabs" style="display: flex; gap: 6px; margin-bottom: 10px;">
+                    <button class="leaderboard-tab active" data-tab="all" onclick="switchLeaderboardTab('all')" style="padding: 6px 12px; font-size: 0.85rem;">
                         Genel Sıralama
                     </button>
-                    <button class="leaderboard-tab" data-tab="league" onclick="switchLeaderboardTab('league')">
+                    <button class="leaderboard-tab" data-tab="league" onclick="switchLeaderboardTab('league')" style="padding: 6px 12px; font-size: 0.85rem;">
                         Lig İçi
                     </button>
                 </div>
@@ -371,7 +370,7 @@ function renderLeaderboardList(leaderboard, userPos, mode = 'all') {
     filtered.sort((a, b) => b.weekly_xp - a.weekly_xp);
     
     if (filtered.length === 0) {
-        return '<div style="text-align: center; padding: 20px; color: rgba(255,255,255,0.7);">Bu ligde henüz kullanıcı yok.</div>';
+        return '<div style="text-align: center; padding: 20px; color: rgba(26,26,46,0.8); font-size: 0.85rem;">Bu ligde henüz kullanıcı yok.</div>';
     }
     
     let html = '<div class="leaderboard-items">';
@@ -385,22 +384,22 @@ function renderLeaderboardList(leaderboard, userPos, mode = 'all') {
             <div class="leaderboard-item ${isCurrentUser ? 'current-user' : ''}" style="
                 display: flex;
                 align-items: center;
-                gap: 12px;
-                padding: 12px;
-                margin-bottom: 8px;
+                gap: 8px;
+                padding: 8px;
+                margin-bottom: 6px;
                 background: ${isCurrentUser ? `linear-gradient(135deg, ${entry.league.color}33, ${entry.league.color}11)` : 'rgba(255,255,255,0.05)'};
                 border: ${isCurrentUser ? `2px solid ${entry.league.color}` : '1px solid rgba(255,255,255,0.1)'};
-                border-radius: 8px;
+                border-radius: 6px;
             ">
-                <div style="font-size: 20px; font-weight: bold; min-width: 40px; text-align: center;">
+                <div style="font-size: 16px; font-weight: bold; min-width: 30px; text-align: center;">
                     ${medal || rank}
                 </div>
-                <div style="font-size: 24px;">${entry.league.icon}</div>
+                <div style="font-size: 18px;">${entry.league.icon}</div>
                 <div style="flex: 1;">
-                    <div style="font-weight: ${isCurrentUser ? 'bold' : '500'}; color: ${isCurrentUser ? entry.league.color : 'rgba(255,255,255,0.9)'};">
+                    <div style="font-size: 13px; font-weight: ${isCurrentUser ? 'bold' : '500'}; color: ${isCurrentUser ? entry.league.color : 'rgba(26,26,46,0.9)'}; line-height: 1.2;">
                         ${entry.username}
                     </div>
-                    <div style="font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 2px;">
+                    <div style="font-size: 10px; color: rgba(26,26,46,0.7); margin-top: 1px; line-height: 1.2;">
                         ${entry.league.name} • ${formatNumber(entry.weekly_xp)} XP
                     </div>
                 </div>

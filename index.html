@@ -745,14 +745,14 @@
     <div id="username-login-modal" class="modal hidden">
         <div class="modal-content glass-card">
             <h2>👤 Kullanıcı Adı Girişi</h2>
-            <p style="margin-bottom: 20px; color: rgba(255,255,255,0.8);">Oyunu oynamak için bir kullanıcı adı girin</p>
+            <p style="margin-bottom: 20px; color: rgba(26,26,46,0.8);">Oyunu oynamak için bir kullanıcı adı girin</p>
             <input 
                 type="text" 
                 id="username-input" 
                 class="username-input" 
                 placeholder="Kullanıcı adınızı girin..."
                 maxlength="50"
-                style="width: 100%; padding: 12px; margin-bottom: 20px; font-size: 16px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); color: white;"
+                style="width: 100%; padding: 12px; margin-bottom: 20px; font-size: 16px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.2); color: rgba(26,26,46,0.9);"
                 onkeypress="if(event.key === 'Enter') confirmUsername();"
             />
             <div style="display: flex; gap: 10px;">
@@ -794,14 +794,14 @@
     <!-- Leaderboard Modal -->
     <div id="leaderboard-modal" class="modal hidden">
         <div class="modal-content glass-card" style="max-width: 600px; max-height: 80vh; overflow-y: auto;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2>🏆 Liderlik Tablosu</h2>
-                <button class="secondary-btn" onclick="closeModal('leaderboard-modal')" style="padding: 8px 16px;">✕</button>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <h2 style="font-size: 1.1rem; margin: 0;">🏆 Liderlik Tablosu</h2>
+                <button class="secondary-btn" onclick="closeModal('leaderboard-modal')" style="padding: 6px 12px; font-size: 0.9rem;">✕</button>
             </div>
             <div id="leaderboard-content">
-                <div style="text-align: center; padding: 40px;">
+                <div style="text-align: center; padding: 30px;">
                     <div class="loading-spinner"></div>
-                    <p>Yükleniyor...</p>
+                    <p style="margin-top: 10px; font-size: 0.9rem;">Yükleniyor...</p>
                 </div>
             </div>
         </div>

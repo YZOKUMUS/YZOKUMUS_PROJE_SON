@@ -1906,20 +1906,20 @@ function showWordAnalysisModal() {
     let content = `
         <div class="analysis-summary" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px;">
             <div class="analysis-stat" style="text-align: center; padding: 16px; background: rgba(255,255,255,0.05); border-radius: 8px;">
-                <span class="stat-value" style="display: block; font-size: 24px; font-weight: bold; color: rgba(255,255,255,0.9);">${analysis.totalWords}</span>
-                <span class="stat-label" style="display: block; font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 4px;">Toplam Kelime</span>
+                <span class="stat-value" style="display: block; font-size: 24px; font-weight: bold; color: rgba(26,26,46,0.9);">${analysis.totalWords}</span>
+                <span class="stat-label" style="display: block; font-size: 12px; color: rgba(26,26,46,0.75); margin-top: 4px;">Toplam Kelime</span>
             </div>
             <div class="analysis-stat mastered" style="text-align: center; padding: 16px; background: rgba(76, 175, 80, 0.1); border-radius: 8px;">
                 <span class="stat-value" style="display: block; font-size: 24px; font-weight: bold; color: #4caf50;">${analysis.mastered}</span>
-                <span class="stat-label" style="display: block; font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 4px;">Ustalaşılan</span>
+                <span class="stat-label" style="display: block; font-size: 12px; color: rgba(26,26,46,0.75); margin-top: 4px;">Ustalaşılan</span>
             </div>
             <div class="analysis-stat learning" style="text-align: center; padding: 16px; background: rgba(255, 152, 0, 0.1); border-radius: 8px;">
                 <span class="stat-value" style="display: block; font-size: 24px; font-weight: bold; color: #ff9800;">${analysis.learning}</span>
-                <span class="stat-label" style="display: block; font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 4px;">Öğreniliyor</span>
+                <span class="stat-label" style="display: block; font-size: 12px; color: rgba(26,26,46,0.75); margin-top: 4px;">Öğreniliyor</span>
             </div>
             <div class="analysis-stat struggling" style="text-align: center; padding: 16px; background: rgba(244, 67, 54, 0.1); border-radius: 8px;">
                 <span class="stat-value" style="display: block; font-size: 24px; font-weight: bold; color: #f44336;">${analysis.struggling}</span>
-                <span class="stat-label" style="display: block; font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 4px;">Zorlanılan</span>
+                <span class="stat-label" style="display: block; font-size: 12px; color: rgba(26,26,46,0.75); margin-top: 4px;">Zorlanılan</span>
             </div>
         </div>
         
@@ -1929,8 +1929,8 @@ function showWordAnalysisModal() {
                 <div class="progress-learning" style="height: 100%; background: linear-gradient(90deg, #ff9800, #ffc107); width: ${analysis.totalWords > 0 ? (analysis.learning / analysis.totalWords * 100) : 0}%"></div>
                 <div class="progress-struggling" style="height: 100%; background: linear-gradient(90deg, #f44336, #e91e63); width: ${analysis.totalWords > 0 ? (analysis.struggling / analysis.totalWords * 100) : 0}%"></div>
             </div>
-            <p style="margin: 8px 0; color: rgba(255,255,255,0.9);">Ortalama Başarı: <strong>${analysis.averageSuccessRate}%</strong></p>
-            <p style="margin: 8px 0; color: rgba(255,255,255,0.9);">Tekrar Bekleyen: <strong>${analysis.dueForReview}</strong> kelime</p>
+            <p style="margin: 8px 0; color: rgba(26,26,46,0.9);">Ortalama Başarı: <strong>${analysis.averageSuccessRate}%</strong></p>
+            <p style="margin: 8px 0; color: rgba(26,26,46,0.9);">Tekrar Bekleyen: <strong>${analysis.dueForReview}</strong> kelime</p>
         </div>
     `;
     
@@ -1938,7 +1938,7 @@ function showWordAnalysisModal() {
     if (analysis.recentlyViewed && analysis.recentlyViewed.length > 0) {
         content += `
             <div class="analysis-section" style="margin: 20px 0; padding: 16px; background: rgba(255,255,255,0.05); border-radius: 8px;">
-                <h4 style="margin: 0 0 12px 0; color: rgba(255,255,255,0.9); font-size: 16px; display: flex; align-items: center; gap: 8px;">
+                <h4 style="margin: 0 0 12px 0; color: rgba(26,26,46,0.9); font-size: 16px; display: flex; align-items: center; gap: 8px;">
                     <span>📅</span>
                     <span>En Son Görülen Kelimeler</span>
                 </h4>
@@ -1948,10 +1948,10 @@ function showWordAnalysisModal() {
                         return `
                             <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 6px;">
                                 <div style="flex: 1;">
-                                    <div style="font-weight: 500; color: rgba(255,255,255,0.9); font-size: 18px; font-family: 'KFGQPC Uthmanic Script HAFS', serif;">${word ? (word.kelime || word.arabic) : w.id}</div>
-                                    ${word ? `<div style="font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 4px;">${word.anlam || word.translation}</div>` : ''}
+                                    <div style="font-weight: 500; color: rgba(26,26,46,0.9); font-size: 18px; font-family: 'KFGQPC Uthmanic Script HAFS', serif;">${word ? (word.kelime || word.arabic) : w.id}</div>
+                                    ${word ? `<div style="font-size: 12px; color: rgba(26,26,46,0.75); margin-top: 4px;">${word.anlam || word.translation}</div>` : ''}
                                 </div>
-                                <span style="font-size: 12px; color: rgba(255,255,255,0.6); margin-left: 12px; white-space: nowrap;">${formatDateForDisplay(w.lastReview)}</span>
+                                <span style="font-size: 12px; color: rgba(26,26,46,0.75); margin-left: 12px; white-space: nowrap;">${formatDateForDisplay(w.lastReview)}</span>
                             </div>
                         `;
                     }).join('')}
@@ -1964,7 +1964,7 @@ function showWordAnalysisModal() {
     if (analysis.mostPracticed && analysis.mostPracticed.length > 0) {
         content += `
             <div class="analysis-section" style="margin: 20px 0; padding: 16px; background: rgba(255,255,255,0.05); border-radius: 8px;">
-                <h4 style="margin: 0 0 12px 0; color: rgba(255,255,255,0.9); font-size: 16px; display: flex; align-items: center; gap: 8px;">
+                <h4 style="margin: 0 0 12px 0; color: rgba(26,26,46,0.9); font-size: 16px; display: flex; align-items: center; gap: 8px;">
                     <span>🔥</span>
                     <span>En Çok Çalışılan Kelimeler</span>
                 </h4>
@@ -1974,11 +1974,11 @@ function showWordAnalysisModal() {
                         return `
                             <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 6px;">
                                 <div style="flex: 1;">
-                                    <div style="font-weight: 500; color: rgba(255,255,255,0.9); font-size: 18px; font-family: 'KFGQPC Uthmanic Script HAFS', serif;">${word ? (word.kelime || word.arabic) : w.id}</div>
-                                    ${word ? `<div style="font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 4px;">${word.anlam || word.translation}</div>` : ''}
+                                    <div style="font-weight: 500; color: rgba(26,26,46,0.9); font-size: 18px; font-family: 'KFGQPC Uthmanic Script HAFS', serif;">${word ? (word.kelime || word.arabic) : w.id}</div>
+                                    ${word ? `<div style="font-size: 12px; color: rgba(26,26,46,0.75); margin-top: 4px;">${word.anlam || word.translation}</div>` : ''}
                                 </div>
                                 <div style="display: flex; gap: 12px; align-items: center; margin-left: 12px;">
-                                    <span style="font-size: 12px; color: rgba(255,255,255,0.6); white-space: nowrap;">${w.attempts} deneme</span>
+                                    <span style="font-size: 12px; color: rgba(26,26,46,0.75); white-space: nowrap;">${w.attempts} deneme</span>
                                     <span style="font-size: 12px; color: ${w.successRate >= 70 ? '#4caf50' : w.successRate >= 50 ? '#ff9800' : '#f44336'}; font-weight: 500; white-space: nowrap;">${w.successRate}%</span>
                                 </div>
                             </div>
@@ -1993,7 +1993,7 @@ function showWordAnalysisModal() {
     if (analysis.newlyLearned && analysis.newlyLearned.length > 0) {
         content += `
             <div class="analysis-section" style="margin: 20px 0; padding: 16px; background: rgba(255,255,255,0.05); border-radius: 8px;">
-                <h4 style="margin: 0 0 12px 0; color: rgba(255,255,255,0.9); font-size: 16px; display: flex; align-items: center; gap: 8px;">
+                <h4 style="margin: 0 0 12px 0; color: rgba(26,26,46,0.9); font-size: 16px; display: flex; align-items: center; gap: 8px;">
                     <span>✨</span>
                     <span>Yeni Öğrenilen Kelimeler (Son 7 Gün)</span>
                 </h4>
@@ -2003,10 +2003,10 @@ function showWordAnalysisModal() {
                         return `
                             <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 6px;">
                                 <div style="flex: 1;">
-                                    <div style="font-weight: 500; color: rgba(255,255,255,0.9); font-size: 18px; font-family: 'KFGQPC Uthmanic Script HAFS', serif;">${word ? (word.kelime || word.arabic) : w.id}</div>
-                                    ${word ? `<div style="font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 4px;">${word.anlam || word.translation}</div>` : ''}
+                                    <div style="font-weight: 500; color: rgba(26,26,46,0.9); font-size: 18px; font-family: 'KFGQPC Uthmanic Script HAFS', serif;">${word ? (word.kelime || word.arabic) : w.id}</div>
+                                    ${word ? `<div style="font-size: 12px; color: rgba(26,26,46,0.75); margin-top: 4px;">${word.anlam || word.translation}</div>` : ''}
                                 </div>
-                                <span style="font-size: 12px; color: rgba(255,255,255,0.6); margin-left: 12px; white-space: nowrap;">${formatDateForDisplay(w.lastCorrect)}</span>
+                                <span style="font-size: 12px; color: rgba(26,26,46,0.75); margin-left: 12px; white-space: nowrap;">${formatDateForDisplay(w.lastCorrect)}</span>
                             </div>
                         `;
                     }).join('')}
@@ -2019,7 +2019,7 @@ function showWordAnalysisModal() {
     if (struggling.length > 0) {
         content += `
             <div class="analysis-section" style="margin: 20px 0; padding: 16px; background: rgba(255,255,255,0.05); border-radius: 8px;">
-                <h4 style="margin: 0 0 12px 0; color: rgba(255,255,255,0.9); font-size: 16px; display: flex; align-items: center; gap: 8px;">
+                <h4 style="margin: 0 0 12px 0; color: rgba(26,26,46,0.9); font-size: 16px; display: flex; align-items: center; gap: 8px;">
                     <span>🔴</span>
                     <span>Zorlandığın Kelimeler</span>
                 </h4>
@@ -2029,8 +2029,8 @@ function showWordAnalysisModal() {
                         return `
                             <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: rgba(244, 67, 54, 0.1); border-radius: 6px;">
                                 <div style="flex: 1;">
-                                    <div style="font-weight: 500; color: rgba(255,255,255,0.9); font-size: 18px; font-family: 'KFGQPC Uthmanic Script HAFS', serif;">${word ? (word.kelime || word.arabic) : w.id}</div>
-                                    ${word ? `<div style="font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 4px;">${word.anlam || word.translation}</div>` : ''}
+                                    <div style="font-weight: 500; color: rgba(26,26,46,0.9); font-size: 18px; font-family: 'KFGQPC Uthmanic Script HAFS', serif;">${word ? (word.kelime || word.arabic) : w.id}</div>
+                                    ${word ? `<div style="font-size: 12px; color: rgba(26,26,46,0.75); margin-top: 4px;">${word.anlam || word.translation}</div>` : ''}
                                 </div>
                                 <span style="font-size: 12px; color: #f44336; font-weight: 500; margin-left: 12px; white-space: nowrap;">${w.successRate}% başarı</span>
                             </div>
