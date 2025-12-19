@@ -1,0 +1,3881 @@
+/**
+ * Hasene Arapça Dersi - Game Core
+ * Ana oyun mantığı ve state yönetimi
+ */
+
+// ========================================
+// GLOBAL STATE
+// ========================================
+
+// User & Points
+let totalPoints = 0;
+let sessionScore = 0;
+let currentLevel = 1;
+
+// Game State
+let currentGameMode = null;
+let currentDifficulty = 'easy';
+let questionIndex = 0;
+let correctCount = 0;
+let wrongCount = 0;
+let comboCount = 0;
+let maxCombo = 0;
+
+// Current Questions
+let currentQuestions = [];
+let currentQuestion = null;
+let currentOptions = []; // Current answer options for hint system
+
+// Reading Mode Indices
+let currentAyetIndex = 0;
+let currentDuaIndex = 0;
+let currentHadisIndex = 0;
+
+// Submode tracking
+let currentKelimeSubmode = 'classic';
+let currentElifBaSubmode = 'harfler';
+
+// Word Stats for SM-2 Algorithm
+let wordStats = {};
+
+// Favorites
+let favorites = [];
+
+// Unlocked Achievements
+let unlockedAchievements = [];
+
+// Unlocked Badges (date keyed)
+let badgesUnlocked = {};
+
+// Onboarding
+let onboardingSlideIndex = 0;
+
+// ========================================
+// MODAL, PANEL & AUDIO YÖNETİMİ
+// ========================================
+
+// Açık olan modal ve panel takibi
+let currentOpenModal = null;
+let currentOpenPanel = null;
+let currentPlayingAudio = null;
+let isAudioPlaying = false;
+
+/**
+ * Tüm sesleri durdur
+ */
+function stopAllAudio() {
+    if (currentPlayingAudio) {
+        try {
+            currentPlayingAudio.pause();
+            currentPlayingAudio.currentTime = 0;
+        } catch (e) {}
+        currentPlayingAudio = null;
+    }
+    isAudioPlaying = false;
+}
+
+/**
+ * Güvenli ses çalma - üst üste binmeyi önler
+ */
+function playSafeAudio(url) {
+    if (!url) return null;
+    
+    // Önce mevcut sesi durdur
+    stopAllAudio();
+    
+    try {
+        const audio = new Audio(url);
+        audio.volume = typeof CONFIG !== 'undefined' ? CONFIG.AUDIO.volume : 0.8;
+        
+        audio.onended = () => {
+            currentPlayingAudio = null;
+            isAudioPlaying = false;
+        };
+        
+        audio.onerror = () => {
+            currentPlayingAudio = null;
+            isAudioPlaying = false;
+        };
+        
+        currentPlayingAudio = audio;
+        isAudioPlaying = true;
+        
+        audio.play().catch(err => {
+            console.warn('Audio play failed:', err);
+            currentPlayingAudio = null;
+            isAudioPlaying = false;
+        });
+        
+        return audio;
+    } catch (err) {
+        console.warn('Audio creation failed:', err);
+        return null;
+    }
+}
+
+/**
+ * Tüm modalları kapat
+ */
+function closeAllModals() {
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.classList.add('hidden');
+    });
+    currentOpenModal = null;
+}
+
+/**
+ * Güvenli modal açma - önce diğer modalları kapatır
+ */
+function openModal(modalId) {
+    // Önce tüm modalları kapat
+    closeAllModals();
+    
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.remove('hidden');
+        currentOpenModal = modalId;
+    }
+}
+
+/**
+ * Modal kapatma
+ */
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+    if (currentOpenModal === modalId) {
+        currentOpenModal = null;
+    }
+}
+
+/**
+ * Tüm panelleri (ekranları) gizle
+ */
+function hideAllPanels() {
+    // Oyun ekranlarını gizle
+    document.querySelectorAll('.game-screen').forEach(screen => {
+        screen.classList.add('hidden');
+    });
+    
+    // Alt menüleri gizle (submode screens are already game-screen class, so they're hidden by the above querySelectorAll)
+    
+    currentOpenPanel = null;
+}
+
+/**
+ * Panel (ekran) göster - önce diğerlerini kapatır
+ */
+function showPanel(panelId) {
+    // Önce sesi durdur
+    stopAllAudio();
+    
+    // Tüm panelleri gizle
+    hideAllPanels();
+    
+    // Modalları da kapat
+    closeAllModals();
+    
+    const panel = document.getElementById(panelId);
+    if (panel) {
+        panel.classList.remove('hidden');
+        currentOpenPanel = panelId;
+    }
+}
+
+/**
+ * Ana ekrana dön - sesleri durdur, modalları/panelleri kapat
+ */
+function goToMainScreen() {
+    // Sesi durdur
+    stopAllAudio();
+    
+    // Tüm modalları kapat
+    closeAllModals();
+    
+    // Tüm panelleri gizle
+    hideAllPanels();
+    
+    // Ana container'ı göster
+    const mainContainer = document.getElementById('main-container');
+    if (mainContainer) {
+        mainContainer.classList.remove('hidden');
+    }
+    
+    // State'i sıfırla
+    currentGameMode = null;
+    currentOpenPanel = null;
+}
+
+/**
+ * Geri dön butonu davranışı
+ */
+function handleBackButton() {
+    // Önce sesi durdur
+    stopAllAudio();
+    
+    // Modal açıksa önce onu kapat
+    if (currentOpenModal) {
+        closeModal(currentOpenModal);
+        return;
+    }
+    
+    // Panel (oyun ekranı) açıksa ana ekrana dön
+    if (currentOpenPanel) {
+        goToMainScreen();
+        return;
+    }
+    
+    // Hiçbiri açık değilse zaten ana ekrandayız
+}
+
+// Streak & Stats
+let streakData = {
+    currentStreak: 0,
+    bestStreak: 0,
+    totalPlayDays: 0,
+    lastPlayDate: '',
+    playDates: []
+};
+
+// Game Stats
+let gameStats = {
+    totalCorrect: 0,
+    totalWrong: 0,
+    perfectLessons: 0,
+    gameModeCounts: {}
+};
+
+// Daily Tasks
+let dailyTasks = {
+    lastTaskDate: '',
+    tasks: [],
+    bonusTasks: [],
+    todayStats: {
+        toplamDogru: 0,
+        toplamPuan: 0,
+        comboCount: 0,
+        allGameModes: [],
+        ayet_oku: 0,
+        dua_et: 0,
+        hadis_oku: 0
+    }
+};
+
+// Daily Goal
+let dailyGoal = 2700;
+let dailyProgress = 0;
+
+// ========================================
+// INITIALIZATION
+// ========================================
+
+/**
+ * Initialize the application
+ */
+async function initApp() {
+    console.log('🚀 Hasene Arapça Dersi başlatılıyor...');
+    
+    // Initialize user (create local user if doesn't exist)
+    if (typeof window.getCurrentUser === 'function') {
+        const user = window.getCurrentUser();
+        console.log('👤 Current user:', user);
+    }
+    
+    // Load stats
+    await loadStats();
+    
+    // Setup UI
+    setupEventListeners();
+    updateStatsDisplay();
+    
+    // Browser geri tuşu dinleyicisi
+    setupBackButtonHandler();
+    
+    // Preload data in background
+    preloadAllData();
+    
+    // Register service worker
+    registerServiceWorker();
+    
+    // Hide loading screen
+    setTimeout(() => {
+        document.getElementById('loadingScreen').classList.add('hidden');
+        document.getElementById('main-container').classList.remove('hidden');
+        
+        // Check if first time (show onboarding)
+        const onboardingComplete = localStorage.getItem('hasene_onboarding_complete');
+        if (!onboardingComplete) {
+            setTimeout(() => showOnboarding(), 500);
+        } else {
+            // Check for daily reward
+            checkAndShowDailyReward();
+        }
+    }, 1500);
+    
+    console.log('✅ Uygulama başlatıldı');
+}
+
+/**
+ * Check and show daily reward if not claimed today
+ */
+function checkAndShowDailyReward() {
+    const today = getLocalDateString();
+    const lastReward = localStorage.getItem('hasene_last_daily_reward');
+    
+    if (lastReward !== today) {
+        setTimeout(() => showDailyReward(), 500);
+    }
+}
+
+/**
+ * Load all saved stats
+ */
+async function loadStats() {
+    // Total points
+    totalPoints = loadFromStorage(CONFIG.STORAGE_KEYS.TOTAL_POINTS, 0);
+    
+    // Current level
+    currentLevel = calculateLevel(totalPoints);
+    
+    // Streak data
+    streakData = loadFromStorage(CONFIG.STORAGE_KEYS.STREAK_DATA, streakData);
+    
+    // Game stats
+    gameStats = loadFromStorage(CONFIG.STORAGE_KEYS.GAME_STATS, gameStats);
+    
+    // Daily goal
+    dailyGoal = loadFromStorage(CONFIG.STORAGE_KEYS.DAILY_GOAL, 2700);
+    
+    // Daily progress (check date)
+    const today = getLocalDateString();
+    const savedProgress = loadFromStorage(CONFIG.STORAGE_KEYS.DAILY_PROGRESS, { date: '', points: 0 });
+    
+    if (savedProgress.date === today) {
+        dailyProgress = savedProgress.points;
+    } else {
+        dailyProgress = 0;
+        saveToStorage(CONFIG.STORAGE_KEYS.DAILY_PROGRESS, { date: today, points: 0 });
+    }
+    
+    // Word stats
+    wordStats = loadFromStorage('hasene_word_stats', {});
+    
+    // Favorites
+    favorites = loadFromStorage('hasene_favorites', []);
+    
+    // Unlocked achievements
+    unlockedAchievements = loadFromStorage('hasene_achievements', []);
+    
+    // Unlocked badges
+    badgesUnlocked = loadFromStorage('hasene_badges', {});
+    
+    // Daily tasks
+    await checkDailyTasks();
+    
+    // Check streak
+    checkStreak();
+    
+    console.log('📊 Stats loaded:', { totalPoints, currentLevel, streakData });
+}
+
+/**
+ * Save all stats
+ * Saves to localStorage first (always), then syncs to Firebase if Firebase user
+ */
+async function saveStats() {
+    // 1. Always save to localStorage (primary storage for local users)
+    saveToStorage(CONFIG.STORAGE_KEYS.TOTAL_POINTS, totalPoints);
+    saveToStorage(CONFIG.STORAGE_KEYS.STREAK_DATA, streakData);
+    saveToStorage(CONFIG.STORAGE_KEYS.GAME_STATS, gameStats);
+    saveToStorage(CONFIG.STORAGE_KEYS.DAILY_GOAL, dailyGoal);
+    saveToStorage(CONFIG.STORAGE_KEYS.DAILY_PROGRESS, { 
+        date: getLocalDateString(), 
+        points: dailyProgress 
+    });
+    saveToStorage(CONFIG.STORAGE_KEYS.DAILY_TASKS, dailyTasks);
+    saveToStorage('hasene_word_stats', wordStats);
+    saveToStorage('hasene_favorites', favorites);
+    saveToStorage('hasene_achievements', unlockedAchievements);
+    saveToStorage('hasene_badges', badgesUnlocked);
+    
+    // 2. Sync to Firebase if Firebase user (don't wait, fire and forget)
+    if (typeof window.saveUserStats === 'function' && typeof window.saveDailyTasks === 'function') {
+        const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : null;
+        if (user && !user.id.startsWith('local-')) {
+            // Sync user stats to Firebase
+            window.saveUserStats({
+                total_points: totalPoints,
+                badges: badgesUnlocked,
+                streak_data: streakData,
+                game_stats: gameStats,
+                perfect_lessons_count: gameStats.perfectLessons || 0
+            }).catch(err => {
+                console.warn('Firebase sync failed (using localStorage only):', err);
+            });
+            
+            // Sync daily tasks to Firebase
+            window.saveDailyTasks(dailyTasks).catch(err => {
+                console.warn('Firebase daily tasks sync failed:', err);
+            });
+        }
+    }
+}
+
+// Debounced save (async version)
+const debouncedSaveStats = debounce(() => {
+    saveStats().catch(err => {
+        console.error('Save stats error:', err);
+    });
+}, 500);
+
+/**
+ * Browser geri tuşu için handler
+ */
+function setupBackButtonHandler() {
+    // History state ekle
+    window.history.pushState({ page: 'main' }, '');
+    
+    // Popstate (geri tuşu) dinleyicisi
+    window.addEventListener('popstate', (event) => {
+        // Sesi durdur
+        stopAllAudio();
+        
+        // Modal açıksa kapat
+        if (currentOpenModal) {
+            closeModal(currentOpenModal);
+            // State'i geri ekle (çıkmasın)
+            window.history.pushState({ page: 'main' }, '');
+            return;
+        }
+        
+        // Panel açıksa ana menüye dön
+        if (currentOpenPanel || currentGameMode) {
+            goToMainMenu();
+            // State'i geri ekle
+            window.history.pushState({ page: 'main' }, '');
+            return;
+        }
+        
+        // Ana sayfadaysa state'i geri ekle
+        window.history.pushState({ page: 'main' }, '');
+    });
+}
+
+/**
+ * Register service worker
+ */
+function registerServiceWorker() {
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js')
+            .then(reg => console.log('✅ Service Worker registered'))
+            .catch(err => console.warn('⚠️ Service Worker registration failed:', err));
+    }
+}
+
+// ========================================
+// EVENT LISTENERS
+// ========================================
+
+/**
+ * Setup all event listeners
+ */
+function setupEventListeners() {
+    // Difficulty buttons
+    document.querySelectorAll('.difficulty-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentDifficulty = btn.dataset.difficulty;
+        });
+    });
+    
+    // Game cards
+    document.querySelectorAll('.game-card').forEach(card => {
+        card.addEventListener('click', () => {
+            const gameMode = card.dataset.game;
+            startGame(gameMode);
+        });
+    });
+    
+    // Goal settings button
+    document.getElementById('goal-settings-btn')?.addEventListener('click', showGoalSettings);
+    
+    // Goal options
+    document.querySelectorAll('.goal-option').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.goal-option').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            dailyGoal = parseInt(btn.dataset.goal);
+            saveStats();
+            updateDailyGoalDisplay();
+            closeModal('goal-settings-modal');
+        });
+    });
+    
+    // Kelime submode buttons
+    document.querySelectorAll('[data-submode]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            currentKelimeSubmode = btn.dataset.submode;
+            startKelimeCevirGame(currentKelimeSubmode);
+        });
+    });
+    
+    // Elif Ba submode buttons
+    document.querySelectorAll('[data-elif-submode]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            currentElifBaSubmode = btn.dataset.elifSubmode;
+            if (currentElifBaSubmode === 'tablo') {
+                showHarfTablosu();
+            } else {
+                startElifBaGame(currentElifBaSubmode);
+            }
+        });
+    });
+    
+    // Badge tabs
+    document.querySelectorAll('.badge-tab').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.badge-tab').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const tab = btn.dataset.tab;
+            if (tab === 'badges') {
+                document.getElementById('badges-grid').classList.remove('hidden');
+                document.getElementById('achievements-list').classList.add('hidden');
+            } else {
+                document.getElementById('badges-grid').classList.add('hidden');
+                document.getElementById('achievements-list').classList.remove('hidden');
+                // Başarımları yükle
+                renderAchievementsList();
+            }
+        });
+    });
+    
+    // Favorite button
+    document.getElementById('kelime-favorite-btn')?.addEventListener('click', toggleCurrentWordFavorite);
+    
+    // Audio buttons
+    setupAudioButtons();
+    
+    // Navigation buttons
+    setupNavigationButtons();
+    
+    // Bottom nav
+    document.querySelectorAll('.nav-item[data-page]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (btn.dataset.page === 'main-menu') {
+                goToMainMenu();
+            }
+        });
+    });
+}
+
+/**
+ * Setup audio buttons
+ */
+function setupAudioButtons() {
+    document.getElementById('kelime-audio-btn')?.addEventListener('click', playCurrentWordAudio);
+    document.getElementById('dinle-audio-btn')?.addEventListener('click', playCurrentWordAudio);
+    document.getElementById('elif-audio-btn')?.addEventListener('click', playCurrentLetterAudio);
+    document.getElementById('ayet-audio-btn')?.addEventListener('click', playCurrentAyetAudio);
+    document.getElementById('dua-audio-btn')?.addEventListener('click', playCurrentDuaAudio);
+    document.getElementById('bosluk-audio-btn')?.addEventListener('click', playCurrentBoslukAudio);
+}
+
+/**
+ * Setup navigation buttons for reading modes
+ */
+function setupNavigationButtons() {
+    // Ayet navigation
+    document.getElementById('ayet-prev-btn')?.addEventListener('click', () => navigateAyet(-1));
+    document.getElementById('ayet-next-btn')?.addEventListener('click', () => navigateAyet(1));
+    
+    // Dua navigation
+    document.getElementById('dua-prev-btn')?.addEventListener('click', () => navigateDua(-1));
+    document.getElementById('dua-next-btn')?.addEventListener('click', () => navigateDua(1));
+    
+    // Hadis navigation
+    document.getElementById('hadis-prev-btn')?.addEventListener('click', () => navigateHadis(-1));
+    document.getElementById('hadis-next-btn')?.addEventListener('click', () => navigateHadis(1));
+}
+
+// ========================================
+// GAME FLOW
+// ========================================
+
+/**
+ * Start a game mode
+ */
+async function startGame(gameMode) {
+    console.log(`🎮 Starting game: ${gameMode}`);
+    currentGameMode = gameMode;
+    
+    // Hide main container
+    document.getElementById('main-container').classList.add('hidden');
+    
+    // For kelime-cevir and elif-ba, show submode selection first
+    if (gameMode === 'kelime-cevir') {
+        document.getElementById('kelime-submode-screen').classList.remove('hidden');
+        return;
+    }
+    
+    if (gameMode === 'elif-ba') {
+        document.getElementById('elif-ba-submode-screen').classList.remove('hidden');
+        return;
+    }
+    
+    // Reset session
+    sessionScore = 0;
+    questionIndex = 0;
+    correctCount = 0;
+    wrongCount = 0;
+    comboCount = 0;
+    maxCombo = 0;
+    
+    // Start appropriate game
+    switch (gameMode) {
+        case 'dinle-bul':
+            await startDinleBulGame();
+            break;
+        case 'bosluk-doldur':
+            await startBoslukDoldurGame();
+            break;
+        case 'ayet-oku':
+            await startAyetOkuMode();
+            break;
+        case 'dua-et':
+            await startDuaEtMode();
+            break;
+        case 'hadis-oku':
+            await startHadisOkuMode();
+            break;
+        case 'karma':
+            await startKarmaGame();
+            break;
+        default:
+            showToast('Bilinmeyen oyun modu', 'error');
+            goToMainMenu();
+    }
+}
+
+/**
+ * Go to Kelime Çevir submodes
+ */
+function goToKelimeSubmodes() {
+    document.getElementById('kelime-cevir-screen').classList.add('hidden');
+    document.getElementById('kelime-submode-screen').classList.remove('hidden');
+}
+
+/**
+ * Go to Elif Ba submodes
+ */
+function goToElifBaSubmodes() {
+    document.getElementById('elif-ba-screen').classList.add('hidden');
+    document.getElementById('elif-ba-tablo-screen').classList.add('hidden');
+    document.getElementById('elif-ba-submode-screen').classList.remove('hidden');
+}
+
+// ========================================
+// ACHIEVEMENT SYSTEM
+// ========================================
+
+/**
+ * Check badges and achievements after earning points
+ * Called after each correct answer to check for immediate unlocks
+ */
+function checkBadgesAndAchievementsAfterPoints() {
+    // Geçici totalPoints hesapla (henüz eklenmedi ama kontrol için)
+    const tempTotalPoints = totalPoints + sessionScore;
+    
+    // Rozetleri kontrol et
+    const badges = window.BADGE_DEFINITIONS || [];
+    const asrBadges = window.ASR_I_SAADET_BADGES || {};
+    const today = getLocalDateString();
+    
+    badges.forEach(badge => {
+        if (!badgesUnlocked[badge.id] && badge.threshold && tempTotalPoints >= badge.threshold) {
+            badgesUnlocked[badge.id] = today;
+            showToast(`🏅 "${badge.name}" rozeti kazandınız!`, 'success', 3000);
+        }
+    });
+    
+    // Asr-ı Saadet rozetlerini kontrol et
+    Object.values(asrBadges).forEach(periodBadges => {
+        periodBadges.forEach(badge => {
+            if (!badgesUnlocked[badge.id] && badge.threshold && tempTotalPoints >= badge.threshold) {
+                badgesUnlocked[badge.id] = today;
+                showToast(`🕌 Asr-ı Saadet: "${badge.name}" rozeti kazandınız!`, 'success', 4000);
+            }
+        });
+    });
+    
+    // Başarıları kontrol et
+    const stars = calculateStars(tempTotalPoints);
+    const stats = { 
+        stars, 
+        bestStreak: streakData.bestStreak,
+        perfectLessons: gameStats.perfectLessons,
+        totalCorrect: (gameStats.totalCorrect || 0) + correctCount
+    };
+    const newAchievements = checkAchievements(stats);
+    if (newAchievements.length > 0) {
+        newAchievements.forEach(ach => saveAchievement(ach.id));
+        setTimeout(() => showAchievementModal(newAchievements[0]), 500);
+    }
+    
+    // Seviye kontrolü
+    const newLevel = calculateLevel(tempTotalPoints);
+    if (newLevel > currentLevel) {
+        currentLevel = newLevel;
+        setTimeout(() => showLevelUpModal(newLevel), 800);
+    }
+    
+    // UI'ı güncelle (geçici totalPoints ile)
+    const tempHaseneEl = document.getElementById('total-hasene');
+    const tempStarsEl = document.getElementById('total-stars');
+    const tempLevelEl = document.getElementById('level-display');
+    if (tempHaseneEl) tempHaseneEl.textContent = formatNumber(tempTotalPoints);
+    if (tempStarsEl) tempStarsEl.textContent = `⭐ ${stars}`;
+    if (tempLevelEl) tempLevelEl.textContent = newLevel > currentLevel ? newLevel : currentLevel;
+}
+
+/**
+ * Check if any new achievements are earned
+ * @param {Object} stats - Current game stats
+ * @returns {Array} Array of newly earned achievements
+ */
+function checkAchievements(stats) {
+    const achievements = window.ACHIEVEMENTS || [];
+    const newlyUnlocked = [];
+    
+    // Extend stats with additional data
+    const extendedStats = {
+        ...stats,
+        totalCorrect: gameStats.totalCorrect || 0,
+        perfectLessons: gameStats.perfectLessons || 0
+    };
+    
+    achievements.forEach(ach => {
+        // Skip if already unlocked
+        if (unlockedAchievements.includes(ach.id)) return;
+        
+        let isEarned = false;
+        
+        // Use the check function if available
+        if (ach.check && typeof ach.check === 'function') {
+            try {
+                isEarned = ach.check(extendedStats);
+            } catch (e) {
+                console.error('Achievement check error:', ach.id, e);
+            }
+        }
+        
+        if (isEarned) {
+            newlyUnlocked.push(ach);
+        }
+    });
+    
+    return newlyUnlocked;
+}
+
+/**
+ * Save achievement as unlocked
+ * @param {string} achievementId - Achievement ID
+ */
+function saveAchievement(achievementId) {
+    if (!unlockedAchievements.includes(achievementId)) {
+        unlockedAchievements.push(achievementId);
+        saveToStorage('hasene_achievements', unlockedAchievements);
+        
+        // Award achievement points
+        const ach = (window.ACHIEVEMENTS || []).find(a => a.id === achievementId);
+        if (ach && ach.points) {
+            totalPoints += ach.points;
+        }
+    }
+}
+
+/**
+ * Check and unlock badges based on total points
+ */
+function checkBadges() {
+    const badges = window.BADGE_DEFINITIONS || [];
+    const asrBadges = window.ASR_I_SAADET_BADGES || {};
+    const today = getLocalDateString();
+    
+    // Normal rozetleri kontrol et
+    badges.forEach(badge => {
+        // Skip if already unlocked
+        if (badgesUnlocked[badge.id]) return;
+        
+        // Check if threshold is met
+        if (badge.threshold && totalPoints >= badge.threshold) {
+            badgesUnlocked[badge.id] = today;
+            showToast(`🏅 "${badge.name}" rozeti kazandınız!`, 'success', 3000);
+        }
+    });
+    
+    // Asr-ı Saadet rozetlerini kontrol et
+    Object.values(asrBadges).forEach(periodBadges => {
+        periodBadges.forEach(badge => {
+            if (badgesUnlocked[badge.id]) return;
+            
+            if (badge.threshold && totalPoints >= badge.threshold) {
+                badgesUnlocked[badge.id] = today;
+                showToast(`🕌 Asr-ı Saadet: "${badge.name}" rozeti kazandınız!`, 'success', 4000);
+            }
+        });
+    });
+    
+    debouncedSaveStats();
+}
+
+/**
+ * Hide all game screens
+ */
+function hideAllScreens() {
+    // Sesleri durdur
+    stopAllAudio();
+    
+    document.querySelectorAll('.game-screen').forEach(screen => {
+        screen.classList.add('hidden');
+    });
+    document.getElementById('main-container')?.classList.add('hidden');
+    
+    currentOpenPanel = null;
+}
+
+/**
+ * Go back to main menu
+ */
+function goToMainMenu() {
+    // Sesi durdur
+    stopAllAudio();
+    
+    // Modalları kapat
+    closeAllModals();
+    
+    // Hide all game screens
+    document.querySelectorAll('.game-screen').forEach(screen => {
+        screen.classList.add('hidden');
+    });
+    
+    // Show main container
+    document.getElementById('main-container').classList.remove('hidden');
+    
+    // Update displays
+    updateStatsDisplay();
+    
+    currentGameMode = null;
+    currentOpenPanel = null;
+}
+
+/**
+ * End game and show results
+ */
+function endGame() {
+    // Calculate perfect bonus
+    let perfectBonus = 0;
+    if (wrongCount === 0 && correctCount >= 3) {
+        perfectBonus = CONFIG.PERFECT_BONUS;
+        sessionScore += perfectBonus;
+        gameStats.perfectLessons = (gameStats.perfectLessons || 0) + 1;
+    }
+    
+    // Add to total points
+    totalPoints += sessionScore;
+    // NOT: dailyProgress zaten her soruda güncelleniyor, burada tekrar eklemeye gerek yok
+    
+    // Update game stats
+    gameStats.totalCorrect = (gameStats.totalCorrect || 0) + correctCount;
+    gameStats.totalWrong = (gameStats.totalWrong || 0) + wrongCount;
+    gameStats.gameModeCounts = gameStats.gameModeCounts || {};
+    gameStats.gameModeCounts[currentGameMode] = (gameStats.gameModeCounts[currentGameMode] || 0) + 1;
+    
+    // Update task progress (sadece oyun modu için, doğru cevaplar zaten her soruda güncelleniyor)
+    updateTaskProgress('game_modes', currentGameMode);
+    // Hasene görevi için toplam sessionScore'u güncelle (görev ilerlemesi için)
+    updateTaskProgress('hasene', sessionScore);
+    
+    // Check level up
+    const newLevel = calculateLevel(totalPoints);
+    if (newLevel > currentLevel) {
+        currentLevel = newLevel;
+        showLevelUpModal(newLevel);
+    }
+    
+    // Check achievements
+    const stars = calculateStars(totalPoints);
+    const stats = { 
+        stars, 
+        bestStreak: streakData.bestStreak,
+        perfectLessons: gameStats.perfectLessons 
+    };
+    const newAchievements = checkAchievements(stats);
+    
+    if (newAchievements.length > 0) {
+        newAchievements.forEach(ach => saveAchievement(ach.id));
+        setTimeout(() => showAchievementModal(newAchievements[0]), 1500);
+    }
+    
+    // Check badges based on total points
+    checkBadges();
+    
+    // Check daily goal
+    checkDailyGoal();
+    
+    // Check and update streak
+    checkStreak();
+    
+    // Save stats
+    debouncedSaveStats();
+    
+    // Show result modal
+    showResultModal(perfectBonus);
+}
+
+/**
+ * Show game result modal
+ */
+function showResultModal(perfectBonus = 0) {
+    document.getElementById('result-correct').textContent = correctCount;
+    document.getElementById('result-wrong').textContent = wrongCount;
+    document.getElementById('result-points').textContent = formatNumber(sessionScore);
+    
+    const perfectContainer = document.getElementById('result-perfect-container');
+    if (perfectBonus > 0) {
+        perfectContainer.style.display = 'block';
+        document.getElementById('result-perfect').textContent = `+${perfectBonus}`;
+    } else {
+        perfectContainer.style.display = 'none';
+    }
+    
+    // Set title based on performance
+    const title = document.getElementById('result-title');
+    if (wrongCount === 0) {
+        title.textContent = '🎉 Mükemmel!';
+    } else if (correctCount > wrongCount) {
+        title.textContent = '👏 Tebrikler!';
+    } else {
+        title.textContent = '💪 İyi Deneme!';
+    }
+    
+    openModal('game-result-modal');
+}
+
+/**
+ * Play again
+ */
+function playAgain() {
+    closeModal('game-result-modal');
+    startGame(currentGameMode);
+}
+
+/**
+ * Close result and go home
+ */
+function closeResultAndGoHome() {
+    closeModal('game-result-modal');
+    goToMainMenu();
+}
+
+// ========================================
+// KELIME ÇEVIR GAME
+// ========================================
+
+async function startKelimeCevirGame(submode = 'classic') {
+    currentKelimeSubmode = submode;
+    
+    // Reset session
+    sessionScore = 0;
+    questionIndex = 0;
+    correctCount = 0;
+    wrongCount = 0;
+    comboCount = 0;
+    maxCombo = 0;
+    
+    const data = await loadKelimeData();
+    if (data.length === 0) {
+        showToast('Kelime verisi yüklenemedi', 'error');
+        goToMainMenu();
+        return;
+    }
+    
+    // Filter by difficulty first
+    let filtered = filterByDifficulty(data, currentDifficulty);
+    if (filtered.length < 20) {
+        filtered = data;
+    }
+    
+    let useIntelligentSelection = false;
+    let isReviewMode = false;
+    
+    // Apply submode filter
+    switch (submode) {
+        case 'juz30':
+            // Filter 30th Juz words (Surah 78-114)
+            // id format is "sure:ayet:kelime" e.g. "82:8:6"
+            filtered = filtered.filter(word => {
+                const wordId = word.id || '';
+                const parts = wordId.split(':');
+                const sureNum = parts.length > 0 ? parseInt(parts[0]) : 0;
+                return sureNum >= 78 && sureNum <= 114;
+            });
+            console.log(`🕌 30. Cüz kelimeleri bulundu: ${filtered.length}`);
+            if (filtered.length < 10) {
+                showToast('30. cüz kelimesi yeterli değil, tüm kelimeler kullanılıyor', 'info');
+                filtered = filterByDifficulty(data, currentDifficulty);
+            }
+            useIntelligentSelection = true;
+            break;
+            
+        case 'review':
+            isReviewMode = true;
+            // Get words that need review (struggling + due for review)
+            const reviewWordIds = [];
+            
+            // 1. Zorlanılan kelimeler (başarı oranı < 50%)
+            const strugglingIds = Object.keys(wordStats).filter(id => {
+                const stats = wordStats[id];
+                return stats && stats.attempts >= 2 && stats.successRate < 50;
+            });
+            reviewWordIds.push(...strugglingIds);
+            
+            // 2. Tekrar zamanı gelmiş kelimeler
+            const today = new Date(getLocalDateString());
+            const dueIds = Object.keys(wordStats).filter(id => {
+                const stats = wordStats[id];
+                if (stats && stats.nextReviewDate) {
+                    const reviewDate = new Date(stats.nextReviewDate);
+                    return reviewDate <= today;
+                }
+                return false;
+            });
+            reviewWordIds.push(...dueIds);
+            
+            // 3. Bugün yanlış cevaplanan kelimeler
+            const todayReview = dailyTasks.todayStats?.reviewWords || [];
+            reviewWordIds.push(...todayReview);
+            
+            // Unique IDs
+            const uniqueReviewIds = [...new Set(reviewWordIds)];
+            
+            console.log(`🔄 Tekrar edilecek kelimeler: ${uniqueReviewIds.length}`);
+            
+            if (uniqueReviewIds.length >= 5) {
+                filtered = filtered.filter(w => uniqueReviewIds.includes(w.id));
+                showToast(`${uniqueReviewIds.length} zorlandığın kelime tekrarlanacak`, 'info');
+            } else {
+                showToast('Yeterli tekrar edilecek kelime yok, akıllı seçim kullanılıyor', 'info');
+                useIntelligentSelection = true;
+            }
+            break;
+            
+        case 'favorites':
+            if (favorites.length >= 5) {
+                filtered = filtered.filter(w => favorites.includes(w.id));
+                console.log(`⭐ Favori kelimeler: ${filtered.length}`);
+            } else {
+                showToast('En az 5 favori kelime eklemelisiniz!', 'error');
+                goToKelimeSubmodes();
+                return;
+            }
+            break;
+            
+        case 'classic':
+        default:
+            // Klasik mod: Akıllı kelime seçimi kullan
+            useIntelligentSelection = true;
+            break;
+    }
+    
+    // Select questions using intelligent algorithm or random
+    if (useIntelligentSelection && filtered.length > CONFIG.QUESTIONS_PER_GAME) {
+        currentQuestions = selectIntelligentWords(filtered, CONFIG.QUESTIONS_PER_GAME, isReviewMode);
+        console.log('🧠 Akıllı kelime seçimi kullanıldı');
+    } else {
+        currentQuestions = getRandomItems(filtered, CONFIG.QUESTIONS_PER_GAME);
+    }
+    
+    // Hide submode screen, show game screen
+    document.getElementById('kelime-submode-screen').classList.add('hidden');
+    document.getElementById('kelime-cevir-screen').classList.remove('hidden');
+    document.getElementById('kelime-total-questions').textContent = CONFIG.QUESTIONS_PER_GAME;
+    
+    // Load first question
+    loadKelimeQuestion();
+}
+
+function loadKelimeQuestion() {
+    if (questionIndex >= currentQuestions.length) {
+        endGame();
+        return;
+    }
+    
+    // Reset hint for new question
+    hintUsedThisQuestion = false;
+    const hintBtn = document.getElementById('kelime-hint-btn');
+    if (hintBtn) {
+        hintBtn.classList.remove('used');
+        hintBtn.disabled = hintsUsedToday >= MAX_HINTS_PER_DAY;
+    }
+    
+    currentQuestion = currentQuestions[questionIndex];
+    
+    // Update UI
+    document.getElementById('kelime-question-number').textContent = questionIndex + 1;
+    document.getElementById('kelime-arabic').textContent = currentQuestion.kelime || currentQuestion.arabic;
+    document.getElementById('kelime-info').textContent = currentQuestion.sure_adi || '';
+    document.getElementById('kelime-combo').textContent = comboCount;
+    document.getElementById('kelime-session-score').textContent = formatNumber(sessionScore);
+    
+    // Update favorite button
+    const wordId = currentQuestion.kelime_id || currentQuestion.id;
+    const favBtn = document.getElementById('kelime-favorite-btn');
+    if (favBtn) {
+        favBtn.textContent = favorites.includes(wordId) ? '❤️' : '♡';
+    }
+    
+    // Generate options
+    const correctAnswer = currentQuestion.anlam || currentQuestion.translation;
+    const allWords = window.kelimeData || currentQuestions || [];
+    
+    // Get wrong options - ensure we have at least 3
+    let wrongAnswerPool = allWords.filter(w => {
+        const answer = w.anlam || w.translation;
+        return answer && answer !== correctAnswer;
+    });
+    
+    // If not enough wrong answers, use current questions
+    if (wrongAnswerPool.length < 3) {
+        wrongAnswerPool = currentQuestions.filter(w => {
+            const answer = w.anlam || w.translation;
+            return answer && answer !== correctAnswer;
+        });
+    }
+    
+    const wrongOptions = getRandomItems(wrongAnswerPool, 3).map(w => w.anlam || w.translation);
+    
+    // Ensure we always have 4 options
+    while (wrongOptions.length < 3) {
+        wrongOptions.push(`Seçenek ${wrongOptions.length + 2}`);
+    }
+    
+    const options = shuffleArray([correctAnswer, ...wrongOptions]);
+    currentOptions = options; // Store for hint system
+    
+    // Render options
+    const optionsContainer = document.getElementById('kelime-options');
+    optionsContainer.innerHTML = options.map((option, index) => `
+        <button class="answer-option" onclick="checkKelimeAnswer(${index}, '${option.replace(/'/g, "\\'")}')">
+            ${option}
+        </button>
+    `).join('');
+}
+
+function checkKelimeAnswer(index, selectedAnswer) {
+    const correctAnswer = currentQuestion.anlam || currentQuestion.translation;
+    const wordId = currentQuestion.kelime_id || currentQuestion.id;
+    const buttons = document.querySelectorAll('#kelime-options .answer-option');
+    
+    // Disable all buttons
+    buttons.forEach(btn => btn.classList.add('disabled'));
+    
+    // Find correct button
+    buttons.forEach(btn => {
+        if (btn.textContent.trim() === correctAnswer) {
+            btn.classList.add('correct');
+        }
+    });
+    
+    // Update word stats
+    updateWordStats(wordId, selectedAnswer === correctAnswer);
+    
+    if (selectedAnswer === correctAnswer) {
+        // Correct answer
+        correctCount++;
+        comboCount++;
+        maxCombo = Math.max(maxCombo, comboCount);
+        
+        const basePoints = getBasePoints(currentDifficulty);
+        const comboBonus = CONFIG.COMBO_BONUS_PER_CORRECT;
+        const gained = basePoints + comboBonus;
+        
+        sessionScore += gained;
+        dailyProgress += gained; // Günlük vird'e ekle
+        updateTaskProgress('correct', 1); // Görev ilerlemesine ekle
+        
+        // Rozet ve başarıları kontrol et (her puan kazanınca)
+        checkBadgesAndAchievementsAfterPoints();
+        
+        showToast(`+${gained} Hasene! 🔥 Combo: ${comboCount}`, 'success', 1000);
+    } else {
+        // Wrong answer
+        wrongCount++;
+        comboCount = 0;
+        
+        buttons[index].classList.add('wrong');
+        showToast('Yanlış! Doğru cevap gösterildi.', 'error', 1000);
+    }
+    
+    // Günlük vird gösterimini güncelle
+    updateDailyGoalDisplay();
+    
+    // Next question after delay
+    setTimeout(() => {
+        questionIndex++;
+        loadKelimeQuestion();
+    }, 1200);
+}
+
+/**
+ * Use hint - eliminate 2 wrong answers
+ */
+let hintUsedThisQuestion = false;
+let hintsUsedToday = 0;
+const MAX_HINTS_PER_DAY = 10;
+
+function useHint() {
+    if (hintUsedThisQuestion) {
+        showToast('Bu soru için ipucu zaten kullanıldı', 'info');
+        return;
+    }
+    
+    if (hintsUsedToday >= MAX_HINTS_PER_DAY) {
+        showToast(`Günlük ipucu hakkınız bitti (${MAX_HINTS_PER_DAY})`, 'warning');
+        return;
+    }
+    
+    const options = document.querySelectorAll('#kelime-options .answer-option:not(.eliminated)');
+    if (options.length <= 2) {
+        showToast('Yeterli şık yok', 'info');
+        return;
+    }
+    
+    // Find wrong options to eliminate
+    const wrongOptions = [];
+    options.forEach((option, index) => {
+        if (!option.classList.contains('correct') && currentOptions && currentOptions[index] !== currentQuestion.turkce_anlam && currentOptions[index] !== currentQuestion.translation) {
+            wrongOptions.push(option);
+        }
+    });
+    
+    // Eliminate 1 wrong option
+    const toEliminate = wrongOptions.slice(0, 1);
+    toEliminate.forEach(option => {
+        option.classList.add('eliminated');
+        option.disabled = true;
+        option.style.opacity = '0.3';
+        option.style.textDecoration = 'line-through';
+    });
+    
+    hintUsedThisQuestion = true;
+    hintsUsedToday++;
+    
+    // Update hint button
+    const hintBtn = document.getElementById('kelime-hint-btn');
+    if (hintBtn) {
+        hintBtn.classList.add('used');
+        hintBtn.title = `İpucu kullanıldı (${MAX_HINTS_PER_DAY - hintsUsedToday} kaldı)`;
+    }
+    
+    showToast(`💡 1 yanlış şık elendi! (${MAX_HINTS_PER_DAY - hintsUsedToday} ipucu kaldı)`, 'success', 2000);
+}
+
+/**
+ * Toggle favorite for current word
+ */
+function toggleCurrentWordFavorite() {
+    if (!currentQuestion) return;
+    
+    const wordId = currentQuestion.kelime_id || currentQuestion.id;
+    const favBtn = document.getElementById('kelime-favorite-btn');
+    
+    if (favorites.includes(wordId)) {
+        favorites = favorites.filter(id => id !== wordId);
+        if (favBtn) favBtn.textContent = '♡';
+        showToast('Favorilerden çıkarıldı', 'info', 1000);
+    } else {
+        favorites.push(wordId);
+        if (favBtn) favBtn.textContent = '❤️';
+        showToast('Favorilere eklendi!', 'success', 1000);
+    }
+    
+    debouncedSaveStats();
+}
+
+/**
+ * Update word statistics with SM-2 Algorithm
+ * @param {string} wordId - Word ID
+ * @param {boolean} isCorrect - Whether answer was correct
+ */
+function updateWordStats(wordId, isCorrect) {
+    if (!wordId) return;
+    
+    const today = getLocalDateString();
+    
+    if (!wordStats[wordId]) {
+        wordStats[wordId] = {
+            attempts: 0,
+            correct: 0,
+            wrong: 0,
+            successRate: 0,
+            masteryLevel: 0,
+            lastCorrect: null,
+            lastWrong: null,
+            easeFactor: 2.5,       // SM-2: başlangıç kolaylık faktörü
+            interval: 0,           // SM-2: tekrar aralığı (gün)
+            nextReviewDate: null,  // SM-2: sonraki tekrar tarihi
+            lastReview: null       // Son tekrar tarihi
+        };
+    }
+    
+    const stats = wordStats[wordId];
+    const previousAttempts = stats.attempts;
+    stats.attempts++;
+    stats.lastReview = today;
+    
+    if (isCorrect) {
+        stats.correct++;
+        stats.lastCorrect = today;
+        
+        // SM-2 Interval Hesaplama
+        if (previousAttempts === 0) {
+            // İlk öğrenme: 1 gün sonra tekrar
+            stats.interval = 1;
+        } else if (previousAttempts === 1 && stats.correct === 2) {
+            // İkinci doğru cevap: 6 gün sonra tekrar
+            stats.interval = 6;
+        } else {
+            // Sonraki doğru cevaplar: interval * easeFactor
+            stats.interval = Math.max(1, Math.floor(stats.interval * stats.easeFactor));
+        }
+        
+        // SM-2 Ease Factor Güncellemesi
+        const currentSuccessRate = (stats.correct / stats.attempts) * 100;
+        if (currentSuccessRate >= 90) {
+            stats.easeFactor = Math.min(2.5, stats.easeFactor + 0.15);
+        } else if (currentSuccessRate >= 70) {
+            stats.easeFactor = Math.min(2.5, stats.easeFactor + 0.05);
+        } else if (currentSuccessRate < 50) {
+            stats.easeFactor = Math.max(1.3, stats.easeFactor - 0.15);
+        }
+        
+        // Sonraki tekrar tarihini hesapla
+        stats.nextReviewDate = addDaysToDate(today, stats.interval);
+    } else {
+        stats.wrong++;
+        stats.lastWrong = today;
+        
+        // Yanlış cevap: interval sıfırla, ease factor azalt
+        stats.interval = 1;
+        stats.easeFactor = Math.max(1.3, stats.easeFactor - 0.20);
+        
+        // Review listesine ekle
+        addToReviewList(wordId);
+        
+        // Yanlış cevap durumunda da nextReviewDate hesapla (1 gün sonra)
+        stats.nextReviewDate = addDaysToDate(today, 1);
+    }
+    
+    // Başarı oranı ve ustalık seviyesi
+    stats.successRate = Math.round((stats.correct / stats.attempts) * 100);
+    stats.masteryLevel = Math.min(10, Math.floor(stats.successRate / 10));
+    
+    debouncedSaveStats();
+}
+
+/**
+ * Add word to review list for "Tekrar Et" mode
+ * @param {string} wordId - Word ID to add
+ */
+function addToReviewList(wordId) {
+    if (!dailyTasks.todayStats.reviewWords) {
+        dailyTasks.todayStats.reviewWords = [];
+    }
+    if (!dailyTasks.todayStats.reviewWords.includes(wordId)) {
+        dailyTasks.todayStats.reviewWords.push(wordId);
+    }
+}
+
+/**
+ * Add days to a date string (YYYY-MM-DD format)
+ * @param {string} dateStr - Date string
+ * @param {number} days - Days to add
+ * @returns {string} New date string
+ */
+function addDaysToDate(dateStr, days) {
+    const date = new Date(dateStr);
+    date.setDate(date.getDate() + days);
+    return date.toISOString().split('T')[0];
+}
+
+/**
+ * Select words intelligently using SM-2 spaced repetition
+ * @param {Array} words - All available words
+ * @param {number} count - Number of words to select
+ * @param {boolean} isReviewMode - Whether in review mode
+ * @returns {Array} Selected words
+ */
+function selectIntelligentWords(words, count, isReviewMode = false) {
+    const today = getLocalDateString();
+    const todayDate = new Date(today);
+    
+    // Kategorize words by priority
+    const prioritizedWords = words.map(word => {
+        const stats = wordStats[word.id];
+        let priority = 1;
+        
+        if (!stats) {
+            // Hiç denenmemiş kelimeler
+            priority = 5;
+        } else {
+            // 1. Tekrar Zamanı Geçmiş Kelimeler (en yüksek öncelik)
+            if (stats.nextReviewDate) {
+                const reviewDate = new Date(stats.nextReviewDate);
+                const overdueDays = Math.floor((todayDate - reviewDate) / (1000 * 60 * 60 * 24));
+                if (overdueDays > 0) {
+                    priority = 200 + (overdueDays * 10);
+                } else if (overdueDays >= -2 && overdueDays <= 0) {
+                    // Tekrar zamanı 1-2 gün içinde
+                    priority = 1.5;
+                }
+            }
+            
+            // 2. Son Yanlış Cevap Verilen Kelimeler
+            if (stats.lastWrong) {
+                const lastWrongDate = new Date(stats.lastWrong);
+                const daysSinceWrong = Math.floor((todayDate - lastWrongDate) / (1000 * 60 * 60 * 24));
+                if (daysSinceWrong === 0) {
+                    priority = Math.max(priority, 100);
+                } else if (daysSinceWrong === 1) {
+                    priority = Math.max(priority, 50);
+                } else if (daysSinceWrong === 2) {
+                    priority = Math.max(priority, 25);
+                } else if (daysSinceWrong === 3) {
+                    priority = Math.max(priority, 12);
+                }
+            }
+            
+            // 3. Zorlanılan Kelimeler
+            if (stats.attempts >= 2 && stats.successRate < 50) {
+                priority = Math.max(priority, isReviewMode ? 10 : 3);
+            }
+            
+            // 4. Düşük Ustalık Seviyesi
+            if (stats.masteryLevel <= 3 && stats.attempts >= 1) {
+                priority = Math.max(priority, 2);
+            }
+        }
+        
+        return { word, priority };
+    });
+    
+    // Sort by priority (highest first)
+    prioritizedWords.sort((a, b) => b.priority - a.priority);
+    
+    // High priority selection (top half)
+    const highPriorityCount = Math.min(Math.floor(count / 2), prioritizedWords.filter(w => w.priority >= 10).length);
+    const selectedWords = prioritizedWords.slice(0, highPriorityCount).map(w => w.word);
+    
+    // Remaining words via weighted random selection
+    const remainingCandidates = prioritizedWords.slice(highPriorityCount);
+    
+    while (selectedWords.length < count && remainingCandidates.length > 0) {
+        const totalPriority = remainingCandidates.reduce((sum, w) => sum + w.priority, 0);
+        let random = Math.random() * totalPriority;
+        
+        for (let i = 0; i < remainingCandidates.length; i++) {
+            random -= remainingCandidates[i].priority;
+            if (random <= 0) {
+                selectedWords.push(remainingCandidates[i].word);
+                remainingCandidates.splice(i, 1);
+                break;
+            }
+        }
+    }
+    
+    // Shuffle to avoid predictable order
+    return shuffleArray(selectedWords);
+}
+
+/**
+ * Get struggling words for analysis/review
+ * @returns {Array} Array of struggling words with stats
+ */
+function getStrugglingWords() {
+    return Object.keys(wordStats)
+        .filter(wordId => {
+            const stats = wordStats[wordId];
+            return stats.attempts >= 2 && stats.successRate < 50;
+        })
+        .map(wordId => ({
+            id: wordId,
+            ...wordStats[wordId]
+        }))
+        .sort((a, b) => a.successRate - b.successRate)
+        .slice(0, 20);
+}
+
+/**
+ * Get word statistics for analysis modal
+ * @returns {Object} Word analysis data
+ */
+function getWordAnalysis() {
+    const allStats = Object.entries(wordStats);
+    const totalWords = allStats.length;
+    
+    if (totalWords === 0) {
+        return {
+            totalWords: 0,
+            mastered: 0,
+            learning: 0,
+            struggling: 0,
+            averageSuccessRate: 0,
+            dueForReview: 0
+        };
+    }
+    
+    const today = new Date(getLocalDateString());
+    
+    let mastered = 0;
+    let learning = 0;
+    let struggling = 0;
+    let dueForReview = 0;
+    let totalSuccessRate = 0;
+    
+    allStats.forEach(([id, stats]) => {
+        totalSuccessRate += stats.successRate || 0;
+        
+        if (stats.masteryLevel >= 8) {
+            mastered++;
+        } else if (stats.masteryLevel >= 4) {
+            learning++;
+        } else {
+            struggling++;
+        }
+        
+        if (stats.nextReviewDate) {
+            const reviewDate = new Date(stats.nextReviewDate);
+            if (reviewDate <= today) {
+                dueForReview++;
+            }
+        }
+    });
+    
+    return {
+        totalWords,
+        mastered,
+        learning,
+        struggling,
+        averageSuccessRate: Math.round(totalSuccessRate / totalWords),
+        dueForReview
+    };
+}
+
+/**
+ * Show word analysis modal
+ */
+function showWordAnalysisModal() {
+    const analysis = getWordAnalysis();
+    const struggling = getStrugglingWords();
+    
+    let content = `
+        <div class="analysis-summary">
+            <div class="analysis-stat">
+                <span class="stat-value">${analysis.totalWords}</span>
+                <span class="stat-label">Toplam Kelime</span>
+            </div>
+            <div class="analysis-stat mastered">
+                <span class="stat-value">${analysis.mastered}</span>
+                <span class="stat-label">Ustalaşılan</span>
+            </div>
+            <div class="analysis-stat learning">
+                <span class="stat-value">${analysis.learning}</span>
+                <span class="stat-label">Öğreniliyor</span>
+            </div>
+            <div class="analysis-stat struggling">
+                <span class="stat-value">${analysis.struggling}</span>
+                <span class="stat-label">Zorlanılan</span>
+            </div>
+        </div>
+        
+        <div class="analysis-progress">
+            <div class="progress-bar">
+                <div class="progress-mastered" style="width: ${analysis.totalWords > 0 ? (analysis.mastered / analysis.totalWords * 100) : 0}%"></div>
+                <div class="progress-learning" style="width: ${analysis.totalWords > 0 ? (analysis.learning / analysis.totalWords * 100) : 0}%"></div>
+            </div>
+            <p>Ortalama Başarı: <strong>${analysis.averageSuccessRate}%</strong></p>
+            <p>Tekrar Bekleyen: <strong>${analysis.dueForReview}</strong> kelime</p>
+        </div>
+    `;
+    
+    if (struggling.length > 0) {
+        content += `
+            <div class="struggling-words">
+                <h4>🔴 Zorlandığın Kelimeler</h4>
+                <ul>
+                    ${struggling.slice(0, 5).map(w => `
+                        <li>
+                            <span class="word-id">${w.id}</span>
+                            <span class="word-rate">${w.successRate}%</span>
+                        </li>
+                    `).join('')}
+                </ul>
+            </div>
+        `;
+    }
+    
+    // Create and show modal
+    const modal = document.getElementById('word-analysis-modal');
+    if (modal) {
+        const modalContent = modal.querySelector('.modal-body') || modal.querySelector('.analysis-content');
+        if (modalContent) {
+            modalContent.innerHTML = content;
+        }
+        openModal('word-analysis-modal');
+    } else {
+        // Fallback: show as toast summary
+        showToast(`📊 ${analysis.totalWords} kelime öğrenildi, ${analysis.dueForReview} tekrar bekliyor`, 'info', 3000);
+    }
+}
+
+function playCurrentWordAudio() {
+    if (currentQuestion) {
+        const audioUrl = currentQuestion.ses_dosyasi || currentQuestion.audio;
+        if (audioUrl) {
+            playSafeAudio(audioUrl);
+        }
+    }
+}
+
+// ========================================
+// DINLE BUL GAME
+// ========================================
+
+async function startDinleBulGame() {
+    const data = await loadKelimeData();
+    if (data.length === 0) {
+        showToast('Kelime verisi yüklenemedi', 'error');
+        goToMainMenu();
+        return;
+    }
+    
+    // Filter words with audio
+    let filtered = data.filter(w => w.ses_dosyasi || w.audio);
+    filtered = filterByDifficulty(filtered, currentDifficulty);
+    
+    if (filtered.length < 10) {
+        filtered = data.filter(w => w.ses_dosyasi || w.audio);
+    }
+    
+    currentQuestions = getRandomItems(filtered, CONFIG.QUESTIONS_PER_GAME);
+    
+    document.getElementById('dinle-bul-screen').classList.remove('hidden');
+    document.getElementById('dinle-total-questions').textContent = CONFIG.QUESTIONS_PER_GAME;
+    
+    loadDinleQuestion();
+}
+
+function loadDinleQuestion() {
+    if (questionIndex >= currentQuestions.length) {
+        endGame();
+        return;
+    }
+    
+    currentQuestion = currentQuestions[questionIndex];
+    
+    document.getElementById('dinle-question-number').textContent = questionIndex + 1;
+    document.getElementById('dinle-combo').textContent = comboCount;
+    document.getElementById('dinle-session-score').textContent = formatNumber(sessionScore);
+    
+    const correctAnswer = currentQuestion.anlam || currentQuestion.translation;
+    const allWords = window.kelimeData || currentQuestions || [];
+    
+    // Get wrong options - ensure we have at least 3
+    let wrongAnswerPool = allWords.filter(w => {
+        const answer = w.anlam || w.translation;
+        return answer && answer !== correctAnswer;
+    });
+    
+    // If not enough wrong answers, use current questions
+    if (wrongAnswerPool.length < 3) {
+        wrongAnswerPool = currentQuestions.filter(w => {
+            const answer = w.anlam || w.translation;
+            return answer && answer !== correctAnswer;
+        });
+    }
+    
+    const wrongOptions = getRandomItems(wrongAnswerPool, 3).map(w => w.anlam || w.translation);
+    
+    // Ensure we always have 4 options
+    while (wrongOptions.length < 3) {
+        wrongOptions.push(`Seçenek ${wrongOptions.length + 2}`);
+    }
+    
+    const options = shuffleArray([correctAnswer, ...wrongOptions]);
+    
+    const optionsContainer = document.getElementById('dinle-options');
+    optionsContainer.innerHTML = options.map((option, index) => `
+        <button class="answer-option" onclick="checkDinleAnswer(${index}, '${option.replace(/'/g, "\\'")}')">
+            ${option}
+        </button>
+    `).join('');
+    
+    // Auto play audio
+    setTimeout(() => playCurrentWordAudio(), 500);
+}
+
+function checkDinleAnswer(index, selectedAnswer) {
+    const correctAnswer = currentQuestion.anlam || currentQuestion.translation;
+    const buttons = document.querySelectorAll('#dinle-options .answer-option');
+    
+    buttons.forEach(btn => btn.classList.add('disabled'));
+    buttons.forEach(btn => {
+        if (btn.textContent.trim() === correctAnswer) {
+            btn.classList.add('correct');
+        }
+    });
+    
+    if (selectedAnswer === correctAnswer) {
+        correctCount++;
+        comboCount++;
+        maxCombo = Math.max(maxCombo, comboCount);
+        
+        const basePoints = getBasePoints(currentDifficulty);
+        const gained = basePoints + CONFIG.COMBO_BONUS_PER_CORRECT;
+        sessionScore += gained;
+        dailyProgress += gained; // Günlük vird'e ekle
+        updateTaskProgress('correct', 1); // Görev ilerlemesine ekle
+        
+        // Rozet ve başarıları kontrol et (her puan kazanınca)
+        checkBadgesAndAchievementsAfterPoints();
+        
+        showToast(`+${gained} Hasene! 🔥 Combo: ${comboCount}`, 'success', 1000);
+    } else {
+        wrongCount++;
+        comboCount = 0;
+        buttons[index].classList.add('wrong');
+        showToast('Yanlış!', 'error', 1000);
+    }
+    
+    // Günlük vird gösterimini güncelle
+    updateDailyGoalDisplay();
+    
+    setTimeout(() => {
+        questionIndex++;
+        loadDinleQuestion();
+    }, 1200);
+}
+
+// ========================================
+// BOŞLUK DOLDUR GAME
+// ========================================
+
+async function startBoslukDoldurGame() {
+    const data = await loadAyetData();
+    if (data.length === 0) {
+        showToast('Ayet verisi yüklenemedi', 'error');
+        goToMainMenu();
+        return;
+    }
+    
+    // Filter verses with enough words
+    const filtered = data.filter(ayet => {
+        const text = ayet.ayet_metni || '';
+        const words = text.split(' ').filter(w => w.length > 1);
+        return words.length >= 3;
+    });
+    
+    currentQuestions = getRandomItems(filtered, CONFIG.QUESTIONS_PER_GAME);
+    
+    document.getElementById('bosluk-doldur-screen').classList.remove('hidden');
+    document.getElementById('bosluk-total-questions').textContent = CONFIG.QUESTIONS_PER_GAME;
+    
+    loadBoslukQuestion();
+}
+
+function loadBoslukQuestion() {
+    if (questionIndex >= currentQuestions.length) {
+        endGame();
+        return;
+    }
+    
+    currentQuestion = currentQuestions[questionIndex];
+    
+    document.getElementById('bosluk-question-number').textContent = questionIndex + 1;
+    document.getElementById('bosluk-combo').textContent = comboCount;
+    document.getElementById('bosluk-session-score').textContent = formatNumber(sessionScore);
+    
+    const arabicText = currentQuestion.ayet_metni || '';
+    const words = arabicText.split(' ').filter(w => w.length > 1);
+    
+    // Pick random word to blank
+    const blankIndex = Math.floor(Math.random() * words.length);
+    const correctWord = words[blankIndex];
+    
+    // Create text with blank
+    const displayWords = [...words];
+    displayWords[blankIndex] = '<span class="blank-word" id="bosluk-blank"></span>';
+    
+    document.getElementById('bosluk-arabic').innerHTML = displayWords.join(' ');
+    document.getElementById('bosluk-translation').textContent = currentQuestion.meal || '';
+    
+    // Generate wrong options from other words in verse or other verses
+    let wrongOptions = words.filter((w, i) => i !== blankIndex && w.length > 1).slice(0, 3);
+    
+    // If not enough, get from other verses
+    if (wrongOptions.length < 3) {
+        const otherWords = shuffleArray(
+            window.ayetData
+                .flatMap(a => (a.ayet_metni || '').split(' '))
+                .filter(w => w.length > 1 && w !== correctWord)
+        ).slice(0, 3 - wrongOptions.length);
+        wrongOptions = [...wrongOptions, ...otherWords];
+    }
+    
+    // Store correct word for checking
+    currentQuestion._correctWord = correctWord;
+    
+    const options = shuffleArray([correctWord, ...wrongOptions.slice(0, 3)]);
+    
+    const optionsContainer = document.getElementById('bosluk-options');
+    optionsContainer.innerHTML = options.map((option, index) => `
+        <button class="answer-option" onclick="checkBoslukAnswer(${index}, '${option.replace(/'/g, "\\'")}')">
+            ${option}
+        </button>
+    `).join('');
+}
+
+function checkBoslukAnswer(index, selectedWord) {
+    const correctWord = currentQuestion._correctWord;
+    const buttons = document.querySelectorAll('#bosluk-options .answer-option');
+    
+    buttons.forEach(btn => btn.classList.add('disabled'));
+    buttons.forEach(btn => {
+        if (btn.textContent.trim() === correctWord) {
+            btn.classList.add('correct');
+        }
+    });
+    
+    if (selectedWord === correctWord) {
+        correctCount++;
+        comboCount++;
+        maxCombo = Math.max(maxCombo, comboCount);
+        
+        // Doğru kelimeyi boşluğa yerleştir
+        const blankSpan = document.getElementById('bosluk-blank');
+        if (blankSpan) {
+            blankSpan.textContent = correctWord;
+            blankSpan.classList.add('filled');
+        }
+        
+        const basePoints = getBasePoints(currentDifficulty);
+        const comboBonus = CONFIG.COMBO_BONUS_PER_CORRECT;
+        const gained = basePoints + comboBonus;
+        sessionScore += gained;
+        dailyProgress += gained; // Günlük vird'e ekle
+        updateTaskProgress('correct', 1); // Görev ilerlemesine ekle
+        
+        // Rozet ve başarıları kontrol et (her puan kazanınca)
+        checkBadgesAndAchievementsAfterPoints();
+        
+        showToast(`+${gained} Hasene! 🔥 Combo: ${comboCount}`, 'success', 1000);
+    } else {
+        wrongCount++;
+        comboCount = 0;
+        buttons[index].classList.add('wrong');
+        showToast('Yanlış!', 'error', 1000);
+    }
+    
+    // Günlük vird gösterimini güncelle
+    updateDailyGoalDisplay();
+    
+    setTimeout(() => {
+        questionIndex++;
+        loadBoslukQuestion();
+    }, 1200);
+}
+
+function playCurrentBoslukAudio() {
+    if (currentQuestion && currentQuestion.ayet_ses_dosyasi) {
+        playSafeAudio(currentQuestion.ayet_ses_dosyasi);
+    }
+}
+
+// ========================================
+// AYET OKU MODE
+// ========================================
+
+async function startAyetOkuMode() {
+    const data = await loadAyetData();
+    if (data.length === 0) {
+        showToast('Ayet verisi yüklenemedi', 'error');
+        goToMainMenu();
+        return;
+    }
+    
+    // Shuffle and set random starting point
+    window.shuffledAyetData = shuffleArray(data);
+    currentAyetIndex = 0;
+    
+    document.getElementById('ayet-oku-screen').classList.remove('hidden');
+    displayAyet();
+}
+
+function displayAyet() {
+    const data = window.shuffledAyetData || window.ayetData;
+    if (!data || data.length === 0) return;
+    
+    if (currentAyetIndex < 0) currentAyetIndex = data.length - 1;
+    if (currentAyetIndex >= data.length) currentAyetIndex = 0;
+    
+    const ayet = data[currentAyetIndex];
+    
+    document.getElementById('ayet-surah-info').textContent = ayet.sure_adı || '';
+    document.getElementById('ayet-arabic').textContent = ayet.ayet_metni || '';
+    document.getElementById('ayet-translation').textContent = ayet.meal || '';
+    
+    // Update task progress
+    updateTaskProgress('ayet_oku', 1);
+}
+
+function navigateAyet(direction) {
+    // Önce sesi durdur
+    stopAllAudio();
+    
+    currentAyetIndex += direction;
+    displayAyet();
+}
+
+function playCurrentAyetAudio() {
+    const data = window.shuffledAyetData || window.ayetData;
+    if (data && data[currentAyetIndex]) {
+        const audioUrl = data[currentAyetIndex].ayet_ses_dosyasi;
+        if (audioUrl) playSafeAudio(audioUrl);
+    }
+}
+
+// ========================================
+// DUA ET MODE
+// ========================================
+
+async function startDuaEtMode() {
+    const data = await loadDuaData();
+    if (data.length === 0) {
+        showToast('Dua verisi yüklenemedi', 'error');
+        goToMainMenu();
+        return;
+    }
+    
+    window.shuffledDuaData = shuffleArray(data);
+    currentDuaIndex = 0;
+    
+    document.getElementById('dua-et-screen').classList.remove('hidden');
+    displayDua();
+}
+
+function displayDua() {
+    const data = window.shuffledDuaData || window.duaData;
+    if (!data || data.length === 0) return;
+    
+    if (currentDuaIndex < 0) currentDuaIndex = data.length - 1;
+    if (currentDuaIndex >= data.length) currentDuaIndex = 0;
+    
+    const dua = data[currentDuaIndex];
+    
+    document.getElementById('dua-reference').textContent = dua.ayet || '';
+    document.getElementById('dua-arabic').textContent = dua.dua || '';
+    document.getElementById('dua-translation').textContent = dua.tercume || '';
+    
+    updateTaskProgress('dua_et', 1);
+}
+
+function navigateDua(direction) {
+    // Önce sesi durdur
+    stopAllAudio();
+    
+    currentDuaIndex += direction;
+    displayDua();
+}
+
+function playCurrentDuaAudio() {
+    const data = window.shuffledDuaData || window.duaData;
+    if (data && data[currentDuaIndex]) {
+        const audioUrl = data[currentDuaIndex].ses_url;
+        if (audioUrl) playSafeAudio(audioUrl);
+    }
+}
+
+// ========================================
+// HADIS OKU MODE
+// ========================================
+
+async function startHadisOkuMode() {
+    const data = await loadHadisData();
+    if (data.length === 0) {
+        showToast('Hadis verisi yüklenemedi', 'error');
+        goToMainMenu();
+        return;
+    }
+    
+    window.shuffledHadisData = shuffleArray(data);
+    currentHadisIndex = 0;
+    
+    document.getElementById('hadis-oku-screen').classList.remove('hidden');
+    displayHadis();
+}
+
+function displayHadis() {
+    const data = window.shuffledHadisData || window.hadisData;
+    if (!data || data.length === 0) return;
+    
+    if (currentHadisIndex < 0) currentHadisIndex = data.length - 1;
+    if (currentHadisIndex >= data.length) currentHadisIndex = 0;
+    
+    const hadis = data[currentHadisIndex];
+    
+    document.getElementById('hadis-section').textContent = hadis.section || '';
+    document.getElementById('hadis-header').textContent = hadis.header || '';
+    document.getElementById('hadis-text').textContent = hadis.text || '';
+    document.getElementById('hadis-reference').textContent = hadis.refno || '';
+    
+    updateTaskProgress('hadis_oku', 1);
+}
+
+function navigateHadis(direction) {
+    // Önce sesi durdur
+    stopAllAudio();
+    
+    currentHadisIndex += direction;
+    displayHadis();
+}
+
+// ========================================
+// ELIF BA GAME
+// ========================================
+
+/**
+ * Start Elif Ba game with selected submode
+ * @param {string} submode - 'harfler' | 'kelimeler' | 'harekeler'
+ */
+async function startElifBaGame(submode = 'harfler') {
+    currentElifBaSubmode = submode;
+    const data = await loadHarfData();
+    
+    if (data.length === 0) {
+        showToast('Harf verisi yüklenemedi', 'error');
+        goToMainMenu();
+        return;
+    }
+    
+    // Reset session
+    questionIndex = 0;
+    sessionScore = 0;
+    comboCount = 0;
+    maxCombo = 0;
+    correctCount = 0;
+    wrongCount = 0;
+    
+    // Hide submode screen
+    hideAllScreens();
+    
+    if (submode === 'harfler') {
+        // Original letter recognition game
+        currentQuestions = shuffleArray([...data]).slice(0, CONFIG.QUESTIONS_PER_GAME);
+        document.getElementById('elif-ba-screen').classList.remove('hidden');
+        document.getElementById('elif-total-questions').textContent = CONFIG.QUESTIONS_PER_GAME;
+        loadElifQuestion();
+        
+    } else if (submode === 'kelimeler') {
+        // Word reading with letters
+        await startElifKelimelerGame(data);
+        
+    } else if (submode === 'harekeler') {
+        // Harekeler (vowel marks) game
+        await startElifHarekelerGame(data);
+    }
+}
+
+/**
+ * Elif Ba Kelimeler submode - identify word starting with specific letter
+ */
+async function startElifKelimelerGame(harfData) {
+    // Load kelime data to get words starting with specific letters
+    const kelimeData = await loadKelimeData();
+    
+    if (kelimeData.length === 0) {
+        showToast('Kelime verisi yüklenemedi', 'error');
+        goToMainMenu();
+        return;
+    }
+    
+    // Create questions - match words with their starting letter
+    const questions = [];
+    const usedHarfler = shuffleArray([...harfData]).slice(0, CONFIG.QUESTIONS_PER_GAME);
+    
+    for (const harf of usedHarfler) {
+        const matchingWords = kelimeData.filter(w => {
+            const kelime = w.kelime || w.arabic || '';
+            return kelime.startsWith(harf.harf);
+        });
+        
+        if (matchingWords.length > 0) {
+            const word = matchingWords[Math.floor(Math.random() * matchingWords.length)];
+            questions.push({
+                type: 'kelimeler',
+                harf: harf,
+                word: word,
+                correctAnswer: word.kelime || word.arabic
+            });
+        }
+    }
+    
+    if (questions.length < 5) {
+        // Fallback to normal harf game if not enough words
+        currentQuestions = shuffleArray([...harfData]).slice(0, CONFIG.QUESTIONS_PER_GAME);
+        document.getElementById('elif-ba-screen').classList.remove('hidden');
+        document.getElementById('elif-total-questions').textContent = CONFIG.QUESTIONS_PER_GAME;
+        loadElifQuestion();
+        return;
+    }
+    
+    currentQuestions = questions.slice(0, CONFIG.QUESTIONS_PER_GAME);
+    document.getElementById('elif-ba-screen').classList.remove('hidden');
+    document.getElementById('elif-total-questions').textContent = currentQuestions.length;
+    loadElifKelimelerQuestion();
+}
+
+function loadElifKelimelerQuestion() {
+    if (questionIndex >= currentQuestions.length) {
+        endGame();
+        return;
+    }
+    
+    currentQuestion = currentQuestions[questionIndex];
+    
+    document.getElementById('elif-question-number').textContent = questionIndex + 1;
+    document.getElementById('elif-letter').textContent = `"${currentQuestion.harf.harf}" harfiyle başlayan kelimeyi seç`;
+    document.getElementById('elif-combo').textContent = comboCount;
+    document.getElementById('elif-session-score').textContent = formatNumber(sessionScore);
+    
+    const correctAnswer = currentQuestion.correctAnswer;
+    const kelimeData = window.kelimeData || [];
+    
+    // Get wrong options (words NOT starting with this letter)
+    const wrongWords = kelimeData.filter(w => {
+        const kelime = w.kelime || w.arabic || '';
+        return !kelime.startsWith(currentQuestion.harf.harf) && kelime.length > 0;
+    });
+    
+    const wrongOptions = getRandomItems(wrongWords, 3).map(w => w.kelime || w.arabic);
+    const options = shuffleArray([correctAnswer, ...wrongOptions]);
+    
+    const optionsContainer = document.getElementById('elif-options');
+    optionsContainer.innerHTML = options.map((option, index) => `
+        <button class="answer-option arabic-text" onclick="checkElifKelimelerAnswer(${index}, '${option.replace(/'/g, "\\'")}')">
+            ${option}
+        </button>
+    `).join('');
+}
+
+function checkElifKelimelerAnswer(index, selectedAnswer) {
+    const correctAnswer = currentQuestion.correctAnswer;
+    const buttons = document.querySelectorAll('#elif-options .answer-option');
+    
+    buttons.forEach(btn => btn.classList.add('disabled'));
+    buttons.forEach(btn => {
+        if (btn.textContent.trim() === correctAnswer) {
+            btn.classList.add('correct');
+        }
+    });
+    
+    if (selectedAnswer === correctAnswer) {
+        correctCount++;
+        comboCount++;
+        maxCombo = Math.max(maxCombo, comboCount);
+        const basePoints = getBasePoints(currentDifficulty);
+        const comboBonus = CONFIG.COMBO_BONUS_PER_CORRECT;
+        const gained = basePoints + comboBonus;
+        sessionScore += gained;
+        dailyProgress += gained; // Günlük vird'e ekle
+        updateTaskProgress('correct', 1); // Görev ilerlemesine ekle
+        
+        // Rozet ve başarıları kontrol et (her puan kazanınca)
+        checkBadgesAndAchievementsAfterPoints();
+        
+        showToast(`+${gained} Hasene! 🔥 Combo: ${comboCount}`, 'success', 1000);
+    } else {
+        wrongCount++;
+        comboCount = 0;
+        buttons[index].classList.add('wrong');
+        showToast('Yanlış!', 'error', 1000);
+    }
+    
+    // Günlük vird gösterimini güncelle
+    updateDailyGoalDisplay();
+    
+    setTimeout(() => {
+        questionIndex++;
+        loadElifKelimelerQuestion();
+    }, 1200);
+}
+
+/**
+ * Elif Ba Harekeler submode - vowel marks game
+ */
+async function startElifHarekelerGame(harfData) {
+    const harekeler = [
+        { name: 'Fetha', symbol: 'ـَ', sound: 'e' },
+        { name: 'Kesra', symbol: 'ـِ', sound: 'i' },
+        { name: 'Damme', symbol: 'ـُ', sound: 'u' },
+        { name: 'Sukun', symbol: 'ـْ', sound: '-' },
+        { name: 'Şedde', symbol: 'ـّ', sound: 'çift' },
+        { name: 'Tenvin Fetha', symbol: 'ـً', sound: 'en' },
+        { name: 'Tenvin Kesra', symbol: 'ـٍ', sound: 'in' },
+        { name: 'Tenvin Damme', symbol: 'ـٌ', sound: 'un' }
+    ];
+    
+    // Create questions about harekeler
+    const questions = [];
+    for (let i = 0; i < CONFIG.QUESTIONS_PER_GAME; i++) {
+        const hareke = harekeler[i % harekeler.length];
+        const harf = harfData[Math.floor(Math.random() * harfData.length)];
+        questions.push({
+            type: 'harekeler',
+            hareke: hareke,
+            harf: harf,
+            correctAnswer: hareke.name
+        });
+    }
+    
+    currentQuestions = shuffleArray(questions);
+    document.getElementById('elif-ba-screen').classList.remove('hidden');
+    document.getElementById('elif-total-questions').textContent = currentQuestions.length;
+    loadElifHarekelerQuestion();
+}
+
+function loadElifHarekelerQuestion() {
+    if (questionIndex >= currentQuestions.length) {
+        endGame();
+        return;
+    }
+    
+    currentQuestion = currentQuestions[questionIndex];
+    
+    document.getElementById('elif-question-number').textContent = questionIndex + 1;
+    document.getElementById('elif-letter').textContent = currentQuestion.hareke.symbol;
+    document.getElementById('elif-combo').textContent = comboCount;
+    document.getElementById('elif-session-score').textContent = formatNumber(sessionScore);
+    
+    const harekeler = [
+        { name: 'Fetha', symbol: 'ـَ' },
+        { name: 'Kesra', symbol: 'ـِ' },
+        { name: 'Damme', symbol: 'ـُ' },
+        { name: 'Sukun', symbol: 'ـْ' },
+        { name: 'Şedde', symbol: 'ـّ' },
+        { name: 'Tenvin Fetha', symbol: 'ـً' },
+        { name: 'Tenvin Kesra', symbol: 'ـٍ' },
+        { name: 'Tenvin Damme', symbol: 'ـٌ' }
+    ];
+    
+    const correctAnswer = currentQuestion.correctAnswer;
+    const wrongOptions = harekeler
+        .filter(h => h.name !== correctAnswer)
+        .slice(0, 3)
+        .map(h => h.name);
+    
+    const options = shuffleArray([correctAnswer, ...wrongOptions]);
+    
+    const optionsContainer = document.getElementById('elif-options');
+    optionsContainer.innerHTML = options.map((option, index) => `
+        <button class="answer-option" onclick="checkElifHarekelerAnswer(${index}, '${option.replace(/'/g, "\\'")}')">
+            ${option}
+        </button>
+    `).join('');
+}
+
+function checkElifHarekelerAnswer(index, selectedAnswer) {
+    const correctAnswer = currentQuestion.correctAnswer;
+    const buttons = document.querySelectorAll('#elif-options .answer-option');
+    
+    buttons.forEach(btn => btn.classList.add('disabled'));
+    buttons.forEach(btn => {
+        if (btn.textContent.trim() === correctAnswer) {
+            btn.classList.add('correct');
+        }
+    });
+    
+    if (selectedAnswer === correctAnswer) {
+        correctCount++;
+        comboCount++;
+        maxCombo = Math.max(maxCombo, comboCount);
+        const basePoints = getBasePoints(currentDifficulty);
+        const comboBonus = CONFIG.COMBO_BONUS_PER_CORRECT;
+        const gained = basePoints + comboBonus;
+        sessionScore += gained;
+        dailyProgress += gained; // Günlük vird'e ekle
+        updateTaskProgress('correct', 1); // Görev ilerlemesine ekle
+        
+        // Rozet ve başarıları kontrol et (her puan kazanınca)
+        checkBadgesAndAchievementsAfterPoints();
+        
+        showToast(`+${gained} Hasene! 🔥 Combo: ${comboCount}`, 'success', 1000);
+    } else {
+        wrongCount++;
+        comboCount = 0;
+        buttons[index].classList.add('wrong');
+        showToast('Yanlış!', 'error', 1000);
+    }
+    
+    // Günlük vird gösterimini güncelle
+    updateDailyGoalDisplay();
+    
+    setTimeout(() => {
+        questionIndex++;
+        loadElifHarekelerQuestion();
+    }, 1200);
+}
+
+function loadElifQuestion() {
+    if (questionIndex >= currentQuestions.length) {
+        endGame();
+        return;
+    }
+    
+    currentQuestion = currentQuestions[questionIndex];
+    
+    document.getElementById('elif-question-number').textContent = questionIndex + 1;
+    document.getElementById('elif-letter').textContent = currentQuestion.harf;
+    document.getElementById('elif-combo').textContent = comboCount;
+    document.getElementById('elif-session-score').textContent = formatNumber(sessionScore);
+    
+    const correctAnswer = currentQuestion.okunus || currentQuestion.isim;
+    const allHarfler = window.harfData || [];
+    
+    const wrongOptions = getRandomItems(
+        allHarfler.filter(h => (h.okunus || h.isim) !== correctAnswer),
+        3
+    ).map(h => h.okunus || h.isim);
+    
+    const options = shuffleArray([correctAnswer, ...wrongOptions]);
+    
+    const optionsContainer = document.getElementById('elif-options');
+    optionsContainer.innerHTML = options.map((option, index) => `
+        <button class="answer-option" onclick="checkElifAnswer(${index}, '${option.replace(/'/g, "\\'")}')">
+            ${option}
+        </button>
+    `).join('');
+}
+
+function checkElifAnswer(index, selectedAnswer) {
+    const correctAnswer = currentQuestion.okunus || currentQuestion.isim;
+    const buttons = document.querySelectorAll('#elif-options .answer-option');
+    
+    buttons.forEach(btn => btn.classList.add('disabled'));
+    buttons.forEach(btn => {
+        if (btn.textContent.trim() === correctAnswer) {
+            btn.classList.add('correct');
+        }
+    });
+    
+    if (selectedAnswer === correctAnswer) {
+        correctCount++;
+        comboCount++;
+        maxCombo = Math.max(maxCombo, comboCount);
+        
+        const basePoints = getBasePoints(currentDifficulty);
+        const comboBonus = CONFIG.COMBO_BONUS_PER_CORRECT;
+        const gained = basePoints + comboBonus;
+        sessionScore += gained;
+        dailyProgress += gained; // Günlük vird'e ekle
+        updateTaskProgress('correct', 1); // Görev ilerlemesine ekle
+        
+        // Rozet ve başarıları kontrol et (her puan kazanınca)
+        checkBadgesAndAchievementsAfterPoints();
+        
+        showToast(`+${gained} Hasene! 🔥 Combo: ${comboCount}`, 'success', 1000);
+    } else {
+        wrongCount++;
+        comboCount = 0;
+        buttons[index].classList.add('wrong');
+        showToast('Yanlış!', 'error', 1000);
+    }
+    
+    // Günlük vird gösterimini güncelle
+    updateDailyGoalDisplay();
+    
+    setTimeout(() => {
+        questionIndex++;
+        loadElifQuestion();
+    }, 1200);
+}
+
+function playCurrentLetterAudio() {
+    if (currentQuestion && currentQuestion.audioUrl) {
+        playSafeAudio(currentQuestion.audioUrl);
+    }
+}
+
+// ========================================
+// DAILY TASKS & STREAK
+// ========================================
+
+async function checkDailyTasks() {
+    const today = getLocalDateString();
+    dailyTasks = loadFromStorage(CONFIG.STORAGE_KEYS.DAILY_TASKS, dailyTasks);
+    
+    if (dailyTasks.lastTaskDate !== today) {
+        // New day, reset tasks
+        dailyTasks = {
+            lastTaskDate: today,
+            tasks: JSON.parse(JSON.stringify(DAILY_TASKS_TEMPLATE)).map(t => ({ ...t, progress: 0 })),
+            bonusTasks: JSON.parse(JSON.stringify(DAILY_BONUS_TASKS_TEMPLATE)).map(t => ({ ...t, progress: 0 })),
+            todayStats: {
+                toplamDogru: 0,
+                toplamPuan: 0,
+                comboCount: 0,
+                allGameModes: [],
+                ayet_oku: 0,
+                dua_et: 0,
+                hadis_oku: 0
+            }
+        };
+        saveToStorage(CONFIG.STORAGE_KEYS.DAILY_TASKS, dailyTasks);
+    }
+}
+
+function updateTaskProgress(type, value) {
+    if (!dailyTasks.tasks) return;
+    
+    // Update stats
+    if (type === 'correct') {
+        dailyTasks.todayStats.toplamDogru += value;
+    } else if (type === 'hasene') {
+        dailyTasks.todayStats.toplamPuan += value;
+    } else if (type === 'game_modes') {
+        if (!dailyTasks.todayStats.allGameModes.includes(value)) {
+            dailyTasks.todayStats.allGameModes.push(value);
+        }
+    } else if (type === 'ayet_oku') {
+        dailyTasks.todayStats.ayet_oku += value;
+    } else if (type === 'dua_et') {
+        dailyTasks.todayStats.dua_et += value;
+    } else if (type === 'hadis_oku') {
+        dailyTasks.todayStats.hadis_oku += value;
+    }
+    
+    // Update task progress
+    dailyTasks.tasks.forEach(task => {
+        if (task.type === type) {
+            if (type === 'game_modes') {
+                task.progress = dailyTasks.todayStats.allGameModes.length;
+            } else if (type === 'ayet_oku') {
+                task.progress = dailyTasks.todayStats.ayet_oku;
+            } else if (type === 'dua_et') {
+                task.progress = dailyTasks.todayStats.dua_et;
+            } else if (type === 'hadis_oku') {
+                task.progress = dailyTasks.todayStats.hadis_oku;
+            }
+        }
+    });
+    
+    dailyTasks.bonusTasks.forEach(task => {
+        if (task.type === 'correct') {
+            task.progress = dailyTasks.todayStats.toplamDogru;
+        } else if (task.type === 'hasene') {
+            task.progress = dailyTasks.todayStats.toplamPuan;
+        }
+    });
+    
+    debouncedSaveStats();
+    
+    // Ödül kutusunu kontrol et
+    checkRewardBoxStatus();
+}
+
+// ========================================
+// GÜNLÜK ÖDÜL KUTUSU (SÜRPRİZ KUTUSU)
+// ========================================
+
+const DAILY_REWARDS = [100, 250, 500];
+// ISLAMIC_TEACHINGS is defined in constants.js
+
+function checkRewardBoxStatus() {
+    const rewardBox = document.getElementById('reward-box');
+    const statusEl = document.getElementById('reward-box-status');
+    if (!rewardBox || !statusEl) return;
+    
+    const today = getLocalDateString();
+    
+    // Bugün zaten alındı mı?
+    if (dailyTasks.rewardClaimedDate === today) {
+        rewardBox.classList.remove('active');
+        rewardBox.classList.add('claimed');
+        statusEl.textContent = '✓ Bugünkü ödül alındı!';
+        return;
+    }
+    
+    // Tüm görevler tamamlandı mı?
+    const allTasksComplete = areAllTasksComplete();
+    
+    if (allTasksComplete) {
+        rewardBox.classList.add('active');
+        rewardBox.classList.remove('claimed');
+        statusEl.textContent = '🎉 Tıkla ve ödülünü al!';
+    } else {
+        rewardBox.classList.remove('active', 'claimed');
+        statusEl.textContent = 'Görevleri tamamla!';
+    }
+}
+
+function areAllTasksComplete() {
+    if (!dailyTasks.tasks || dailyTasks.tasks.length === 0) return false;
+    
+    // Ana görevlerin hepsinin tamamlanmış olması gerekiyor
+    return dailyTasks.tasks.every(task => task.progress >= task.target);
+}
+
+function claimDailyReward() {
+    const rewardBox = document.getElementById('reward-box');
+    if (!rewardBox || !rewardBox.classList.contains('active')) return;
+    
+    const today = getLocalDateString();
+    
+    // Zaten alındıysa çık
+    if (dailyTasks.rewardClaimedDate === today) {
+        showToast('Bugünkü ödül zaten alındı!', 'info');
+        return;
+    }
+    
+    // Rastgele ödül seç
+    const rewardAmount = DAILY_REWARDS[Math.floor(Math.random() * DAILY_REWARDS.length)];
+    
+    // Rastgele öğreti seç
+    const teachings = window.ISLAMIC_TEACHINGS || [];
+    const teaching = teachings[Math.floor(Math.random() * teachings.length)];
+    
+    // Hasene ekle
+    totalPoints += rewardAmount;
+    
+    // Ödül alındı olarak işaretle
+    dailyTasks.rewardClaimedDate = today;
+    saveToStorage(CONFIG.STORAGE_KEYS.DAILY_TASKS, dailyTasks);
+    debouncedSaveStats();
+    
+    // UI güncelle
+    updateDisplay();
+    checkRewardBoxStatus();
+    
+    // Ödül modalı göster
+    showRewardModal(rewardAmount, teaching);
+}
+
+function showRewardModal(amount, teaching) {
+    // Mevcut modal varsa kapat
+    closeAllModals();
+    
+    if (!teaching) {
+        // Fallback if teaching is not available
+        const modalHTML = `
+            <div id="reward-result-modal" class="modal" style="display: flex;">
+                <div class="modal-content glass-card reward-result-content">
+                    <div class="reward-celebration">🎉</div>
+                    <h2>Tebrikler!</h2>
+                    <div class="reward-amount">+${formatNumber(amount)} Hasene</div>
+                    <button class="primary-btn" onclick="closeRewardModal()">Tamam</button>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        return;
+    }
+    
+    // Modal oluştur - constants.js yapısına göre (arabic, turkish, explanation)
+    const modalHTML = `
+        <div id="reward-result-modal" class="modal" style="display: flex;">
+            <div class="modal-content glass-card reward-result-content">
+                <div class="reward-celebration">🎉</div>
+                <h2>Tebrikler!</h2>
+                <div class="reward-amount">+${formatNumber(amount)} Hasene</div>
+                <div class="reward-teaching">
+                    <div class="teaching-arabic">${teaching.arabic || ''}</div>
+                    <div class="teaching-turkish">${teaching.turkish || ''}</div>
+                    <div class="teaching-explanation">${teaching.explanation || ''}</div>
+                </div>
+                <button class="primary-btn" onclick="closeRewardModal()">Tamam</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // Konfeti efekti (basit)
+    playSafeAudio && typeof playSuccessSound === 'function' && playSuccessSound();
+}
+
+function closeRewardModal() {
+    const modal = document.getElementById('reward-result-modal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+// Window'a export et
+window.claimDailyReward = claimDailyReward;
+window.closeRewardModal = closeRewardModal;
+
+function checkStreak() {
+    const today = getLocalDateString();
+    const yesterday = getLocalDateString(new Date(Date.now() - 86400000));
+    
+    if (streakData.lastPlayDate === today) {
+        // Already played today
+        return;
+    }
+    
+    if (streakData.lastPlayDate === yesterday) {
+        // Continue streak
+        streakData.currentStreak++;
+    } else if (streakData.lastPlayDate !== today) {
+        // Streak broken
+        streakData.currentStreak = 1;
+    }
+    
+    streakData.lastPlayDate = today;
+    streakData.bestStreak = Math.max(streakData.bestStreak, streakData.currentStreak);
+    
+    if (!streakData.playDates.includes(today)) {
+        streakData.playDates.push(today);
+        streakData.totalPlayDays++;
+    }
+    
+    debouncedSaveStats();
+}
+
+function checkDailyGoal() {
+    if (dailyProgress >= dailyGoal) {
+        // Daily goal completed!
+        showToast(`🎯 Günlük hedef tamamlandı! +${CONFIG.DAILY_GOAL_BONUS} Hasene`, 'success', 3000);
+        totalPoints += CONFIG.DAILY_GOAL_BONUS;
+        dailyProgress += CONFIG.DAILY_GOAL_BONUS;
+    }
+}
+
+// ========================================
+// UI UPDATES
+// ========================================
+
+function updateStatsDisplay() {
+    document.getElementById('total-hasene').textContent = formatNumber(totalPoints);
+    document.getElementById('total-stars').textContent = `⭐ ${calculateStars(totalPoints)}`;
+    document.getElementById('streak-count').textContent = `🔥 ${streakData.currentStreak}`;
+    document.getElementById('level-display').textContent = currentLevel;
+    
+    updateDailyGoalDisplay();
+}
+
+function updateDailyGoalDisplay() {
+    document.getElementById('daily-goal-text').textContent = 
+        `${formatNumber(dailyProgress)} / ${formatNumber(dailyGoal)}`;
+    
+    const progress = Math.min(100, (dailyProgress / dailyGoal) * 100);
+    document.getElementById('daily-goal-progress').style.width = `${progress}%`;
+}
+
+function showGoalSettings() {
+    // Update active button
+    document.querySelectorAll('.goal-option').forEach(btn => {
+        btn.classList.toggle('active', parseInt(btn.dataset.goal) === dailyGoal);
+    });
+    
+    openModal('goal-settings-modal');
+}
+
+function showStatsModal() {
+    document.getElementById('modal-total-hasene').textContent = formatNumber(totalPoints);
+    document.getElementById('modal-total-stars').textContent = calculateStars(totalPoints);
+    document.getElementById('modal-total-correct').textContent = formatNumber(gameStats.totalCorrect || 0);
+    document.getElementById('modal-total-wrong').textContent = formatNumber(gameStats.totalWrong || 0);
+    document.getElementById('modal-best-streak').textContent = streakData.bestStreak;
+    document.getElementById('modal-total-days').textContent = streakData.totalPlayDays;
+    
+    openModal('stats-modal');
+}
+
+function showTasksModal() {
+    const tasksList = document.getElementById('tasks-list');
+    
+    const allTasks = [...(dailyTasks.tasks || []), ...(dailyTasks.bonusTasks || [])];
+    const completedCount = allTasks.filter(t => (t.progress || 0) >= t.target).length;
+    const allComplete = completedCount === allTasks.length && allTasks.length > 0;
+    
+    let html = allTasks.map(task => {
+        const isComplete = (task.progress || 0) >= task.target;
+        const progressPercent = Math.min(100, ((task.progress || 0) / task.target) * 100);
+        return `
+            <div class="task-item ${isComplete ? 'completed' : ''}">
+                <div class="task-icon">${task.icon || '📋'}</div>
+                <div class="task-info">
+                    <div class="task-name">${task.name}</div>
+                    <div class="task-progress-bar">
+                        <div class="task-progress-fill" style="width: ${progressPercent}%"></div>
+                    </div>
+                    <div class="task-progress-text">${task.progress || 0} / ${task.target}</div>
+                </div>
+                <div class="task-status">${isComplete ? '✅' : '⏳'}</div>
+            </div>
+        `;
+    }).join('');
+    
+    // Add reward button if all tasks complete
+    if (allComplete && !dailyTasks.rewardsClaimed) {
+        html += `
+            <div class="task-reward-box">
+                <div class="reward-box-icon">🎁</div>
+                <h3>Tüm Görevler Tamamlandı!</h3>
+                <p>Ödülünüzü almak için tıklayın</p>
+                <button class="claim-reward-btn pulse" onclick="claimTaskRewards()">Ödülü Al 🎁</button>
+            </div>
+        `;
+    } else if (dailyTasks.rewardsClaimed) {
+        html += `
+            <div class="task-reward-claimed">
+                <div class="reward-claimed-icon">✨</div>
+                <p>Bugünkü ödülünüz alındı!</p>
+            </div>
+        `;
+    }
+    
+    tasksList.innerHTML = html;
+    openModal('tasks-modal');
+}
+
+/**
+ * Claim rewards for completing all daily tasks
+ */
+function claimTaskRewards() {
+    if (dailyTasks.rewardsClaimed) {
+        showToast('Bugünkü ödülünüzü zaten aldınız!', 'info');
+        return;
+    }
+    
+    const teachings = window.ISLAMIC_TEACHINGS || [];
+    if (teachings.length === 0) {
+        // Fallback
+        const reward = 250;
+        totalPoints += reward;
+        dailyTasks.rewardsClaimed = true;
+        showToast(`+${reward} Hasene kazandınız! 🎁`, 'success', 3000);
+        updateStatsDisplay();
+        debouncedSaveStats();
+        closeModal('tasks-modal');
+        return;
+    }
+    
+    // Random teaching and reward
+    const teaching = teachings[Math.floor(Math.random() * teachings.length)];
+    const reward = teaching.rewardAmounts[Math.floor(Math.random() * teaching.rewardAmounts.length)];
+    
+    totalPoints += reward;
+    dailyTasks.rewardsClaimed = true;
+    
+    // Show teaching modal
+    showTeachingRewardModal(teaching, reward);
+    
+    updateStatsDisplay();
+    debouncedSaveStats();
+}
+
+/**
+ * Show Islamic teaching reward modal
+ */
+function showTeachingRewardModal(teaching, reward) {
+    closeModal('tasks-modal');
+    
+    const modal = document.getElementById('daily-reward-modal');
+    if (!modal) {
+        showToast(`+${reward} Hasene! ${teaching.turkish}`, 'success', 4000);
+        return;
+    }
+    
+    document.getElementById('daily-reward-amount').textContent = reward;
+    
+    const streakEl = document.getElementById('daily-reward-streak');
+    if (streakEl) {
+        streakEl.innerHTML = `
+            <div class="teaching-content">
+                <div class="teaching-arabic">${teaching.arabic}</div>
+                <div class="teaching-turkish">${teaching.turkish}</div>
+                <div class="teaching-explanation">${teaching.explanation}</div>
+            </div>
+        `;
+    }
+    
+    openModal('daily-reward-modal');
+}
+
+function showLevelUpModal(newLevel) {
+    document.getElementById('new-level-display').textContent = `Seviye ${newLevel}`;
+    document.getElementById('new-level-name').textContent = getLevelName(newLevel);
+    openModal('level-up-modal');
+}
+
+function showAchievementModal(achievement) {
+    // Simple toast for achievement
+    showToast(`🏆 ${achievement.name} başarımı kazandınız!`, 'success', 3000);
+}
+
+// ========================================
+// HARF TABLOSU (LETTER TABLE)
+// ========================================
+
+async function showHarfTablosu() {
+    const data = await loadHarfData();
+    
+    if (data.length === 0) {
+        showToast('Harf verisi yüklenemedi', 'error');
+        return;
+    }
+    
+    // Populate the harf grid
+    const harfGrid = document.getElementById('harf-grid');
+    if (harfGrid) {
+        harfGrid.innerHTML = data.map(harf => `
+            <div class="harf-card" onclick="playHarfAudio('${harf.ses_dosyasi || ''}', '${harf.harf}')">
+                <div class="harf-arabic">${harf.harf}</div>
+                <div class="harf-name">${harf.isim || harf.okunus || ''}</div>
+            </div>
+        `).join('');
+    }
+    
+    // Hide all screens and show Harf Tablosu
+    hideAllScreens();
+    document.getElementById('elif-ba-tablo-screen').classList.remove('hidden');
+}
+
+function playHarfAudio(audioUrl, harfName) {
+    if (audioUrl) {
+        playSafeAudio(audioUrl);
+    } else {
+        showToast(`${harfName}`, 'info', 1000);
+    }
+}
+
+// ========================================
+// ROZET (BADGES) MODAL
+// ========================================
+
+let currentBadgeTab = 'badges';
+let currentAsrTab = 'mekke';
+
+function showBadgesModal() {
+    currentBadgeTab = 'badges';
+    currentAsrTab = 'mekke';
+    
+    renderNormalBadges();
+    renderAsrSaadetBadges();
+    renderAchievementsList();
+    
+    // Tab event listeners
+    setupBadgeTabListeners();
+    setupAsrTabListeners();
+    
+    // Show/hide correct content
+    updateBadgeTabDisplay();
+    
+    openModal('badges-modal');
+}
+
+function setupBadgeTabListeners() {
+    const tabs = document.querySelectorAll('.badge-tab');
+    tabs.forEach(tab => {
+        tab.onclick = () => {
+            currentBadgeTab = tab.dataset.tab;
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            updateBadgeTabDisplay();
+        };
+    });
+}
+
+function setupAsrTabListeners() {
+    const asrTabs = document.querySelectorAll('.asr-tab');
+    asrTabs.forEach(tab => {
+        tab.onclick = () => {
+            currentAsrTab = tab.dataset.asrTab;
+            asrTabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            updateAsrTabDisplay();
+        };
+    });
+}
+
+function updateBadgeTabDisplay() {
+    const badgesGrid = document.getElementById('badges-grid');
+    const asrContainer = document.getElementById('asr-saadet-container');
+    const achievementsList = document.getElementById('achievements-list');
+    
+    if (badgesGrid) badgesGrid.classList.toggle('hidden', currentBadgeTab !== 'badges');
+    if (asrContainer) asrContainer.classList.toggle('hidden', currentBadgeTab !== 'asr-i-saadet');
+    if (achievementsList) achievementsList.classList.toggle('hidden', currentBadgeTab !== 'achievements');
+    
+    if (currentBadgeTab === 'asr-i-saadet') {
+        updateAsrTabDisplay();
+    }
+}
+
+function updateAsrTabDisplay() {
+    const grids = {
+        'mekke': document.getElementById('mekke-grid'),
+        'medine': document.getElementById('medine-grid'),
+        'ilk-iki-halife': document.getElementById('ilk-iki-halife-grid'),
+        'son-iki-halife': document.getElementById('son-iki-halife-grid')
+    };
+    
+    Object.entries(grids).forEach(([key, grid]) => {
+        if (grid) {
+            grid.classList.toggle('hidden', key !== currentAsrTab);
+            grid.classList.toggle('active', key === currentAsrTab);
+        }
+    });
+}
+
+function renderNormalBadges() {
+    const badgesGrid = document.getElementById('badges-grid');
+    const unlockedBadgesList = Object.keys(badgesUnlocked);
+    
+    if (badgesGrid) {
+        const badges = window.BADGE_DEFINITIONS || [];
+        badgesGrid.innerHTML = badges.map(badge => {
+            const isUnlocked = unlockedBadgesList.includes(badge.id);
+            const badgeImage = badge.image ? 
+                `<img src="ASSETS/badges/${badge.image}" alt="${badge.name}" class="badge-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                 <span class="badge-icon-fallback" style="display:none;">${badge.icon || '🏅'}</span>` :
+                `<span class="badge-icon-emoji">${badge.icon || '🏅'}</span>`;
+            
+            return `
+                <div class="badge-card ${isUnlocked ? 'unlocked' : 'locked'}" 
+                     onclick="showBadgeDetail('${badge.id}', 'normal')">
+                    <div class="badge-icon-container">
+                        ${isUnlocked ? badgeImage : `<span class="badge-locked-icon">🔒</span>`}
+                    </div>
+                    <div class="badge-name">${badge.name}</div>
+                    <div class="badge-threshold">${formatNumber(badge.threshold)} Hasene</div>
+                </div>
+            `;
+        }).join('');
+    }
+}
+
+function renderAsrSaadetBadges() {
+    const asrBadges = window.ASR_I_SAADET_BADGES || {};
+    const unlockedBadgesList = Object.keys(badgesUnlocked);
+    
+    const gridMapping = {
+        'mekke': 'mekke-grid',
+        'medine': 'medine-grid',
+        'ilkIkiHalife': 'ilk-iki-halife-grid',
+        'sonIkiHalife': 'son-iki-halife-grid'
+    };
+    
+    Object.entries(asrBadges).forEach(([period, badges]) => {
+        const gridId = gridMapping[period];
+        const grid = document.getElementById(gridId);
+        
+        if (grid && badges) {
+            grid.innerHTML = badges.map(badge => {
+                const isUnlocked = unlockedBadgesList.includes(badge.id);
+                const badgeImage = badge.image ? 
+                    `<img src="ASSETS/badges/${badge.image}" alt="${badge.name}" onerror="this.outerHTML='<span class=\\'emoji\\'>🕌</span>';">` :
+                    `<span class="emoji">🕌</span>`;
+                
+                return `
+                    <div class="asr-badge-card ${isUnlocked ? 'unlocked' : 'locked'}" 
+                         onclick="showBadgeDetail('${badge.id}', 'asr')">
+                        ${badge.year ? `<div class="asr-badge-year">${badge.year}</div>` : ''}
+                        <div class="asr-badge-icon">
+                            ${isUnlocked ? badgeImage : `<span class="emoji">🔒</span>`}
+                        </div>
+                        <div class="asr-badge-name">${badge.name}</div>
+                        <div class="asr-badge-threshold">${formatNumber(badge.threshold)} Hasene</div>
+                    </div>
+                `;
+            }).join('');
+        }
+    });
+}
+
+function renderAchievementsList() {
+    const achievementsList = document.getElementById('achievements-list');
+    if (achievementsList) {
+        const achievements = window.ACHIEVEMENTS || [];
+        achievementsList.innerHTML = achievements.map(ach => {
+            const isUnlocked = achievementsData[ach.id];
+            return `
+                <div class="achievement-item ${isUnlocked ? 'unlocked' : 'locked'}">
+                    <div class="achievement-icon">${isUnlocked ? ach.icon : '🔒'}</div>
+                    <div class="achievement-info">
+                        <div class="achievement-name">${ach.name}</div>
+                        <div class="achievement-desc">${ach.description}</div>
+                    </div>
+                    <div class="achievement-status">${isUnlocked ? '✅' : ''}</div>
+                </div>
+            `;
+        }).join('');
+    }
+}
+
+function showBadgeDetail(badgeId, type = 'normal') {
+    let badge = null;
+    
+    if (type === 'asr') {
+        // Search in Asr-ı Saadet badges
+        const asrBadges = window.ASR_I_SAADET_BADGES || {};
+        for (const period in asrBadges) {
+            const found = asrBadges[period].find(b => b.id === badgeId);
+            if (found) {
+                badge = found;
+                break;
+            }
+        }
+    } else {
+        // Search in normal badges
+        const badges = window.BADGE_DEFINITIONS || [];
+        badge = badges.find(b => b.id === badgeId);
+    }
+    
+    const isUnlocked = badgesUnlocked[badgeId];
+    
+    if (badge) {
+        const iconContainer = document.getElementById('badge-detail-icon');
+        if (isUnlocked && badge.image) {
+            iconContainer.innerHTML = `<img src="ASSETS/badges/${badge.image}" alt="${badge.name}" class="badge-detail-img" onerror="this.outerHTML='${badge.icon || '🏅'}';">`;
+        } else {
+            iconContainer.textContent = isUnlocked ? (badge.icon || '🏅') : '🔒';
+        }
+        
+        document.getElementById('badge-detail-name').textContent = badge.name;
+        
+        // Description - for Asr-ı Saadet badges include year
+        let description = badge.description;
+        if (type === 'asr' && badge.year) {
+            description = `📅 ${badge.year}\n\n${description}`;
+        }
+        document.getElementById('badge-detail-description').textContent = description;
+        
+        const statusEl = document.getElementById('badge-detail-status');
+        if (isUnlocked) {
+            statusEl.textContent = `✅ Kazanıldı: ${badgesUnlocked[badgeId]}`;
+            statusEl.className = 'badge-detail-status unlocked';
+        } else {
+            const remaining = badge.threshold - totalPoints;
+            statusEl.textContent = remaining > 0 ? 
+                `🔒 ${formatNumber(remaining)} Hasene daha kazan` : 
+                'Henüz kazanılmadı';
+            statusEl.className = 'badge-detail-status locked';
+        }
+        
+        openModal('badge-detail-modal');
+    }
+}
+
+// ========================================
+// TAKVIM (CALENDAR) MODAL
+// ========================================
+
+function showCalendarModal() {
+    const calendarGrid = document.getElementById('calendar-grid');
+    const today = new Date();
+    const currentMonth = today.getMonth();
+    const currentYear = today.getFullYear();
+    
+    // Get first day of month
+    const firstDay = new Date(currentYear, currentMonth, 1);
+    const lastDay = new Date(currentYear, currentMonth + 1, 0);
+    
+    // Day names
+    const dayNames = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
+    
+    // Generate calendar
+    let html = '<div class="calendar-header">';
+    html += `<span>${today.toLocaleDateString('tr-TR', { month: 'long', year: 'numeric' })}</span>`;
+    html += '</div>';
+    
+    html += '<div class="calendar-days">';
+    dayNames.forEach(day => {
+        html += `<div class="calendar-day-name">${day}</div>`;
+    });
+    html += '</div>';
+    
+    html += '<div class="calendar-dates">';
+    
+    // Empty cells for days before first day
+    for (let i = 0; i < firstDay.getDay(); i++) {
+        html += '<div class="calendar-date empty"></div>';
+    }
+    
+    // Days of month
+    for (let day = 1; day <= lastDay.getDate(); day++) {
+        const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const isPlayed = streakData.playDates && streakData.playDates.includes(dateStr);
+        const isToday = day === today.getDate();
+        
+        html += `
+            <div class="calendar-date ${isPlayed ? 'played' : ''} ${isToday ? 'today' : ''}">
+                ${day}
+                ${isPlayed ? '<span class="played-dot"></span>' : ''}
+            </div>
+        `;
+    }
+    
+    html += '</div>';
+    
+    if (calendarGrid) {
+        calendarGrid.innerHTML = html;
+    }
+    
+    // Update streak info
+    const currentStreakEl = document.getElementById('calendar-current-streak');
+    const bestStreakEl = document.getElementById('calendar-best-streak');
+    const totalDaysEl = document.getElementById('calendar-total-days');
+    
+    if (currentStreakEl) currentStreakEl.textContent = streakData.currentStreak || 0;
+    if (bestStreakEl) bestStreakEl.textContent = streakData.bestStreak || 0;
+    if (totalDaysEl) totalDaysEl.textContent = streakData.totalPlayDays || 0;
+    
+    openModal('calendar-modal');
+}
+
+// ========================================
+// ONBOARDING
+// ========================================
+
+function showOnboarding() {
+    onboardingSlideIndex = 0;
+    updateOnboardingSlide();
+    openModal('onboarding-modal');
+}
+
+function updateOnboardingSlide() {
+    const slides = window.ONBOARDING_SLIDES || [];
+    if (slides.length === 0) return;
+    
+    const slide = slides[onboardingSlideIndex];
+    
+    document.getElementById('onboarding-icon').textContent = slide.icon || '📱';
+    document.getElementById('onboarding-title').textContent = slide.title || '';
+    document.getElementById('onboarding-text').textContent = slide.description || slide.text || '';
+    
+    // Update dots
+    const dotsContainer = document.getElementById('onboarding-dots');
+    if (dotsContainer) {
+        dotsContainer.innerHTML = slides.map((_, i) => 
+            `<span class="onboarding-dot ${i === onboardingSlideIndex ? 'active' : ''}"></span>`
+        ).join('');
+    }
+    
+    // Update buttons
+    const prevBtn = document.getElementById('onboarding-prev');
+    const nextBtn = document.getElementById('onboarding-next');
+    
+    if (prevBtn) prevBtn.style.visibility = onboardingSlideIndex === 0 ? 'hidden' : 'visible';
+    if (nextBtn) nextBtn.textContent = onboardingSlideIndex === slides.length - 1 ? 'Başla!' : 'İleri →';
+}
+
+function nextOnboardingSlide() {
+    const slides = window.ONBOARDING_SLIDES || [];
+    
+    if (onboardingSlideIndex < slides.length - 1) {
+        onboardingSlideIndex++;
+        updateOnboardingSlide();
+    } else {
+        // Finish onboarding
+        closeModal('onboarding-modal');
+        localStorage.setItem('hasene_onboarding_complete', 'true');
+    }
+}
+
+function prevOnboardingSlide() {
+    if (onboardingSlideIndex > 0) {
+        onboardingSlideIndex--;
+        updateOnboardingSlide();
+    }
+}
+
+// ========================================
+// DAILY REWARD
+// ========================================
+
+function showDailyReward() {
+    const today = getLocalDateString();
+    const lastReward = localStorage.getItem('hasene_last_daily_reward');
+    
+    if (lastReward === today) {
+        showToast('Bugünkü ödülünüzü zaten aldınız!', 'info');
+        return;
+    }
+    
+    // Calculate streak bonus
+    const streakBonus = Math.min(streakData.currentStreak * 5, 50);
+    const baseReward = 20;
+    const totalReward = baseReward + streakBonus;
+    
+    document.getElementById('daily-reward-amount').textContent = totalReward;
+    document.getElementById('daily-reward-streak').textContent = 
+        streakBonus > 0 ? `+${streakBonus} seri bonusu dahil!` : '';
+    
+    openModal('daily-reward-modal');
+}
+
+function claimDailyReward() {
+    const today = getLocalDateString();
+    const streakBonus = Math.min(streakData.currentStreak * 5, 50);
+    const baseReward = 20;
+    const totalReward = baseReward + streakBonus;
+    
+    totalPoints += totalReward;
+    localStorage.setItem('hasene_last_daily_reward', today);
+    
+    closeModal('daily-reward-modal');
+    showToast(`+${totalReward} Hasene kazandınız! 🎁`, 'success', 2000);
+    updateStatsDisplay();
+    debouncedSaveStats();
+}
+
+// ========================================
+// ACHIEVEMENTS MODAL
+// ========================================
+
+/**
+ * Render achievements list in badges modal
+ */
+function renderAchievementsList() {
+    const achievementsList = document.getElementById('achievements-list');
+    const achievements = window.ACHIEVEMENTS || [];
+    
+    if (!achievementsList || achievements.length === 0) return;
+    
+    // Calculate current stats for achievement progress
+    const stars = calculateStars(totalPoints);
+    const currentStats = {
+        stars,
+        bestStreak: streakData.bestStreak || 0,
+        totalCorrect: gameStats.totalCorrect || 0,
+        perfectLessons: gameStats.perfectLessons || 0
+    };
+    
+    // Sort: unlocked first, then by progress
+    const sortedAchievements = [...achievements].sort((a, b) => {
+        const aUnlocked = unlockedAchievements.includes(a.id);
+        const bUnlocked = unlockedAchievements.includes(b.id);
+        if (aUnlocked && !bUnlocked) return -1;
+        if (!aUnlocked && bUnlocked) return 1;
+        return 0;
+    });
+    
+    achievementsList.innerHTML = sortedAchievements.map(ach => {
+        const isUnlocked = unlockedAchievements.includes(ach.id);
+        const icon = ach.name.match(/[\p{Emoji}]/u)?.[0] || '⭐';
+        
+        return `
+            <div class="achievement-item ${isUnlocked ? 'unlocked' : 'locked'}">
+                <div class="achievement-icon">${isUnlocked ? icon : '🔒'}</div>
+                <div class="achievement-info">
+                    <div class="achievement-name">${ach.name}</div>
+                    <div class="achievement-desc">${ach.description}</div>
+                </div>
+                <div class="achievement-status">${isUnlocked ? '✓' : ''}</div>
+            </div>
+        `;
+    }).join('');
+}
+
+function showAchievementsModal() {
+    renderAchievementsList();
+    openModal('badges-modal');
+    // Switch to achievements tab
+    document.querySelectorAll('.badge-tab').forEach(b => b.classList.remove('active'));
+    document.querySelector('.badge-tab[data-tab="achievements"]')?.classList.add('active');
+    document.getElementById('badges-grid')?.classList.add('hidden');
+    document.getElementById('achievements-list')?.classList.remove('hidden');
+}
+
+// ========================================
+// KARMA OYUN MODU (Mixed Game Mode)
+// ========================================
+
+// Karma oyun değişkenleri
+let karmaQuestions = [];
+let karmaQuestionIndex = 0;
+let karmaMatchPairs = [];
+
+/**
+ * Start Karma (Mixed) Game Mode
+ * Combines all game types: Kelime Çevir, Dinle Bul, Eşleştirme, Boşluk Doldur
+ */
+async function startKarmaGame() {
+    console.log('🎲 Karma Oyun başlatılıyor...');
+    
+    // Reset session
+    sessionScore = 0;
+    questionIndex = 0;
+    correctCount = 0;
+    wrongCount = 0;
+    comboCount = 0;
+    maxCombo = 0;
+    karmaQuestionIndex = 0;
+    karmaQuestions = [];
+    
+    // Load all necessary data
+    const [kelimeData, ayetData, harfData] = await Promise.all([
+        loadKelimeData(),
+        loadAyetData(),
+        loadHarfData()
+    ]);
+    
+    if (kelimeData.length === 0) {
+        showToast('Veri yüklenemedi', 'error');
+        goToMainMenu();
+        return;
+    }
+    
+    // Generate mixed questions (15 total)
+    const questionCount = 15;
+    
+    // 1. Kelime Çevir soruları (4 adet)
+    const kelimeQuestions = getRandomItems(kelimeData, 4).map(word => ({
+        type: 'kelime-cevir',
+        data: word,
+        question: word.kelime,
+        correctAnswer: word.anlam,
+        options: generateOptions(word.anlam, kelimeData.map(w => w.anlam))
+    }));
+    
+    // 2. Dinle Bul soruları (3 adet)
+    const audioWords = kelimeData.filter(w => w.ses_dosyasi);
+    const dinleQuestions = getRandomItems(audioWords, 3).map(word => ({
+        type: 'dinle-bul',
+        data: word,
+        question: '🔊 Dinle ve doğru anlamı seç',
+        audioUrl: word.ses_dosyasi,
+        correctAnswer: word.anlam,
+        options: generateOptions(word.anlam, kelimeData.map(w => w.anlam))
+    }));
+    
+    // 3. Eşleştirme sorusu (2 adet - her biri 4 çift)
+    const matchQuestions = [];
+    for (let i = 0; i < 2; i++) {
+        const matchWords = getRandomItems(kelimeData, 4);
+        matchQuestions.push({
+            type: 'eslestirme',
+            pairs: matchWords.map(w => ({
+                arabic: w.kelime,
+                turkish: w.anlam,
+                id: w.id
+            }))
+        });
+    }
+    
+    // 4. Boşluk Doldur soruları (3 adet)
+    const suitableAyets = ayetData.filter(a => {
+        const words = (a.ayet_metni || '').split(' ').filter(w => w.length > 1);
+        return words.length >= 3;
+    });
+    const boslukQuestions = getRandomItems(suitableAyets, 3).map(ayet => {
+        const words = ayet.ayet_metni.split(' ').filter(w => w.length > 1);
+        const blankIndex = Math.floor(Math.random() * words.length);
+        const correctWord = words[blankIndex];
+        const displayWords = [...words];
+        displayWords[blankIndex] = '____';
+        
+        return {
+            type: 'bosluk-doldur',
+            data: ayet,
+            question: displayWords.join(' '),
+            translation: ayet.meal,
+            correctAnswer: correctWord,
+            options: generateOptions(correctWord, words.filter((w, i) => i !== blankIndex))
+        };
+    });
+    
+    // 5. Harf soruları (3 adet)
+    const harfQuestions = getRandomItems(harfData, 3).map(harf => ({
+        type: 'harf-bul',
+        data: harf,
+        question: harf.harf,
+        correctAnswer: harf.okunusu,
+        options: generateOptions(harf.okunusu, harfData.map(h => h.okunusu))
+    }));
+    
+    // Combine and shuffle all questions
+    karmaQuestions = shuffleArray([
+        ...kelimeQuestions,
+        ...dinleQuestions,
+        ...matchQuestions,
+        ...boslukQuestions,
+        ...harfQuestions
+    ]);
+    
+    console.log(`🎲 ${karmaQuestions.length} karma soru oluşturuldu`);
+    
+    // Show karma game screen
+    hideAllScreens();
+    document.getElementById('karma-game-screen').classList.remove('hidden');
+    document.getElementById('karma-total-questions').textContent = karmaQuestions.length;
+    
+    // Load first question
+    loadKarmaQuestion();
+}
+
+/**
+ * Generate 4 options including the correct answer
+ */
+function generateOptions(correctAnswer, allAnswers) {
+    const uniqueAnswers = [...new Set(allAnswers.filter(a => a && a !== correctAnswer))];
+    const wrongAnswers = getRandomItems(uniqueAnswers, 3);
+    return shuffleArray([correctAnswer, ...wrongAnswers]);
+}
+
+/**
+ * Load current karma question
+ */
+function loadKarmaQuestion() {
+    if (karmaQuestionIndex >= karmaQuestions.length) {
+        endGame();
+        return;
+    }
+    
+    const question = karmaQuestions[karmaQuestionIndex];
+    
+    // Update progress
+    document.getElementById('karma-question-number').textContent = karmaQuestionIndex + 1;
+    document.getElementById('karma-combo').textContent = comboCount;
+    document.getElementById('karma-session-score').textContent = formatNumber(sessionScore);
+    
+    // Get question container
+    const container = document.getElementById('karma-question-container');
+    
+    // Render based on question type
+    switch (question.type) {
+        case 'kelime-cevir':
+            renderKelimeCevirKarma(container, question);
+            break;
+        case 'dinle-bul':
+            renderDinleBulKarma(container, question);
+            break;
+        case 'eslestirme':
+            renderEslestirmeKarma(container, question);
+            break;
+        case 'bosluk-doldur':
+            renderBoslukDoldurKarma(container, question);
+            break;
+        case 'harf-bul':
+            renderHarfBulKarma(container, question);
+            break;
+    }
+}
+
+function renderKelimeCevirKarma(container, question) {
+    container.innerHTML = `
+        <div class="karma-type-badge">📝 Kelime Çevir</div>
+        <div class="karma-arabic">${question.question}</div>
+        <div class="karma-info">${question.data.sure_adi || ''}</div>
+        <div class="karma-options">
+            ${question.options.map((opt, i) => `
+                <button class="answer-option" onclick="checkKarmaAnswer('${opt.replace(/'/g, "\\'")}', '${question.correctAnswer.replace(/'/g, "\\'")}')">
+                    ${opt}
+                </button>
+            `).join('')}
+        </div>
+    `;
+}
+
+function renderDinleBulKarma(container, question) {
+    container.innerHTML = `
+        <div class="karma-type-badge">🎧 Dinle Bul</div>
+        <div class="karma-audio-section">
+            <button class="audio-btn large" onclick="playSafeAudio('${question.audioUrl}')">🔊 Dinle</button>
+        </div>
+        <div class="karma-options">
+            ${question.options.map((opt, i) => `
+                <button class="answer-option" onclick="checkKarmaAnswer('${opt.replace(/'/g, "\\'")}', '${question.correctAnswer.replace(/'/g, "\\'")}')">
+                    ${opt}
+                </button>
+            `).join('')}
+        </div>
+    `;
+    // Auto play
+    setTimeout(() => playSafeAudio(question.audioUrl), 300);
+}
+
+function renderEslestirmeKarma(container, question) {
+    karmaMatchPairs = question.pairs.map(p => ({ ...p, matched: false }));
+    let selectedArabic = null;
+    
+    const arabicItems = shuffleArray([...question.pairs]);
+    const turkishItems = shuffleArray([...question.pairs]);
+    
+    container.innerHTML = `
+        <div class="karma-type-badge">🔗 Eşleştir</div>
+        <div class="karma-match-instruction">Arapça kelimeleri Türkçe anlamlarıyla eşleştir</div>
+        <div class="karma-match-grid">
+            <div class="match-column arabic-column">
+                ${arabicItems.map(p => `
+                    <button class="match-item arabic" data-id="${p.id}" onclick="selectKarmaMatch(this, 'arabic', '${p.id}')">
+                        ${p.arabic}
+                    </button>
+                `).join('')}
+            </div>
+            <div class="match-column turkish-column">
+                ${turkishItems.map(p => `
+                    <button class="match-item turkish" data-id="${p.id}" onclick="selectKarmaMatch(this, 'turkish', '${p.id}')">
+                        ${p.turkish}
+                    </button>
+                `).join('')}
+            </div>
+        </div>
+    `;
+}
+
+let karmaSelectedItem = null;
+let karmaMatchedCount = 0;
+
+function selectKarmaMatch(element, type, id) {
+    if (element.classList.contains('matched')) return;
+    
+    if (!karmaSelectedItem) {
+        // First selection
+        karmaSelectedItem = { element, type, id };
+        element.classList.add('selected');
+    } else if (karmaSelectedItem.type === type) {
+        // Same column - switch selection
+        karmaSelectedItem.element.classList.remove('selected');
+        karmaSelectedItem = { element, type, id };
+        element.classList.add('selected');
+    } else {
+        // Different column - check match
+        if (karmaSelectedItem.id === id) {
+            // Correct match!
+            karmaSelectedItem.element.classList.remove('selected');
+            karmaSelectedItem.element.classList.add('matched', 'correct');
+            element.classList.add('matched', 'correct');
+            karmaMatchedCount++;
+            
+            comboCount++;
+            const basePoints = getBasePoints(currentDifficulty);
+            const comboBonus = CONFIG.COMBO_BONUS_PER_CORRECT;
+            const points = basePoints + comboBonus;
+            sessionScore += points;
+            dailyProgress += points; // Günlük vird'e ekle
+            updateTaskProgress('correct', 1); // Görev ilerlemesine ekle (her eşleşme için)
+            
+            // Rozet ve başarıları kontrol et (her puan kazanınca)
+            checkBadgesAndAchievementsAfterPoints();
+            
+            showToast(`+${points} Hasene! 🔥 Combo: ${comboCount}`, 'success', 800);
+            
+            // Check if all matched
+            if (karmaMatchedCount >= 4) {
+                correctCount++;
+                maxCombo = Math.max(maxCombo, comboCount);
+                karmaMatchedCount = 0;
+                setTimeout(() => {
+                    karmaQuestionIndex++;
+                    loadKarmaQuestion();
+                }, 1000);
+            }
+        } else {
+            // Wrong match
+            karmaSelectedItem.element.classList.remove('selected');
+            karmaSelectedItem.element.classList.add('wrong');
+            element.classList.add('wrong');
+            comboCount = 0;
+            
+            setTimeout(() => {
+                karmaSelectedItem.element.classList.remove('wrong');
+                element.classList.remove('wrong');
+            }, 500);
+        }
+        karmaSelectedItem = null;
+    }
+}
+
+function renderBoslukDoldurKarma(container, question) {
+    container.innerHTML = `
+        <div class="karma-type-badge">📖 Boşluk Doldur</div>
+        <div class="karma-arabic bosluk">${question.question}</div>
+        <div class="karma-translation">${question.translation}</div>
+        <div class="karma-options">
+            ${question.options.map((opt, i) => `
+                <button class="answer-option" onclick="checkKarmaAnswer('${opt.replace(/'/g, "\\'")}', '${question.correctAnswer.replace(/'/g, "\\'")}')">
+                    ${opt}
+                </button>
+            `).join('')}
+        </div>
+    `;
+}
+
+function renderHarfBulKarma(container, question) {
+    container.innerHTML = `
+        <div class="karma-type-badge">🔤 Harf Bul</div>
+        <div class="karma-arabic harf">${question.question}</div>
+        <div class="karma-info">Bu harfin okunuşunu seç</div>
+        <div class="karma-options">
+            ${question.options.map((opt, i) => `
+                <button class="answer-option" onclick="checkKarmaAnswer('${opt.replace(/'/g, "\\'")}', '${question.correctAnswer.replace(/'/g, "\\'")}')">
+                    ${opt}
+                </button>
+            `).join('')}
+        </div>
+    `;
+}
+
+/**
+ * Check karma answer
+ */
+function checkKarmaAnswer(selected, correct) {
+    const buttons = document.querySelectorAll('#karma-question-container .answer-option');
+    buttons.forEach(btn => btn.classList.add('disabled'));
+    
+    // Highlight correct answer
+    buttons.forEach(btn => {
+        if (btn.textContent.trim() === correct) {
+            btn.classList.add('correct');
+        }
+    });
+    
+    const question = karmaQuestions[karmaQuestionIndex];
+    const wordId = question.data?.id;
+    
+    if (selected === correct) {
+        correctCount++;
+        comboCount++;
+        maxCombo = Math.max(maxCombo, comboCount);
+        
+        const basePoints = getBasePoints(currentDifficulty);
+        const comboBonus = CONFIG.COMBO_BONUS_PER_CORRECT;
+        const gained = basePoints + comboBonus;
+        sessionScore += gained;
+        dailyProgress += gained; // Günlük vird'e ekle
+        updateTaskProgress('correct', 1); // Görev ilerlemesine ekle
+        
+        // Rozet ve başarıları kontrol et (her puan kazanınca)
+        checkBadgesAndAchievementsAfterPoints();
+        
+        showToast(`+${gained} Hasene! 🔥 Combo: ${comboCount}`, 'success', 1000);
+        
+        if (wordId) updateWordStats(wordId, true);
+    } else {
+        wrongCount++;
+        comboCount = 0;
+        
+        // Find and highlight wrong
+        buttons.forEach(btn => {
+            if (btn.textContent.trim() === selected) {
+                btn.classList.add('wrong');
+            }
+        });
+        
+        showToast('Yanlış!', 'error', 1000);
+        
+        if (wordId) updateWordStats(wordId, false);
+    }
+    
+    // Günlük vird gösterimini güncelle
+    updateDailyGoalDisplay();
+    
+    // Next question
+    setTimeout(() => {
+        karmaQuestionIndex++;
+        loadKarmaQuestion();
+    }, 1200);
+}
+
+// ========================================
+// RESET ALL DATA (TEST FUNCTION)
+// ========================================
+
+/**
+ * Reset all game data - TEST FUNCTION (Remove before production)
+ */
+function resetAllData() {
+    if (!confirm('⚠️ TÜM VERİLER SİLİNECEK!\n\nBu işlem geri alınamaz. Devam etmek istediğinize emin misiniz?')) {
+        return;
+    }
+    
+    if (!confirm('Son uyarı: Tüm puanlar, rozetler, başarımlar, favoriler, istatistikler ve günlük görevler silinecek. Emin misiniz?')) {
+        return;
+    }
+    
+    console.log('🔄 Tüm veriler sıfırlanıyor...');
+    
+    // Clear all localStorage keys
+    const allStorageKeys = [
+        // CONFIG.STORAGE_KEYS
+        CONFIG.STORAGE_KEYS.TOTAL_POINTS,
+        CONFIG.STORAGE_KEYS.STREAK_DATA,
+        CONFIG.STORAGE_KEYS.DAILY_TASKS,
+        CONFIG.STORAGE_KEYS.WORD_STATS,
+        CONFIG.STORAGE_KEYS.GAME_STATS,
+        CONFIG.STORAGE_KEYS.DAILY_GOAL,
+        CONFIG.STORAGE_KEYS.DAILY_PROGRESS,
+        CONFIG.STORAGE_KEYS.ACHIEVEMENTS,
+        
+        // Other storage keys
+        'hasene_word_stats',
+        'hasene_favorites',
+        'hasene_achievements',
+        'hasene_badges',
+        'hasene_onboarding_complete',
+        'hasene_dailyReward',
+        'hasene_hintsUsedToday',
+        'hasene_hintsDate',
+        'hasene_lastHintDate',
+        'hasene_hintsCount'
+    ];
+    
+    // Remove all keys
+    allStorageKeys.forEach(key => {
+        localStorage.removeItem(key);
+        console.log(`✓ Removed: ${key}`);
+    });
+    
+    // Clear all localStorage items that start with 'hasene_'
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('hasene_')) {
+            keysToRemove.push(key);
+        }
+    }
+    keysToRemove.forEach(key => {
+        localStorage.removeItem(key);
+        console.log(`✓ Removed: ${key}`);
+    });
+    
+    // Reset global variables
+    totalPoints = 0;
+    currentLevel = 1;
+    sessionScore = 0;
+    correctCount = 0;
+    wrongCount = 0;
+    comboCount = 0;
+    maxCombo = 0;
+    questionIndex = 0;
+    dailyProgress = 0;
+    dailyGoal = 2700;
+    
+    streakData = {
+        currentStreak: 0,
+        bestStreak: 0,
+        totalPlayDays: 0,
+        lastPlayDate: '',
+        playDates: []
+    };
+    
+    gameStats = {
+        totalCorrect: 0,
+        totalWrong: 0,
+        perfectLessons: 0,
+        gameModeCounts: {}
+    };
+    
+    dailyTasks = {
+        lastTaskDate: '',
+        tasks: [],
+        bonusTasks: [],
+        todayStats: {
+            toplamDogru: 0,
+            toplamPuan: 0,
+            comboCount: 0,
+            allGameModes: [],
+            ayet_oku: 0,
+            dua_et: 0,
+            hadis_oku: 0
+        }
+    };
+    
+    wordStats = {};
+    favorites = [];
+    unlockedAchievements = [];
+    badgesUnlocked = {};
+    
+    // Close all modals
+    closeAllModals();
+    
+    // Reset current game state
+    currentGameMode = null;
+    currentDifficulty = 'medium';
+    currentQuestions = [];
+    currentQuestion = null;
+    currentOptions = [];
+    
+    console.log('✅ Tüm veriler sıfırlandı, sayfa yenileniyor...');
+    
+    // Immediately reload page to properly reinitialize everything
+    window.location.reload();
+}
+
+// ========================================
+// INITIALIZE ON LOAD
+// ========================================
+
+window.addEventListener('load', initApp);
+
+// Make functions globally available
+if (typeof window !== 'undefined') {
+    window.goToMainMenu = goToMainMenu;
+    window.playAgain = playAgain;
+    window.closeResultAndGoHome = closeResultAndGoHome;
+    window.showStatsModal = showStatsModal;
+    window.showTasksModal = showTasksModal;
+    window.showGoalSettings = showGoalSettings;
+    window.startGame = startGame;
+    window.checkKelimeAnswer = checkKelimeAnswer;
+    window.checkDinleAnswer = checkDinleAnswer;
+    window.checkBoslukAnswer = checkBoslukAnswer;
+    window.checkElifAnswer = checkElifAnswer;
+    window.checkElifKelimelerAnswer = checkElifKelimelerAnswer;
+    window.checkElifHarekelerAnswer = checkElifHarekelerAnswer;
+    window.toggleCurrentWordFavorite = toggleCurrentWordFavorite;
+    window.showHarfTablosu = showHarfTablosu;
+    window.playHarfAudio = playHarfAudio;
+    window.showBadgesModal = showBadgesModal;
+    window.showBadgeDetail = showBadgeDetail;
+    window.showCalendarModal = showCalendarModal;
+    window.showOnboarding = showOnboarding;
+    window.nextOnboardingSlide = nextOnboardingSlide;
+    window.prevOnboardingSlide = prevOnboardingSlide;
+    window.showDailyReward = showDailyReward;
+    window.claimDailyReward = claimDailyReward;
+    window.showAchievementsModal = showAchievementsModal;
+    window.goToKelimeSubmodes = goToKelimeSubmodes;
+    window.goToElifBaSubmodes = goToElifBaSubmodes;
+    window.startKelimeCevirGame = startKelimeCevirGame;
+    window.startElifBaGame = startElifBaGame;
+    window.hideAllScreens = hideAllScreens;
+    window.checkBadges = checkBadges;
+    window.showWordAnalysisModal = showWordAnalysisModal;
+    window.getWordAnalysis = getWordAnalysis;
+    window.getStrugglingWords = getStrugglingWords;
+    window.selectIntelligentWords = selectIntelligentWords;
+    window.renderAchievementsList = renderAchievementsList;
+    window.startKarmaGame = startKarmaGame;
+    window.checkKarmaAnswer = checkKarmaAnswer;
+    window.selectKarmaMatch = selectKarmaMatch;
+    window.useHint = useHint;
+    window.resetAllData = resetAllData;
+    window.claimTaskRewards = claimTaskRewards;
+    window.showTeachingRewardModal = showTeachingRewardModal;
+    
+    // Modal, Panel ve Ses Yönetimi
+    window.openModal = openModal;
+    window.closeModal = closeModal;
+    window.closeAllModals = closeAllModals;
+    window.stopAllAudio = stopAllAudio;
+    window.playSafeAudio = playSafeAudio;
+    window.goToMainScreen = goToMainScreen;
+    window.handleBackButton = handleBackButton;
+}

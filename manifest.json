@@ -1,0 +1,20 @@
+{
+    "name": "Hasene Arapça Dersi",
+    "short_name": "Hasene",
+    "description": "Kuran kelimeleri ile eğlenceli öğrenme oyunu",
+    "start_url": "./index.html",
+    "display": "standalone",
+    "background_color": "#a8b5ff",
+    "theme_color": "#9d8aff",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "ASSETS/badges/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "categories": ["education", "games"],
+    "lang": "tr"
+}
