@@ -164,8 +164,21 @@ async function loadLeaderboard() {
             console.log('✅ Leaderboard loaded from Firebase:', rankings.length, 'users');
             return rankings;
         } catch (error) {
-            console.warn('⚠️ Firebase leaderboard load failed:', error);
             // If orderBy fails (no index), try without orderBy
+            if (error.code === 'failed-precondition' && error.message && error.message.includes('index')) {
+                // Extract index creation URL from error message if available
+                const indexUrlMatch = error.message.match(/https:\/\/console\.firebase\.google\.com[^\s)]+/);
+                if (indexUrlMatch) {
+                    console.info('ℹ️ Firestore index gerekiyor. Liderlik tablosu manuel sıralama ile yükleniyor.');
+                    console.info('📋 Index oluşturmak için:', indexUrlMatch[0]);
+                } else {
+                    console.info('ℹ️ Firestore index gerekiyor. Liderlik tablosu manuel sıralama ile yükleniyor.');
+                }
+            } else {
+                console.warn('⚠️ Firebase leaderboard load failed:', error);
+            }
+            
+            // Try without orderBy (manual sort)
             try {
                 const snapshot = await window.firestore
                     .collection('weekly_leaderboard')
