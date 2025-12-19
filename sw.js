@@ -10,6 +10,8 @@ const urlsToCache = [
     './js/config.js',
     './js/constants.js',
     './js/utils.js',
+    './js/firebase-config.js',
+    './js/firebase-init.js',
     './js/auth.js',
     './js/api-service.js',
     './js/data-loader.js',

@@ -9,16 +9,16 @@
 // ========================================
 
 /**
- * Get backend type
+ * Get backend type helper - uses auth.js function
  * @returns {string} 'localStorage' | 'firebase'
  */
-function getBackendType() {
-    // Use auth.js function if available, otherwise default to localStorage
+function getBackendTypeFromAuth() {
+    // Always use auth.js function - it's loaded before api-service.js
     if (typeof window.getBackendType === 'function') {
         return window.getBackendType();
     }
     
-    // Check for Firebase availability
+    // Fallback: Check for Firebase availability directly (if auth.js not loaded yet)
     if (window.firebase && window.firebase.firestore) {
         const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : null;
         if (user && user.type === 'firebase') {
@@ -79,14 +79,13 @@ async function saveToIndexedDB(key, value) {
  * @returns {Promise<any>} Document data or null
  */
 async function firestoreGet(collection, docId) {
-    const backendType = getBackendType();
-    if (backendType !== 'firebase' || !window.firebase || !window.firebase.firestore) {
+    const backendType = getBackendTypeFromAuth();
+    if (backendType !== 'firebase' || !window.firestore) {
         return null;
     }
     
     try {
-        const db = window.firebase.firestore();
-        const doc = await db.collection(collection).doc(docId).get();
+        const doc = await window.firestore.collection(collection).doc(docId).get();
         return doc.exists ? doc.data() : null;
     } catch (error) {
         console.error('Firestore get error:', error);
@@ -102,17 +101,36 @@ async function firestoreGet(collection, docId) {
  * @returns {Promise<boolean>} Success status
  */
 async function firestoreSet(collection, docId, data) {
-    const backendType = getBackendType();
-    if (backendType !== 'firebase' || !window.firebase || !window.firebase.firestore) {
+    const backendType = getBackendTypeFromAuth();
+    
+    console.log('🔍 firestoreSet called:', { collection, docId, backendType, firestoreExists: !!window.firestore });
+    
+    if (backendType !== 'firebase' || !window.firestore) {
+        console.warn('⚠️ Firebase not available:', { backendType, firestoreExists: !!window.firestore });
+        return false;
+    }
+    
+    // Check if user is authenticated
+    const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : null;
+    if (!user || user.id.startsWith('local-')) {
+        console.warn('⚠️ User is local, not syncing to Firebase:', user);
+        return false;
+    }
+    
+    // Check Firebase auth
+    if (window.firebaseAuth && !window.firebaseAuth.currentUser) {
+        console.warn('⚠️ Firebase user not authenticated');
         return false;
     }
     
     try {
-        const db = window.firebase.firestore();
-        await db.collection(collection).doc(docId).set(data, { merge: true });
+        console.log('📤 Sending to Firestore:', { collection, docId, dataSize: JSON.stringify(data).length });
+        await window.firestore.collection(collection).doc(docId).set(data, { merge: true });
+        console.log('✅ Firestore set successful:', { collection, docId });
         return true;
     } catch (error) {
-        console.error('Firestore set error:', error);
+        console.error('❌ Firestore set error:', error);
+        console.error('Error details:', { code: error.code, message: error.message });
         return false;
     }
 }
@@ -122,24 +140,34 @@ async function firestoreSet(collection, docId, data) {
 // ========================================
 
 /**
- * Load user stats from all sources (IndexedDB → localStorage → Firebase)
+ * Load user stats from all sources
+ * For Firebase users: Firebase → localStorage → IndexedDB
+ * For local users: localStorage → IndexedDB
  * @returns {Promise<Object>} User stats object
  */
 async function loadUserStats() {
     const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : null;
+    const isFirebaseUser = user && !user.id.startsWith('local-');
     
-    // 1. Try IndexedDB first (fastest, local cache)
-    try {
-        const indexedData = await loadFromIndexedDB('hasene_totalPoints');
-        if (indexedData) {
-            console.log('📦 User stats loaded from IndexedDB');
-            return { total_points: parseInt(indexedData) || 0 };
+    // For Firebase users, try Firebase first (source of truth)
+    if (isFirebaseUser) {
+        try {
+            const firebaseData = await firestoreGet('user_stats', user.id);
+            if (firebaseData && firebaseData.total_points !== undefined) {
+                console.log('☁️ User stats loaded from Firebase');
+                // Sync to localStorage and IndexedDB for offline access
+                if (firebaseData.total_points !== undefined) {
+                    localStorage.setItem('hasene_totalPoints', firebaseData.total_points.toString());
+                    saveToIndexedDB('hasene_totalPoints', firebaseData.total_points).catch(() => {});
+                }
+                return firebaseData;
+            }
+        } catch (error) {
+            console.warn('Firebase load failed:', error);
         }
-    } catch (error) {
-        console.warn('IndexedDB load failed:', error);
     }
     
-    // 2. Try localStorage (fallback)
+    // Try localStorage (works for both Firebase and local users as cache)
     try {
         const localPoints = localStorage.getItem('hasene_totalPoints');
         if (localPoints !== null) {
@@ -150,24 +178,18 @@ async function loadUserStats() {
         console.warn('localStorage load failed:', error);
     }
     
-    // 3. Try Firebase (if user is Firebase user)
-    if (user && !user.id.startsWith('local-')) {
-        try {
-            const firebaseData = await firestoreGet('user_stats', user.id);
-            if (firebaseData) {
-                console.log('☁️ User stats loaded from Firebase');
-                // Sync to localStorage for offline access
-                if (firebaseData.total_points !== undefined) {
-                    localStorage.setItem('hasene_totalPoints', firebaseData.total_points.toString());
-                }
-                return firebaseData;
-            }
-        } catch (error) {
-            console.warn('Firebase load failed:', error);
+    // Try IndexedDB as last resort
+    try {
+        const indexedData = await loadFromIndexedDB('hasene_totalPoints');
+        if (indexedData) {
+            console.log('📦 User stats loaded from IndexedDB');
+            return { total_points: parseInt(indexedData) || 0 };
         }
+    } catch (error) {
+        console.warn('IndexedDB load failed:', error);
     }
     
-    // 4. Default value
+    // Default value
     console.log('🆕 Using default user stats');
     return { total_points: 0 };
 }
@@ -180,9 +202,11 @@ async function loadUserStats() {
 async function saveUserStats(stats) {
     const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : null;
     if (!user) {
-        console.warn('No user found, cannot save stats');
+        console.warn('⚠️ No user found, cannot save stats');
         return false;
     }
+    
+    console.log('💾 saveUserStats called:', { userId: user.id, userType: user.type, stats: Object.keys(stats) });
     
     const promises = [];
     let success = false;
@@ -203,19 +227,36 @@ async function saveUserStats(stats) {
     
     // 3. Save to Firebase (if Firebase user)
     if (!user.id.startsWith('local-')) {
+        console.log('🔥 Firebase user detected, syncing to Firestore...');
+        // Get username from localStorage (most up-to-date) or user object
+        const savedUsername = localStorage.getItem('hasene_username') || user.username || 'Anonim Kullanıcı';
+        // Add username to stats for backend reporting
+        const statsWithUsername = {
+            ...stats,
+            username: savedUsername
+        };
+        console.log('📝 Saving username to Firestore:', savedUsername);
         promises.push(
-            firestoreSet('user_stats', user.id, stats).then((result) => {
+            firestoreSet('user_stats', user.id, statsWithUsername).then((result) => {
                 if (result) {
-                    console.log('☁️ User stats saved to Firebase');
+                    console.log('☁️ ✅ User stats saved to Firebase successfully');
+                } else {
+                    console.warn('☁️ ❌ User stats save to Firebase failed');
                 }
                 return result;
+            }).catch((error) => {
+                console.error('☁️ ❌ User stats Firebase save error:', error);
+                return false;
             })
         );
+    } else {
+        console.log('ℹ️ Local user, skipping Firebase sync');
     }
     
     // Wait for all async operations (but don't fail if Firebase fails)
     try {
-        await Promise.allSettled(promises);
+        const results = await Promise.allSettled(promises);
+        console.log('📊 Save operations completed:', results.map(r => r.status));
     } catch (error) {
         console.warn('Some save operations failed:', error);
     }
@@ -229,12 +270,30 @@ async function saveUserStats(stats) {
 
 /**
  * Load daily tasks from all sources
+ * For Firebase users: Firebase → localStorage
+ * For local users: localStorage
  * @returns {Promise<Object>} Daily tasks object
  */
 async function loadDailyTasks() {
     const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : null;
+    const isFirebaseUser = user && !user.id.startsWith('local-');
     
-    // 1. Try localStorage first (most common case)
+    // For Firebase users, try Firebase first (source of truth)
+    if (isFirebaseUser) {
+        try {
+            const firebaseData = await firestoreGet('daily_tasks', user.id);
+            if (firebaseData) {
+                console.log('☁️ Daily tasks loaded from Firebase');
+                // Sync to localStorage for offline access
+                localStorage.setItem('hasene_dailyTasks', JSON.stringify(firebaseData));
+                return firebaseData;
+            }
+        } catch (error) {
+            console.warn('Firebase load failed:', error);
+        }
+    }
+    
+    // Try localStorage (works for both Firebase and local users as cache)
     try {
         const localTasks = localStorage.getItem('hasene_dailyTasks');
         if (localTasks) {
@@ -246,22 +305,7 @@ async function loadDailyTasks() {
         console.warn('localStorage load failed:', error);
     }
     
-    // 2. Try Firebase (if Firebase user)
-    if (user && !user.id.startsWith('local-')) {
-        try {
-            const firebaseData = await firestoreGet('daily_tasks', user.id);
-            if (firebaseData) {
-                console.log('☁️ Daily tasks loaded from Firebase');
-                // Sync to localStorage
-                localStorage.setItem('hasene_dailyTasks', JSON.stringify(firebaseData));
-                return firebaseData;
-            }
-        } catch (error) {
-            console.warn('Firebase load failed:', error);
-        }
-    }
-    
-    // 3. Default value
+    // Default value
     return null; // Will be initialized by game-core.js
 }
 
@@ -313,7 +357,7 @@ async function syncAllDataToBackend() {
         return true;
     }
     
-    if (getBackendType() !== 'firebase') {
+    if (getBackendTypeFromAuth() !== 'firebase') {
         console.log('ℹ️ Firebase not configured, no sync needed');
         return true;
     }
@@ -347,8 +391,9 @@ async function syncAllDataToBackend() {
 }
 
 // Make functions globally available
+// Note: getBackendType is NOT exported - use window.getBackendType from auth.js instead
 if (typeof window !== 'undefined') {
-    window.getBackendType = getBackendType;
+    // window.getBackendType is already set by auth.js, don't override it
     window.loadFromIndexedDB = loadFromIndexedDB;
     window.saveToIndexedDB = saveToIndexedDB;
     window.firestoreGet = firestoreGet;

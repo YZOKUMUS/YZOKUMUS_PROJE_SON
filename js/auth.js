@@ -13,13 +13,28 @@
  * @returns {Object|null} User object { id, username, email, type: 'local'|'firebase' }
  */
 function getCurrentUser() {
-    // Check for Firebase user first (if Firebase is enabled)
-    if (window.firebase && window.firebase.auth && window.firebase.auth().currentUser) {
-        const firebaseUser = window.firebase.auth().currentUser;
+    // Check for Firebase user first (if Firebase is enabled and authenticated)
+    if (window.FIREBASE_ENABLED && window.firebaseAuth && window.firebaseAuth.currentUser) {
+        const firebaseUser = window.firebaseAuth.currentUser;
+        // Check localStorage for saved username (user might have set a custom username)
+        const savedUsername = localStorage.getItem('hasene_username');
         return {
             id: firebaseUser.uid,
-            username: firebaseUser.displayName || 'Kullanıcı',
+            username: savedUsername || firebaseUser.displayName || 'Anonim Kullanıcı',
             email: firebaseUser.email || '',
+            type: 'firebase'
+        };
+    }
+    
+    // Check localStorage for Firebase user ID (in case Firebase isn't loaded yet)
+    const firebaseUserId = localStorage.getItem('hasene_firebase_user_id');
+    const userType = localStorage.getItem('hasene_user_type');
+    if (firebaseUserId && userType === 'firebase') {
+        const savedUsername = localStorage.getItem('hasene_username');
+        return {
+            id: firebaseUserId,
+            username: savedUsername || 'Anonim Kullanıcı',
+            email: '',
             type: 'firebase'
         };
     }
@@ -111,22 +126,30 @@ function getBackendType() {
 }
 
 /**
- * Sign out (clear local user only, Firebase handled separately)
+ * Sign out (clear local user or Firebase user)
  */
-function signOut() {
-    // Only clear local user data
-    const userId = getCurrentUser()?.id;
-    if (userId && userId.startsWith('local-')) {
+async function signOut() {
+    const user = getCurrentUser();
+    
+    // Sign out from Firebase if Firebase user
+    if (user && user.type === 'firebase' && window.firebaseAuth) {
+        try {
+            await window.firebaseAuth.signOut();
+            localStorage.removeItem('hasene_firebase_user_id');
+            localStorage.setItem('hasene_user_type', 'local');
+            console.log('✅ Firebase kullanıcı çıkış yaptı');
+        } catch (error) {
+            console.error('Firebase sign-out error:', error);
+        }
+    }
+    
+    // Clear local user data
+    if (user && user.id && user.id.startsWith('local-')) {
         localStorage.removeItem('hasene_user_id');
         localStorage.removeItem('hasene_username');
         localStorage.removeItem('hasene_user_email');
         console.log('✅ Local kullanıcı çıkış yaptı');
     }
-    
-    // Firebase sign out would be handled here if Firebase is enabled
-    // if (window.firebase && window.firebase.auth) {
-    //     window.firebase.auth().signOut();
-    // }
 }
 
 // ========================================
@@ -135,15 +158,30 @@ function signOut() {
 
 /**
  * Sign in with Firebase Anonymous Auth
- * This is a placeholder - implement when Firebase is configured
  */
 async function signInWithFirebaseAnonymous() {
-    // Placeholder for Firebase Anonymous Authentication
-    // Uncomment and implement when Firebase is configured:
-    /*
+    // Check if Firebase is available
+    if (!window.firebaseAuth || !window.FIREBASE_ENABLED) {
+        console.log('ℹ️ Firebase not configured, using local user');
+        return createLocalUser();
+    }
+    
     try {
-        const auth = window.firebase.auth();
-        const result = await auth.signInAnonymously();
+        // Check if already signed in
+        const currentUser = window.firebaseAuth.currentUser;
+        if (currentUser) {
+            return {
+                id: currentUser.uid,
+                username: 'Anonim Kullanıcı',
+                email: '',
+                type: 'firebase'
+            };
+        }
+        
+        // Sign in anonymously
+        const result = await window.firebaseAuth.signInAnonymously();
+        console.log('✅ Firebase anonymous sign-in successful');
+        
         return {
             id: result.user.uid,
             username: 'Anonim Kullanıcı',
@@ -155,10 +193,6 @@ async function signInWithFirebaseAnonymous() {
         // Fallback to local user
         return createLocalUser();
     }
-    */
-    
-    console.warn('Firebase authentication is not configured. Using local user.');
-    return createLocalUser();
 }
 
 // Make functions globally available

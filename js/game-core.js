@@ -277,7 +277,12 @@ let dailyProgress = 0;
 async function initApp() {
     console.log('🚀 Hasene Arapça Dersi başlatılıyor...');
     
-    // Initialize user (create local user if doesn't exist)
+    // Initialize Firebase (if enabled)
+    if (typeof window.initFirebase === 'function') {
+        await window.initFirebase();
+    }
+    
+    // Initialize user (create local user if doesn't exist, or use Firebase user)
     if (typeof window.getCurrentUser === 'function') {
         const user = window.getCurrentUser();
         console.log('👤 Current user:', user);
@@ -288,7 +293,7 @@ async function initApp() {
     
     // Setup UI
     setupEventListeners();
-    updateStatsDisplay();
+    updateStatsDisplay(); // This also calls updateUserStatusDisplay()
     
     // Browser geri tuşu dinleyicisi
     setupBackButtonHandler();
@@ -308,42 +313,92 @@ async function initApp() {
         const onboardingComplete = localStorage.getItem('hasene_onboarding_complete');
         if (!onboardingComplete) {
             setTimeout(() => showOnboarding(), 500);
-        } else {
-            // Check for daily reward
-            checkAndShowDailyReward();
         }
+        // Daily reward will be shown via reward box when all tasks are completed
+        // No need to show it automatically on page load
     }, 1500);
     
     console.log('✅ Uygulama başlatıldı');
 }
 
 /**
- * Check and show daily reward if not claimed today
- */
-function checkAndShowDailyReward() {
-    const today = getLocalDateString();
-    const lastReward = localStorage.getItem('hasene_last_daily_reward');
-    
-    if (lastReward !== today) {
-        setTimeout(() => showDailyReward(), 500);
-    }
-}
-
-/**
  * Load all saved stats
+ * Tries Firebase first (if Firebase user), then falls back to localStorage
  */
 async function loadStats() {
-    // Total points
-    totalPoints = loadFromStorage(CONFIG.STORAGE_KEYS.TOTAL_POINTS, 0);
+    const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : null;
+    const isFirebaseUser = user && !user.id.startsWith('local-');
     
-    // Current level
+    // If Firebase user, try to load from Firebase first
+    if (isFirebaseUser && typeof window.loadUserStats === 'function' && typeof window.loadDailyTasks === 'function') {
+        try {
+            console.log('🔥 Loading stats from Firebase...');
+            const firebaseStats = await window.loadUserStats();
+            const firebaseTasks = await window.loadDailyTasks();
+            
+            if (firebaseStats && firebaseStats.total_points !== undefined) {
+                // Load from Firebase data
+                totalPoints = firebaseStats.total_points || 0;
+                currentLevel = calculateLevel(totalPoints);
+                
+                // Update streak data from Firebase
+                if (firebaseStats.streak_data) {
+                    streakData = { ...streakData, ...firebaseStats.streak_data };
+                }
+                
+                // Update game stats from Firebase
+                if (firebaseStats.game_stats) {
+                    gameStats = { ...gameStats, ...firebaseStats.game_stats };
+                }
+                
+                // Update badges from Firebase
+                if (firebaseStats.badges) {
+                    badgesUnlocked = firebaseStats.badges;
+                }
+                
+                // Sync to localStorage for offline access
+                saveToStorage(CONFIG.STORAGE_KEYS.TOTAL_POINTS, totalPoints);
+                saveToStorage(CONFIG.STORAGE_KEYS.STREAK_DATA, streakData);
+                saveToStorage(CONFIG.STORAGE_KEYS.GAME_STATS, gameStats);
+                saveToStorage('hasene_badges', badgesUnlocked);
+                
+                console.log('✅ Stats loaded from Firebase:', { totalPoints, currentLevel });
+            }
+            
+            // Load daily tasks from Firebase
+            if (firebaseTasks) {
+                dailyTasks = { ...dailyTasks, ...firebaseTasks };
+                saveToStorage(CONFIG.STORAGE_KEYS.DAILY_TASKS, dailyTasks);
+                console.log('✅ Daily tasks loaded from Firebase');
+            }
+        } catch (error) {
+            console.warn('⚠️ Firebase load failed, falling back to localStorage:', error);
+            // Fall through to localStorage loading
+        }
+    }
+    
+    // If not Firebase user, or Firebase load failed, load from localStorage
+    // Also load additional data that might not be in Firebase yet
+    if (totalPoints === undefined || totalPoints === 0) {
+        totalPoints = loadFromStorage(CONFIG.STORAGE_KEYS.TOTAL_POINTS, 0);
+    }
     currentLevel = calculateLevel(totalPoints);
     
-    // Streak data
-    streakData = loadFromStorage(CONFIG.STORAGE_KEYS.STREAK_DATA, streakData);
+    // Merge localStorage data (in case Firebase doesn't have all fields)
+    const localStreakData = loadFromStorage(CONFIG.STORAGE_KEYS.STREAK_DATA, {});
+    if (Object.keys(localStreakData).length > 0) {
+        streakData = { ...streakData, ...localStreakData };
+    }
     
-    // Game stats
-    gameStats = loadFromStorage(CONFIG.STORAGE_KEYS.GAME_STATS, gameStats);
+    const localGameStats = loadFromStorage(CONFIG.STORAGE_KEYS.GAME_STATS, {});
+    if (Object.keys(localGameStats).length > 0) {
+        gameStats = { ...gameStats, ...localGameStats };
+    }
+    
+    const localBadges = loadFromStorage('hasene_badges', {});
+    if (Object.keys(localBadges).length > 0) {
+        badgesUnlocked = { ...badgesUnlocked, ...localBadges };
+    }
     
     // Daily goal
     dailyGoal = loadFromStorage(CONFIG.STORAGE_KEYS.DAILY_GOAL, 2700);
@@ -357,27 +412,28 @@ async function loadStats() {
     } else {
         dailyProgress = 0;
         saveToStorage(CONFIG.STORAGE_KEYS.DAILY_PROGRESS, { date: today, points: 0 });
+        // Reset daily goal completion flag for new day
+        localStorage.removeItem('hasene_last_daily_goal_completed');
     }
     
-    // Word stats
+    // Word stats (localStorage only for now)
     wordStats = loadFromStorage('hasene_word_stats', {});
     
-    // Favorites
+    // Favorites (localStorage only for now)
     favorites = loadFromStorage('hasene_favorites', []);
     
-    // Unlocked achievements
+    // Unlocked achievements (localStorage only for now)
     unlockedAchievements = loadFromStorage('hasene_achievements', []);
     
-    // Unlocked badges
-    badgesUnlocked = loadFromStorage('hasene_badges', {});
-    
-    // Daily tasks
-    await checkDailyTasks();
+    // Daily tasks - if not loaded from Firebase, load from localStorage
+    if (!isFirebaseUser || !dailyTasks || !dailyTasks.tasks || dailyTasks.tasks.length === 0) {
+        await checkDailyTasks();
+    }
     
     // Check streak
     checkStreak();
     
-    console.log('📊 Stats loaded:', { totalPoints, currentLevel, streakData });
+    console.log('📊 Stats loaded:', { totalPoints, currentLevel, streakData, source: isFirebaseUser ? 'Firebase+localStorage' : 'localStorage' });
 }
 
 /**
@@ -403,23 +459,45 @@ async function saveStats() {
     // 2. Sync to Firebase if Firebase user (don't wait, fire and forget)
     if (typeof window.saveUserStats === 'function' && typeof window.saveDailyTasks === 'function') {
         const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : null;
+        console.log('💾 saveStats - User check:', { user: user ? { id: user.id, type: user.type } : null });
+        
         if (user && !user.id.startsWith('local-')) {
-            // Sync user stats to Firebase
+            console.log('🔥 Syncing to Firebase...');
+            // Get username from localStorage (most up-to-date)
+            const username = localStorage.getItem('hasene_username') || user.username || 'Anonim Kullanıcı';
+            // Sync user stats to Firebase (include username for backend reporting)
             window.saveUserStats({
                 total_points: totalPoints,
                 badges: badgesUnlocked,
                 streak_data: streakData,
                 game_stats: gameStats,
-                perfect_lessons_count: gameStats.perfectLessons || 0
+                perfect_lessons_count: gameStats.perfectLessons || 0,
+                username: username // Explicitly include username
+            }).then(success => {
+                if (success) {
+                    console.log('✅ Firebase user stats sync completed');
+                } else {
+                    console.warn('⚠️ Firebase user stats sync failed');
+                }
             }).catch(err => {
-                console.warn('Firebase sync failed (using localStorage only):', err);
+                console.error('❌ Firebase sync error:', err);
             });
             
             // Sync daily tasks to Firebase
-            window.saveDailyTasks(dailyTasks).catch(err => {
-                console.warn('Firebase daily tasks sync failed:', err);
+            window.saveDailyTasks(dailyTasks).then(success => {
+                if (success) {
+                    console.log('✅ Firebase daily tasks sync completed');
+                } else {
+                    console.warn('⚠️ Firebase daily tasks sync failed');
+                }
+            }).catch(err => {
+                console.error('❌ Firebase daily tasks sync error:', err);
             });
+        } else {
+            console.log('ℹ️ Local user, Firebase sync skipped');
         }
+    } else {
+        console.warn('⚠️ Firebase sync functions not available');
     }
 }
 
@@ -609,7 +687,26 @@ function setupNavigationButtons() {
  */
 async function startGame(gameMode) {
     console.log(`🎮 Starting game: ${gameMode}`);
+    
+    // Check if username is set (per README: "Kullanıcı adı ile direkt giriş yapılır")
+    const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : null;
+    const username = user?.username || localStorage.getItem('hasene_username') || '';
+    
+    // If no username or default username (including Firebase default), show login modal
+    const defaultUsernames = ['Kullanıcı', 'Misafir', 'Anonim Kullanıcı'];
+    if (!username || defaultUsernames.includes(username) || username.trim() === '') {
+        // Store the game mode to start after login
+        window.pendingGameMode = gameMode;
+        showUsernameLoginModal();
+        return;
+    }
+    
     currentGameMode = gameMode;
+    
+    // Show login success message when entering game (username already defined above)
+    if (username && username !== 'Misafir' && username !== 'Kullanıcı' && username !== 'Anonim Kullanıcı') {
+        showToast(`🎮 Oyuna giriş yapıldı: ${username}`, 'success', 2000);
+    }
     
     // Hide main container
     document.getElementById('main-container').classList.add('hidden');
@@ -922,11 +1019,22 @@ function endGame() {
     // Check badges based on total points
     checkBadges();
     
-    // Check daily goal
+    // Check daily goal (this will also update streak if goal is completed)
     checkDailyGoal();
     
-    // Check and update streak
-    checkStreak();
+    // Update weekly XP for leaderboard
+    if (typeof window.updateWeeklyXP === 'function') {
+        window.updateWeeklyXP(sessionScore).then(newWeeklyXP => {
+            console.log('✅ Weekly XP updated:', newWeeklyXP);
+            // Check if league changed
+            const newLeague = typeof window.getUserLeague === 'function' ? window.getUserLeague() : null;
+            if (newLeague) {
+                console.log('📊 Current league:', newLeague.name);
+            }
+        }).catch(err => {
+            console.warn('⚠️ Weekly XP update failed:', err);
+        });
+    }
     
     // Save stats
     debouncedSaveStats();
@@ -1533,17 +1641,25 @@ function getWordAnalysis() {
             learning: 0,
             struggling: 0,
             averageSuccessRate: 0,
-            dueForReview: 0
+            dueForReview: 0,
+            recentlyViewed: [],
+            mostPracticed: [],
+            newlyLearned: []
         };
     }
     
     const today = new Date(getLocalDateString());
+    const todayStr = getLocalDateString();
+    const sevenDaysAgo = new Date(today);
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
     
     let mastered = 0;
     let learning = 0;
     let struggling = 0;
     let dueForReview = 0;
     let totalSuccessRate = 0;
+    
+    const wordsWithDates = [];
     
     allStats.forEach(([id, stats]) => {
         totalSuccessRate += stats.successRate || 0;
@@ -1562,7 +1678,47 @@ function getWordAnalysis() {
                 dueForReview++;
             }
         }
+        
+        // Collect data for detailed analysis
+        wordsWithDates.push({
+            id,
+            lastReview: stats.lastReview || null,
+            lastCorrect: stats.lastWrong || stats.lastCorrect || null,
+            attempts: stats.attempts || 0,
+            successRate: stats.successRate || 0,
+            masteryLevel: stats.masteryLevel || 0
+        });
     });
+    
+    // En son görülen kelimeler (lastReview'e göre sırala)
+    const recentlyViewed = [...wordsWithDates]
+        .filter(w => w.lastReview)
+        .sort((a, b) => {
+            const dateA = new Date(a.lastReview);
+            const dateB = new Date(b.lastReview);
+            return dateB - dateA;
+        })
+        .slice(0, 10);
+    
+    // En çok çalışılan kelimeler (attempts'e göre sırala)
+    const mostPracticed = [...wordsWithDates]
+        .filter(w => w.attempts > 0)
+        .sort((a, b) => b.attempts - a.attempts)
+        .slice(0, 10);
+    
+    // Son 7 günde öğrenilen kelimeler (yeni öğrenilen)
+    const newlyLearned = [...wordsWithDates]
+        .filter(w => {
+            if (!w.lastCorrect) return false;
+            const learnedDate = new Date(w.lastCorrect);
+            return learnedDate >= sevenDaysAgo;
+        })
+        .sort((a, b) => {
+            const dateA = new Date(a.lastCorrect);
+            const dateB = new Date(b.lastCorrect);
+            return dateB - dateA;
+        })
+        .slice(0, 10);
     
     return {
         totalWords,
@@ -1570,8 +1726,40 @@ function getWordAnalysis() {
         learning,
         struggling,
         averageSuccessRate: Math.round(totalSuccessRate / totalWords),
-        dueForReview
+        dueForReview,
+        recentlyViewed,
+        mostPracticed,
+        newlyLearned
     };
+}
+
+/**
+ * Get word details from wordId
+ * @param {string} wordId - Word ID
+ * @returns {Object|null} Word data or null
+ */
+function getWordDetails(wordId) {
+    if (!wordId || !window.kelimeData) return null;
+    return window.kelimeData.find(w => (w.id === wordId || w.kelime_id === wordId));
+}
+
+/**
+ * Format date for display
+ * @param {string} dateStr - Date string (YYYY-MM-DD)
+ * @returns {string} Formatted date
+ */
+function formatDateForDisplay(dateStr) {
+    if (!dateStr) return 'Hiç görülmedi';
+    const date = new Date(dateStr);
+    const today = new Date(getLocalDateString());
+    const diffTime = today - date;
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) return 'Bugün';
+    if (diffDays === 1) return 'Dün';
+    if (diffDays < 7) return `${diffDays} gün önce`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} hafta önce`;
+    return `${Math.floor(diffDays / 30)} ay önce`;
 }
 
 /**
@@ -1582,47 +1770,139 @@ function showWordAnalysisModal() {
     const struggling = getStrugglingWords();
     
     let content = `
-        <div class="analysis-summary">
-            <div class="analysis-stat">
-                <span class="stat-value">${analysis.totalWords}</span>
-                <span class="stat-label">Toplam Kelime</span>
+        <div class="analysis-summary" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px;">
+            <div class="analysis-stat" style="text-align: center; padding: 16px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                <span class="stat-value" style="display: block; font-size: 24px; font-weight: bold; color: rgba(255,255,255,0.9);">${analysis.totalWords}</span>
+                <span class="stat-label" style="display: block; font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 4px;">Toplam Kelime</span>
             </div>
-            <div class="analysis-stat mastered">
-                <span class="stat-value">${analysis.mastered}</span>
-                <span class="stat-label">Ustalaşılan</span>
+            <div class="analysis-stat mastered" style="text-align: center; padding: 16px; background: rgba(76, 175, 80, 0.1); border-radius: 8px;">
+                <span class="stat-value" style="display: block; font-size: 24px; font-weight: bold; color: #4caf50;">${analysis.mastered}</span>
+                <span class="stat-label" style="display: block; font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 4px;">Ustalaşılan</span>
             </div>
-            <div class="analysis-stat learning">
-                <span class="stat-value">${analysis.learning}</span>
-                <span class="stat-label">Öğreniliyor</span>
+            <div class="analysis-stat learning" style="text-align: center; padding: 16px; background: rgba(255, 152, 0, 0.1); border-radius: 8px;">
+                <span class="stat-value" style="display: block; font-size: 24px; font-weight: bold; color: #ff9800;">${analysis.learning}</span>
+                <span class="stat-label" style="display: block; font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 4px;">Öğreniliyor</span>
             </div>
-            <div class="analysis-stat struggling">
-                <span class="stat-value">${analysis.struggling}</span>
-                <span class="stat-label">Zorlanılan</span>
+            <div class="analysis-stat struggling" style="text-align: center; padding: 16px; background: rgba(244, 67, 54, 0.1); border-radius: 8px;">
+                <span class="stat-value" style="display: block; font-size: 24px; font-weight: bold; color: #f44336;">${analysis.struggling}</span>
+                <span class="stat-label" style="display: block; font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 4px;">Zorlanılan</span>
             </div>
         </div>
         
-        <div class="analysis-progress">
-            <div class="progress-bar">
-                <div class="progress-mastered" style="width: ${analysis.totalWords > 0 ? (analysis.mastered / analysis.totalWords * 100) : 0}%"></div>
-                <div class="progress-learning" style="width: ${analysis.totalWords > 0 ? (analysis.learning / analysis.totalWords * 100) : 0}%"></div>
+        <div class="analysis-progress" style="margin: 20px 0; padding: 16px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+            <div class="progress-bar" style="height: 20px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; margin-bottom: 12px; display: flex;">
+                <div class="progress-mastered" style="height: 100%; background: linear-gradient(90deg, #4caf50, #8bc34a); width: ${analysis.totalWords > 0 ? (analysis.mastered / analysis.totalWords * 100) : 0}%"></div>
+                <div class="progress-learning" style="height: 100%; background: linear-gradient(90deg, #ff9800, #ffc107); width: ${analysis.totalWords > 0 ? (analysis.learning / analysis.totalWords * 100) : 0}%"></div>
+                <div class="progress-struggling" style="height: 100%; background: linear-gradient(90deg, #f44336, #e91e63); width: ${analysis.totalWords > 0 ? (analysis.struggling / analysis.totalWords * 100) : 0}%"></div>
             </div>
-            <p>Ortalama Başarı: <strong>${analysis.averageSuccessRate}%</strong></p>
-            <p>Tekrar Bekleyen: <strong>${analysis.dueForReview}</strong> kelime</p>
+            <p style="margin: 8px 0; color: rgba(255,255,255,0.9);">Ortalama Başarı: <strong>${analysis.averageSuccessRate}%</strong></p>
+            <p style="margin: 8px 0; color: rgba(255,255,255,0.9);">Tekrar Bekleyen: <strong>${analysis.dueForReview}</strong> kelime</p>
         </div>
     `;
     
+    // En son görülen kelimeler
+    if (analysis.recentlyViewed && analysis.recentlyViewed.length > 0) {
+        content += `
+            <div class="analysis-section" style="margin: 20px 0; padding: 16px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                <h4 style="margin: 0 0 12px 0; color: rgba(255,255,255,0.9); font-size: 16px; display: flex; align-items: center; gap: 8px;">
+                    <span>📅</span>
+                    <span>En Son Görülen Kelimeler</span>
+                </h4>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    ${analysis.recentlyViewed.slice(0, 5).map(w => {
+                        const word = getWordDetails(w.id);
+                        return `
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 6px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 500; color: rgba(255,255,255,0.9); font-size: 18px; font-family: 'KFGQPC Uthmanic Script HAFS', serif;">${word ? (word.kelime || word.arabic) : w.id}</div>
+                                    ${word ? `<div style="font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 4px;">${word.anlam || word.translation}</div>` : ''}
+                                </div>
+                                <span style="font-size: 12px; color: rgba(255,255,255,0.6); margin-left: 12px; white-space: nowrap;">${formatDateForDisplay(w.lastReview)}</span>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
+        `;
+    }
+    
+    // En çok çalışılan kelimeler
+    if (analysis.mostPracticed && analysis.mostPracticed.length > 0) {
+        content += `
+            <div class="analysis-section" style="margin: 20px 0; padding: 16px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                <h4 style="margin: 0 0 12px 0; color: rgba(255,255,255,0.9); font-size: 16px; display: flex; align-items: center; gap: 8px;">
+                    <span>🔥</span>
+                    <span>En Çok Çalışılan Kelimeler</span>
+                </h4>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    ${analysis.mostPracticed.slice(0, 5).map(w => {
+                        const word = getWordDetails(w.id);
+                        return `
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 6px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 500; color: rgba(255,255,255,0.9); font-size: 18px; font-family: 'KFGQPC Uthmanic Script HAFS', serif;">${word ? (word.kelime || word.arabic) : w.id}</div>
+                                    ${word ? `<div style="font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 4px;">${word.anlam || word.translation}</div>` : ''}
+                                </div>
+                                <div style="display: flex; gap: 12px; align-items: center; margin-left: 12px;">
+                                    <span style="font-size: 12px; color: rgba(255,255,255,0.6); white-space: nowrap;">${w.attempts} deneme</span>
+                                    <span style="font-size: 12px; color: ${w.successRate >= 70 ? '#4caf50' : w.successRate >= 50 ? '#ff9800' : '#f44336'}; font-weight: 500; white-space: nowrap;">${w.successRate}%</span>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
+        `;
+    }
+    
+    // Yeni öğrenilen kelimeler (son 7 gün)
+    if (analysis.newlyLearned && analysis.newlyLearned.length > 0) {
+        content += `
+            <div class="analysis-section" style="margin: 20px 0; padding: 16px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                <h4 style="margin: 0 0 12px 0; color: rgba(255,255,255,0.9); font-size: 16px; display: flex; align-items: center; gap: 8px;">
+                    <span>✨</span>
+                    <span>Yeni Öğrenilen Kelimeler (Son 7 Gün)</span>
+                </h4>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    ${analysis.newlyLearned.slice(0, 5).map(w => {
+                        const word = getWordDetails(w.id);
+                        return `
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 6px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 500; color: rgba(255,255,255,0.9); font-size: 18px; font-family: 'KFGQPC Uthmanic Script HAFS', serif;">${word ? (word.kelime || word.arabic) : w.id}</div>
+                                    ${word ? `<div style="font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 4px;">${word.anlam || word.translation}</div>` : ''}
+                                </div>
+                                <span style="font-size: 12px; color: rgba(255,255,255,0.6); margin-left: 12px; white-space: nowrap;">${formatDateForDisplay(w.lastCorrect)}</span>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
+        `;
+    }
+    
+    // Zorlanılan kelimeler
     if (struggling.length > 0) {
         content += `
-            <div class="struggling-words">
-                <h4>🔴 Zorlandığın Kelimeler</h4>
-                <ul>
-                    ${struggling.slice(0, 5).map(w => `
-                        <li>
-                            <span class="word-id">${w.id}</span>
-                            <span class="word-rate">${w.successRate}%</span>
-                        </li>
-                    `).join('')}
-                </ul>
+            <div class="analysis-section" style="margin: 20px 0; padding: 16px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                <h4 style="margin: 0 0 12px 0; color: rgba(255,255,255,0.9); font-size: 16px; display: flex; align-items: center; gap: 8px;">
+                    <span>🔴</span>
+                    <span>Zorlandığın Kelimeler</span>
+                </h4>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    ${struggling.slice(0, 5).map(w => {
+                        const word = getWordDetails(w.id);
+                        return `
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: rgba(244, 67, 54, 0.1); border-radius: 6px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 500; color: rgba(255,255,255,0.9); font-size: 18px; font-family: 'KFGQPC Uthmanic Script HAFS', serif;">${word ? (word.kelime || word.arabic) : w.id}</div>
+                                    ${word ? `<div style="font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 4px;">${word.anlam || word.translation}</div>` : ''}
+                                </div>
+                                <span style="font-size: 12px; color: #f44336; font-weight: 500; margin-left: 12px; white-space: nowrap;">${w.successRate}% başarı</span>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
             </div>
         `;
     }
@@ -1630,7 +1910,7 @@ function showWordAnalysisModal() {
     // Create and show modal
     const modal = document.getElementById('word-analysis-modal');
     if (modal) {
-        const modalContent = modal.querySelector('.modal-body') || modal.querySelector('.analysis-content');
+        const modalContent = modal.querySelector('.modal-body') || modal.querySelector('#analysis-content');
         if (modalContent) {
             modalContent.innerHTML = content;
         }
@@ -2626,23 +2906,34 @@ function closeRewardModal() {
 window.claimDailyReward = claimDailyReward;
 window.closeRewardModal = closeRewardModal;
 
-function checkStreak() {
+/**
+ * Check and update streak based on daily goal completion
+ * Streak only increases when daily goal is completed (per README)
+ */
+function updateStreakOnDailyGoalCompletion() {
     const today = getLocalDateString();
     const yesterday = getLocalDateString(new Date(Date.now() - 86400000));
     
+    // Only update streak if daily goal was completed today
+    // Check if we already updated streak for today's goal completion
     if (streakData.lastPlayDate === today) {
-        // Already played today
+        // Already updated streak for today
         return;
     }
     
+    // Check if yesterday's goal was completed (to continue streak)
     if (streakData.lastPlayDate === yesterday) {
-        // Continue streak
+        // Continue streak - yesterday's goal was completed
         streakData.currentStreak++;
-    } else if (streakData.lastPlayDate !== today) {
-        // Streak broken
+    } else if (streakData.lastPlayDate && streakData.lastPlayDate !== today && streakData.lastPlayDate !== yesterday) {
+        // Streak broken - gap in days
+        streakData.currentStreak = 1; // Start new streak
+    } else if (!streakData.lastPlayDate || streakData.lastPlayDate === '') {
+        // First time completing daily goal
         streakData.currentStreak = 1;
     }
     
+    // Update last play date to today (goal completed)
     streakData.lastPlayDate = today;
     streakData.bestStreak = Math.max(streakData.bestStreak, streakData.currentStreak);
     
@@ -2654,12 +2945,73 @@ function checkStreak() {
     debouncedSaveStats();
 }
 
+/**
+ * Check streak status on app load (to reset if needed)
+ * This checks if streak should be reset due to gap in days
+ */
+function checkStreak() {
+    const today = getLocalDateString();
+    const yesterday = getLocalDateString(new Date(Date.now() - 86400000));
+    
+    // If last play date is not today and not yesterday, streak might be broken
+    // But don't update streak here - only update when daily goal is completed
+    // This function just validates streak state on load
+    if (streakData.lastPlayDate && streakData.lastPlayDate !== today && streakData.lastPlayDate !== yesterday && streakData.lastPlayDate !== '') {
+        // There's a gap, but don't reset streak until we check if goal was completed today
+        // Streak will be reset when daily goal is completed (if yesterday wasn't completed)
+        // or will continue if today's goal is completed
+    }
+}
+
+/**
+ * Handle user logout
+ */
+async function handleUserLogout() {
+    if (!confirm('Çıkış yapmak istediğinize emin misiniz? Tüm veriler kaydedilecek.')) {
+        return;
+    }
+    
+    // Sign out using auth.js function
+    if (typeof window.signOut === 'function') {
+        await window.signOut();
+    } else {
+        // Fallback: Clear localStorage
+        localStorage.removeItem('hasene_user_id');
+        localStorage.removeItem('hasene_username');
+        localStorage.removeItem('hasene_user_email');
+    }
+    
+    // Update UI
+    updateUserStatusDisplay();
+    
+    // Show logout message
+    showToast('👋 Çıkış yapıldı', 'info', 2000);
+    
+    // If in game, go to main menu
+    if (currentGameMode) {
+        goToMainMenu();
+    }
+}
+
 function checkDailyGoal() {
-    if (dailyProgress >= dailyGoal) {
+    const today = getLocalDateString();
+    const lastGoalCompleted = localStorage.getItem('hasene_last_daily_goal_completed');
+    
+    // Check if daily goal is reached and not already completed today
+    if (dailyProgress >= dailyGoal && lastGoalCompleted !== today) {
         // Daily goal completed!
         showToast(`🎯 Günlük hedef tamamlandı! +${CONFIG.DAILY_GOAL_BONUS} Hasene`, 'success', 3000);
         totalPoints += CONFIG.DAILY_GOAL_BONUS;
-        dailyProgress += CONFIG.DAILY_GOAL_BONUS;
+        dailyProgress += CONFIG.DAILY_GOAL_BONUS; // Bonus da günlük vird'e eklenir
+        
+        // Mark as completed today
+        localStorage.setItem('hasene_last_daily_goal_completed', today);
+        
+        // Update streak when daily goal is completed (per README: "Her gün, günlük vird hedefi tamamlanırsa seri artar")
+        updateStreakOnDailyGoalCompletion();
+        
+        // Save stats immediately
+        debouncedSaveStats();
     }
 }
 
@@ -2674,6 +3026,72 @@ function updateStatsDisplay() {
     document.getElementById('level-display').textContent = currentLevel;
     
     updateDailyGoalDisplay();
+    updateUserStatusDisplay();
+}
+
+/**
+ * Update user status display (username, login/logout buttons)
+ */
+function updateUserStatusDisplay() {
+    const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : null;
+    const usernameDisplay = document.getElementById('current-username-display');
+    const statusIndicator = document.getElementById('user-status-indicator');
+    const loginBtn = document.getElementById('user-login-btn');
+    const logoutBtn = document.getElementById('user-logout-btn');
+    
+    if (!usernameDisplay || !statusIndicator || !loginBtn || !logoutBtn) return;
+    
+    const username = user?.username || localStorage.getItem('hasene_username') || 'Misafir';
+    const defaultUsernames = ['Kullanıcı', 'Misafir', 'Anonim Kullanıcı'];
+    const isLoggedIn = user && username && !defaultUsernames.includes(username) && username.trim() !== '';
+    
+    // Update username display
+    usernameDisplay.textContent = isLoggedIn ? username : 'Misafir';
+    
+    // Update status indicator
+    if (isLoggedIn) {
+        statusIndicator.textContent = '🟢 Giriş Yapıldı';
+        statusIndicator.style.background = 'rgba(76, 175, 80, 0.2)';
+        statusIndicator.style.color = '#4caf50';
+        loginBtn.style.display = 'none';
+        logoutBtn.style.display = 'block';
+    } else {
+        statusIndicator.textContent = '🔴 Çıkış Yapıldı';
+        statusIndicator.style.background = 'rgba(244, 67, 54, 0.2)';
+        statusIndicator.style.color = '#f44336';
+        loginBtn.style.display = 'block';
+        logoutBtn.style.display = 'none';
+    }
+}
+
+/**
+ * Handle user logout
+ */
+async function handleUserLogout() {
+    if (!confirm('Çıkış yapmak istediğinize emin misiniz? Tüm veriler kaydedilecek.')) {
+        return;
+    }
+    
+    // Sign out using auth.js function
+    if (typeof window.signOut === 'function') {
+        await window.signOut();
+    } else {
+        // Fallback: Clear localStorage
+        localStorage.removeItem('hasene_user_id');
+        localStorage.removeItem('hasene_username');
+        localStorage.removeItem('hasene_user_email');
+    }
+    
+    // Update UI
+    updateUserStatusDisplay();
+    
+    // Show logout message
+    showToast('👋 Çıkış yapıldı', 'info', 2000);
+    
+    // If in game, go to main menu
+    if (currentGameMode) {
+        goToMainMenu();
+    }
 }
 
 function updateDailyGoalDisplay() {
@@ -3705,13 +4123,13 @@ function resetAllData() {
         return;
     }
     
-    if (!confirm('Son uyarı: Tüm puanlar, rozetler, başarımlar, favoriler, istatistikler ve günlük görevler silinecek. Emin misiniz?')) {
+    if (!confirm('Son uyarı: Tüm puanlar, rozetler, başarımlar, favoriler, istatistikler, günlük görevler, takvim, haftalık XP ve LİDER TABLOSU verileri silinecek. Emin misiniz?')) {
         return;
     }
     
     console.log('🔄 Tüm veriler sıfırlanıyor...');
     
-    // Clear all localStorage keys
+    // Clear all localStorage keys - EXHAUSTIVE LIST
     const allStorageKeys = [
         // CONFIG.STORAGE_KEYS
         CONFIG.STORAGE_KEYS.TOTAL_POINTS,
@@ -3723,26 +4141,39 @@ function resetAllData() {
         CONFIG.STORAGE_KEYS.DAILY_PROGRESS,
         CONFIG.STORAGE_KEYS.ACHIEVEMENTS,
         
-        // Other storage keys
+        // Game data
         'hasene_word_stats',
         'hasene_favorites',
         'hasene_achievements',
         'hasene_badges',
-        'hasene_onboarding_complete',
+        
+        // Daily and calendar
         'hasene_dailyReward',
+        'hasene_last_daily_goal_completed',
+        'hasene_last_daily_reward',
+        
+        // Hints
         'hasene_hintsUsedToday',
         'hasene_hintsDate',
         'hasene_lastHintDate',
-        'hasene_hintsCount'
+        'hasene_hintsCount',
+        
+        // Onboarding
+        'hasene_onboarding_complete',
+        'hasene_onboarding_seen_v2',
+        
+        // Weekly XP and leaderboard (all weeks)
+        // These will be removed by the hasene_ prefix cleanup below
     ];
     
-    // Remove all keys
+    // Remove all specific keys
     allStorageKeys.forEach(key => {
         localStorage.removeItem(key);
         console.log(`✓ Removed: ${key}`);
     });
     
-    // Clear all localStorage items that start with 'hasene_'
+    // Clear ALL localStorage items that start with 'hasene_'
+    // This includes weekly XP keys, daily stats, calendar data, etc.
     const keysToRemove = [];
     for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
@@ -3753,6 +4184,24 @@ function resetAllData() {
     keysToRemove.forEach(key => {
         localStorage.removeItem(key);
         console.log(`✓ Removed: ${key}`);
+    });
+    
+    // Also clear any daily stats keys (format: hasene_daily_YYYY-MM-DD)
+    const allKeys = [];
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key) allKeys.push(key);
+    }
+    allKeys.forEach(key => {
+        if (key.startsWith('hasene_daily_') || 
+            key.startsWith('hasene_weekly_xp_') ||
+            key.startsWith('hasene_calendar_') ||
+            key.includes('hasene') && key.includes('daily') ||
+            key.includes('hasene') && key.includes('weekly') ||
+            key.includes('hasene') && key.includes('calendar')) {
+            localStorage.removeItem(key);
+            console.log(`✓ Removed: ${key}`);
+        }
     });
     
     // Reset global variables
@@ -3802,8 +4251,32 @@ function resetAllData() {
     unlockedAchievements = [];
     badgesUnlocked = {};
     
+    // Reset reading mode indices
+    currentAyetIndex = 0;
+    currentDuaIndex = 0;
+    currentHadisIndex = 0;
+    
+    // Reset submode tracking
+    currentKelimeSubmode = 'classic';
+    currentElifBaSubmode = 'harfler';
+    
+    // Reset onboarding
+    onboardingSlideIndex = 0;
+    
     // Close all modals
     closeAllModals();
+    
+    // Reset reading mode indices
+    currentAyetIndex = 0;
+    currentDuaIndex = 0;
+    currentHadisIndex = 0;
+    
+    // Reset submode tracking
+    currentKelimeSubmode = 'classic';
+    currentElifBaSubmode = 'harfler';
+    
+    // Reset onboarding
+    onboardingSlideIndex = 0;
     
     // Reset current game state
     currentGameMode = null;
@@ -3812,7 +4285,7 @@ function resetAllData() {
     currentQuestion = null;
     currentOptions = [];
     
-    console.log('✅ Tüm veriler sıfırlandı, sayfa yenileniyor...');
+    console.log('✅ Tüm veriler sıfırlandı (puanlar, rozetler, başarımlar, favoriler, kelime istatistikleri, günlük görevler, takvim, haftalık XP, lider tablosu). Sayfa yenileniyor...');
     
     // Immediately reload page to properly reinitialize everything
     window.location.reload();
@@ -3821,6 +4294,88 @@ function resetAllData() {
 // ========================================
 // INITIALIZE ON LOAD
 // ========================================
+
+/**
+ * Show username login modal
+ */
+function showUsernameLoginModal() {
+    const input = document.getElementById('username-input');
+    if (input) {
+        // Always clear input for fresh entry (user wants to type directly)
+        input.value = '';
+        input.focus();
+        // Select all text if there's any (for immediate replacement)
+        input.select();
+    }
+    openModal('username-login-modal');
+}
+
+/**
+ * Confirm username and start pending game
+ */
+function confirmUsername() {
+    const input = document.getElementById('username-input');
+    if (!input) return;
+    
+    const username = input.value.trim();
+    if (!username || username.length < 2) {
+        showToast('Lütfen en az 2 karakterlik bir kullanıcı adı girin', 'error');
+        return;
+    }
+    
+    // Update username in localStorage FIRST (before getCurrentUser)
+    localStorage.setItem('hasene_username', username);
+    
+    // If user exists and is local, update it; otherwise just save username
+    const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : null;
+    if (user && user.type === 'local') {
+        // Update existing local user
+        if (typeof window.createLocalUser === 'function') {
+            window.createLocalUser(username);
+        }
+    } else if (user && user.type === 'firebase') {
+        // For Firebase users, username is saved in localStorage and will be synced to Firestore
+        // Firebase user ID stays the same, only username updates
+    } else {
+        // Create new local user if no user exists
+        if (typeof window.createLocalUser === 'function') {
+            window.createLocalUser(username);
+        }
+    }
+    
+    closeModal('username-login-modal');
+    
+    // Update user status display
+    updateUserStatusDisplay();
+    
+    // Show login success message
+    showToast(`✅ Giriş yapıldı: ${username}`, 'success', 2000);
+    
+    // Sync username to Firebase immediately if Firebase user
+    // Get user again to get updated username from localStorage (username was just saved)
+    const updatedUser = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : null;
+    if (updatedUser && !updatedUser.id.startsWith('local-') && typeof window.saveUserStats === 'function') {
+        // Get current stats and update with new username
+        const currentStats = {
+            total_points: totalPoints || 0,
+            badges: badgesUnlocked || {},
+            streak_data: streakData || {},
+            game_stats: gameStats || {},
+            perfect_lessons_count: gameStats?.perfectLessons || 0,
+            username: username // Explicitly set username
+        };
+        window.saveUserStats(currentStats).catch(err => {
+            console.warn('Username sync to Firebase failed:', err);
+        });
+    }
+    
+    // Start pending game if exists
+    if (window.pendingGameMode) {
+        const gameMode = window.pendingGameMode;
+        window.pendingGameMode = null;
+        startGame(gameMode);
+    }
+}
 
 window.addEventListener('load', initApp);
 
@@ -3866,6 +4421,12 @@ if (typeof window !== 'undefined') {
     window.checkKarmaAnswer = checkKarmaAnswer;
     window.selectKarmaMatch = selectKarmaMatch;
     window.useHint = useHint;
+    window.handleUserLogout = handleUserLogout;
+    window.updateUserStatusDisplay = updateUserStatusDisplay;
+    window.handleUserLogout = handleUserLogout;
+    window.updateUserStatusDisplay = updateUserStatusDisplay;
+    window.showUsernameLoginModal = showUsernameLoginModal;
+    window.confirmUsername = confirmUsername;
     window.resetAllData = resetAllData;
     window.claimTaskRewards = claimTaskRewards;
     window.showTeachingRewardModal = showTeachingRewardModal;
