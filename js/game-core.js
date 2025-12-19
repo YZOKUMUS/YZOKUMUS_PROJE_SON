@@ -4595,10 +4595,14 @@ async function resetAllData() {
     currentQuestion = null;
     currentOptions = [];
     
+    // CRITICAL: Save username BEFORE clearing localStorage (for later cleanup)
+    const savedUsername = localStorage.getItem('hasene_username');
+    
     // Delete Firebase data if Firebase user (async operation - MUST WAIT)
+    // IMPORTANT: Do this BEFORE signOut to ensure we can delete with current user ID
     const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : null;
     if (user && !user.id.startsWith('local-') && typeof window.firestoreDelete === 'function') {
-        console.log('🔥 Firebase verileri siliniyor...');
+        console.log('🔥 Firebase verileri siliniyor (user ID:', user.id + ')...');
         
         // Delete weekly leaderboard entries for all weeks (current week and past weeks)
         const deletePromises = [
