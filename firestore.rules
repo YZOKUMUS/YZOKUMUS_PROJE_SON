@@ -3,26 +3,40 @@ service cloud.firestore {
   match /databases/{database}/documents {
     // Kullanıcı sadece kendi verilerine erişebilir
     match /user_stats/{userId} {
+      // Sadece authenticated kullanıcılar kendi verilerini okuyabilir/yazabilir
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
     
     match /daily_tasks/{userId} {
+      // Sadece authenticated kullanıcılar kendi verilerini okuyabilir/yazabilir
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
     
     // Word stats (opsiyonel - şu an localStorage'da)
     match /word_stats/{userId} {
+      // Sadece authenticated kullanıcılar kendi verilerini okuyabilir/yazabilir
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
     
-    // Weekly leaderboard (public read, authenticated write)
+    // Weekly leaderboard (public read for ranking, authenticated write/delete for own data)
     match /weekly_leaderboard/{docId} {
-      // Anyone can read leaderboard (public ranking)
+      // Leaderboard herkes tarafından okunabilir (sıralama görmek için)
+      // Bu normal bir durumdur - leaderboard'lar genellikle public'tir
       allow read: if true;
-      // Only authenticated users can write their own data
-      allow write: if request.auth != null && 
-                     (request.resource.data.user_id == request.auth.uid || 
-                      resource == null && request.resource.data.user_id == request.auth.uid);
+      
+      // Sadece authenticated kullanıcılar kendi verilerini yazabilir/güncelleyebilir
+      allow create, update: if request.auth != null && 
+                             request.resource.data.user_id == request.auth.uid;
+      
+      // Sadece authenticated kullanıcılar kendi verilerini silebilir
+      allow delete: if request.auth != null && 
+                     resource != null && 
+                     resource.data.user_id == request.auth.uid;
+    }
+    
+    // Tüm diğer koleksiyonlar varsayılan olarak engellenir
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
