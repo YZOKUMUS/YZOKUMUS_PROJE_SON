@@ -153,12 +153,11 @@ async function firestoreGet(collection, docId) {
         const doc = await window.firestore.collection(collection).doc(docId).get();
         return doc.exists ? doc.data() : null;
     } catch (error) {
-        // Permission errors are expected if user is not authenticated
-        if (error.code === 'permission-denied') {
-            console.warn('⚠️ Firestore permission denied, falling back to localStorage');
-        } else {
+        // Permission errors are expected if user is not authenticated - silently fall back to localStorage
+        if (error.code !== 'permission-denied') {
             console.error('Firestore get error:', error);
         }
+        // Permission denied is expected for non-authenticated users, no need to log
         return null;
     }
 }
@@ -205,7 +204,7 @@ async function firestoreDelete(collection, docId) {
  * @returns {Promise<boolean>} Success status
  */
 async function firestoreSet(collection, docId, data) {
-    console.log('🔍 firestoreSet called:', { collection, docId, firestoreExists: !!window.firestore });
+    // Removed verbose logging - only log on actual errors
     
     // Check if Firebase is enabled and available
     if (!window.FIREBASE_ENABLED || !window.firestore) {
@@ -271,40 +270,24 @@ async function firestoreSet(collection, docId, data) {
         // Always use Firebase auth UID for user_id (security rules requirement)
         dataToSave.user_id = firebaseAuthUID;
         
-        console.log('📤 Sending to Firestore:', { 
-            collection, 
-            docId, 
-            dataSize: JSON.stringify(dataToSave).length,
-            hasUserId: !!dataToSave.user_id,
-            userId: dataToSave.user_id,
-            firebaseAuthUID: firebaseAuthUID
-        });
-        
         // Use set with merge to create or update document
         await window.firestore.collection(collection).doc(docId).set(dataToSave, { merge: true });
-        console.log('✅ Firestore set successful:', { collection, docId, userId: dataToSave.user_id, firebaseAuthUID });
         return true;
     } catch (error) {
+        // Permission denied is expected for users without proper Firebase auth - silently fail
+        if (error.code === 'permission-denied') {
+            // Silent fail for permission denied - this is expected for local users
+            return false;
+        }
+        // Only log unexpected errors
         console.error('❌ Firestore set error:', error);
-        // dataToSave try bloğu içinde tanımlı, burada erişilemiyor - data kullan
         const errorDataUserId = data?.user_id || firebaseAuthUID;
         console.error('Error details:', { 
             code: error.code, 
             message: error.message,
             collection: collection,
-            docId: docId,
-            hasUserId: !!errorDataUserId,
-            userId: errorDataUserId,
-            firebaseAuthUID: firebaseAuthUID,
-            currentUserUID: window.firebaseAuth?.currentUser?.uid
+            docId: docId
         });
-        console.error('Failed data keys:', Object.keys(data || {}));
-        // Permission denied hatası ise daha açıklayıcı mesaj
-        if (error.code === 'permission-denied') {
-            console.error('🔒 PERMISSION DENIED - Check Firestore security rules. user_id must match request.auth.uid');
-            console.error('🔒 Expected user_id:', firebaseAuthUID);
-            console.error('🔒 Actual auth.uid:', window.firebaseAuth?.currentUser?.uid);
-        }
         return false;
     }
 }
@@ -434,20 +417,17 @@ async function saveUserStats(stats) {
         console.log('📝 Saving username to Firestore (docId:', docId + ', username:', savedUsername + ')');
         promises.push(
             firestoreSet('user_stats', docId, statsWithUsername).then((result) => {
+                // Silent fail - permission denied is expected for local users
+                // Only log success, not failures
                 if (result) {
                     console.log('☁️ ✅ User stats saved to Firebase successfully');
-                } else {
-                    console.warn('☁️ ❌ User stats save to Firebase failed (firestoreSet returned false)');
-                    console.warn('☁️ Check console above for firestoreSet error details');
                 }
                 return result;
             }).catch((error) => {
-                console.error('☁️ ❌ User stats Firebase save error:', error);
-                console.error('☁️ Error details:', {
-                    message: error.message,
-                    code: error.code,
-                    stack: error.stack
-                });
+                // Only log unexpected errors (not permission-denied)
+                if (error.code !== 'permission-denied') {
+                    console.error('☁️ ❌ User stats Firebase save error:', error);
+                }
                 return false;
             })
         );
@@ -562,10 +542,16 @@ async function saveDailyTasks(tasks) {
         };
         
         try {
-            await firestoreSet('daily_tasks', docId, tasksWithUserInfo);
-            console.log('☁️ Daily tasks saved to Firebase (docId:', docId + ', username:', savedUsername + ')');
+            const result = await firestoreSet('daily_tasks', docId, tasksWithUserInfo);
+            if (result) {
+                console.log('☁️ Daily tasks saved to Firebase (docId:', docId + ', username:', savedUsername + ')');
+            }
+            // Silent fail if permission denied - expected for local users
         } catch (error) {
-            console.warn('Firebase save failed (using localStorage only):', error);
+            // Only log unexpected errors
+            if (error.code !== 'permission-denied') {
+                console.warn('Firebase save failed (using localStorage only):', error);
+            }
         }
     }
     
