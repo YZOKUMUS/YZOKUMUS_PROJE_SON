@@ -171,8 +171,8 @@
     },
     {
       "harf": "ك",
-      "isim": "Kef",
-      "okunus": "kef",
+      "isim": "Kâf",
+      "okunus": "kâf",
       "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/harfler/sesleri/btn_15.mp3",
       "sesTipi": "ince_sesli_harf",
       "renkKodu": "#ADE2EF"
@@ -211,16 +211,16 @@
     },
     {
       "harf": "ه",
-      "isim": "He",
-      "okunus": "he",
+      "isim": "Hâ",
+      "okunus": "hâ",
       "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/harfler/sesleri/btn_19.mp3",
       "sesTipi": "ince_sesli_harf",
       "renkKodu": "#ADE2EF"
     },
     {
       "harf": "ي",
-      "isim": "Ye",
-      "okunus": "ye",
+      "isim": "Ya",
+      "okunus": "ya",
       "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/harfler/sesleri/btn_21.mp3",
       "sesTipi": "ince_sesli_harf",
       "renkKodu": "#ADE2EF"
