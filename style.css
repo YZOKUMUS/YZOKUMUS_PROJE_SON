@@ -1838,6 +1838,36 @@ body {
 }
 
 /* ===================================
+   USERNAME LOGIN MODAL - GENDER SELECTION
+   =================================== */
+.gender-btn {
+    flex: 1;
+    padding: 12px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 12px;
+    background: rgba(255,255,255,0.2);
+    cursor: pointer;
+    font-size: 24px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.gender-btn:hover {
+    border-color: rgba(157, 138, 255, 0.6);
+    background: rgba(157, 138, 255, 0.1);
+    transform: scale(1.05);
+}
+
+.gender-btn.active {
+    border-color: rgba(157, 138, 255, 0.8);
+    background: rgba(157, 138, 255, 0.15);
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(157, 138, 255, 0.3);
+}
+
+/* ===================================
    ONBOARDING MODAL
    =================================== */
 .onboarding-content {
@@ -3030,6 +3060,12 @@ body {
     
     .combo-display {
         font-size: 0.8rem;
+    }
+    
+    /* Gender butonları küçük ekranlar için */
+    .gender-btn {
+        padding: 10px;
+        font-size: 20px;
     }
 }
 

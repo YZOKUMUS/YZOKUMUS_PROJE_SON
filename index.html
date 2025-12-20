@@ -54,7 +54,7 @@
             <!-- User Status Bar with Reset Button -->
             <div class="user-status-bar" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding: 6px 10px; background: rgba(255,255,255,0.05); border-radius: 8px;">
                 <div class="user-info" style="display: flex; align-items: center; gap: 8px;">
-                    <span style="font-size: 16px;">👤</span>
+                    <span id="user-avatar" style="font-size: 16px;">👤</span>
                     <span id="current-username-display" style="font-weight: 600; color: #1a1a2e; font-size: 14px;">Misafir</span>
                     <span id="user-status-indicator" style="font-size: 10px; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.1);">🔴 Çıkış Yapıldı</span>
                 </div>
@@ -755,9 +755,33 @@
                 class="username-input" 
                 placeholder="Kullanıcı adınızı girin..."
                 maxlength="50"
-                style="width: 100%; padding: 12px; margin-bottom: 20px; font-size: 16px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.2); color: rgba(26,26,46,0.9);"
+                style="width: 100%; padding: 12px; margin-bottom: 16px; font-size: 16px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.2); color: rgba(26,26,46,0.9);"
                 onkeypress="if(event.key === 'Enter') confirmUsername();"
             />
+            <!-- Cinsiyet Seçimi -->
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; font-size: 14px; font-weight: 600; color: rgba(26,26,46,0.9);">Cinsiyet (Opsiyonel)</label>
+                <div style="display: flex; gap: 12px;">
+                    <button 
+                        id="gender-male-btn" 
+                        class="gender-btn" 
+                        onclick="selectGender('male')"
+                        title="Erkek"
+                    >👨</button>
+                    <button 
+                        id="gender-female-btn" 
+                        class="gender-btn" 
+                        onclick="selectGender('female')"
+                        title="Kadın"
+                    >👩</button>
+                    <button 
+                        id="gender-none-btn" 
+                        class="gender-btn active" 
+                        onclick="selectGender('none')"
+                        title="Belirtmek istemiyorum"
+                    >👤</button>
+                </div>
+            </div>
             <div style="display: flex; gap: 10px;">
                 <button class="primary-btn" onclick="confirmUsername()" style="flex: 1;">Giriş Yap</button>
                 <button class="secondary-btn" onclick="closeModal('username-login-modal')" style="flex: 1;">İptal</button>

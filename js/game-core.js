@@ -3434,12 +3434,29 @@ function updateUserStatusDisplay() {
     const statusIndicator = document.getElementById('user-status-indicator');
     const loginBtn = document.getElementById('user-login-btn');
     const logoutBtn = document.getElementById('user-logout-btn');
+    const avatarEl = document.getElementById('user-avatar');
     
     if (!usernameDisplay || !statusIndicator || !loginBtn || !logoutBtn) return;
     
     const username = user?.username || localStorage.getItem('hasene_username') || 'Misafir';
     const defaultUsernames = ['Kullanıcı', 'Misafir', 'Anonim Kullanıcı'];
     const isLoggedIn = user && username && !defaultUsernames.includes(username) && username.trim() !== '';
+    
+    // Avatar'ı cinsiyete göre güncelle
+    if (avatarEl) {
+        if (isLoggedIn) {
+            const gender = localStorage.getItem('hasene_user_gender');
+            if (gender === 'male') {
+                avatarEl.textContent = '👨';
+            } else if (gender === 'female') {
+                avatarEl.textContent = '👩';
+            } else {
+                avatarEl.textContent = '👤'; // Varsayılan
+            }
+        } else {
+            avatarEl.textContent = '👤'; // Misafir için varsayılan
+        }
+    }
     
     // Update username display
     usernameDisplay.textContent = isLoggedIn ? username : 'Misafir';
@@ -4954,12 +4971,41 @@ function showUsernameLoginModal() {
         // Select all text if there's any (for immediate replacement)
         input.select();
     }
+    
+    // Mevcut cinsiyet bilgisini yükle
+    const currentGender = localStorage.getItem('hasene_user_gender') || 'none';
+    selectedGender = currentGender;
+    
+    // Gender butonlarını güncelle
+    setTimeout(() => {
+        selectGender(currentGender);
+    }, 50);
+    
     openModal('username-login-modal');
 }
 
 /**
  * Confirm username and start pending game
  */
+// Cinsiyet seçimi için global değişken
+let selectedGender = null;
+
+function selectGender(gender) {
+    selectedGender = gender;
+    
+    // Tüm gender butonlarını aktif sınıfından çıkar (CSS class kullan)
+    document.querySelectorAll('.gender-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Seçilen butonu aktif yap (CSS class otomatik stilleri uygular)
+    const btnId = gender === 'male' ? 'gender-male-btn' : (gender === 'female' ? 'gender-female-btn' : 'gender-none-btn');
+    const btn = document.getElementById(btnId);
+    if (btn) {
+        btn.classList.add('active');
+    }
+}
+
 function confirmUsername() {
     const input = document.getElementById('username-input');
     if (!input) return;
@@ -4968,6 +5014,14 @@ function confirmUsername() {
     if (!username || username.length < 2) {
         showToast('Lütfen en az 2 karakterlik bir kullanıcı adı girin', 'error');
         return;
+    }
+    
+    // Cinsiyet bilgisini kaydet
+    if (selectedGender && selectedGender !== 'none') {
+        localStorage.setItem('hasene_user_gender', selectedGender);
+    } else {
+        // Varsayılan olarak 'none' veya null
+        localStorage.removeItem('hasene_user_gender');
     }
     
     // Update username in localStorage FIRST (before getCurrentUser)
@@ -4991,6 +5045,9 @@ function confirmUsername() {
     }
     
     closeModal('username-login-modal');
+    
+    // Seçimi sıfırla
+    selectedGender = null;
     
     // Update user status display
     updateUserStatusDisplay();
@@ -5072,6 +5129,7 @@ if (typeof window !== 'undefined') {
     window.updateUserStatusDisplay = updateUserStatusDisplay;
     window.showUsernameLoginModal = showUsernameLoginModal;
     window.confirmUsername = confirmUsername;
+    window.selectGender = selectGender;
     window.resetAllData = resetAllData;
     window.claimTaskRewards = claimTaskRewards;
     window.showTeachingRewardModal = showTeachingRewardModal;
