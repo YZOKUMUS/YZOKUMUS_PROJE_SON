@@ -47,3 +47,4 @@ https://console.firebase.google.com/v1/r/project/hasene-da146/firestore/indexes?
 
 Bu link, doğru index parametreleriyle birlikte gelir ve tek tıkla index oluşturmanızı sağlar.
 
+

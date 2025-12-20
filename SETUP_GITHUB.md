@@ -184,3 +184,4 @@ GitHub Pages HTTPS kullanır, Service Worker çalışır. Eğer sorun yaşıyors
 
 Sorularınız için: GitHub Issues kullanabilirsiniz! 🚀
 
+

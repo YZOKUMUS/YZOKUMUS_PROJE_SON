@@ -68,12 +68,16 @@ self.addEventListener('fetch', (event) => {
     const url = new URL(event.request.url);
 
     // Data files - Cache First, then Network
-    if (url.pathname.includes('/data/')) {
+    // Sadece GET isteklerini cache'le (POST, PUT, DELETE desteklenmiyor)
+    if (url.pathname.includes('/data/') && event.request.method === 'GET') {
         event.respondWith(
             caches.open(DATA_CACHE_NAME).then((cache) => {
                 return cache.match(event.request).then((response) => {
                     const fetchPromise = fetch(event.request).then((networkResponse) => {
-                        cache.put(event.request, networkResponse.clone());
+                        // Sadece başarılı GET isteklerini cache'le
+                        if (networkResponse && networkResponse.status === 200) {
+                            cache.put(event.request, networkResponse.clone());
+                        }
                         return networkResponse;
                     }).catch(() => response);
 
@@ -83,14 +87,22 @@ self.addEventListener('fetch', (event) => {
         );
         return;
     }
+    
+    // POST/PUT/DELETE gibi non-GET istekleri direkt network'e git
+    if (event.request.method !== 'GET') {
+        event.respondWith(fetch(event.request));
+        return;
+    }
 
     // App shell - Cache First
+    // Buraya sadece GET istekleri gelir (non-GET istekleri yukarıda handle edildi)
     event.respondWith(
         caches.match(event.request).then((response) => {
             if (response) {
                 return response;
             }
             return fetch(event.request).then((networkResponse) => {
+                // Sadece başarılı GET isteklerini cache'le
                 if (networkResponse && networkResponse.status === 200) {
                     const responseClone = networkResponse.clone();
                     caches.open(CACHE_NAME).then((cache) => {

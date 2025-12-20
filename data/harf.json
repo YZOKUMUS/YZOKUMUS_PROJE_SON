@@ -6,7 +6,7 @@
       "okunus": "elif",
       "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/harfler/sesleri/btn_1.mp3",
       "sesTipi": "ince_sesli_harf",
-      "renkKodu": "#D4AF37"
+      "renkKodu": "#0F0F0F"
     },
     {
       "harf": "ب",
@@ -14,7 +14,7 @@
       "okunus": "bâ",
       "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/harfler/sesleri/btn_2.mp3",
       "sesTipi": "ince_sesli_harf",
-      "renkKodu": "#D4AF37"
+      "renkKodu": "#0F0F0F"
     },
     {
       "harf": "ت",
@@ -22,7 +22,7 @@
       "okunus": "tâ",
       "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/harfler/sesleri/btn_3.mp3",
       "sesTipi": "ince_sesli_harf",
-      "renkKodu": "#D4AF37"
+      "renkKodu": "#0F0F0F"
     },
     {
       "harf": "ث",
@@ -30,7 +30,7 @@
       "okunus": "sâ",
       "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/harfler/sesleri/btn_4.mp3",
       "sesTipi": "ince_sesli_harf",
-      "renkKodu": "#D4AF37"
+      "renkKodu": "#0F0F0F"
     },
     {
       "harf": "ج",
@@ -38,14 +38,14 @@
       "okunus": "cim",
       "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/harfler/sesleri/btn_5.mp3",
       "sesTipi": "ince_sesli_harf",
-      "renkKodu": "#D4AF37"
+      "renkKodu": "#0F0F0F"
     },
     {
       "harf": "ح",
       "isim": "Ha",
       "okunus": "ha",
       "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/harfler/sesleri/btn_6.mp3",
-      "sesTipi": "kalın sesli harf",
+      "sesTipi": "ince_sesli_harf",
       "renkKodu": "#0F0F0F"
     },
     {
@@ -53,16 +53,17 @@
       "isim": "Ha",
       "okunus": "ha",
       "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/harfler/sesleri/btn_22.mp3",
-      "sesTipi": "ince_sesli_harf",
-      "renkKodu": "#D4AF37"
+      "sesTipi": "kalın sesli harf",
+      "renkKodu": "#0F0F0F"
     },
+    
     {
       "harf": "د",
       "isim": "Dal",
       "okunus": "dal",
       "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/harfler/sesleri/btn_7.mp3",
       "sesTipi": "ince_sesli_harf",
-      "renkKodu": "#D4AF37"
+      "renkKodu": "#0F0F0F"
     },
     {
       "harf": "ذ",
@@ -70,7 +71,7 @@
       "okunus": "zal",
       "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/harfler/sesleri/btn_8.mp3",
       "sesTipi": "ince_sesli_harf",
-      "renkKodu": "#D4AF37"
+      "renkKodu": "#0F0F0F"
     },
     {
       "harf": "ر",
@@ -78,7 +79,7 @@
       "okunus": "ra",
       "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/harfler/sesleri/btn_9.mp3",
       "sesTipi": "ince_sesli_harf",
-      "renkKodu": "#D4AF37"
+      "renkKodu": "#0F0F0F"
     },
     {
       "harf": "ز",
@@ -86,7 +87,7 @@
       "okunus": "ze",
       "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/harfler/sesleri/btn_10.mp3",
       "sesTipi": "ince_sesli_harf",
-      "renkKodu": "#D4AF37"
+      "renkKodu": "#0F0F0F"
     },
     {
       "harf": "س",
@@ -94,7 +95,7 @@
       "okunus": "sin",
       "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/harfler/sesleri/btn_11.mp3",
       "sesTipi": "ince_sesli_harf",
-      "renkKodu": "#D4AF37"
+      "renkKodu": "#0F0F0F"
     },
     {
       "harf": "ش",
@@ -102,7 +103,7 @@
       "okunus": "şın",
       "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/harfler/sesleri/btn_12.mp3",
       "sesTipi": "ince_sesli_harf",
-      "renkKodu": "#D4AF37"
+      "renkKodu": "#0F0F0F"
     },
     {
       "harf": "ص",
@@ -142,7 +143,7 @@
       "okunus": "ayn",
       "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/harfler/sesleri/btn_13.mp3",
       "sesTipi": "ince_sesli_harf",
-      "renkKodu": "#D4AF37"
+      "renkKodu": "#0F0F0F"
     },
     {
       "harf": "غ",
@@ -158,7 +159,7 @@
       "okunus": "fe",
       "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/harfler/sesleri/btn_14.mp3",
       "sesTipi": "ince_sesli_harf",
-      "renkKodu": "#D4AF37"
+      "renkKodu": "#0F0F0F"
     },
     {
       "harf": "ق",
@@ -174,7 +175,7 @@
       "okunus": "kef",
       "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/harfler/sesleri/btn_15.mp3",
       "sesTipi": "ince_sesli_harf",
-      "renkKodu": "#D4AF37"
+      "renkKodu": "#0F0F0F"
     },
     {
       "harf": "ل",
@@ -182,7 +183,7 @@
       "okunus": "lâm",
       "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/harfler/sesleri/btn_16.mp3",
       "sesTipi": "ince_sesli_harf",
-      "renkKodu": "#D4AF37"
+      "renkKodu": "#0F0F0F"
     },
     {
       "harf": "م",
@@ -190,7 +191,7 @@
       "okunus": "mim",
       "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/harfler/sesleri/btn_17.mp3",
       "sesTipi": "ince_sesli_harf",
-      "renkKodu": "#D4AF37"
+      "renkKodu": "#0F0F0F"
     },
     {
       "harf": "ن",
@@ -198,7 +199,7 @@
       "okunus": "nun",
       "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/harfler/sesleri/btn_18.mp3",
       "sesTipi": "ince_sesli_harf",
-      "renkKodu": "#D4AF37"
+      "renkKodu": "#0F0F0F"
     },
     {
       "harf": "و",
@@ -206,7 +207,7 @@
       "okunus": "vav",
       "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/harfler/sesleri/btn_20.mp3",
       "sesTipi": "ince_sesli_harf",
-      "renkKodu": "#D4AF37"
+      "renkKodu": "#0F0F0F"
     },
     {
       "harf": "ه",
@@ -214,7 +215,7 @@
       "okunus": "he",
       "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/harfler/sesleri/btn_19.mp3",
       "sesTipi": "ince_sesli_harf",
-      "renkKodu": "#D4AF37"
+      "renkKodu": "#0F0F0F"
     },
     {
       "harf": "ي",
@@ -222,7 +223,7 @@
       "okunus": "ye",
       "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/harfler/sesleri/btn_21.mp3",
       "sesTipi": "ince_sesli_harf",
-      "renkKodu": "#D4AF37"
+      "renkKodu": "#0F0F0F"
     }
   ]
 }

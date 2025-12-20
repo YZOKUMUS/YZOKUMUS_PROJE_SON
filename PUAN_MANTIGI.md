@@ -103,3 +103,4 @@ Günlük Hasene **sadece bugün** kazanılan puanları gösterir, **her gün 24:
 - **Sonraki günlerde**: Toplam ≥ Günlük (normal durum)
 - **Fark nedeni**: Toplam birikimli, günlük sadece bugünkü ilerleme
 
+

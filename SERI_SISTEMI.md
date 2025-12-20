@@ -96,3 +96,4 @@ streakData = {
 - **Günlük Hedef Kontrolü**: `checkDailyGoal()` (game-core.js:3247)
 - **Takvim Gösterimi**: `showCalendarModal()` (game-core.js:3789)
 
+

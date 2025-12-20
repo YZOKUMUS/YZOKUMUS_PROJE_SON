@@ -190,3 +190,4 @@ Eğer hala local kullanıcıysanız:
 - İnternet bağlantısı sorunu olabilir
 - Firebase yapılandırması yanlış olabilir
 
+

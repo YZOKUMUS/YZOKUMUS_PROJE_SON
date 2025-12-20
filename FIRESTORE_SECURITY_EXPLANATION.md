@@ -80,3 +80,4 @@ match /weekly_leaderboard/{docId} {
 
 **Önemli olan**: Kullanıcılar sadece kendi verilerini yazabilir/silebilir, başkalarının verilerine erişemezler.
 
+

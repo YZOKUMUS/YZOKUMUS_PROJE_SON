@@ -126,3 +126,4 @@ const type = localStorage.getItem('hasene_user_type');
 console.log(uid && type === 'firebase' ? '🔥 FIREBASE - Her şey sıfırlanacak' : '💾 LOCAL - Sadece localStorage sıfırlanacak');
 ```
 
+

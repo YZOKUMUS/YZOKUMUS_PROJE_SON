@@ -2683,7 +2683,29 @@ function loadElifKelimelerQuestion() {
     currentQuestion = currentQuestions[questionIndex];
     
     document.getElementById('elif-question-number').textContent = questionIndex + 1;
-    document.getElementById('elif-letter').textContent = `"${currentQuestion.harf.harf}" harfiyle başlayan kelimeyi seç`;
+    
+    // JSON'dan harf bilgilerini al (sesTipi ve renkKodu)
+    const harfObj = currentQuestion.harf || {};
+    const sesTipi = harfObj.sesTipi || '';
+    const renkKodu = harfObj.renkKodu || '';
+    
+    // Kalın sesli harf kontrolü - JSON'daki sesTipi alanından
+    const isKalinSesli = sesTipi.includes('kalın') || sesTipi.includes('kalin');
+    
+    // Kalın sesli ise kırmızı, değilse JSON'daki renkKodu (kömür karası) veya varsayılan
+    const harfColor = isKalinSesli ? '#dc2626' : (renkKodu || 'var(--text-primary)');
+    
+    // Harfi göster ve renk uygula
+    const elifLetterEl = document.getElementById('elif-letter');
+    elifLetterEl.textContent = harfObj.harf || currentQuestion.harf.harf;
+    elifLetterEl.style.color = harfColor;
+    
+    // Açıklama metnini ayrı elementte göster ve göster
+    const instructionEl = document.getElementById('elif-question-instruction');
+    if (instructionEl) {
+        instructionEl.textContent = `"${harfObj.harf || currentQuestion.harf.harf}" harfiyle başlayan kelimeyi seç`;
+        instructionEl.style.display = 'block';
+    }
     document.getElementById('elif-combo').textContent = comboCount;
     document.getElementById('elif-session-score').textContent = formatNumber(sessionScore);
     
@@ -2789,7 +2811,28 @@ function loadElifHarekelerQuestion() {
     currentQuestion = currentQuestions[questionIndex];
     
     document.getElementById('elif-question-number').textContent = questionIndex + 1;
-    document.getElementById('elif-letter').textContent = currentQuestion.hareke.symbol;
+    
+    // JSON'dan harf bilgilerini al (sesTipi ve renkKodu) - harekeler modunda harf objesi mevcut
+    const harfObj = currentQuestion.harf || {};
+    const sesTipi = harfObj.sesTipi || '';
+    const renkKodu = harfObj.renkKodu || '';
+    
+    // Kalın sesli harf kontrolü - JSON'daki sesTipi alanından
+    const isKalinSesli = sesTipi.includes('kalın') || sesTipi.includes('kalin');
+    
+    // Kalın sesli ise kırmızı, değilse JSON'daki renkKodu (kömür karası) veya varsayılan
+    const harfColor = isKalinSesli ? '#dc2626' : (renkKodu || 'var(--text-primary)');
+    
+    // Hareke sembolünü göster ve renk uygula
+    const elifLetterEl = document.getElementById('elif-letter');
+    elifLetterEl.textContent = currentQuestion.hareke.symbol;
+    elifLetterEl.style.color = harfColor;
+    
+    // Harekeler modunda açıklama metnini gizle
+    const instructionEl = document.getElementById('elif-question-instruction');
+    if (instructionEl) {
+        instructionEl.style.display = 'none';
+    }
     document.getElementById('elif-combo').textContent = comboCount;
     document.getElementById('elif-session-score').textContent = formatNumber(sessionScore);
     
@@ -2868,7 +2911,27 @@ function loadElifQuestion() {
     currentQuestion = currentQuestions[questionIndex];
     
     document.getElementById('elif-question-number').textContent = questionIndex + 1;
-    document.getElementById('elif-letter').textContent = currentQuestion.harf;
+    
+    // JSON'dan sesTipi ve renkKodu bilgilerini al
+    const sesTipi = currentQuestion.sesTipi || '';
+    const renkKodu = currentQuestion.renkKodu || '';
+    
+    // Kalın sesli harf kontrolü - JSON'daki sesTipi alanından
+    const isKalinSesli = sesTipi.includes('kalın') || sesTipi.includes('kalin');
+    
+    // Kalın sesli ise kırmızı, değilse JSON'daki renkKodu (kömür karası) veya varsayılan
+    const harfColor = isKalinSesli ? '#dc2626' : (renkKodu || 'var(--text-primary)');
+    
+    // Harfi göster ve renk uygula
+    const elifLetterEl = document.getElementById('elif-letter');
+    elifLetterEl.textContent = currentQuestion.harf;
+    elifLetterEl.style.color = harfColor;
+    
+    // Normal harfler modunda açıklama metnini gizle
+    const instructionEl = document.getElementById('elif-question-instruction');
+    if (instructionEl) {
+        instructionEl.style.display = 'none';
+    }
     document.getElementById('elif-combo').textContent = comboCount;
     document.getElementById('elif-session-score').textContent = formatNumber(sessionScore);
     
@@ -2931,8 +2994,18 @@ function checkElifAnswer(index, selectedAnswer) {
 }
 
 function playCurrentLetterAudio() {
-    if (currentQuestion && currentQuestion.audioUrl) {
-        playSafeAudio(currentQuestion.audioUrl);
+    if (!currentQuestion) return;
+    
+    // Kelimeler modunda harf.audioUrl kullan
+    let audioUrl = null;
+    if (currentQuestion.harf && currentQuestion.harf.audioUrl) {
+        audioUrl = currentQuestion.harf.audioUrl;
+    } else if (currentQuestion.audioUrl) {
+        audioUrl = currentQuestion.audioUrl;
+    }
+    
+    if (audioUrl) {
+        playSafeAudio(audioUrl);
     }
 }
 
@@ -2997,7 +3070,8 @@ async function checkDailyTasks() {
                 ayet_oku: 0,
                 dua_et: 0,
                 hadis_oku: 0
-            }
+            },
+            rewardClaimedDate: null // Yeni gün başladığında ödül kutusunu reset et
         };
         saveToStorage(CONFIG.STORAGE_KEYS.DAILY_TASKS, dailyTasks);
         
@@ -3080,11 +3154,16 @@ function checkRewardBoxStatus() {
     
     const today = getLocalDateString();
     
-    // Bugün zaten alındı mı?
+    // Bugün zaten alındı mı? - ÖNCELİKLE BU KONTROL EDİLMELİ
     if (dailyTasks.rewardClaimedDate === today) {
+        // Ödül alındıysa kesinlikle pasif yap
         rewardBox.classList.remove('active');
         rewardBox.classList.add('claimed');
         statusEl.textContent = '✓ Bugünkü ödül alındı!';
+        // Tıklamayı engelle
+        rewardBox.style.pointerEvents = 'none';
+        rewardBox.style.cursor = 'not-allowed';
+        rewardBox.style.opacity = '0.6';
         return;
     }
     
@@ -3092,12 +3171,22 @@ function checkRewardBoxStatus() {
     const allTasksComplete = areAllTasksComplete();
     
     if (allTasksComplete) {
+        // Görevler tamamlandı ve ödül alınmamış - aktif yap
         rewardBox.classList.add('active');
         rewardBox.classList.remove('claimed');
         statusEl.textContent = '🎉 Tıkla ve ödülünü al!';
+        // Tıklanabilir yap
+        rewardBox.style.pointerEvents = 'auto';
+        rewardBox.style.cursor = 'pointer';
+        rewardBox.style.opacity = '1';
     } else {
+        // Görevler tamamlanmadı - pasif yap
         rewardBox.classList.remove('active', 'claimed');
         statusEl.textContent = 'Görevleri tamamla!';
+        // Tıklamayı engelle
+        rewardBox.style.pointerEvents = 'none';
+        rewardBox.style.cursor = 'not-allowed';
+        rewardBox.style.opacity = '0.6';
     }
 }
 
@@ -3110,15 +3199,24 @@ function areAllTasksComplete() {
 
 function claimDailyReward() {
     const rewardBox = document.getElementById('reward-box');
-    if (!rewardBox || !rewardBox.classList.contains('active')) return;
+    if (!rewardBox) return;
     
     const today = getLocalDateString();
     
-    // Zaten alındıysa çık
-    if (dailyTasks.rewardClaimedDate === today) {
+    // Zaten alındıysa çık - hem class hem de date kontrolü
+    if (dailyTasks.rewardClaimedDate === today || rewardBox.classList.contains('claimed')) {
         showToast('Bugünkü ödül zaten alındı!', 'info');
+        checkRewardBoxStatus(); // UI'ı güncelle
         return;
     }
+    
+    // Aktif değilse çık
+    if (!rewardBox.classList.contains('active')) {
+        return;
+    }
+    
+    // Ödül alınırken kutuya tıklamayı engelle (double-click koruması)
+    rewardBox.style.pointerEvents = 'none';
     
     // Rastgele ödül seç
     const rewardAmount = DAILY_REWARDS[Math.floor(Math.random() * DAILY_REWARDS.length)];
@@ -3130,17 +3228,24 @@ function claimDailyReward() {
     // Hasene ekle
     totalPoints += rewardAmount;
     
-    // Ödül alındı olarak işaretle
+    // Ödül alındı olarak işaretle - ÖNCE bu set edilmeli
     dailyTasks.rewardClaimedDate = today;
+    
+    // Hemen storage'a kaydet (async olmadan)
     saveToStorage(CONFIG.STORAGE_KEYS.DAILY_TASKS, dailyTasks);
     debouncedSaveStats();
     
-    // UI güncelle
-    updateDisplay();
+    // UI güncelle - ÖDÜL KUTUSUNU HEMEN PASİF YAP
     checkRewardBoxStatus();
+    updateDisplay();
     
     // Ödül modalı göster
     showRewardModal(rewardAmount, teaching);
+    
+    // Pointer events'i geri aç (modal kapandıktan sonra)
+    setTimeout(() => {
+        rewardBox.style.pointerEvents = '';
+    }, 100);
 }
 
 function showRewardModal(amount, teaching) {
@@ -3490,6 +3595,10 @@ function showTasksModal() {
     }
     
     tasksList.innerHTML = html;
+    
+    // Ödül kutusu durumunu güncelle (modal içindeki ödül kutusu için)
+    checkRewardBoxStatus();
+    
     openModal('tasks-modal');
 }
 
@@ -3580,15 +3689,47 @@ async function showHarfTablosu() {
         return;
     }
     
-    // Populate the harf grid
+    // Populate the harf grid - Harfler zaten doğru sırada (Elif'ten başlayarak)
+    // RTL direction CSS'te eklenmeli (sağdan sola)
     const harfGrid = document.getElementById('harf-grid');
     if (harfGrid) {
-        harfGrid.innerHTML = data.map(harf => `
-            <div class="harf-card" onclick="playHarfAudio('${harf.ses_dosyasi || ''}', '${harf.harf}')">
-                <div class="harf-arabic">${harf.harf}</div>
-                <div class="harf-name">${harf.isim || harf.okunus || ''}</div>
+        harfGrid.innerHTML = data.map((harf, index) => {
+            // Güvenli string escape için data attribute kullan
+            const audioUrl = harf.audioUrl || '';
+            const harfName = harf.harf || '';
+            const harfIsim = harf.isim || harf.okunus || '';
+            // JSON'dan sesTipi ve renkKodu bilgilerini al
+            const sesTipi = harf.sesTipi || '';
+            const renkKodu = harf.renkKodu || '';
+            
+            // Kalın sesli harf kontrolü - JSON'daki sesTipi alanından alınıyor
+            const isKalinSesli = sesTipi.includes('kalın') || sesTipi.includes('kalin');
+            const kalinClass = isKalinSesli ? ' kalin-sesli' : '';
+            
+            // Kalın sesli ise kırmızı renk kullan, değilse JSON'daki renkKodu veya varsayılan
+            // Not: JSON'da kalın sesli harfler için #0F0F0F (siyah) var ama kırmızı yapıyoruz
+            const harfColor = isKalinSesli ? '#dc2626' : (renkKodu || 'var(--text-primary)');
+            
+            return `
+            <div class="harf-card${kalinClass}" 
+                 data-audio-url="${audioUrl.replace(/"/g, '&quot;')}" 
+                 data-harf-name="${harfName.replace(/"/g, '&quot;')}" 
+                 data-ses-tipi="${sesTipi.replace(/"/g, '&quot;')}"
+                 data-renk-kodu="${renkKodu.replace(/"/g, '&quot;')}">
+                <div class="harf-arabic" style="color: ${harfColor};">${harf.harf}</div>
+                <div class="harf-name">${harfIsim}</div>
             </div>
-        `).join('');
+        `;
+        }).join('');
+        
+        // Event listener'ları ekle
+        harfGrid.querySelectorAll('.harf-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const audioUrl = this.getAttribute('data-audio-url') || '';
+                const harfName = this.getAttribute('data-harf-name') || '';
+                playHarfAudio(audioUrl, harfName);
+            });
+        });
     }
     
     // Hide all screens and show Harf Tablosu
@@ -3597,10 +3738,21 @@ async function showHarfTablosu() {
 }
 
 function playHarfAudio(audioUrl, harfName) {
-    if (audioUrl) {
-        playSafeAudio(audioUrl);
+    // audioUrl kontrolü - boş string veya null/undefined kontrolü
+    if (audioUrl && audioUrl.trim() !== '') {
+        try {
+            playSafeAudio(audioUrl);
+        } catch (err) {
+            console.warn('Harf sesi çalınamadı:', err);
+            if (harfName) {
+                showToast(`${harfName} harfinin sesi bulunamadı`, 'info', 2000);
+            }
+        }
     } else {
-        showToast(`${harfName}`, 'info', 1000);
+        // Ses yoksa harf adını göster
+        if (harfName) {
+            showToast(`${harfName}`, 'info', 1000);
+        }
     }
 }
 

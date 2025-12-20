@@ -60,3 +60,4 @@ Reset butonuna bastıktan sonra konsolda şu logları görmelisiniz:
 - **user_id kontrolü**: Kullanıcı sadece kendi `user_id`'sine sahip dokümanları silebilir
 - **localStorage zaten temizleniyor**: Firebase delete başarısız olsa bile localStorage temizlenir, bu yüzden uygulama çalışmaya devam eder
 
+

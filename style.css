@@ -443,6 +443,40 @@ body {
     margin-bottom: var(--spacing-md);
 }
 
+/* Elif Ba Kelimeler Modu İçin Özel Düzen */
+.elif-question-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    position: relative;
+    min-height: 80px;
+}
+
+.elif-question-header .arabic-letter {
+    margin-bottom: 0;
+    flex: 1;
+    text-align: center;
+}
+
+.elif-question-header .audio-btn {
+    position: static;
+    flex-shrink: 0;
+    align-self: flex-start;
+    margin-top: var(--spacing-xs);
+}
+
+.elif-question-instruction {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: var(--spacing-sm);
+    line-height: 1.4;
+    padding: 0 var(--spacing-md);
+}
+
 .arabic-verse {
     font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif;
     font-size: 2rem;
@@ -1113,9 +1147,42 @@ body {
     .arabic-letter {
         font-size: 2.5rem;
     }
+    
+    .elif-question-header {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+    
+    .elif-question-header .audio-btn {
+        align-self: flex-end;
+        margin-top: var(--spacing-xs);
+    }
+    
+    .elif-question-instruction {
+        font-size: 0.85rem;
+        padding: 0 var(--spacing-sm);
+    }
 
     .arabic-verse {
         font-size: 1.5rem;
+    }
+    
+    /* Harf tablosu orta ekranlar için */
+    .harf-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: var(--spacing-sm);
+    }
+    
+    .harf-card {
+        padding: var(--spacing-md);
+    }
+    
+    .harf-arabic {
+        font-size: 2rem;
+    }
+    
+    .harf-name {
+        font-size: 0.7rem;
     }
 
     .game-cards-container {
@@ -1282,8 +1349,12 @@ body {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: var(--spacing-md);
-    max-width: 500px;
+    max-width: 100%;
+    width: 100%;
     margin: 0 auto;
+    direction: rtl; /* Arapça sağdan sola sıralama - Elif sağda başlar */
+    padding: 0 var(--spacing-sm);
+    box-sizing: border-box;
 }
 
 .harf-card {
@@ -1316,10 +1387,30 @@ body {
     color: var(--text-primary);
 }
 
+/* Kalın sesli harfler için kırmızı renk */
+.harf-card.kalin-sesli .harf-arabic {
+    color: #dc2626; /* Kırmızı renk */
+    font-weight: 600;
+}
+
+.harf-card.kalin-sesli {
+    border-color: rgba(220, 38, 38, 0.3); /* Kırmızı border */
+    background: rgba(220, 38, 38, 0.05); /* Hafif kırmızı arka plan */
+}
+
+.harf-card.kalin-sesli:hover {
+    box-shadow: 0 12px 40px rgba(220, 38, 38, 0.3);
+    border-color: rgba(220, 38, 38, 0.5);
+}
+
 .harf-name {
     font-size: 0.75rem;
     color: var(--text-secondary);
     margin-top: var(--spacing-xs);
+}
+
+.harf-card.kalin-sesli .harf-name {
+    color: #991b1b; /* Koyu kırmızı */
 }
 
 /* ===================================
@@ -2011,6 +2102,10 @@ body {
    =================================== */
 .harf-tablo-content {
     padding: var(--spacing-lg);
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden; /* Sayfa dışına taşmayı önle */
 }
 
 /* ===================================
@@ -2662,6 +2757,25 @@ body {
         font-size: 0.9rem;
         padding: var(--spacing-sm) var(--spacing-md);
     }
+    
+    /* Harf tablosu responsive */
+    .harf-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--spacing-sm);
+        padding: 0 var(--spacing-xs);
+    }
+    
+    .harf-card {
+        padding: var(--spacing-md);
+    }
+    
+    .harf-arabic {
+        font-size: 2rem;
+    }
+    
+    .harf-name {
+        font-size: 0.7rem;
+    }
 }
 
 /* Küçük Telefon (420px ve altı) */
@@ -2691,11 +2805,47 @@ body {
         font-size: 2.5rem;
     }
     
+    .elif-question-instruction {
+        font-size: 0.8rem;
+        padding: 0 var(--spacing-xs);
+        line-height: 1.3;
+    }
+    
+    .elif-question-header .audio-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 1.1rem;
+    }
+    
     .arabic-verse {
         font-size: 1.2rem;
     }
     
     .question-card {
+        padding: var(--spacing-md);
+    }
+    
+    /* Harf tablosu küçük ekranlar için */
+    .harf-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: var(--spacing-xs);
+        padding: 0;
+    }
+    
+    .harf-card {
+        padding: var(--spacing-sm);
+        min-height: 70px;
+    }
+    
+    .harf-arabic {
+        font-size: 1.8rem;
+    }
+    
+    .harf-name {
+        font-size: 0.65rem;
+    }
+    
+    .harf-tablo-content {
         padding: var(--spacing-md);
     }
     
@@ -2745,9 +2895,44 @@ body {
         font-size: 2rem;
     }
     
+    .elif-question-instruction {
+        font-size: 0.75rem;
+        padding: 0;
+        line-height: 1.2;
+    }
+    
+    .elif-question-header .audio-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+    }
+    
     .arabic-verse {
         font-size: 1.1rem;
         line-height: 1.8;
+    }
+    
+    /* Harf tablosu çok küçük ekranlar için */
+    .harf-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--spacing-xs);
+    }
+    
+    .harf-card {
+        padding: var(--spacing-xs);
+        min-height: 60px;
+    }
+    
+    .harf-arabic {
+        font-size: 1.5rem;
+    }
+    
+    .harf-name {
+        font-size: 0.6rem;
+    }
+    
+    .harf-tablo-content {
+        padding: var(--spacing-sm);
     }
     
     .badges-grid {

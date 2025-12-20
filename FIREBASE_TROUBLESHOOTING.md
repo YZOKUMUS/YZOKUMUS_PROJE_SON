@@ -77,3 +77,4 @@ Firebase'de zaten bir projeniz varsa, yeni proje oluşturmak yerine mevcut proje
 
 **Not**: Bir Firebase projesinde birden fazla uygulama olması normal ve önerilir. Her uygulama (web, iOS, Android) kendi config bilgilerine sahiptir ve birbirinden bağımsızdır.
 
+
