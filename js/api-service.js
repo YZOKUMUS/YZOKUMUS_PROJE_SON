@@ -286,8 +286,23 @@ async function firestoreSet(collection, docId, data) {
         return true;
     } catch (error) {
         console.error('❌ Firestore set error:', error);
-        console.error('Error details:', { code: error.code, message: error.message });
-        console.error('Failed data:', { collection, docId, dataKeys: Object.keys(data) });
+        console.error('Error details:', { 
+            code: error.code, 
+            message: error.message,
+            collection: collection,
+            docId: docId,
+            hasUserId: !!dataToSave.user_id,
+            userId: dataToSave.user_id,
+            firebaseAuthUID: firebaseAuthUID,
+            currentUserUID: window.firebaseAuth?.currentUser?.uid
+        });
+        console.error('Failed data keys:', Object.keys(data));
+        // Permission denied hatası ise daha açıklayıcı mesaj
+        if (error.code === 'permission-denied') {
+            console.error('🔒 PERMISSION DENIED - Check Firestore security rules. user_id must match request.auth.uid');
+            console.error('🔒 Expected user_id:', firebaseAuthUID);
+            console.error('🔒 Actual auth.uid:', window.firebaseAuth?.currentUser?.uid);
+        }
         return false;
     }
 }
@@ -420,11 +435,17 @@ async function saveUserStats(stats) {
                 if (result) {
                     console.log('☁️ ✅ User stats saved to Firebase successfully');
                 } else {
-                    console.warn('☁️ ❌ User stats save to Firebase failed');
+                    console.warn('☁️ ❌ User stats save to Firebase failed (firestoreSet returned false)');
+                    console.warn('☁️ Check console above for firestoreSet error details');
                 }
                 return result;
             }).catch((error) => {
                 console.error('☁️ ❌ User stats Firebase save error:', error);
+                console.error('☁️ Error details:', {
+                    message: error.message,
+                    code: error.code,
+                    stack: error.stack
+                });
                 return false;
             })
         );
