@@ -2541,6 +2541,9 @@ body {
 }
 
 .word-actions .favorite-btn {
+    position: relative;
+    top: auto;
+    right: auto;
     width: 36px;
     height: 36px;
     min-width: 36px;
@@ -2549,6 +2552,10 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
 }
 
 /* Hint Button Styles */
@@ -2972,6 +2979,22 @@ body {
         font-size: 1.2rem;
     }
     
+    /* Word actions butonları mobilde düzgün görünsün */
+    .word-actions {
+        padding: 0 var(--spacing-xs);
+        gap: var(--spacing-xs);
+    }
+    
+    .word-actions .hint-btn,
+    .word-actions .audio-btn,
+    .word-actions .favorite-btn {
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        min-height: 40px;
+        font-size: 1rem;
+    }
+    
     .nav-btn {
         padding: var(--spacing-sm) var(--spacing-md);
         font-size: 0.9rem;
@@ -3008,6 +3031,17 @@ body {
     .arabic-verse {
         font-size: 1.1rem;
         line-height: 1.8;
+    }
+    
+    /* Word actions butonları çok küçük ekranlarda */
+    .word-actions .hint-btn,
+    .word-actions .audio-btn,
+    .word-actions .favorite-btn {
+        width: 36px;
+        height: 36px;
+        min-width: 36px;
+        min-height: 36px;
+        font-size: 0.9rem;
     }
     
     /* Harf tablosu çok küçük ekranlar için */
