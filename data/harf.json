@@ -29,8 +29,8 @@
       "isim": "Sâ",
       "okunus": "sâ",
       "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/harfler/sesleri/btn_4.mp3",
-      "sesTipi": "ince_sesli_harf",
-      "renkKodu": "#0F0F0F"
+      "sesTipi": "peltek_sesli_harf",
+      "renkKodu": "#10b981"
     },
     {
       "harf": "ج",
@@ -70,8 +70,8 @@
       "isim": "Zal",
       "okunus": "zal",
       "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/harfler/sesleri/btn_8.mp3",
-      "sesTipi": "ince_sesli_harf",
-      "renkKodu": "#0F0F0F"
+      "sesTipi": "peltek_sesli_harf",
+      "renkKodu": "#10b981"
     },
     {
       "harf": "ر",
@@ -134,8 +134,8 @@
       "isim": "Za",
       "okunus": "za",
       "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/harfler/sesleri/btn_26.mp3",
-      "sesTipi": "kalın sesli harf",
-      "renkKodu": "#0F0F0F"
+      "sesTipi": "peltek_sesli_harf",
+      "renkKodu": "#10b981"
     },
     {
       "harf": "ع",

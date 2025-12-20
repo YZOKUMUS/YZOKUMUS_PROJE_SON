@@ -1435,6 +1435,26 @@ body {
     color: #991b1b; /* Koyu kırmızı */
 }
 
+/* Peltek sesli harfler için yeşil renk */
+.harf-card.peltek-sesli .harf-arabic {
+    color: #10b981; /* Yeşil renk */
+    font-weight: 500;
+}
+
+.harf-card.peltek-sesli {
+    border-color: rgba(16, 185, 129, 0.3); /* Yeşil border */
+    background: rgba(16, 185, 129, 0.05); /* Hafif yeşil arka plan */
+}
+
+.harf-card.peltek-sesli:hover {
+    box-shadow: 0 12px 40px rgba(16, 185, 129, 0.3);
+    border-color: rgba(16, 185, 129, 0.5);
+}
+
+.harf-card.peltek-sesli .harf-name {
+    color: #047857; /* Koyu yeşil */
+}
+
 /* ===================================
    BADGES MODAL
    =================================== */
@@ -2152,6 +2172,11 @@ body {
 /* ===================================
    HARF TABLOSU CONTENT
    =================================== */
+/* Harf Tablosu ekranı için iOS benzeri açık gri zemin */
+#elif-ba-tablo-screen {
+    background: #F2F2F7; /* iOS system background color */
+}
+
 .harf-tablo-content {
     padding: var(--spacing-lg);
     width: 100%;

@@ -2709,11 +2709,19 @@ function loadElifKelimelerQuestion() {
     const sesTipi = harfObj.sesTipi || '';
     const renkKodu = harfObj.renkKodu || '';
     
-    // Kalın sesli harf kontrolü - JSON'daki sesTipi alanından
+    // Kalın sesli ve peltek sesli harf kontrolü - JSON'daki sesTipi alanından
     const isKalinSesli = sesTipi.includes('kalın') || sesTipi.includes('kalin');
+    const isPeltekSesli = sesTipi.includes('peltek');
     
-    // Kalın sesli ise kırmızı, değilse JSON'daki renkKodu (kömür karası) veya varsayılan
-    const harfColor = isKalinSesli ? '#dc2626' : (renkKodu || 'var(--text-primary)');
+    // Renk belirleme: Kalın → kırmızı, Peltek → turuncu, Diğer → JSON'daki renkKodu veya varsayılan
+    let harfColor;
+    if (isKalinSesli) {
+        harfColor = '#dc2626'; // Kırmızı
+    } else if (isPeltekSesli) {
+        harfColor = renkKodu || '#10b981'; // Yeşil (JSON'dan veya varsayılan)
+    } else {
+        harfColor = renkKodu || 'var(--text-primary)'; // Kömür karası veya varsayılan
+    }
     
     // Harfi göster ve renk uygula
     const elifLetterEl = document.getElementById('elif-letter');
@@ -2837,11 +2845,19 @@ function loadElifHarekelerQuestion() {
     const sesTipi = harfObj.sesTipi || '';
     const renkKodu = harfObj.renkKodu || '';
     
-    // Kalın sesli harf kontrolü - JSON'daki sesTipi alanından
+    // Kalın sesli ve peltek sesli harf kontrolü - JSON'daki sesTipi alanından
     const isKalinSesli = sesTipi.includes('kalın') || sesTipi.includes('kalin');
+    const isPeltekSesli = sesTipi.includes('peltek');
     
-    // Kalın sesli ise kırmızı, değilse JSON'daki renkKodu (kömür karası) veya varsayılan
-    const harfColor = isKalinSesli ? '#dc2626' : (renkKodu || 'var(--text-primary)');
+    // Renk belirleme: Kalın → kırmızı, Peltek → turuncu, Diğer → JSON'daki renkKodu veya varsayılan
+    let harfColor;
+    if (isKalinSesli) {
+        harfColor = '#dc2626'; // Kırmızı
+    } else if (isPeltekSesli) {
+        harfColor = renkKodu || '#10b981'; // Yeşil (JSON'dan veya varsayılan)
+    } else {
+        harfColor = renkKodu || 'var(--text-primary)'; // Kömür karası veya varsayılan
+    }
     
     // Hareke sembolünü göster ve renk uygula
     const elifLetterEl = document.getElementById('elif-letter');
@@ -2936,11 +2952,19 @@ function loadElifQuestion() {
     const sesTipi = currentQuestion.sesTipi || '';
     const renkKodu = currentQuestion.renkKodu || '';
     
-    // Kalın sesli harf kontrolü - JSON'daki sesTipi alanından
+    // Kalın sesli ve peltek sesli harf kontrolü - JSON'daki sesTipi alanından
     const isKalinSesli = sesTipi.includes('kalın') || sesTipi.includes('kalin');
+    const isPeltekSesli = sesTipi.includes('peltek');
     
-    // Kalın sesli ise kırmızı, değilse JSON'daki renkKodu (kömür karası) veya varsayılan
-    const harfColor = isKalinSesli ? '#dc2626' : (renkKodu || 'var(--text-primary)');
+    // Renk belirleme: Kalın → kırmızı, Peltek → turuncu, Diğer → JSON'daki renkKodu veya varsayılan
+    let harfColor;
+    if (isKalinSesli) {
+        harfColor = '#dc2626'; // Kırmızı
+    } else if (isPeltekSesli) {
+        harfColor = renkKodu || '#10b981'; // Yeşil (JSON'dan veya varsayılan)
+    } else {
+        harfColor = renkKodu || 'var(--text-primary)'; // Kömür karası veya varsayılan
+    }
     
     // Harfi göster ve renk uygula
     const elifLetterEl = document.getElementById('elif-letter');
@@ -3744,16 +3768,24 @@ async function showHarfTablosu() {
             const sesTipi = harf.sesTipi || '';
             const renkKodu = harf.renkKodu || '';
             
-            // Kalın sesli harf kontrolü - JSON'daki sesTipi alanından alınıyor
+            // Kalın sesli ve peltek sesli harf kontrolü - JSON'daki sesTipi alanından alınıyor
             const isKalinSesli = sesTipi.includes('kalın') || sesTipi.includes('kalin');
+            const isPeltekSesli = sesTipi.includes('peltek');
             const kalinClass = isKalinSesli ? ' kalin-sesli' : '';
+            const peltekClass = isPeltekSesli ? ' peltek-sesli' : '';
             
-            // Kalın sesli ise kırmızı renk kullan, değilse JSON'daki renkKodu veya varsayılan
-            // Not: JSON'da kalın sesli harfler için #0F0F0F (siyah) var ama kırmızı yapıyoruz
-            const harfColor = isKalinSesli ? '#dc2626' : (renkKodu || 'var(--text-primary)');
+            // Renk belirleme: Kalın → kırmızı, Peltek → turuncu, Diğer → JSON'daki renkKodu veya varsayılan
+            let harfColor;
+            if (isKalinSesli) {
+                harfColor = '#dc2626'; // Kırmızı
+            } else if (isPeltekSesli) {
+                harfColor = renkKodu || '#f59e0b'; // Turuncu (JSON'dan veya varsayılan)
+            } else {
+                harfColor = renkKodu || 'var(--text-primary)'; // Kömür karası veya varsayılan
+            }
             
             return `
-            <div class="harf-card${kalinClass}" 
+            <div class="harf-card${kalinClass}${peltekClass}" 
                  data-audio-url="${audioUrl.replace(/"/g, '&quot;')}" 
                  data-harf-name="${harfName.replace(/"/g, '&quot;')}" 
                  data-ses-tipi="${sesTipi.replace(/"/g, '&quot;')}"
