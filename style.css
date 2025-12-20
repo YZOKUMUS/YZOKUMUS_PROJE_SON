@@ -1385,18 +1385,17 @@ body {
     align-items: center;
     justify-content: center;
     padding: var(--spacing-lg);
-    background: var(--glass-bg);
-    backdrop-filter: var(--glass-blur);
-    border-radius: var(--radius-md);
-    border: 1px solid var(--glass-border);
+    background: #B2EBF2; /* Varsayılan açık mavi (ince sesli harfler için) */
+    border-radius: 16px; /* Yuvarlak köşeler */
+    border: 2px solid #80DEEA; /* Biraz daha koyu mavi border */
     cursor: pointer;
     transition: var(--transition-bounce);
-    box-shadow: var(--glass-shadow);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .harf-card:hover {
     transform: scale(1.05);
-    box-shadow: 0 12px 40px rgba(31, 38, 135, 0.2);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .harf-card:active {
@@ -1406,23 +1405,18 @@ body {
 .harf-arabic {
     font-family: 'KFGQPC Uthmanic Script HAFS', 'Amiri', serif;
     font-size: 2.5rem;
-    color: var(--text-primary);
+    color: #000000; /* Siyah harfler */
+    font-weight: 500;
 }
 
-/* Kalın sesli harfler için kırmızı renk */
-.harf-card.kalin-sesli .harf-arabic {
-    color: #dc2626; /* Kırmızı renk */
-    font-weight: 600;
-}
-
+/* Kalın sesli harfler için açık yeşil arka plan */
 .harf-card.kalin-sesli {
-    border-color: rgba(220, 38, 38, 0.3); /* Kırmızı border */
-    background: rgba(220, 38, 38, 0.05); /* Hafif kırmızı arka plan */
+    background: #C8E6C9; /* Açık yeşil arka plan */
+    border-color: #A5D6A7; /* Biraz daha koyu yeşil border */
 }
 
 .harf-card.kalin-sesli:hover {
-    box-shadow: 0 12px 40px rgba(220, 38, 38, 0.3);
-    border-color: rgba(220, 38, 38, 0.5);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .harf-name {
@@ -1431,29 +1425,17 @@ body {
     margin-top: var(--spacing-xs);
 }
 
-.harf-card.kalin-sesli .harf-name {
-    color: #991b1b; /* Koyu kırmızı */
-}
-
-/* Peltek sesli harfler için yeşil renk */
-.harf-card.peltek-sesli .harf-arabic {
-    color: #10b981; /* Yeşil renk */
-    font-weight: 500;
-}
-
+/* Peltek sesli harfler için açık kırmızı/pembe arka plan */
 .harf-card.peltek-sesli {
-    border-color: rgba(16, 185, 129, 0.3); /* Yeşil border */
-    background: rgba(16, 185, 129, 0.05); /* Hafif yeşil arka plan */
+    background: #FFCDD2; /* Açık kırmızı/pembe arka plan */
+    border-color: #EF9A9A; /* Biraz daha koyu kırmızı border */
 }
 
 .harf-card.peltek-sesli:hover {
-    box-shadow: 0 12px 40px rgba(16, 185, 129, 0.3);
-    border-color: rgba(16, 185, 129, 0.5);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.harf-card.peltek-sesli .harf-name {
-    color: #047857; /* Koyu yeşil */
-}
+/* İnce sesli harfler (varsayılan) - açık mavi arka plan zaten .harf-card'da tanımlı */
 
 /* ===================================
    BADGES MODAL

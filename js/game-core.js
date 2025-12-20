@@ -2636,6 +2636,12 @@ async function startElifBaGame(submode = 'harfler') {
     } else if (submode === 'harekeler') {
         // Harekeler (vowel marks) game
         await startElifHarekelerGame(data);
+    } else if (submode === 'kelime-okuma') {
+        // Kelime Okuma (Word Reading) game
+        await startKelimeOkumaGame();
+    } else if (submode === 'tablo') {
+        // Harf Tablosu (Letter Table)
+        await showHarfTablosu();
     }
 }
 
@@ -2713,15 +2719,8 @@ function loadElifKelimelerQuestion() {
     const isKalinSesli = sesTipi.includes('kalın') || sesTipi.includes('kalin');
     const isPeltekSesli = sesTipi.includes('peltek');
     
-    // Renk belirleme: Kalın → kırmızı, Peltek → turuncu, Diğer → JSON'daki renkKodu veya varsayılan
-    let harfColor;
-    if (isKalinSesli) {
-        harfColor = '#dc2626'; // Kırmızı
-    } else if (isPeltekSesli) {
-        harfColor = renkKodu || '#10b981'; // Yeşil (JSON'dan veya varsayılan)
-    } else {
-        harfColor = renkKodu || 'var(--text-primary)'; // Kömür karası veya varsayılan
-    }
+    // Harf rengi siyah (kart arka planı renkli olacak, harf siyah)
+    const harfColor = '#000000'; // Siyah harfler
     
     // Harfi göster ve renk uygula
     const elifLetterEl = document.getElementById('elif-letter');
@@ -2797,6 +2796,121 @@ function checkElifKelimelerAnswer(index, selectedAnswer) {
 }
 
 /**
+ * Elif Ba Kelime Okuma submode - read and learn Arabic words
+ */
+async function startKelimeOkumaGame() {
+    const data = await loadHarf1Data();
+    
+    if (data.length === 0) {
+        showToast('Kelime Okuma verisi yüklenemedi', 'error');
+        goToMainMenu();
+        return;
+    }
+    
+    // Shuffle questions
+    currentQuestions = shuffleArray([...data]).slice(0, CONFIG.QUESTIONS_PER_GAME);
+    
+    document.getElementById('elif-ba-screen').classList.remove('hidden');
+    document.getElementById('elif-total-questions').textContent = currentQuestions.length;
+    
+    questionIndex = 0;
+    loadKelimeOkumaQuestion();
+}
+
+function loadKelimeOkumaQuestion() {
+    if (questionIndex >= currentQuestions.length) {
+        endGame();
+        return;
+    }
+    
+    currentQuestion = currentQuestions[questionIndex];
+    
+    document.getElementById('elif-question-number').textContent = questionIndex + 1;
+    
+    // Kelimeyi göster
+    const elifLetterEl = document.getElementById('elif-letter');
+    elifLetterEl.textContent = currentQuestion.kelime;
+    elifLetterEl.style.color = '#000000'; // Siyah
+    
+    // Açıklama metnini gizle
+    const instructionEl = document.getElementById('elif-question-instruction');
+    if (instructionEl) {
+        instructionEl.style.display = 'none';
+    }
+    
+    document.getElementById('elif-combo').textContent = comboCount;
+    document.getElementById('elif-session-score').textContent = formatNumber(sessionScore);
+    
+    // Audio button'a ses dosyasını bağla
+    const audioBtn = document.getElementById('elif-audio-btn');
+    if (audioBtn) {
+        audioBtn.onclick = () => {
+            if (currentQuestion.audioUrl) {
+                playSafeAudio(currentQuestion.audioUrl);
+            }
+        };
+    }
+    
+    // Doğru cevap: kelimenin okunuşu
+    const correctAnswer = currentQuestion.okunus;
+    const allKelimeler = window.harf1Data || [];
+    
+    // Yanlış seçenekler: diğer kelimelerin okunuşları
+    const wrongOptions = getRandomItems(
+        allKelimeler.filter(k => k.id !== currentQuestion.id),
+        3
+    ).map(k => k.okunus);
+    
+    const options = shuffleArray([correctAnswer, ...wrongOptions]);
+    
+    const optionsContainer = document.getElementById('elif-options');
+    optionsContainer.innerHTML = options.map((option, index) => `
+        <button class="answer-option" onclick="checkKelimeOkumaAnswer(${index}, '${option.replace(/'/g, "\\'")}')">
+            ${option}
+        </button>
+    `).join('');
+}
+
+function checkKelimeOkumaAnswer(index, selectedAnswer) {
+    const correctAnswer = currentQuestion.okunus;
+    const buttons = document.querySelectorAll('#elif-options .answer-option');
+    
+    buttons.forEach(btn => btn.classList.add('disabled'));
+    buttons.forEach(btn => {
+        if (btn.textContent.trim() === correctAnswer) {
+            btn.classList.add('correct');
+        }
+    });
+    
+    if (selectedAnswer === correctAnswer) {
+        correctCount++;
+        comboCount++;
+        maxCombo = Math.max(maxCombo, comboCount);
+        const basePoints = getBasePoints(currentDifficulty);
+        const comboBonus = CONFIG.COMBO_BONUS_PER_CORRECT;
+        const gained = basePoints + comboBonus;
+        sessionScore += gained;
+        dailyProgress += gained; // Günlük vird'e ekle
+        updateTaskProgress('correct', 1); // Görev ilerlemesine ekle
+        
+        // Rozet ve başarıları kontrol et (her puan kazanınca)
+        checkBadgesAndAchievementsAfterPoints();
+    } else {
+        wrongCount++;
+        comboCount = 0;
+        buttons[index].classList.add('wrong');
+    }
+    
+    // Günlük vird gösterimini güncelle
+    updateDailyGoalDisplay();
+    
+    setTimeout(() => {
+        questionIndex++;
+        loadKelimeOkumaQuestion();
+    }, 1200);
+}
+
+/**
  * Elif Ba Harekeler submode - vowel marks game
  */
 async function startElifHarekelerGame(harfData) {
@@ -2849,15 +2963,8 @@ function loadElifHarekelerQuestion() {
     const isKalinSesli = sesTipi.includes('kalın') || sesTipi.includes('kalin');
     const isPeltekSesli = sesTipi.includes('peltek');
     
-    // Renk belirleme: Kalın → kırmızı, Peltek → turuncu, Diğer → JSON'daki renkKodu veya varsayılan
-    let harfColor;
-    if (isKalinSesli) {
-        harfColor = '#dc2626'; // Kırmızı
-    } else if (isPeltekSesli) {
-        harfColor = renkKodu || '#10b981'; // Yeşil (JSON'dan veya varsayılan)
-    } else {
-        harfColor = renkKodu || 'var(--text-primary)'; // Kömür karası veya varsayılan
-    }
+    // Harf rengi siyah (kart arka planı renkli olacak, harf siyah)
+    const harfColor = '#000000'; // Siyah harfler
     
     // Hareke sembolünü göster ve renk uygula
     const elifLetterEl = document.getElementById('elif-letter');
@@ -2956,15 +3063,8 @@ function loadElifQuestion() {
     const isKalinSesli = sesTipi.includes('kalın') || sesTipi.includes('kalin');
     const isPeltekSesli = sesTipi.includes('peltek');
     
-    // Renk belirleme: Kalın → kırmızı, Peltek → turuncu, Diğer → JSON'daki renkKodu veya varsayılan
-    let harfColor;
-    if (isKalinSesli) {
-        harfColor = '#dc2626'; // Kırmızı
-    } else if (isPeltekSesli) {
-        harfColor = renkKodu || '#10b981'; // Yeşil (JSON'dan veya varsayılan)
-    } else {
-        harfColor = renkKodu || 'var(--text-primary)'; // Kömür karası veya varsayılan
-    }
+    // Harf rengi siyah (kart arka planı renkli olacak, harf siyah)
+    const harfColor = '#000000'; // Siyah harfler
     
     // Harfi göster ve renk uygula
     const elifLetterEl = document.getElementById('elif-letter');
@@ -3774,15 +3874,8 @@ async function showHarfTablosu() {
             const kalinClass = isKalinSesli ? ' kalin-sesli' : '';
             const peltekClass = isPeltekSesli ? ' peltek-sesli' : '';
             
-            // Renk belirleme: Kalın → kırmızı, Peltek → turuncu, Diğer → JSON'daki renkKodu veya varsayılan
-            let harfColor;
-            if (isKalinSesli) {
-                harfColor = '#dc2626'; // Kırmızı
-            } else if (isPeltekSesli) {
-                harfColor = renkKodu || '#f59e0b'; // Turuncu (JSON'dan veya varsayılan)
-            } else {
-                harfColor = renkKodu || 'var(--text-primary)'; // Kömür karası veya varsayılan
-            }
+            // Harf rengi siyah (kart arka planı renkli olacak, harf siyah)
+            const harfColor = '#000000'; // Siyah harfler
             
             return `
             <div class="harf-card${kalinClass}${peltekClass}" 
@@ -5149,6 +5242,7 @@ if (typeof window !== 'undefined') {
     window.checkElifAnswer = checkElifAnswer;
     window.checkElifKelimelerAnswer = checkElifKelimelerAnswer;
     window.checkElifHarekelerAnswer = checkElifHarekelerAnswer;
+    window.checkKelimeOkumaAnswer = checkKelimeOkumaAnswer;
     window.toggleCurrentWordFavorite = toggleCurrentWordFavorite;
     window.showHarfTablosu = showHarfTablosu;
     window.playHarfAudio = playHarfAudio;

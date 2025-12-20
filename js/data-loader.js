@@ -9,6 +9,7 @@ let ayetData = [];
 let duaData = [];
 let hadisData = [];
 let harfData = [];
+let harf1Data = [];
 
 // Loading state
 let dataLoaded = {
@@ -16,7 +17,8 @@ let dataLoaded = {
     ayet: false,
     dua: false,
     hadis: false,
-    harf: false
+    harf: false,
+    harf1: false
 };
 
 /**
@@ -165,6 +167,35 @@ async function loadHarfData() {
 }
 
 /**
+ * Load Harf1 (Kelime Okuma) data
+ */
+async function loadHarf1Data() {
+    if (dataLoaded.harf1 && harf1Data.length > 0) {
+        return harf1Data;
+    }
+    
+    try {
+        const response = await fetch('./data/harf1.json');
+        if (!response.ok) throw new Error('Harf1 data fetch failed');
+        
+        const data = await response.json();
+        harf1Data = Array.isArray(data.kelimeler) ? data.kelimeler : [];
+        dataLoaded.harf1 = true;
+        
+        // Update global reference
+        if (typeof window !== 'undefined') {
+            window.harf1Data = harf1Data;
+        }
+        
+        console.log(`✅ Harf1 (Kelime Okuma) data loaded: ${harf1Data.length} words`);
+        return harf1Data;
+    } catch (err) {
+        console.error('❌ Harf1 data load error:', err);
+        return [];
+    }
+}
+
+/**
  * Preload all data in background
  */
 async function preloadAllData() {
@@ -175,7 +206,8 @@ async function preloadAllData() {
         loadAyetData(),
         loadDuaData(),
         loadHadisData(),
-        loadHarfData()
+        loadHarfData(),
+        loadHarf1Data()
     ]);
     
     console.log('✅ All data preloaded');
@@ -190,7 +222,8 @@ function getDataStatus() {
         ayet: { loaded: dataLoaded.ayet, count: ayetData.length },
         dua: { loaded: dataLoaded.dua, count: duaData.length },
         hadis: { loaded: dataLoaded.hadis, count: hadisData.length },
-        harf: { loaded: dataLoaded.harf, count: harfData.length }
+        harf: { loaded: dataLoaded.harf, count: harfData.length },
+        harf1: { loaded: dataLoaded.harf1, count: harf1Data.length }
     };
 }
 
@@ -201,6 +234,7 @@ if (typeof window !== 'undefined') {
     window.loadDuaData = loadDuaData;
     window.loadHadisData = loadHadisData;
     window.loadHarfData = loadHarfData;
+    window.loadHarf1Data = loadHarf1Data;
     window.preloadAllData = preloadAllData;
     window.getDataStatus = getDataStatus;
     
@@ -210,4 +244,5 @@ if (typeof window !== 'undefined') {
     window.duaData = duaData;
     window.hadisData = hadisData;
     window.harfData = harfData;
+    window.harf1Data = harf1Data;
 }
