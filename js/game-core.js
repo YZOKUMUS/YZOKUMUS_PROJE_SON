@@ -1067,7 +1067,7 @@ function checkBadgesAndAchievementsAfterPoints() {
     const newAchievements = checkAchievements(stats);
     if (newAchievements.length > 0) {
         newAchievements.forEach(ach => saveAchievement(ach.id));
-        setTimeout(() => showAchievementModal(newAchievements[0]), 500);
+        // Başarım pop-up'ı kaldırıldı - gereksiz pop-up
     }
     
     // Seviye kontrolü
@@ -1264,7 +1264,7 @@ function endGame() {
     
     if (newAchievements.length > 0) {
         newAchievements.forEach(ach => saveAchievement(ach.id));
-        setTimeout(() => showAchievementModal(newAchievements[0]), 1500);
+        // Başarım pop-up'ı kaldırıldı - gereksiz pop-up
     }
     
     // Check badges based on total points
@@ -3210,14 +3210,14 @@ function loadElifQuestion() {
     elifLetterEl.style.color = harfColor;
     elifLetterEl.classList.remove('hareke-symbol'); // Harekeler class'ını kaldır
     
-    // Normal harfler modunda açıklama metnini gizle, ses butonunu göster
+    // Normal harfler modunda açıklama metnini gizle, ses butonunu gizle (ses çalınca cevap bulunuyor)
     const instructionEl = document.getElementById('elif-question-instruction');
     if (instructionEl) {
         instructionEl.style.display = 'none';
     }
     const audioBtn = document.getElementById('elif-audio-btn');
     if (audioBtn) {
-        audioBtn.style.display = '';
+        audioBtn.style.display = 'none';
     }
     document.getElementById('elif-combo').textContent = comboCount;
     document.getElementById('elif-session-score').textContent = formatNumber(sessionScore);
@@ -3282,6 +3282,11 @@ function checkElifAnswer(index, selectedAnswer) {
 
 function playCurrentLetterAudio() {
     if (!currentQuestion) return;
+    
+    // Harfler modunda ses çalma (ses çalınca cevap bulunuyor, mantıksız)
+    if (currentElifBaSubmode === 'harfler') {
+        return;
+    }
     
     // Harekeler ve Fetha modlarında ses çalma (Fetha'da özel audioUrl kullanılıyor)
     if (currentElifBaSubmode === 'harekeler') {
