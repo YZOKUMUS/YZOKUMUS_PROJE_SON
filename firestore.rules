@@ -2,14 +2,37 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     // Kullanıcı sadece kendi verilerine erişebilir
-    match /user_stats/{userId} {
-      // Sadece authenticated kullanıcılar kendi verilerini okuyabilir/yazabilir
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+    // Document ID artık username olduğu için, document içindeki user_id alanını kontrol ediyoruz
+    match /user_stats/{docId} {
+      // Read: Document içindeki user_id alanı request.auth.uid ile eşleşmeli
+      allow read: if request.auth != null && 
+                  resource != null && 
+                  resource.data.user_id == request.auth.uid;
+      
+      // Create: Yeni document oluşturulurken user_id alanı request.auth.uid ile eşleşmeli
+      allow create: if request.auth != null && 
+                    request.resource.data.user_id == request.auth.uid;
+      
+      // Update: Güncellemede de user_id alanı request.auth.uid ile eşleşmeli
+      allow update: if request.auth != null && 
+                    request.resource.data.user_id == request.auth.uid &&
+                    resource.data.user_id == request.auth.uid;
     }
     
-    match /daily_tasks/{userId} {
-      // Sadece authenticated kullanıcılar kendi verilerini okuyabilir/yazabilir
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+    match /daily_tasks/{docId} {
+      // Read: Document içindeki user_id alanı request.auth.uid ile eşleşmeli
+      allow read: if request.auth != null && 
+                  resource != null && 
+                  resource.data.user_id == request.auth.uid;
+      
+      // Create: Yeni document oluşturulurken user_id alanı request.auth.uid ile eşleşmeli
+      allow create: if request.auth != null && 
+                    request.resource.data.user_id == request.auth.uid;
+      
+      // Update: Güncellemede de user_id alanı request.auth.uid ile eşleşmeli
+      allow update: if request.auth != null && 
+                    request.resource.data.user_id == request.auth.uid &&
+                    resource.data.user_id == request.auth.uid;
     }
     
     // Word stats (opsiyonel - şu an localStorage'da)

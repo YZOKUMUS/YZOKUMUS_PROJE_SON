@@ -9,6 +9,43 @@
 // ========================================
 
 /**
+ * Convert username to safe Firestore document ID
+ * Removes/replaces invalid characters for Firestore document IDs
+ * @param {string} username - Username to convert
+ * @returns {string} Safe document ID
+ */
+function usernameToDocId(username) {
+    console.log('🔍 usernameToDocId called with:', username);
+    
+    if (!username || typeof username !== 'string') {
+        console.warn('⚠️ usernameToDocId: Invalid username, returning user_unknown');
+        return 'user_unknown';
+    }
+    
+    // Replace spaces and invalid characters with underscores
+    // Firestore document IDs: letters, digits, and underscore only (no spaces, slashes, etc.)
+    let safeId = username.trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9_]/g, '_') // Replace invalid chars with underscore
+        .replace(/_+/g, '_') // Replace multiple underscores with single
+        .replace(/^_+|_+$/g, ''); // Remove leading/trailing underscores
+    
+    // Ensure it's not empty
+    if (!safeId || safeId.length === 0) {
+        console.warn('⚠️ usernameToDocId: Result is empty, generating timestamp-based ID');
+        safeId = 'user_' + Date.now();
+    }
+    
+    // Firestore document ID max length is 1500 chars, but keep it reasonable
+    if (safeId.length > 100) {
+        safeId = safeId.substring(0, 100);
+    }
+    
+    console.log('✅ usernameToDocId result:', safeId, '(from input:', username + ')');
+    return safeId;
+}
+
+/**
  * Get backend type helper - uses auth.js function
  * @returns {string} 'localStorage' | 'firebase'
  */
@@ -79,22 +116,37 @@ async function saveToIndexedDB(key, value) {
  * @returns {Promise<any>} Document data or null
  */
 async function firestoreGet(collection, docId) {
-    const backendType = getBackendTypeFromAuth();
-    if (backendType !== 'firebase' || !window.firestore) {
+    if (!window.FIREBASE_ENABLED || !window.firestore) {
+        // Firebase not enabled, skip
         return null;
     }
     
-    // Check if user is authenticated (required for Firestore rules)
-    const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : null;
-    if (!user || user.id.startsWith('local-')) {
-        // Local user, skip Firebase
-        return null;
-    }
-    
-    // Check Firebase auth (required for Firestore security rules)
-    if (window.firebaseAuth && !window.firebaseAuth.currentUser) {
-        console.warn('⚠️ Firebase user not authenticated, cannot read from Firestore');
-        return null;
+    // Check Firebase auth - try to sign in anonymously if not authenticated (for local users)
+    let firebaseAuthUID = null;
+    if (window.firebaseAuth && window.firebaseAuth.currentUser) {
+        // Already authenticated
+        firebaseAuthUID = window.firebaseAuth.currentUser.uid;
+    } else {
+        // Try anonymous auth for local users
+        const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : null;
+        if (user && typeof window.autoSignInAnonymous === 'function') {
+            try {
+                await window.autoSignInAnonymous();
+                if (window.firebaseAuth && window.firebaseAuth.currentUser) {
+                    firebaseAuthUID = window.firebaseAuth.currentUser.uid;
+                    console.log('✅ Anonymous Firebase auth for firestoreGet, UID:', firebaseAuthUID);
+                } else {
+                    console.warn('⚠️ Anonymous auth completed but no current user');
+                    return null;
+                }
+            } catch (error) {
+                console.warn('⚠️ Firebase anonymous auth failed in firestoreGet:', error);
+                return null;
+            }
+        } else {
+            console.warn('⚠️ Firebase user not authenticated, cannot read from Firestore');
+            return null;
+        }
     }
     
     try {
@@ -153,36 +205,89 @@ async function firestoreDelete(collection, docId) {
  * @returns {Promise<boolean>} Success status
  */
 async function firestoreSet(collection, docId, data) {
-    const backendType = getBackendTypeFromAuth();
+    console.log('🔍 firestoreSet called:', { collection, docId, firestoreExists: !!window.firestore });
     
-    console.log('🔍 firestoreSet called:', { collection, docId, backendType, firestoreExists: !!window.firestore });
-    
-    if (backendType !== 'firebase' || !window.firestore) {
-        console.warn('⚠️ Firebase not available:', { backendType, firestoreExists: !!window.firestore });
+    // Check if Firebase is enabled and available
+    if (!window.FIREBASE_ENABLED || !window.firestore) {
+        console.warn('⚠️ Firebase not available:', { FIREBASE_ENABLED: !!window.FIREBASE_ENABLED, firestoreExists: !!window.firestore });
         return false;
     }
     
-    // Check if user is authenticated
+    // Check if user exists and has a real username
     const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : null;
-    if (!user || user.id.startsWith('local-')) {
-        console.warn('⚠️ User is local, not syncing to Firebase:', user);
+    if (!user) {
+        console.warn('⚠️ No user found, not syncing to Firebase');
         return false;
     }
     
-    // Check Firebase auth
-    if (window.firebaseAuth && !window.firebaseAuth.currentUser) {
-        console.warn('⚠️ Firebase user not authenticated');
+    // ALWAYS use localStorage username first - this is the username user explicitly entered
+    // Don't fall back to user.username (which might be Firebase displayName) unless localStorage is empty
+    const savedUsername = localStorage.getItem('hasene_username') || '';
+    const defaultUsernames = ['Kullanıcı', 'Misafir', 'Anonim Kullanıcı', ''];
+    const hasRealUsername = savedUsername && savedUsername.trim() !== '' && !defaultUsernames.includes(savedUsername.trim());
+    
+    if (!hasRealUsername) {
+        console.warn('⚠️ User has no real username in localStorage (hasene_username), not syncing to Firebase. localStorage value:', savedUsername);
+        return false;
+    }
+    
+    // Check Firebase auth - try to sign in anonymously if not authenticated (for local users)
+    let firebaseAuthUID = null;
+    if (window.firebaseAuth && window.firebaseAuth.currentUser) {
+        // Already authenticated, use current user's UID
+        firebaseAuthUID = window.firebaseAuth.currentUser.uid;
+        console.log('✅ Firebase user authenticated, UID:', firebaseAuthUID);
+    } else {
+        // For local users, try anonymous auth
+        if (user.id.startsWith('local-') && typeof window.autoSignInAnonymous === 'function') {
+            try {
+                const authResult = await window.autoSignInAnonymous();
+                if (authResult && window.firebaseAuth && window.firebaseAuth.currentUser) {
+                    firebaseAuthUID = window.firebaseAuth.currentUser.uid;
+                    console.log('✅ Anonymous Firebase auth for local user, UID:', firebaseAuthUID);
+                } else {
+                    console.warn('⚠️ Anonymous auth completed but no current user');
+                    return false;
+                }
+            } catch (error) {
+                console.warn('⚠️ Firebase anonymous auth failed:', error);
+                return false;
+            }
+        } else {
+            console.warn('⚠️ Firebase user not authenticated and cannot sign in anonymously');
+            return false;
+        }
+    }
+    
+    // Ensure we have Firebase auth UID
+    if (!firebaseAuthUID) {
+        console.warn('⚠️ No Firebase auth UID available, cannot save to Firestore');
         return false;
     }
     
     try {
-        console.log('📤 Sending to Firestore:', { collection, docId, dataSize: JSON.stringify(data).length });
-        await window.firestore.collection(collection).doc(docId).set(data, { merge: true });
-        console.log('✅ Firestore set successful:', { collection, docId });
+        // Ensure data has user_id field for security rules - MUST use Firebase auth UID, not user.id
+        const dataToSave = { ...data };
+        // Always use Firebase auth UID for user_id (security rules requirement)
+        dataToSave.user_id = firebaseAuthUID;
+        
+        console.log('📤 Sending to Firestore:', { 
+            collection, 
+            docId, 
+            dataSize: JSON.stringify(dataToSave).length,
+            hasUserId: !!dataToSave.user_id,
+            userId: dataToSave.user_id,
+            firebaseAuthUID: firebaseAuthUID
+        });
+        
+        // Use set with merge to create or update document
+        await window.firestore.collection(collection).doc(docId).set(dataToSave, { merge: true });
+        console.log('✅ Firestore set successful:', { collection, docId, userId: dataToSave.user_id, firebaseAuthUID });
         return true;
     } catch (error) {
         console.error('❌ Firestore set error:', error);
         console.error('Error details:', { code: error.code, message: error.message });
+        console.error('Failed data:', { collection, docId, dataKeys: Object.keys(data) });
         return false;
     }
 }
@@ -199,20 +304,28 @@ async function firestoreSet(collection, docId, data) {
  */
 async function loadUserStats() {
     const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : null;
-    const isFirebaseUser = user && !user.id.startsWith('local-');
     
-    // For Firebase users, try Firebase first (source of truth)
-    if (isFirebaseUser) {
+    // Try Firebase first if user has a real username (works for both local and Firebase users)
+    // ALWAYS use localStorage username - don't fall back to user.username
+    if (user && window.FIREBASE_ENABLED && window.firestore) {
         try {
-            const firebaseData = await firestoreGet('user_stats', user.id);
-            if (firebaseData && firebaseData.total_points !== undefined) {
-                console.log('☁️ User stats loaded from Firebase');
-                // Sync to localStorage and IndexedDB for offline access
-                if (firebaseData.total_points !== undefined) {
-                    localStorage.setItem('hasene_totalPoints', firebaseData.total_points.toString());
-                    saveToIndexedDB('hasene_totalPoints', firebaseData.total_points).catch(() => {});
+            const savedUsername = localStorage.getItem('hasene_username') || '';
+            const defaultUsernames = ['Kullanıcı', 'Misafir', 'Anonim Kullanıcı', ''];
+            const hasRealUsername = savedUsername && savedUsername.trim() !== '' && !defaultUsernames.includes(savedUsername.trim());
+            
+            if (hasRealUsername) {
+                const docId = usernameToDocId(savedUsername);
+                console.log('🔍 loadUserStats - Attempting to load from Firebase with docId:', docId, 'for username:', savedUsername);
+                const firebaseData = await firestoreGet('user_stats', docId);
+                if (firebaseData && firebaseData.total_points !== undefined) {
+                    console.log('☁️ User stats loaded from Firebase (username:', savedUsername + ')');
+                    // Sync to localStorage and IndexedDB for offline access
+                    if (firebaseData.total_points !== undefined) {
+                        localStorage.setItem('hasene_totalPoints', firebaseData.total_points.toString());
+                        saveToIndexedDB('hasene_totalPoints', firebaseData.total_points).catch(() => {});
+                    }
+                    return firebaseData;
                 }
-                return firebaseData;
             }
         } catch (error) {
             console.warn('Firebase load failed:', error);
@@ -277,29 +390,33 @@ async function saveUserStats(stats) {
     // 2. Save to IndexedDB (async, don't wait)
     promises.push(saveToIndexedDB('hasene_totalPoints', stats.total_points || 0));
     
-    // 3. Save to Firebase (if Firebase user AND user has a real username)
-    // IMPORTANT: Only save to Firebase if user has explicitly logged in with a username
-    // Don't save anonymous users or users without proper usernames
-    if (!user.id.startsWith('local-')) {
-        // Check if user has a real username (not default/anonymous)
-        const savedUsername = localStorage.getItem('hasene_username') || user.username || '';
-        const defaultUsernames = ['Kullanıcı', 'Misafir', 'Anonim Kullanıcı', ''];
-        const hasRealUsername = savedUsername && savedUsername.trim() !== '' && !defaultUsernames.includes(savedUsername.trim());
+    // 3. Save to Firebase if user has a real username
+    // IMPORTANT: ALWAYS use localStorage username (hasene_username) - this is what user explicitly entered
+    // Don't use user.username which might be Firebase displayName or other default values
+    const savedUsername = localStorage.getItem('hasene_username') || '';
+    console.log('🔍 saveUserStats - Checking username:', { savedUsername, localStorageHasUsername: !!localStorage.getItem('hasene_username') });
+    
+    const defaultUsernames = ['Kullanıcı', 'Misafir', 'Anonim Kullanıcı', ''];
+    const hasRealUsername = savedUsername && savedUsername.trim() !== '' && !defaultUsernames.includes(savedUsername.trim());
+    
+    console.log('🔍 saveUserStats - Username check:', { savedUsername, hasRealUsername, FIREBASE_ENABLED: !!window.FIREBASE_ENABLED, firestore: !!window.firestore });
+    
+    if (hasRealUsername && window.FIREBASE_ENABLED && window.firestore) {
+        console.log('🔥 User has real username, syncing to Firestore...');
+        // Use username as document ID for easy tracking
+        const docId = usernameToDocId(savedUsername);
+        console.log('📝 saveUserStats - Document ID generated:', docId, 'for username:', savedUsername);
         
-        if (!hasRealUsername) {
-            console.log('⚠️ Firebase user has no real username, skipping Firebase save (username:', savedUsername + ')');
-            return success; // Only return localStorage/IndexedDB success, don't write to Firebase
-        }
-        
-        console.log('🔥 Firebase user detected with username, syncing to Firestore...');
-        // Add username to stats for backend reporting
+        // Add username and user_id to stats for tracking
         const statsWithUsername = {
             ...stats,
-            username: savedUsername
+            username: savedUsername,
+            user_id: user.id, // Keep original user ID for reference
+            user_type: user.type || 'local'
         };
-        console.log('📝 Saving username to Firestore:', savedUsername);
+        console.log('📝 Saving username to Firestore (docId:', docId + ', username:', savedUsername + ')');
         promises.push(
-            firestoreSet('user_stats', user.id, statsWithUsername).then((result) => {
+            firestoreSet('user_stats', docId, statsWithUsername).then((result) => {
                 if (result) {
                     console.log('☁️ ✅ User stats saved to Firebase successfully');
                 } else {
@@ -312,7 +429,11 @@ async function saveUserStats(stats) {
             })
         );
     } else {
-        console.log('ℹ️ Local user, skipping Firebase sync');
+        if (!hasRealUsername) {
+            console.log('ℹ️ User has no real username, skipping Firebase sync');
+        } else {
+            console.log('ℹ️ Firebase not enabled, skipping Firebase sync');
+        }
     }
     
     // Wait for all async operations (but don't fail if Firebase fails)
@@ -338,17 +459,25 @@ async function saveUserStats(stats) {
  */
 async function loadDailyTasks() {
     const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : null;
-    const isFirebaseUser = user && !user.id.startsWith('local-');
     
-    // For Firebase users, try Firebase first (source of truth)
-    if (isFirebaseUser) {
+    // Try Firebase first if user has a real username (works for both local and Firebase users)
+    // ALWAYS use localStorage username - don't fall back to user.username
+    if (user && window.FIREBASE_ENABLED && window.firestore) {
         try {
-            const firebaseData = await firestoreGet('daily_tasks', user.id);
-            if (firebaseData) {
-                console.log('☁️ Daily tasks loaded from Firebase');
-                // Sync to localStorage for offline access
-                localStorage.setItem('hasene_dailyTasks', JSON.stringify(firebaseData));
-                return firebaseData;
+            const savedUsername = localStorage.getItem('hasene_username') || '';
+            const defaultUsernames = ['Kullanıcı', 'Misafir', 'Anonim Kullanıcı', ''];
+            const hasRealUsername = savedUsername && savedUsername.trim() !== '' && !defaultUsernames.includes(savedUsername.trim());
+            
+            if (hasRealUsername) {
+                const docId = usernameToDocId(savedUsername);
+                console.log('🔍 loadDailyTasks - Attempting to load from Firebase with docId:', docId, 'for username:', savedUsername);
+                const firebaseData = await firestoreGet('daily_tasks', docId);
+                if (firebaseData) {
+                    console.log('☁️ Daily tasks loaded from Firebase (username:', savedUsername + ')');
+                    // Sync to localStorage for offline access
+                    localStorage.setItem('hasene_dailyTasks', JSON.stringify(firebaseData));
+                    return firebaseData;
+                }
             }
         } catch (error) {
             console.warn('Firebase load failed:', error);
@@ -391,21 +520,27 @@ async function saveDailyTasks(tasks) {
         return false;
     }
     
-    // 2. Save to Firebase (if Firebase user AND user has a real username)
-    if (!user.id.startsWith('local-')) {
-        // Check if user has a real username (not default/anonymous)
-        const savedUsername = localStorage.getItem('hasene_username') || user.username || '';
-        const defaultUsernames = ['Kullanıcı', 'Misafir', 'Anonim Kullanıcı', ''];
-        const hasRealUsername = savedUsername && savedUsername.trim() !== '' && !defaultUsernames.includes(savedUsername.trim());
+    // 2. Save to Firebase if user has a real username (for both local and Firebase users)
+    // ALWAYS use localStorage username - don't fall back to user.username
+    const savedUsername = localStorage.getItem('hasene_username') || '';
+    const defaultUsernames = ['Kullanıcı', 'Misafir', 'Anonim Kullanıcı', ''];
+    const hasRealUsername = savedUsername && savedUsername.trim() !== '' && !defaultUsernames.includes(savedUsername.trim());
+    
+    if (hasRealUsername && window.FIREBASE_ENABLED && window.firestore) {
+        // Use username as document ID for easy tracking
+        const docId = usernameToDocId(savedUsername);
         
-        if (!hasRealUsername) {
-            console.log('⚠️ Firebase user has no real username, skipping Firebase save for daily tasks');
-            return true; // Return success for localStorage save only
-        }
+        // Add username and user_id to tasks for tracking
+        const tasksWithUserInfo = {
+            ...tasks,
+            username: savedUsername,
+            user_id: user.id, // Keep original user ID for reference
+            user_type: user.type || 'local'
+        };
         
         try {
-            await firestoreSet('daily_tasks', user.id, tasks);
-            console.log('☁️ Daily tasks saved to Firebase');
+            await firestoreSet('daily_tasks', docId, tasksWithUserInfo);
+            console.log('☁️ Daily tasks saved to Firebase (docId:', docId + ', username:', savedUsername + ')');
         } catch (error) {
             console.warn('Firebase save failed (using localStorage only):', error);
         }
@@ -424,8 +559,18 @@ async function saveDailyTasks(tasks) {
  */
 async function syncAllDataToBackend() {
     const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : null;
-    if (!user || user.id.startsWith('local-')) {
-        console.log('ℹ️ Local user, no sync needed');
+    if (!user) {
+        console.log('ℹ️ No user found, no sync needed');
+        return true;
+    }
+    
+        // ALWAYS use localStorage username - don't fall back to user.username
+        const savedUsername = localStorage.getItem('hasene_username') || '';
+        const defaultUsernames = ['Kullanıcı', 'Misafir', 'Anonim Kullanıcı', ''];
+        const hasRealUsername = savedUsername && savedUsername.trim() !== '' && !defaultUsernames.includes(savedUsername.trim());
+    
+    if (!hasRealUsername) {
+        console.log('ℹ️ User has no real username, no sync needed');
         return true;
     }
     
@@ -445,8 +590,11 @@ async function syncAllDataToBackend() {
         const dailyProgress = JSON.parse(localStorage.getItem('hasene_dailyProgress') || '{"date":"","points":0}');
         const dailyGoal = parseInt(localStorage.getItem('hasene_dailyGoal') || '2700');
         
-        // Save to Firebase
-        await firestoreSet('user_stats', user.id, {
+        // Use username as document ID for easy tracking
+        const docId = usernameToDocId(savedUsername);
+        
+        // Save to Firebase with username as document ID
+        await firestoreSet('user_stats', docId, {
             total_points: totalPoints,
             badges: badges,
             streak_data: streakData,
@@ -454,12 +602,20 @@ async function syncAllDataToBackend() {
             perfect_lessons_count: gameStats.perfectLessons || 0,
             achievements: achievements,
             daily_progress: dailyProgress.points || 0,
-            daily_goal: dailyGoal
+            daily_goal: dailyGoal,
+            username: savedUsername,
+            user_id: user.id,
+            user_type: user.type || 'local'
         });
         
-        await firestoreSet('daily_tasks', user.id, dailyTasks);
+        await firestoreSet('daily_tasks', docId, {
+            ...dailyTasks,
+            username: savedUsername,
+            user_id: user.id,
+            user_type: user.type || 'local'
+        });
         
-        console.log('✅ All data synced to Firebase');
+        console.log('✅ All data synced to Firebase (docId:', docId + ', username:', savedUsername + ')');
         return true;
     } catch (error) {
         console.error('Sync failed:', error);

@@ -448,9 +448,29 @@ async function loadStats() {
                 }
                 
                 // Update daily progress and goal from Firebase
+                // IMPORTANT: daily_progress sadece bugün için geçerlidir, eski günlerden gelen veriyi yok say
+                const today = getLocalDateString();
+                const savedProgress = loadFromStorage(CONFIG.STORAGE_KEYS.DAILY_PROGRESS, { date: '', points: 0 });
+                
+                // Eğer Firebase'den gelen daily_progress bugünün tarihi değilse veya total_points'ten fazlaysa, sıfırla
                 if (firebaseStats.daily_progress !== undefined) {
-                    dailyProgress = firebaseStats.daily_progress;
+                    // Mantık kontrolü: daily_progress total_points'ten fazla olamaz (ilk oyun hariç)
+                    if (totalPoints === 0 || firebaseStats.daily_progress > totalPoints) {
+                        // Eski günlerden gelen veri veya mantık hatası - bugün için 0 yap
+                        dailyProgress = 0;
+                        console.log('ℹ️ Firebase daily_progress sıfırlandı (totalPoints:', totalPoints + ', daily_progress:', firebaseStats.daily_progress + ')');
+                    } else {
+                        dailyProgress = firebaseStats.daily_progress;
+                    }
+                } else {
+                    // Firebase'de daily_progress yoksa, localStorage'dan kontrol et
+                    if (savedProgress.date === today) {
+                        dailyProgress = savedProgress.points;
+                    } else {
+                        dailyProgress = 0;
+                    }
                 }
+                
                 if (firebaseStats.daily_goal !== undefined) {
                     dailyGoal = firebaseStats.daily_goal;
                 }
@@ -3524,20 +3544,25 @@ function updateDailyGoalDisplay() {
     // Ancak önceki günlerden birikim varsa (totalPoints büyükse), fark normaldir
     if (totalPoints < 500 && dailyProgress > totalPoints) {
         // İlk oyunda veya az puan varsa, dailyProgress toplam puandan fazla olamaz
-        console.warn(`⚠️ Mantık hatası: İlk oyunda dailyProgress (${dailyProgress}) > totalPoints (${totalPoints}). Düzeltiliyor...`);
+        // Sessizce düzelt (console.warn yerine console.log kullan - çok fazla uyarı vermesin)
         const today = getLocalDateString();
         const savedProgress = loadFromStorage(CONFIG.STORAGE_KEYS.DAILY_PROGRESS, { date: '', points: 0 });
         if (savedProgress.date !== today) {
             // Tarih farklıysa, dailyProgress'i 0 yap (yeni gün)
             dailyProgress = 0;
         } else {
-            // Aynı günse, totalPoints'e eşitle
-            dailyProgress = totalPoints;
+            // Aynı günse, totalPoints'e eşitle (ama totalPoints 0 ise, dailyProgress de 0 olmalı)
+            dailyProgress = totalPoints || 0;
         }
         saveToStorage(CONFIG.STORAGE_KEYS.DAILY_PROGRESS, { 
             date: getLocalDateString(), 
             points: dailyProgress 
         });
+        // Sadece bir kere log (çok fazla tekrar etmesin)
+        if (!window.dailyProgressFixLogged) {
+            console.log(`ℹ️ dailyProgress mantık hatası düzeltildi: ${dailyProgress} (totalPoints: ${totalPoints})`);
+            window.dailyProgressFixLogged = true;
+        }
     }
     
     document.getElementById('daily-goal-text').textContent = 
@@ -5048,11 +5073,10 @@ async function confirmUsername() {
     // Show login success message
     showToast(`✅ Giriş yapıldı: ${username}`, 'success', 2000);
     
-    // Sync username to Firebase immediately if Firebase user
-    // Get user again to get updated username from localStorage (username was just saved)
-    const updatedUser = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : null;
-    if (updatedUser && !updatedUser.id.startsWith('local-') && typeof window.saveUserStats === 'function') {
-        // Get current stats and update with new username
+    // Sync username to Firebase immediately after login (if Firebase is enabled)
+    // This creates/updates document with username as document ID for easy tracking
+    if (typeof window.saveUserStats === 'function') {
+        // Get current stats and save with username
         const currentStats = {
             total_points: totalPoints || 0,
             badges: badgesUnlocked || {},
