@@ -277,11 +277,21 @@ async function saveUserStats(stats) {
     // 2. Save to IndexedDB (async, don't wait)
     promises.push(saveToIndexedDB('hasene_totalPoints', stats.total_points || 0));
     
-    // 3. Save to Firebase (if Firebase user)
+    // 3. Save to Firebase (if Firebase user AND user has a real username)
+    // IMPORTANT: Only save to Firebase if user has explicitly logged in with a username
+    // Don't save anonymous users or users without proper usernames
     if (!user.id.startsWith('local-')) {
-        console.log('🔥 Firebase user detected, syncing to Firestore...');
-        // Get username from localStorage (most up-to-date) or user object
-        const savedUsername = localStorage.getItem('hasene_username') || user.username || 'Anonim Kullanıcı';
+        // Check if user has a real username (not default/anonymous)
+        const savedUsername = localStorage.getItem('hasene_username') || user.username || '';
+        const defaultUsernames = ['Kullanıcı', 'Misafir', 'Anonim Kullanıcı', ''];
+        const hasRealUsername = savedUsername && savedUsername.trim() !== '' && !defaultUsernames.includes(savedUsername.trim());
+        
+        if (!hasRealUsername) {
+            console.log('⚠️ Firebase user has no real username, skipping Firebase save (username:', savedUsername + ')');
+            return success; // Only return localStorage/IndexedDB success, don't write to Firebase
+        }
+        
+        console.log('🔥 Firebase user detected with username, syncing to Firestore...');
         // Add username to stats for backend reporting
         const statsWithUsername = {
             ...stats,
@@ -381,8 +391,18 @@ async function saveDailyTasks(tasks) {
         return false;
     }
     
-    // 2. Save to Firebase (if Firebase user)
+    // 2. Save to Firebase (if Firebase user AND user has a real username)
     if (!user.id.startsWith('local-')) {
+        // Check if user has a real username (not default/anonymous)
+        const savedUsername = localStorage.getItem('hasene_username') || user.username || '';
+        const defaultUsernames = ['Kullanıcı', 'Misafir', 'Anonim Kullanıcı', ''];
+        const hasRealUsername = savedUsername && savedUsername.trim() !== '' && !defaultUsernames.includes(savedUsername.trim());
+        
+        if (!hasRealUsername) {
+            console.log('⚠️ Firebase user has no real username, skipping Firebase save for daily tasks');
+            return true; // Return success for localStorage save only
+        }
+        
         try {
             await firestoreSet('daily_tasks', user.id, tasks);
             console.log('☁️ Daily tasks saved to Firebase');

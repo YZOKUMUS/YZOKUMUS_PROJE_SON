@@ -5006,7 +5006,7 @@ function selectGender(gender) {
     }
 }
 
-function confirmUsername() {
+async function confirmUsername() {
     const input = document.getElementById('username-input');
     if (!input) return;
     
@@ -5027,21 +5027,36 @@ function confirmUsername() {
     // Update username in localStorage FIRST (before getCurrentUser)
     localStorage.setItem('hasene_username', username);
     
-    // If user exists and is local, update it; otherwise just save username
-    const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : null;
-    if (user && user.type === 'local') {
-        // Update existing local user
-        if (typeof window.createLocalUser === 'function') {
-            window.createLocalUser(username);
+    // Create/update local user FIRST
+    if (typeof window.createLocalUser === 'function') {
+        window.createLocalUser(username);
+    }
+    
+    // NOW, after username is set, check if Firebase should be activated
+    // Only sign in to Firebase if Firebase is enabled and user wants to use it
+    // For now, we'll use local user by default and only use Firebase if explicitly requested
+    // If user was previously using Firebase, maintain that
+    const existingUserType = localStorage.getItem('hasene_user_type');
+    
+    // Only use Firebase if explicitly configured and user was already using it
+    // OR if we want to enable Firebase for new logins (optional - currently disabled)
+    const useFirebase = window.FIREBASE_ENABLED && existingUserType === 'firebase';
+    
+    if (useFirebase && typeof window.autoSignInAnonymous === 'function' && window.firebaseAuth) {
+        // User wants to use Firebase - sign in anonymously now that username is set
+        try {
+            const firebaseUser = await window.autoSignInAnonymous();
+            if (firebaseUser) {
+                console.log('✅ Firebase kullanıcı giriş yaptı (username ile):', username);
+                localStorage.setItem('hasene_user_type', 'firebase');
+            }
+        } catch (error) {
+            console.warn('⚠️ Firebase giriş hatası, local kullanıcı kullanılıyor:', error);
+            localStorage.setItem('hasene_user_type', 'local');
         }
-    } else if (user && user.type === 'firebase') {
-        // For Firebase users, username is saved in localStorage and will be synced to Firestore
-        // Firebase user ID stays the same, only username updates
     } else {
-        // Create new local user if no user exists
-        if (typeof window.createLocalUser === 'function') {
-            window.createLocalUser(username);
-        }
+        // Use local user (default)
+        localStorage.setItem('hasene_user_type', 'local');
     }
     
     closeModal('username-login-modal');
