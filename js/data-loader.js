@@ -10,6 +10,7 @@ let duaData = [];
 let hadisData = [];
 let harfData = [];
 let harf1Data = [];
+let fethaData = [];
 
 // Loading state
 let dataLoaded = {
@@ -18,7 +19,8 @@ let dataLoaded = {
     dua: false,
     hadis: false,
     harf: false,
-    harf1: false
+    harf1: false,
+    fetha: false
 };
 
 /**
@@ -195,6 +197,34 @@ async function loadHarf1Data() {
     }
 }
 
+/**
+ * Load Fetha data
+ */
+async function loadFethaData() {
+    if (dataLoaded.fetha && fethaData.length > 0) {
+        return fethaData;
+    }
+    
+    try {
+        const response = await fetch('./data/fetha.json');
+        if (!response.ok) throw new Error('Fetha data fetch failed');
+        
+        const data = await response.json();
+        fethaData = Array.isArray(data.harfler) ? data.harfler : [];
+        dataLoaded.fetha = true;
+        
+        // Update global reference
+        if (typeof window !== 'undefined') {
+            window.fethaData = fethaData;
+        }
+        
+        console.log(`✅ Fetha data loaded: ${fethaData.length} letters`);
+        return fethaData;
+    } catch (err) {
+        console.error('❌ Fetha data load error:', err);
+        return [];
+    }
+}
 
 /**
  * Preload all data in background
@@ -208,7 +238,8 @@ async function preloadAllData() {
         loadDuaData(),
         loadHadisData(),
         loadHarfData(),
-        loadHarf1Data()
+        loadHarf1Data(),
+        loadFethaData()
     ]);
     
     console.log('✅ All data preloaded');
@@ -224,7 +255,8 @@ function getDataStatus() {
         dua: { loaded: dataLoaded.dua, count: duaData.length },
         hadis: { loaded: dataLoaded.hadis, count: hadisData.length },
         harf: { loaded: dataLoaded.harf, count: harfData.length },
-        harf1: { loaded: dataLoaded.harf1, count: harf1Data.length }
+        harf1: { loaded: dataLoaded.harf1, count: harf1Data.length },
+        fetha: { loaded: dataLoaded.fetha, count: fethaData.length }
     };
 }
 
@@ -236,8 +268,7 @@ if (typeof window !== 'undefined') {
     window.loadHadisData = loadHadisData;
     window.loadHarfData = loadHarfData;
     window.loadHarf1Data = loadHarf1Data;
-    window.loadHarf2Data = loadHarf2Data;
-    window.loadHarf3Data = loadHarf3Data;
+    window.loadFethaData = loadFethaData;
     window.preloadAllData = preloadAllData;
     window.getDataStatus = getDataStatus;
     
@@ -248,4 +279,5 @@ if (typeof window !== 'undefined') {
     window.hadisData = hadisData;
     window.harfData = harfData;
     window.harf1Data = harf1Data;
+    window.fethaData = fethaData;
 }

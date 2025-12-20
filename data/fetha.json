@@ -1,0 +1,256 @@
+{
+  "harfler": [
+    {
+      "id": 1,
+      "harf": "ا",
+      "harfWithFetha": "اَ",
+      "isim": "Elif",
+      "okunus": "e",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fetha/fetha/btn_1.mp3",
+      "sesTipi": "ince_sesli_harf"
+    },
+    {
+      "id": 2,
+      "harf": "ب",
+      "harfWithFetha": "بَ",
+      "isim": "Bâ",
+      "okunus": "be",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fetha/fetha/btn_2.mp3",
+      "sesTipi": "ince_sesli_harf"
+    },
+    {
+      "id": 3,
+      "harf": "ت",
+      "harfWithFetha": "تَ",
+      "isim": "Tâ",
+      "okunus": "te",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fetha/fetha/btn_3.mp3",
+      "sesTipi": "ince_sesli_harf"
+    },
+    {
+      "id": 4,
+      "harf": "ث",
+      "harfWithFetha": "ثَ",
+      "isim": "Sâ",
+      "okunus": "se",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fetha/fetha/btn_4.mp3",
+      "sesTipi": "peltek_sesli_harf"
+    },
+    {
+      "id": 5,
+      "harf": "ج",
+      "harfWithFetha": "جَ",
+      "isim": "Cim",
+      "okunus": "ce",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fetha/fetha/btn_5.mp3",
+      "sesTipi": "ince_sesli_harf"
+    },
+    {
+      "id": 6,
+      "harf": "ح",
+      "harfWithFetha": "حَ",
+      "isim": "Ha",
+      "okunus": "ha",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fetha/fetha/btn_6.mp3",
+      "sesTipi": "ince_sesli_harf"
+    },
+    {
+      "id": 7,
+      "harf": "د",
+      "harfWithFetha": "دَ",
+      "isim": "Dal",
+      "okunus": "de",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fetha/fetha/btn_7.mp3",
+      "sesTipi": "ince_sesli_harf"
+    },
+    {
+      "id": 8,
+      "harf": "ذ",
+      "harfWithFetha": "ذَ",
+      "isim": "Zal",
+      "okunus": "ze",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fetha/fetha/btn_8.mp3",
+      "sesTipi": "peltek_sesli_harf"
+    },
+    {
+      "id": 9,
+      "harf": "ز",
+      "harfWithFetha": "زَ",
+      "isim": "Zâl",
+      "okunus": "zâl",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fetha/fetha/btn_9.mp3",
+      "sesTipi": "ince_sesli_harf"
+    },
+    {
+      "id": 10,
+      "harf": "س",
+      "harfWithFetha": "سَ",
+      "isim": "Sin",
+      "okunus": "se",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fetha/fetha/btn_10.mp3",
+      "sesTipi": "ince_sesli_harf"
+    },
+    {
+      "id": 11,
+      "harf": "ش",
+      "harfWithFetha": "شَ",
+      "isim": "Şın",
+      "okunus": "şe",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fetha/fetha/btn_11.mp3",
+      "sesTipi": "ince_sesli_harf"
+    },
+    {
+      "id": 12,
+      "harf": "ع",
+      "harfWithFetha": "عَ",
+      "isim": "Ayn",
+      "okunus": "a",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fetha/fetha/btn_12.mp3",
+      "sesTipi": "ince_sesli_harf"
+    },
+    {
+      "id": 13,
+      "harf": "ف",
+      "harfWithFetha": "فَ",
+      "isim": "Fe",
+      "okunus": "fe",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fetha/fetha/btn_13.mp3",
+      "sesTipi": "ince_sesli_harf"
+    },
+    {
+      "id": 14,
+      "harf": "ك",
+      "harfWithFetha": "كَ",
+      "isim": "Kâf",
+      "okunus": "ke",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fetha/fetha/btn_14.mp3",
+      "sesTipi": "ince_sesli_harf"
+    },
+    {
+      "id": 15,
+      "harf": "ل",
+      "harfWithFetha": "لَ",
+      "isim": "Lâm",
+      "okunus": "le",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fetha/fetha/btn_15.mp3",
+      "sesTipi": "ince_sesli_harf"
+    },
+    {
+      "id": 16,
+      "harf": "م",
+      "harfWithFetha": "مَ",
+      "isim": "Mim",
+      "okunus": "me",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fetha/fetha/btn_16.mp3",
+      "sesTipi": "ince_sesli_harf"
+    },
+    {
+      "id": 17,
+      "harf": "ن",
+      "harfWithFetha": "نَ",
+      "isim": "Nun",
+      "okunus": "ne",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fetha/fetha/btn_17.mp3",
+      "sesTipi": "ince_sesli_harf"
+    },
+    {
+      "id": 18,
+      "harf": "ه",
+      "harfWithFetha": "هَ",
+      "isim": "Hâ",
+      "okunus": "he",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fetha/fetha/btn_18.mp3",
+      "sesTipi": "ince_sesli_harf"
+    },
+    {
+      "id": 19,
+      "harf": "و",
+      "harfWithFetha": "وَ",
+      "isim": "Vav",
+      "okunus": "ve",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fetha/fetha/btn_19.mp3",
+      "sesTipi": "ince_sesli_harf"
+    },
+    {
+      "id": 20,
+      "harf": "ي",
+      "harfWithFetha": "يَ",
+      "isim": "Ye",
+      "okunus": "ye",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fetha/fetha/btn_20.mp3",
+      "sesTipi": "ince_sesli_harf"
+    },
+    {
+      "id": 21,
+      "harf": "خ",
+      "harfWithFetha": "خَ",
+      "isim": "Ha",
+      "okunus": "ha",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fetha/fetha/btn_30.mp3",
+      "sesTipi": "kalın_sesli_harf"
+    },
+    {
+      "id": 22,
+      "harf": "ر",
+      "harfWithFetha": "رَ",
+      "isim": "Ra",
+      "okunus": "ra",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fetha/fetha/btn_31.mp3",
+      "sesTipi": "kalın_sesli_harf"
+    },
+    {
+      "id": 23,
+      "harf": "ق",
+      "harfWithFetha": "قَ",
+      "isim": "Gaf",
+      "okunus": "gaf",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fetha/fetha/btn_32.mp3",
+      "sesTipi": "kalın_sesli_harf"
+    },
+    {
+      "id": 24,
+      "harf": "ص",
+      "harfWithFetha": "صَ",
+      "isim": "Sad",
+      "okunus": "sad",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fetha/fetha/btn_33.mp3",
+      "sesTipi": "kalın_sesli_harf"
+    },
+    {
+      "id": 25,
+      "harf": "ض",
+      "harfWithFetha": "ضَ",
+      "isim": "Dad",
+      "okunus": "dad",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fetha/fetha/btn_34.mp3",
+      "sesTipi": "kalın_sesli_harf"
+    },
+    {
+      "id": 26,
+      "harf": "ط",
+      "harfWithFetha": "طَ",
+      "isim": "Da",
+      "okunus": "da",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fetha/fetha/btn_35.mp3",
+      "sesTipi": "kalın_sesli_harf"
+    },
+    {
+      "id": 27,
+      "harf": "ظ",
+      "harfWithFetha": "ظَ",
+      "isim": "Za",
+      "okunus": "za",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fetha/fetha/btn_36.mp3",
+      "sesTipi": "peltek_sesli_harf"
+    },
+    {
+      "id": 28,
+      "harf": "غ",
+      "harfWithFetha": "غَ",
+      "isim": "Gayn",
+      "okunus": "gayn",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fetha/fetha/btn_37.mp3",
+      "sesTipi": "kalın_sesli_harf"
+    }
+  ]
+}

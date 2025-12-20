@@ -2639,6 +2639,9 @@ async function startElifBaGame(submode = 'harfler') {
         // Word reading with letters
         await startElifKelimelerGame(data);
         
+    } else if (submode === 'fetha') {
+        // Fetha dersi - harfleri fetha harekesi ile öğrenme
+        await startElifFethaGame(data);
     } else if (submode === 'harekeler') {
         // Harekeler (vowel marks) game
         await startElifHarekelerGame(data);
@@ -2918,6 +2921,127 @@ function checkKelimeOkumaAnswer(index, selectedAnswer) {
 }
 
 /**
+ * Elif Ba Fetha submode - learn letters with fetha diacritic
+ * JSON dosyasından veri yüklenir (data/fetha.json)
+ */
+async function startElifFethaGame(harfData) {
+    // Fetha JSON dosyasından veri yükle
+    const fethaData = await loadFethaData();
+    
+    if (fethaData.length === 0) {
+        showToast('Fetha verisi yüklenemedi', 'error');
+        goToMainMenu();
+        return;
+    }
+    
+    // JSON'daki sıralamayı kullan (zaten doğru sırada)
+    const questions = fethaData.map(fethaItem => ({
+        type: 'fetha',
+        harf: fethaItem.harf,
+        harfWithFetha: fethaItem.harfWithFetha,
+        isim: fethaItem.isim,
+        okunus: fethaItem.okunus,
+        audioUrl: fethaItem.audioUrl,
+        sesTipi: fethaItem.sesTipi
+    }));
+    
+    currentQuestions = shuffleArray(questions).slice(0, CONFIG.QUESTIONS_PER_GAME);
+    document.getElementById('elif-ba-screen').classList.remove('hidden');
+    document.getElementById('elif-total-questions').textContent = currentQuestions.length;
+    loadElifFethaQuestion();
+}
+
+function loadElifFethaQuestion() {
+    if (questionIndex >= currentQuestions.length) {
+        endGame();
+        return;
+    }
+    
+    currentQuestion = currentQuestions[questionIndex];
+    
+    document.getElementById('elif-question-number').textContent = questionIndex + 1;
+    
+    // Harfi fetha ile göster
+    const elifLetterEl = document.getElementById('elif-letter');
+    elifLetterEl.textContent = currentQuestion.harfWithFetha;
+    elifLetterEl.style.color = '#000000'; // Siyah harf
+    elifLetterEl.style.fontSize = ''; // CSS'den gelen font-size'ı kullan
+    elifLetterEl.style.fontWeight = '600'; // Kalın harf
+    elifLetterEl.style.display = 'block'; // Görünür olduğundan emin ol
+    elifLetterEl.classList.remove('hareke-symbol'); // Normal harf gibi göster
+    
+    // Ses butonunu göster
+    const audioBtn = document.getElementById('elif-audio-btn');
+    if (audioBtn) {
+        audioBtn.style.display = '';
+    }
+    
+    // Ses URL'ini kaydet
+    if (currentQuestion.audioUrl) {
+        audioBtn.onclick = () => playSafeAudio(currentQuestion.audioUrl);
+    }
+    
+    document.getElementById('elif-combo').textContent = comboCount;
+    document.getElementById('elif-session-score').textContent = formatNumber(sessionScore);
+    
+    // Doğru cevap: harfin okunuşu
+    const correctAnswer = currentQuestion.okunus || currentQuestion.isim;
+    const allHarfler = window.harfData || [];
+    
+    // Yanlış seçenekler
+    const wrongOptions = getRandomItems(
+        allHarfler.filter(h => (h.okunus || h.isim) !== correctAnswer),
+        3
+    ).map(h => h.okunus || h.isim);
+    
+    const options = shuffleArray([correctAnswer, ...wrongOptions]);
+    
+    const optionsContainer = document.getElementById('elif-options');
+    optionsContainer.innerHTML = options.map((option, index) => `
+        <button class="answer-option" onclick="checkElifFethaAnswer(${index}, '${option.replace(/'/g, "\\'")}')">
+            ${option}
+        </button>
+    `).join('');
+}
+
+function checkElifFethaAnswer(index, selectedAnswer) {
+    const correctAnswer = currentQuestion.okunus || currentQuestion.isim;
+    const buttons = document.querySelectorAll('#elif-options .answer-option');
+    
+    buttons.forEach(btn => btn.classList.add('disabled'));
+    buttons.forEach(btn => {
+        if (btn.textContent.trim() === correctAnswer) {
+            btn.classList.add('correct');
+        }
+    });
+    
+    if (selectedAnswer === correctAnswer) {
+        correctCount++;
+        comboCount++;
+        maxCombo = Math.max(maxCombo, comboCount);
+        const basePoints = getBasePoints(currentDifficulty);
+        const comboBonus = CONFIG.COMBO_BONUS_PER_CORRECT;
+        const gained = basePoints + comboBonus;
+        sessionScore += gained;
+        dailyProgress += gained;
+        updateTaskProgress('correct', 1);
+        
+        checkBadgesAndAchievementsAfterPoints();
+    } else {
+        wrongCount++;
+        comboCount = 0;
+        buttons[index].classList.add('wrong');
+    }
+    
+    updateDailyGoalDisplay();
+    
+    setTimeout(() => {
+        questionIndex++;
+        loadElifFethaQuestion();
+    }, 1200);
+}
+
+/**
  * Elif Ba Harekeler submode - vowel marks game
  */
 async function startElifHarekelerGame(harfData) {
@@ -2974,6 +3098,10 @@ function loadElifHarekelerQuestion() {
     const elifLetterEl = document.getElementById('elif-letter');
     elifLetterEl.textContent = currentQuestion.hareke.symbol;
     elifLetterEl.classList.add('hareke-symbol'); // Harekeler için özel class ekle
+    elifLetterEl.style.color = '#DC143C'; // Kırmızı harekeler - açıkça ayarla
+    elifLetterEl.style.fontSize = 'clamp(4rem, 8vw, 7rem)'; // Büyük ve responsive
+    elifLetterEl.style.fontWeight = '300'; // İnce çizgi
+    elifLetterEl.style.display = 'block'; // Görünür olduğundan emin ol
     
     // Harekeler modunda açıklama metnini ve ses butonunu gizle
     const instructionEl = document.getElementById('elif-question-instruction');
@@ -3153,8 +3281,13 @@ function checkElifAnswer(index, selectedAnswer) {
 function playCurrentLetterAudio() {
     if (!currentQuestion) return;
     
-    // Harekeler modunda ses çalma
+    // Harekeler ve Fetha modlarında ses çalma (Fetha'da özel audioUrl kullanılıyor)
     if (currentElifBaSubmode === 'harekeler') {
+        return;
+    }
+    
+    // Fetha modunda ses çalma (ses butonu onclick ile zaten ayarlı)
+    if (currentElifBaSubmode === 'fetha') {
         return;
     }
     
@@ -5260,6 +5393,7 @@ if (typeof window !== 'undefined') {
     window.checkBoslukAnswer = checkBoslukAnswer;
     window.checkElifAnswer = checkElifAnswer;
     window.checkElifKelimelerAnswer = checkElifKelimelerAnswer;
+    window.checkElifFethaAnswer = checkElifFethaAnswer;
     window.checkElifHarekelerAnswer = checkElifHarekelerAnswer;
     window.checkKelimeOkumaAnswer = checkKelimeOkumaAnswer;
     window.toggleCurrentWordFavorite = toggleCurrentWordFavorite;
