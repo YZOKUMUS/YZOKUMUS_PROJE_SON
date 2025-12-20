@@ -61,8 +61,9 @@ async function initFirebase() {
         // Set up auth state listener
         setupAuthStateListener();
         
-        // Try to sign in anonymously (if not already signed in)
-        await autoSignInAnonymous();
+        // DO NOT auto sign in anonymously - wait for user to log in with username first
+        // Firebase will only be used after user explicitly logs in with username
+        // await autoSignInAnonymous(); // REMOVED - Only sign in after username login
         
         return true;
     } catch (error) {
