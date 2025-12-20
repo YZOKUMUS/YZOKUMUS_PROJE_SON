@@ -36,20 +36,18 @@ async function initFirebase() {
         window.firebaseAuth = firebase.auth();
         window.firestore = firebase.firestore();
         
-        // Enable offline persistence (optional but recommended)
-        // Note: This will show a deprecation warning in console, but still works
-        // Multiple tabs warning is normal when multiple tabs are open - localStorage still works
+        // Enable offline persistence
+        // Note: Multiple tabs will work independently (localStorage still syncs)
         try {
             await window.firestore.enablePersistence({
-                synchronizeTabs: true
+                synchronizeTabs: false // Single-tab mode to avoid deprecation warnings
             });
             console.log('✅ Firestore offline persistence enabled');
         } catch (persistenceError) {
             // Persistence might fail in some browsers (Safari private mode, etc.)
-            // Multiple tabs is a normal condition - not an error
             if (persistenceError.code === 'failed-precondition') {
-                // Multiple tabs open - this is normal, localStorage still works
-                // Silently handle - no need to show warning
+                // Multiple tabs open or persistence already enabled - this is normal
+                // localStorage still works for cross-tab sync
             } else if (persistenceError.code === 'unimplemented') {
                 console.log('ℹ️ Firestore persistence not supported in this browser');
             } else {

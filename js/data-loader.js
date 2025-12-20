@@ -195,6 +195,7 @@ async function loadHarf1Data() {
     }
 }
 
+
 /**
  * Preload all data in background
  */
@@ -235,6 +236,8 @@ if (typeof window !== 'undefined') {
     window.loadHadisData = loadHadisData;
     window.loadHarfData = loadHarfData;
     window.loadHarf1Data = loadHarf1Data;
+    window.loadHarf2Data = loadHarf2Data;
+    window.loadHarf3Data = loadHarf3Data;
     window.preloadAllData = preloadAllData;
     window.getDataStatus = getDataStatus;
     

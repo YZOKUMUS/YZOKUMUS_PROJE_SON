@@ -433,18 +433,11 @@
             <h3 class="submode-title">Alt Mod Seçin</h3>
             <p class="submode-subtitle">Nasıl öğrenmek istediğinizi seçin</p>
             <div class="submode-options">
-                <button class="submode-btn" data-elif-submode="harfler">
-                    <div class="icon">🔤</div>
+                <button class="submode-btn" data-elif-submode="tablo">
+                    <div class="icon">📋</div>
                     <div class="info">
-                        <div class="name">Harfler</div>
-                        <div class="desc">Arapça harfleri öğren</div>
-                    </div>
-                </button>
-                <button class="submode-btn" data-elif-submode="kelimeler">
-                    <div class="icon">📝</div>
-                    <div class="info">
-                        <div class="name">Kelimeler</div>
-                        <div class="desc">Üç harfli kelimeleri öğren</div>
+                        <div class="name">Harf Tablosu</div>
+                        <div class="desc">Tüm harfleri görüntüle</div>
                     </div>
                 </button>
                 <button class="submode-btn" data-elif-submode="harekeler">
@@ -461,11 +454,18 @@
                         <div class="desc">Arapça kelimeleri oku ve öğren</div>
                     </div>
                 </button>
-                <button class="submode-btn" data-elif-submode="tablo">
-                    <div class="icon">📋</div>
+                <button class="submode-btn" data-elif-submode="harfler">
+                    <div class="icon">🔤</div>
                     <div class="info">
-                        <div class="name">Harf Tablosu</div>
-                        <div class="desc">Tüm harfleri görüntüle</div>
+                        <div class="name">Harfler</div>
+                        <div class="desc">Arapça harfleri öğren</div>
+                    </div>
+                </button>
+                <button class="submode-btn" data-elif-submode="kelimeler">
+                    <div class="icon">📝</div>
+                    <div class="info">
+                        <div class="name">Kelimeler</div>
+                        <div class="desc">Üç harfli kelimeleri öğren</div>
                     </div>
                 </button>
             </div>
@@ -513,6 +513,19 @@
         <div class="harf-tablo-content">
             <div class="harf-grid" id="harf-grid">
                 <!-- Harfler dinamik olarak yüklenecek -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Harfler ve İsimleri Tablosu -->
+    <div id="elif-ba-isimler-tablo-screen" class="game-screen hidden">
+        <div class="game-header">
+            <button class="back-btn" onclick="goToElifBaSubmodes()">← Geri</button>
+            <h2>📘 Harfler ve İsimleri</h2>
+        </div>
+        <div class="harf-tablo-content">
+            <div class="harf-isimler-grid" id="harf-isimler-grid">
+                <!-- Harfler ve isimleri dinamik olarak yüklenecek -->
             </div>
         </div>
     </div>

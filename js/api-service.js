@@ -286,17 +286,19 @@ async function firestoreSet(collection, docId, data) {
         return true;
     } catch (error) {
         console.error('❌ Firestore set error:', error);
+        // dataToSave try bloğu içinde tanımlı, burada erişilemiyor - data kullan
+        const errorDataUserId = data?.user_id || firebaseAuthUID;
         console.error('Error details:', { 
             code: error.code, 
             message: error.message,
             collection: collection,
             docId: docId,
-            hasUserId: !!dataToSave.user_id,
-            userId: dataToSave.user_id,
+            hasUserId: !!errorDataUserId,
+            userId: errorDataUserId,
             firebaseAuthUID: firebaseAuthUID,
             currentUserUID: window.firebaseAuth?.currentUser?.uid
         });
-        console.error('Failed data keys:', Object.keys(data));
+        console.error('Failed data keys:', Object.keys(data || {}));
         // Permission denied hatası ise daha açıklayıcı mesaj
         if (error.code === 'permission-denied') {
             console.error('🔒 PERMISSION DENIED - Check Firestore security rules. user_id must match request.auth.uid');
