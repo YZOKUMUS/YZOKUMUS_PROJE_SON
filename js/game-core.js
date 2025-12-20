@@ -4442,7 +4442,9 @@ function renderDinleBulKarma(container, question) {
     container.innerHTML = `
         <div class="karma-type-badge">🎧 Dinle Bul</div>
         <div class="karma-audio-section">
-            <button class="audio-btn large" onclick="playSafeAudio('${question.audioUrl}')">🔊 Dinle</button>
+            <button class="audio-btn large" onclick="playSafeAudio('${question.audioUrl}')">
+                <img src="ASSETS/badges/hoparlor.png" alt="Dinle" class="audio-icon-inline"> Dinle
+            </button>
         </div>
         <div class="karma-options">
             ${question.options.map((opt, i) => `
