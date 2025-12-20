@@ -2935,6 +2935,7 @@ async function startElifFethaGame(harfData) {
     }
     
     // JSON'daki sıralamayı kullan (zaten doğru sırada)
+    // Fetha modunda TÜM harfleri oynat (28 harf)
     const questions = fethaData.map(fethaItem => ({
         type: 'fetha',
         harf: fethaItem.harf,
@@ -2945,7 +2946,8 @@ async function startElifFethaGame(harfData) {
         sesTipi: fethaItem.sesTipi
     }));
     
-    currentQuestions = shuffleArray(questions).slice(0, CONFIG.QUESTIONS_PER_GAME);
+    // Tüm harfleri karıştırıp oynat
+    currentQuestions = shuffleArray(questions);
     document.getElementById('elif-ba-screen').classList.remove('hidden');
     document.getElementById('elif-total-questions').textContent = currentQuestions.length;
     loadElifFethaQuestion();
