@@ -2629,14 +2629,11 @@ async function startElifBaGame(submode = 'harfler') {
     hideAllScreens();
     
     if (submode === 'harfler') {
-        // Original letter recognition game
-        currentQuestions = shuffleArray([...data]).slice(0, CONFIG.QUESTIONS_PER_GAME);
-        document.getElementById('elif-ba-screen').classList.remove('hidden');
-        document.getElementById('elif-total-questions').textContent = CONFIG.QUESTIONS_PER_GAME;
-        loadElifQuestion();
+        // Combined: Harfler ve Kelimeler - hem harf hem kelime soruları
+        await startElifHarflerKelimelerGame(data);
         
     } else if (submode === 'kelimeler') {
-        // Word reading with letters
+        // Word reading with letters (kept for backward compatibility, but not shown in UI)
         await startElifKelimelerGame(data);
         
     } else if (submode === 'fetha') {
@@ -2652,6 +2649,58 @@ async function startElifBaGame(submode = 'harfler') {
         // Harf Tablosu (Letter Table)
         await showHarfTablosu();
     }
+}
+
+/**
+ * Elif Ba Harfler ve Kelimeler - combined mode with both letter and word questions
+ */
+async function startElifHarflerKelimelerGame(harfData) {
+    // Load kelime data for word questions
+    const kelimeData = await loadKelimeData();
+    
+    // Create harf questions (half of the questions)
+    const harfQuestions = shuffleArray([...harfData]).slice(0, Math.ceil(CONFIG.QUESTIONS_PER_GAME / 2)).map(harf => ({
+        type: 'harf',
+        harf: harf.harf,
+        okunus: harf.okunus,
+        isim: harf.isim,
+        sesTipi: harf.sesTipi,
+        renkKodu: harf.renkKodu
+    }));
+    
+    // Create kelime questions (remaining questions)
+    let filteredKelime = filterByDifficulty(kelimeData, currentDifficulty);
+    if (filteredKelime.length < 20) {
+        filteredKelime = kelimeData;
+    }
+    
+    const kelimeQuestions = [];
+    const usedHarfler = shuffleArray([...harfData]).slice(0, Math.floor(CONFIG.QUESTIONS_PER_GAME / 2));
+    
+    for (const harf of usedHarfler) {
+        const matchingWords = filteredKelime.filter(w => {
+            const kelime = w.kelime || w.arabic || '';
+            return kelime.startsWith(harf.harf);
+        });
+        
+        if (matchingWords.length > 0) {
+            const word = matchingWords[Math.floor(Math.random() * matchingWords.length)];
+            kelimeQuestions.push({
+                type: 'kelime',
+                harf: harf,
+                word: word,
+                correctAnswer: word.kelime || word.arabic
+            });
+        }
+    }
+    
+    // Combine and shuffle both question types
+    const allQuestions = shuffleArray([...harfQuestions, ...kelimeQuestions]);
+    currentQuestions = allQuestions.slice(0, CONFIG.QUESTIONS_PER_GAME);
+    
+    document.getElementById('elif-ba-screen').classList.remove('hidden');
+    document.getElementById('elif-total-questions').textContent = currentQuestions.length;
+    loadElifQuestion();
 }
 
 /**
@@ -2841,7 +2890,7 @@ function loadKelimeOkumaQuestion() {
     elifLetterEl.textContent = currentQuestion.kelime;
     elifLetterEl.style.color = '#000000'; // Siyah
     
-    // Açıklama metnini gizle, ses butonunu göster
+    // Açıklama metnini gizle, ses butonunu gizle (ses çalınca cevap bulunuyor)
     const instructionEl = document.getElementById('elif-question-instruction');
     if (instructionEl) {
         instructionEl.style.display = 'none';
@@ -2850,15 +2899,10 @@ function loadKelimeOkumaQuestion() {
     document.getElementById('elif-combo').textContent = comboCount;
     document.getElementById('elif-session-score').textContent = formatNumber(sessionScore);
     
-    // Audio button'a ses dosyasını bağla
+    // Ses butonunu gizle
     const audioBtn = document.getElementById('elif-audio-btn');
     if (audioBtn) {
-        audioBtn.style.display = '';
-        audioBtn.onclick = () => {
-            if (currentQuestion.audioUrl) {
-                playSafeAudio(currentQuestion.audioUrl);
-            }
-        };
+        audioBtn.style.display = 'none';
     }
     
     // Doğru cevap: kelimenin okunuşu
@@ -2972,15 +3016,10 @@ function loadElifFethaQuestion() {
     elifLetterEl.style.display = 'block'; // Görünür olduğundan emin ol
     elifLetterEl.classList.remove('hareke-symbol'); // Normal harf gibi göster
     
-    // Ses butonunu göster
+    // Ses butonunu gizle (ses çalınca cevap bulunuyor)
     const audioBtn = document.getElementById('elif-audio-btn');
     if (audioBtn) {
-        audioBtn.style.display = '';
-    }
-    
-    // Ses URL'ini kaydet
-    if (currentQuestion.audioUrl) {
-        audioBtn.onclick = () => playSafeAudio(currentQuestion.audioUrl);
+        audioBtn.style.display = 'none';
     }
     
     document.getElementById('elif-combo').textContent = comboCount;
@@ -3190,58 +3229,93 @@ function loadElifQuestion() {
     }
     
     currentQuestion = currentQuestions[questionIndex];
+    const questionType = currentQuestion.type || 'harf'; // 'harf' or 'kelime'
     
     document.getElementById('elif-question-number').textContent = questionIndex + 1;
     
-    // JSON'dan sesTipi ve renkKodu bilgilerini al
-    const sesTipi = currentQuestion.sesTipi || '';
-    const renkKodu = currentQuestion.renkKodu || '';
-    
-    // Kalın sesli ve peltek sesli harf kontrolü - JSON'daki sesTipi alanından
-    const isKalinSesli = sesTipi.includes('kalın') || sesTipi.includes('kalin');
-    const isPeltekSesli = sesTipi.includes('peltek');
-    
-    // Harf rengi siyah (kart arka planı renkli olacak, harf siyah)
-    const harfColor = '#000000'; // Siyah harfler
-    
-    // Harfi göster ve renk uygula
     const elifLetterEl = document.getElementById('elif-letter');
-    elifLetterEl.textContent = currentQuestion.harf;
-    elifLetterEl.style.color = harfColor;
-    elifLetterEl.classList.remove('hareke-symbol'); // Harekeler class'ını kaldır
-    
-    // Normal harfler modunda açıklama metnini gizle, ses butonunu gizle (ses çalınca cevap bulunuyor)
     const instructionEl = document.getElementById('elif-question-instruction');
+    const audioBtn = document.getElementById('elif-audio-btn');
+    const optionsContainer = document.getElementById('elif-options');
+    
+    // Reset UI elements
     if (instructionEl) {
         instructionEl.style.display = 'none';
     }
-    const audioBtn = document.getElementById('elif-audio-btn');
     if (audioBtn) {
         audioBtn.style.display = 'none';
     }
+    
     document.getElementById('elif-combo').textContent = comboCount;
     document.getElementById('elif-session-score').textContent = formatNumber(sessionScore);
     
-    const correctAnswer = currentQuestion.okunus || currentQuestion.isim;
-    const allHarfler = window.harfData || [];
-    
-    const wrongOptions = getRandomItems(
-        allHarfler.filter(h => (h.okunus || h.isim) !== correctAnswer),
-        3
-    ).map(h => h.okunus || h.isim);
-    
-    const options = shuffleArray([correctAnswer, ...wrongOptions]);
-    
-    const optionsContainer = document.getElementById('elif-options');
-    optionsContainer.innerHTML = options.map((option, index) => `
-        <button class="answer-option" onclick="checkElifAnswer(${index}, '${option.replace(/'/g, "\\'")}')">
-            ${option}
-        </button>
-    `).join('');
+    if (questionType === 'kelime') {
+        // Kelime sorusu: Harfi göster, "X harfiyle başlayan kelimeyi seç" de, kelime seçenekleri göster
+        const harfObj = currentQuestion.harf || {};
+        elifLetterEl.textContent = harfObj.harf || currentQuestion.harf?.harf || '';
+        elifLetterEl.style.color = '#000000';
+        elifLetterEl.classList.remove('hareke-symbol');
+        
+        if (instructionEl) {
+            instructionEl.textContent = `"${harfObj.harf || currentQuestion.harf?.harf || ''}" harfiyle başlayan kelimeyi seç`;
+            instructionEl.style.display = 'block';
+        }
+        
+        const correctAnswer = currentQuestion.correctAnswer;
+        const kelimeData = window.kelimeData || [];
+        const wrongWords = kelimeData.filter(w => {
+            const kelime = w.kelime || w.arabic || '';
+            return !kelime.startsWith(harfObj.harf || currentQuestion.harf?.harf || '') && kelime.length > 0;
+        });
+        
+        const wrongOptions = getRandomItems(wrongWords, 3).map(w => w.kelime || w.arabic);
+        const options = shuffleArray([correctAnswer, ...wrongOptions]);
+        
+        optionsContainer.innerHTML = options.map((option, index) => `
+            <button class="answer-option arabic-text" onclick="checkElifAnswer(${index}, '${option.replace(/'/g, "\\'")}')">
+                ${option}
+            </button>
+        `).join('');
+    } else {
+        // Harf sorusu: Harfi göster, okunuş/isim seçenekleri göster
+        const sesTipi = currentQuestion.sesTipi || '';
+        const harfColor = '#000000';
+        
+        elifLetterEl.textContent = currentQuestion.harf;
+        elifLetterEl.style.color = harfColor;
+        elifLetterEl.classList.remove('hareke-symbol');
+        
+        // Harf sorusu için açıklama ekle
+        if (instructionEl) {
+            instructionEl.textContent = 'Bu harfin okunuşu nedir?';
+            instructionEl.style.display = 'block';
+        }
+        
+        const correctAnswer = currentQuestion.okunus || currentQuestion.isim;
+        const allHarfler = window.harfData || [];
+        
+        const wrongOptions = getRandomItems(
+            allHarfler.filter(h => (h.okunus || h.isim) !== correctAnswer),
+            3
+        ).map(h => h.okunus || h.isim);
+        
+        const options = shuffleArray([correctAnswer, ...wrongOptions]);
+        
+        optionsContainer.innerHTML = options.map((option, index) => `
+            <button class="answer-option" onclick="checkElifAnswer(${index}, '${option.replace(/'/g, "\\'")}')">
+                ${option}
+            </button>
+        `).join('');
+    }
 }
 
 function checkElifAnswer(index, selectedAnswer) {
-    const correctAnswer = currentQuestion.okunus || currentQuestion.isim;
+    const questionType = currentQuestion.type || 'harf';
+    // Determine correct answer based on question type
+    const correctAnswer = questionType === 'kelime' 
+        ? currentQuestion.correctAnswer 
+        : (currentQuestion.okunus || currentQuestion.isim);
+    
     const buttons = document.querySelectorAll('#elif-options .answer-option');
     
     buttons.forEach(btn => btn.classList.add('disabled'));

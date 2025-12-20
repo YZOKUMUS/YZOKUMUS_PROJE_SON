@@ -171,7 +171,8 @@
 
             <div class="game-card" data-game="elif-ba">
                 <div class="game-icon">
-                    <span>📘</span>
+                    <img src="ASSETS/elifba-cover/harf-tablosu-icon.png" alt="Elif Ba" style="width: 48px; height: 48px; object-fit: contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <span style="display:none;">📘</span>
                 </div>
                 <h3>Elif Ba</h3>
                 <p>Arapça harfleri öğren</p>
@@ -434,45 +435,38 @@
             <p class="submode-subtitle">Nasıl öğrenmek istediğinizi seçin</p>
             <div class="submode-options">
                 <button class="submode-btn" data-elif-submode="tablo">
-                    <div class="icon">📋</div>
+                    <div class="icon"><img src="ASSETS/elifba-cover/harf-tablosu-icon.png" alt="Harf Tablosu" style="width: 48px; height: 48px; object-fit: contain;"></div>
                     <div class="info">
                         <div class="name">Harf Tablosu</div>
-                        <div class="desc">Tüm Arapça harfleri tablo halinde görüntüle, seslerini dinle</div>
-                    </div>
-                </button>
-                <button class="submode-btn" data-elif-submode="fetha">
-                    <div class="icon">📚</div>
-                    <div class="info">
-                        <div class="name">Fetha</div>
-                        <div class="desc">Harfleri fetha harekesi ile öğren, seslerini dinle</div>
+                        <div class="desc">Arapça harflerin yazılışı ve okunuşu</div>
                     </div>
                 </button>
                 <button class="submode-btn" data-elif-submode="harekeler">
-                    <div class="icon">✨</div>
+                    <div class="icon">✍️</div>
                     <div class="info">
                         <div class="name">Harekeler</div>
                         <div class="desc">Fetha, kesra, damme, sukun ve şedde işaretlerini öğren</div>
                     </div>
                 </button>
+                <button class="submode-btn" data-elif-submode="fetha">
+                    <div class="icon">🎓</div>
+                    <div class="info">
+                        <div class="name">Fetha</div>
+                        <div class="desc">Harfleri fetha harekesi ile öğren ve okunuşlarını öğren</div>
+                    </div>
+                </button>
                 <button class="submode-btn" data-elif-submode="kelime-okuma">
-                    <div class="icon">📖</div>
+                    <div class="icon" style="font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif; font-size: 1.8rem; direction: rtl;">كلمة</div>
                     <div class="info">
                         <div class="name">Kelime Okuma</div>
-                        <div class="desc">Arapça kelimeleri gör, seslerini dinle ve okunuşlarını öğren</div>
+                        <div class="desc">Arapça kelimeleri gör ve okunuşlarını öğren</div>
                     </div>
                 </button>
                 <button class="submode-btn" data-elif-submode="harfler">
                     <div class="icon">🔤</div>
                     <div class="info">
-                        <div class="name">Harfler</div>
-                        <div class="desc">Arapça harfleri tanı, seslerini dinle ve isimlerini öğren</div>
-                    </div>
-                </button>
-                <button class="submode-btn" data-elif-submode="kelimeler">
-                    <div class="icon">📝</div>
-                    <div class="info">
-                        <div class="name">Kelimeler</div>
-                        <div class="desc">Üç harfli kelimeleri harflerden oluştur, okunuşlarını öğren</div>
+                        <div class="name">Harfler ve Kelimeler</div>
+                        <div class="desc">Harf okunuşlarını ve harfle başlayan kelimeleri öğren - karma mod</div>
                     </div>
                 </button>
             </div>
