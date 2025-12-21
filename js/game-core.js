@@ -1285,13 +1285,9 @@ function goToMainMenu() {
     stopAllAudio();
     
     // Eğer oyun devam ediyorsa VE oyun bitmemişse (endGame çağrılmamışsa), kazanılan puanları kaydet
-    // endGame() zaten totalPoints'e eklemiş olacak, burada tekrar eklememeliyiz
-    // Oyun ortasında çıkış kontrolü: currentGameMode var ama endGame çağrılmamış (sessionScore > 0 ve oyun bitmemiş)
-    const isGameInProgress = currentGameMode && sessionScore > 0;
-    const isGameFinished = currentGameMode && sessionScore === 0; // endGame() çağrıldıysa sessionScore zaten 0 olmalı
-    
+    // endGame() çağrıldıysa sessionScore zaten 0 olacak, bu yüzden bu kontrol çalışmayacak
     // Sadece oyun ortasında çıkışta puan ekle (endGame çağrılmadan önce)
-    if (isGameInProgress && !isGameFinished) {
+    if (currentGameMode && sessionScore > 0) {
         // Oyun ortasında çıkılırsa bile kazanılan puanları kaydet
         totalPoints += sessionScore;
         // dailyProgress zaten her soruda güncelleniyor, burada eklemeye gerek yok
