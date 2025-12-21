@@ -1413,16 +1413,23 @@ function endGame() {
  * Show game result modal
  */
 function showResultModal(perfectBonus = 0) {
-    document.getElementById('result-correct').textContent = correctCount;
-    document.getElementById('result-wrong').textContent = wrongCount;
-    document.getElementById('result-points').textContent = formatNumber(sessionScore);
-    
+    const correctEl = document.getElementById('result-correct');
+    const wrongEl = document.getElementById('result-wrong');
+    const pointsEl = document.getElementById('result-points');
     const perfectContainer = document.getElementById('result-perfect-container');
-    if (perfectBonus > 0) {
-        perfectContainer.style.display = 'block';
-        document.getElementById('result-perfect').textContent = `+${perfectBonus}`;
-    } else {
-        perfectContainer.style.display = 'none';
+    const perfectEl = document.getElementById('result-perfect');
+    
+    if (correctEl) correctEl.textContent = correctCount;
+    if (wrongEl) wrongEl.textContent = wrongCount;
+    if (pointsEl) pointsEl.textContent = formatNumber(sessionScore);
+    
+    if (perfectContainer) {
+        if (perfectBonus > 0) {
+            perfectContainer.style.display = 'block';
+            if (perfectEl) perfectEl.textContent = `+${perfectBonus}`;
+        } else {
+            perfectContainer.style.display = 'none';
+        }
     }
     
     // Set title based on performance
@@ -1597,15 +1604,29 @@ function loadKelimeQuestion() {
     
     currentQuestion = currentQuestions[questionIndex];
     
-    // Update UI
-    document.getElementById('kelime-question-number').textContent = questionIndex + 1;
-    document.getElementById('kelime-arabic').textContent = currentQuestion.kelime || currentQuestion.arabic;
-    const wordId = currentQuestion.kelime_id || currentQuestion.id;
+    // Safety check: if question is null or undefined, end game
+    if (!currentQuestion) {
+        console.error('❌ Current question is null or undefined');
+        endGame();
+        return;
+    }
+    
+    // Update UI with null checks
+    const questionNumberEl = document.getElementById('kelime-question-number');
+    const arabicEl = document.getElementById('kelime-arabic');
     const wordInfoEl = document.getElementById('kelime-info');
-    wordInfoEl.innerHTML = (currentQuestion.sure_adi || '') + 
-        (wordId ? `<div class="word-id-debug">ID: ${wordId}</div>` : '');
-    document.getElementById('kelime-combo').textContent = comboCount;
-    document.getElementById('kelime-session-score').textContent = formatNumber(sessionScore);
+    const comboEl = document.getElementById('kelime-combo');
+    const sessionScoreEl = document.getElementById('kelime-session-score');
+    
+    if (questionNumberEl) questionNumberEl.textContent = questionIndex + 1;
+    if (arabicEl) arabicEl.textContent = currentQuestion.kelime || currentQuestion.arabic || '';
+    const wordId = currentQuestion.kelime_id || currentQuestion.id;
+    if (wordInfoEl) {
+        wordInfoEl.innerHTML = (currentQuestion.sure_adi || '') + 
+            (wordId ? `<div class="word-id-debug">ID: ${wordId}</div>` : '');
+    }
+    if (comboEl) comboEl.textContent = comboCount;
+    if (sessionScoreEl) sessionScoreEl.textContent = formatNumber(sessionScore);
     
     // Update favorite button
     const favBtn = document.getElementById('kelime-favorite-btn');
@@ -2337,9 +2358,20 @@ function loadDinleQuestion() {
     
     currentQuestion = currentQuestions[questionIndex];
     
-    document.getElementById('dinle-question-number').textContent = questionIndex + 1;
-    document.getElementById('dinle-combo').textContent = comboCount;
-    document.getElementById('dinle-session-score').textContent = formatNumber(sessionScore);
+    // Safety check: if question is null or undefined, end game
+    if (!currentQuestion) {
+        console.error('❌ Current question is null or undefined');
+        endGame();
+        return;
+    }
+    
+    const questionNumberEl = document.getElementById('dinle-question-number');
+    const comboEl = document.getElementById('dinle-combo');
+    const sessionScoreEl = document.getElementById('dinle-session-score');
+    
+    if (questionNumberEl) questionNumberEl.textContent = questionIndex + 1;
+    if (comboEl) comboEl.textContent = comboCount;
+    if (sessionScoreEl) sessionScoreEl.textContent = formatNumber(sessionScore);
     
     const correctAnswer = currentQuestion.anlam || currentQuestion.translation;
     const allWords = window.kelimeData || currentQuestions || [];
@@ -2473,12 +2505,32 @@ function loadBoslukQuestion() {
     
     currentQuestion = currentQuestions[questionIndex];
     
-    document.getElementById('bosluk-question-number').textContent = questionIndex + 1;
-    document.getElementById('bosluk-combo').textContent = comboCount;
-    document.getElementById('bosluk-session-score').textContent = formatNumber(sessionScore);
+    // Safety check: if question is null or undefined, end game
+    if (!currentQuestion) {
+        console.error('❌ Current question is null or undefined');
+        endGame();
+        return;
+    }
+    
+    // Update UI with null checks
+    const questionNumberEl = document.getElementById('bosluk-question-number');
+    const comboEl = document.getElementById('bosluk-combo');
+    const sessionScoreEl = document.getElementById('bosluk-session-score');
+    
+    if (questionNumberEl) questionNumberEl.textContent = questionIndex + 1;
+    if (comboEl) comboEl.textContent = comboCount;
+    if (sessionScoreEl) sessionScoreEl.textContent = formatNumber(sessionScore);
     
     const arabicText = currentQuestion.ayet_metni || '';
     const words = arabicText.split(' ').filter(w => w.length > 1);
+    
+    // Safety check: if no words found, skip this question
+    if (words.length === 0) {
+        console.warn('⚠️ No words found in verse, skipping question');
+        questionIndex++;
+        loadBoslukQuestion();
+        return;
+    }
     
     // Pick random word to blank
     const blankIndex = Math.floor(Math.random() * words.length);
@@ -2488,12 +2540,16 @@ function loadBoslukQuestion() {
     const displayWords = [...words];
     displayWords[blankIndex] = '<span class="blank-word" id="bosluk-blank"></span>';
     
-    document.getElementById('bosluk-arabic').innerHTML = displayWords.join(' ');
+    const arabicEl = document.getElementById('bosluk-arabic');
     const translationEl = document.getElementById('bosluk-translation');
-    const ayetKimligi = currentQuestion.ayet_kimligi || currentQuestion.ayet_id || currentQuestion.id;
-    const debugInfo = ayetKimligi ? `<div class="word-id-debug">Ayet Kimliği: ${ayetKimligi}</div>` : 
-        `<div class="word-id-debug">Ayet Kimliği: YOK</div>`;
-    translationEl.innerHTML = (currentQuestion.meal || '') + debugInfo;
+    
+    if (arabicEl) arabicEl.innerHTML = displayWords.join(' ');
+    if (translationEl) {
+        const ayetKimligi = currentQuestion.ayet_kimligi || currentQuestion.ayet_id || currentQuestion.id;
+        const debugInfo = ayetKimligi ? `<div class="word-id-debug">Ayet Kimliği: ${ayetKimligi}</div>` : 
+            `<div class="word-id-debug">Ayet Kimliği: YOK</div>`;
+        translationEl.innerHTML = (currentQuestion.meal || '') + debugInfo;
+    }
     
     // Generate wrong options from other words in verse or other verses
     let wrongOptions = words.filter((w, i) => i !== blankIndex && w.length > 1).slice(0, 3);
@@ -2616,9 +2672,19 @@ function displayAyet() {
     
     const ayet = data[currentAyetIndex];
     
-    document.getElementById('ayet-surah-info').textContent = ayet.sure_adı || '';
-    document.getElementById('ayet-arabic').textContent = ayet.ayet_metni || '';
-    document.getElementById('ayet-translation').textContent = ayet.meal || '';
+    // Safety check: if ayet is null or undefined, return
+    if (!ayet) {
+        console.error('❌ Ayet is null or undefined');
+        return;
+    }
+    
+    const surahInfoEl = document.getElementById('ayet-surah-info');
+    const arabicEl = document.getElementById('ayet-arabic');
+    const translationEl = document.getElementById('ayet-translation');
+    
+    if (surahInfoEl) surahInfoEl.textContent = ayet.sure_adı || '';
+    if (arabicEl) arabicEl.textContent = ayet.ayet_metni || '';
+    if (translationEl) translationEl.textContent = ayet.meal || '';
     
     // Update task progress
     updateTaskProgress('ayet_oku', 1);
@@ -2668,9 +2734,19 @@ function displayDua() {
     
     const dua = data[currentDuaIndex];
     
-    document.getElementById('dua-reference').textContent = dua.ayet || '';
-    document.getElementById('dua-arabic').textContent = dua.dua || '';
-    document.getElementById('dua-translation').textContent = dua.tercume || '';
+    // Safety check: if dua is null or undefined, return
+    if (!dua) {
+        console.error('❌ Dua is null or undefined');
+        return;
+    }
+    
+    const referenceEl = document.getElementById('dua-reference');
+    const arabicEl = document.getElementById('dua-arabic');
+    const translationEl = document.getElementById('dua-translation');
+    
+    if (referenceEl) referenceEl.textContent = dua.ayet || '';
+    if (arabicEl) arabicEl.textContent = dua.dua || '';
+    if (translationEl) translationEl.textContent = dua.tercume || '';
     
     updateTaskProgress('dua_et', 1);
 }
@@ -2902,12 +2978,36 @@ function loadElifKelimelerQuestion() {
     
     currentQuestion = currentQuestions[questionIndex];
     
-    document.getElementById('elif-question-number').textContent = questionIndex + 1;
+    // Safety check: if question is null or undefined, end game
+    if (!currentQuestion) {
+        console.error('❌ Current question is null or undefined');
+        endGame();
+        return;
+    }
+    
+    const questionNumberEl = document.getElementById('elif-question-number');
+    if (questionNumberEl) questionNumberEl.textContent = questionIndex + 1;
     
     // JSON'dan harf bilgilerini al (sesTipi ve renkKodu)
     const harfObj = currentQuestion.harf || {};
     const sesTipi = harfObj.sesTipi || '';
     const renkKodu = harfObj.renkKodu || '';
+    
+    // Safety check: if harfObj is empty, skip this question
+    if (!harfObj.harf && !currentQuestion.harf?.harf) {
+        console.warn('⚠️ No harf found, skipping question');
+        questionIndex++;
+        if (currentElifBaSubmode === 'harfler') {
+            loadHarfQuestion();
+        } else if (currentElifBaSubmode === 'kelimeler') {
+            loadKelimeOkumaQuestion();
+        } else if (currentElifBaSubmode === 'harekeler') {
+            loadHarekeQuestion();
+        } else if (currentElifBaSubmode === 'fetha') {
+            loadFethaQuestion();
+        }
+        return;
+    }
     
     // Kalın sesli ve peltek sesli harf kontrolü - JSON'daki sesTipi alanından
     const isKalinSesli = sesTipi.includes('kalın') || sesTipi.includes('kalin');
@@ -2918,17 +3018,23 @@ function loadElifKelimelerQuestion() {
     
     // Harfi göster ve renk uygula
     const elifLetterEl = document.getElementById('elif-letter');
-    elifLetterEl.textContent = harfObj.harf || currentQuestion.harf.harf;
-    elifLetterEl.style.color = harfColor;
+    if (elifLetterEl) {
+        elifLetterEl.textContent = harfObj.harf || currentQuestion.harf?.harf || '';
+        elifLetterEl.style.color = harfColor;
+    }
     
     // Açıklama metnini ayrı elementte göster ve göster
     const instructionEl = document.getElementById('elif-question-instruction');
     if (instructionEl) {
-        instructionEl.textContent = `"${harfObj.harf || currentQuestion.harf.harf}" harfiyle başlayan kelimeyi seç`;
+        const harfText = harfObj.harf || currentQuestion.harf?.harf || '';
+        instructionEl.textContent = `"${harfText}" harfiyle başlayan kelimeyi seç`;
         instructionEl.style.display = 'block';
     }
-    document.getElementById('elif-combo').textContent = comboCount;
-    document.getElementById('elif-session-score').textContent = formatNumber(sessionScore);
+    
+    const comboEl = document.getElementById('elif-combo');
+    const sessionScoreEl = document.getElementById('elif-session-score');
+    if (comboEl) comboEl.textContent = comboCount;
+    if (sessionScoreEl) sessionScoreEl.textContent = formatNumber(sessionScore);
     
     const correctAnswer = currentQuestion.correctAnswer;
     const kelimeData = window.kelimeData || [];
@@ -3928,10 +4034,15 @@ function checkDailyGoal() {
 // ========================================
 
 function updateStatsDisplay() {
-    document.getElementById('total-hasene').textContent = formatNumber(totalPoints);
-    document.getElementById('total-stars').textContent = `⭐ ${calculateStars(totalPoints)}`;
-    document.getElementById('streak-count').textContent = `🔥 ${streakData.currentStreak}`;
-    document.getElementById('level-display').textContent = currentLevel;
+    const totalHaseneEl = document.getElementById('total-hasene');
+    const totalStarsEl = document.getElementById('total-stars');
+    const streakCountEl = document.getElementById('streak-count');
+    const levelDisplayEl = document.getElementById('level-display');
+    
+    if (totalHaseneEl) totalHaseneEl.textContent = formatNumber(totalPoints);
+    if (totalStarsEl) totalStarsEl.textContent = `⭐ ${calculateStars(totalPoints)}`;
+    if (streakCountEl) streakCountEl.textContent = `🔥 ${streakData.currentStreak || 0}`;
+    if (levelDisplayEl) levelDisplayEl.textContent = currentLevel;
     
     updateDailyGoalDisplay();
     updateUserStatusDisplay();
