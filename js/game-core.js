@@ -1281,7 +1281,16 @@ function endGame() {
     gameStats.totalCorrect = (gameStats.totalCorrect || 0) + correctCount;
     gameStats.totalWrong = (gameStats.totalWrong || 0) + wrongCount;
     gameStats.gameModeCounts = gameStats.gameModeCounts || {};
-    gameStats.gameModeCounts[currentGameMode] = (gameStats.gameModeCounts[currentGameMode] || 0) + 1;
+    
+    // For Elif Ba mode, track submodes separately
+    if (currentGameMode === 'elif-ba' && currentElifBaSubmode) {
+        const submodeKey = `elif-ba-${currentElifBaSubmode}`;
+        gameStats.gameModeCounts[submodeKey] = (gameStats.gameModeCounts[submodeKey] || 0) + 1;
+        // Also keep main mode count for backward compatibility
+        gameStats.gameModeCounts[currentGameMode] = (gameStats.gameModeCounts[currentGameMode] || 0) + 1;
+    } else {
+        gameStats.gameModeCounts[currentGameMode] = (gameStats.gameModeCounts[currentGameMode] || 0) + 1;
+    }
     
     // Update task progress (sadece oyun modu için, doğru cevaplar zaten her soruda güncelleniyor)
     updateTaskProgress('game_modes', currentGameMode);
