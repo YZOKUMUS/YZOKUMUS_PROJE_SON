@@ -66,7 +66,7 @@
 }
 
 html {
-    font-size: 16px;
+    font-size: clamp(14px, 2.5vw, 16px);
     -webkit-tap-highlight-color: transparent;
 }
 
@@ -121,14 +121,14 @@ body {
 }
 
 .loading-title {
-    font-size: 2rem;
+    font-size: clamp(1.5rem, 5vw, 2rem);
     font-weight: 700;
     color: var(--text-primary);
     margin-bottom: var(--spacing-xs);
 }
 
 .loading-subtitle {
-    font-size: 0.85rem;
+    font-size: clamp(0.75rem, 2vw, 0.85rem);
     color: var(--text-secondary);
     margin-bottom: var(--spacing-xl);
     font-style: italic;
@@ -136,7 +136,7 @@ body {
     margin-left: auto;
     margin-right: auto;
     line-height: 1.6;
-    padding: 0 10px;
+    padding: 0 clamp(8px, 2vw, 10px);
 }
 
 .loading-footer {
@@ -176,9 +176,10 @@ body {
    MAIN CONTAINER
    =================================== */
 .main-container {
-    padding: var(--spacing-md);
-    max-width: 600px;
+    padding: clamp(0.75rem, 2vw, var(--spacing-md));
+    max-width: min(600px, 95vw);
     margin: 0 auto;
+    width: 100%;
 }
 
 /* Stats Header */
@@ -200,13 +201,13 @@ body {
 
 .stat-value {
     display: block;
-    font-size: 1.25rem;
+    font-size: clamp(1rem, 3vw, 1.25rem);
     font-weight: 700;
     color: var(--text-primary);
 }
 
 .stat-label {
-    font-size: 0.75rem;
+    font-size: clamp(0.65rem, 2vw, 0.75rem);
     color: var(--text-secondary);
 }
 
@@ -231,7 +232,7 @@ body {
 
 .game-stats-bar .stat-value {
     display: block;
-    font-size: 1.25rem;
+    font-size: clamp(1rem, 3vw, 1.25rem);
     font-weight: 700;
     color: var(--text-primary);
     margin-top: var(--spacing-xs);
@@ -239,7 +240,7 @@ body {
 
 .game-stats-bar .stat-label {
     display: block;
-    font-size: 0.75rem;
+    font-size: clamp(0.65rem, 2vw, 0.75rem);
     color: var(--text-secondary);
     margin-bottom: var(--spacing-xs);
 }
@@ -350,8 +351,8 @@ body {
 }
 
 .game-icon {
-    width: 60px;
-    height: 60px;
+    width: clamp(50px, 12vw, 60px);
+    height: clamp(50px, 12vw, 60px);
     margin: 0 auto var(--spacing-md);
     display: flex;
     align-items: center;
@@ -365,18 +366,18 @@ body {
 }
 
 .game-icon span {
-    font-size: 2.5rem;
+    font-size: clamp(2rem, 5vw, 2.5rem);
 }
 
 .game-card h3 {
-    font-size: 1rem;
+    font-size: clamp(0.875rem, 2.5vw, 1rem);
     font-weight: 700;
     margin-bottom: var(--spacing-xs);
     color: var(--text-primary);
 }
 
 .game-card p {
-    font-size: 0.75rem;
+    font-size: clamp(0.7rem, 2vw, 0.75rem);
     color: var(--text-secondary);
     line-height: 1.4;
 }
@@ -385,9 +386,10 @@ body {
    GAME SCREENS
    =================================== */
 .game-screen {
-    padding: var(--spacing-md);
-    max-width: 600px;
+    padding: clamp(0.75rem, 2vw, var(--spacing-md));
+    max-width: min(600px, 95vw);
     margin: 0 auto;
+    width: 100%;
 }
 
 .game-header {
@@ -401,12 +403,13 @@ body {
     background: var(--glass-bg);
     backdrop-filter: var(--glass-blur);
     border: none;
-    padding: var(--spacing-sm) var(--spacing-md);
+    padding: clamp(0.4rem, 1.5vw, var(--spacing-sm)) clamp(0.75rem, 2vw, var(--spacing-md));
     border-radius: var(--radius-md);
-    font-size: 0.875rem;
+    font-size: clamp(0.8rem, 2.2vw, 0.875rem);
     font-weight: 600;
     cursor: pointer;
     transition: all var(--transition-fast);
+    min-height: 44px; /* Touch-friendly */
 }
 
 .back-btn:hover {
@@ -414,20 +417,20 @@ body {
 }
 
 .game-progress {
-    font-size: 1rem;
+    font-size: clamp(0.9rem, 2.5vw, 1rem);
     font-weight: 600;
     color: var(--text-primary);
 }
 
 .combo-display {
-    font-size: 1rem;
+    font-size: clamp(0.9rem, 2.5vw, 1rem);
     font-weight: 700;
     color: var(--accent-warning);
 }
 
 /* Question Card */
 .question-card {
-    padding: var(--spacing-xl);
+    padding: clamp(1rem, 3vw, var(--spacing-xl));
     text-align: center;
     margin-bottom: var(--spacing-lg);
     position: relative;
@@ -436,12 +439,14 @@ body {
 .arabic-word,
 .arabic-letter {
     font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif;
-    font-size: 3.5rem;
+    font-size: clamp(2rem, 8vw, 3.5rem);
     color: #000000; /* Siyah - kelimeler her zaman siyah görünmeli */
     direction: rtl;
     line-height: 1.6;
     margin-bottom: var(--spacing-md);
     font-weight: 600; /* Daha kalın yazı */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 /* Elif Ba Kelimeler Modu İçin Özel Düzen */
@@ -490,34 +495,38 @@ body {
 
 .arabic-verse {
     font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif;
-    font-size: 2rem;
+    font-size: clamp(1.25rem, 4vw, 2rem);
     color: var(--text-primary);
     direction: rtl;
     line-height: 1.8;
     margin-bottom: var(--spacing-md);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .verse-translation {
-    font-size: 0.875rem;
+    font-size: clamp(0.8rem, 2.2vw, 0.875rem);
     color: var(--text-secondary);
     line-height: 1.6;
 }
 
 .word-info {
-    font-size: 0.875rem;
+    font-size: clamp(0.8rem, 2.2vw, 0.875rem);
     color: var(--text-secondary);
 }
 
 .audio-btn {
     position: absolute;
-    top: var(--spacing-md);
-    right: var(--spacing-md);
-    width: 44px;
-    height: 44px;
+    top: clamp(0.75rem, 2vw, var(--spacing-md));
+    right: clamp(0.75rem, 2vw, var(--spacing-md));
+    width: clamp(40px, 10vw, 44px);
+    height: clamp(40px, 10vw, 44px);
+    min-width: 40px;
+    min-height: 40px;
     background: var(--accent-primary);
     border: none;
     border-radius: 50%;
-    font-size: 1.25rem;
+    font-size: clamp(1rem, 3vw, 1.25rem);
     cursor: pointer;
     transition: all var(--transition-fast);
     display: flex;
@@ -549,16 +558,17 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: var(--spacing-lg) var(--spacing-xl);
+    padding: clamp(1rem, 3vw, var(--spacing-lg)) clamp(1.25rem, 4vw, var(--spacing-xl));
     background: var(--accent-primary);
     color: white;
     border: none;
     border-radius: var(--radius-lg);
-    font-size: 1.25rem;
+    font-size: clamp(1rem, 3vw, 1.25rem);
     font-weight: 600;
     cursor: pointer;
     transition: all var(--transition-fast);
     gap: var(--spacing-sm);
+    min-height: 44px; /* Touch-friendly */
 }
 
 .big-audio-btn:hover {
@@ -567,7 +577,7 @@ body {
 }
 
 .dinle-instruction {
-    font-size: 1.125rem;
+    font-size: clamp(1rem, 2.8vw, 1.125rem);
     color: var(--text-secondary);
     margin-bottom: var(--spacing-lg);
 }
@@ -576,27 +586,29 @@ body {
 .answer-options {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 1rem; /* Duolingo tarzı daha fazla boşluk */
+    gap: clamp(0.75rem, 2.5vw, 1rem);
     margin-bottom: var(--spacing-lg);
 }
 
 .answer-option {
-    padding: 1.25rem 1.5rem; /* Duolingo tarzı daha geniş padding */
-    background: white; /* Duolingo tarzı beyaz background */
-    border: 2px solid rgba(0, 0, 0, 0.15); /* Duolingo tarzı net border */
-    border-radius: 16px; /* Duolingo tarzı yuvarlatılmış köşeler */
-    font-size: clamp(1.1rem, 2.5vw, 1.35rem); /* Daha büyük ve okunabilir font */
-    font-weight: 600; /* Daha kalın font */
+    padding: clamp(1rem, 3vw, 1.25rem) clamp(1rem, 3.5vw, 1.5rem);
+    background: white;
+    border: 2px solid rgba(0, 0, 0, 0.15);
+    border-radius: clamp(12px, 3vw, 16px);
+    font-size: clamp(0.95rem, 2.5vw, 1.35rem);
+    font-weight: 600;
     text-align: center;
     cursor: pointer;
     transition: all 0.2s ease;
     color: var(--text-primary);
     line-height: 1.5;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08); /* Hafif gölge */
-    min-height: 56px; /* Minimum yükseklik okunabilirlik için */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    min-height: clamp(48px, 12vw, 56px);
     display: flex;
     align-items: center;
     justify-content: center;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .answer-option:hover {
@@ -637,7 +649,7 @@ body {
 /* Session Score */
 .session-score {
     text-align: center;
-    font-size: 1rem;
+    font-size: clamp(0.9rem, 2.5vw, 1rem);
     color: var(--text-secondary);
 }
 
@@ -669,16 +681,18 @@ body {
 
 .arabic-text {
     font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif;
-    font-size: 1.75rem;
+    font-size: clamp(1.25rem, 4vw, 1.75rem);
     color: var(--text-primary);
     direction: rtl;
     line-height: 2;
     text-align: center;
     margin-bottom: var(--spacing-lg);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .translation-text {
-    font-size: 1rem;
+    font-size: clamp(0.9rem, 2.5vw, 1rem);
     color: var(--text-secondary);
     line-height: 1.8;
     text-align: center;
@@ -731,16 +745,17 @@ body {
 
 .nav-btn {
     flex: 1;
-    padding: var(--spacing-md);
+    padding: clamp(0.75rem, 2vw, var(--spacing-md));
     background: var(--glass-bg);
     backdrop-filter: var(--glass-blur);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-md);
-    font-size: 1rem;
+    font-size: clamp(0.9rem, 2.5vw, 1rem);
     font-weight: 600;
     cursor: pointer;
     transition: all var(--transition-fast);
     color: var(--text-primary);
+    min-height: 44px; /* Touch-friendly */
 }
 
 .nav-btn:hover {
@@ -764,16 +779,16 @@ body {
 
 .modal-content {
     width: 100%;
-    max-width: 400px;
+    max-width: min(400px, 90vw);
     max-height: 90vh;
     overflow-y: auto;
-    padding: var(--spacing-xl);
+    padding: clamp(1rem, 3vw, var(--spacing-xl));
     text-align: center;
     animation: slideUp 0.3s ease;
 }
 
 .modal-content h2 {
-    font-size: 1.5rem;
+    font-size: clamp(1.25rem, 4vw, 1.5rem);
     margin-bottom: var(--spacing-lg);
     color: var(--text-primary);
 }
@@ -1185,33 +1200,49 @@ body {
 /* ===================================
    RESPONSIVE
    =================================== */
+/* Tablet ve küçük ekranlar */
+@media (max-width: 768px) {
+    .main-container,
+    .game-screen {
+        padding: clamp(0.5rem, 1.5vw, var(--spacing-md));
+    }
+    
+    .stats-header {
+        padding: clamp(1rem, 3vw, var(--spacing-lg));
+    }
+    
+    .question-card {
+        padding: clamp(1rem, 3vw, var(--spacing-xl));
+    }
+    
+    .reading-card {
+        padding: clamp(1rem, 3vw, var(--spacing-xl));
+    }
+}
+
+/* Mobil cihazlar */
 @media (max-width: 480px) {
     html {
-        font-size: 14px;
+        font-size: clamp(13px, 3.5vw, 14px);
     }
 
     .stats-row {
         grid-template-columns: repeat(2, 1fr);
-    }
-
-    .arabic-word,
-    .arabic-letter {
-        font-size: 2.5rem;
+        gap: clamp(0.5rem, 2vw, var(--spacing-sm));
     }
     
     .elif-question-header {
         flex-direction: column;
         gap: var(--spacing-sm);
-        min-height: 120px; /* Harekeler için daha fazla alan */
+        min-height: clamp(100px, 25vw, 120px);
     }
     
-    /* Harfler modu için orta ekranlarda büyük harfler */
     .elif-question-header .arabic-letter:not(.hareke-symbol) {
-        font-size: clamp(4rem, 10vw, 5.5rem);
+        font-size: clamp(3.5rem, 10vw, 5.5rem);
     }
     
     .elif-question-header .arabic-letter.hareke-symbol {
-        font-size: clamp(3.5rem, 12vw, 6rem);
+        font-size: clamp(3rem, 12vw, 6rem);
     }
     
     .elif-question-header .audio-btn {
@@ -1220,56 +1251,68 @@ body {
     }
     
     .elif-question-instruction {
-        font-size: 0.85rem;
-        padding: 0 var(--spacing-sm);
-    }
-
-    .arabic-verse {
-        font-size: 1.5rem;
+        font-size: clamp(0.8rem, 2.2vw, 0.85rem);
+        padding: 0 clamp(0.5rem, 2vw, var(--spacing-sm));
     }
     
-    /* Harf tablosu orta ekranlar için */
+    /* Harf tablosu mobil için */
     .harf-grid {
         grid-template-columns: repeat(4, 1fr);
-        gap: var(--spacing-sm);
+        gap: clamp(0.5rem, 2vw, var(--spacing-sm));
     }
     
     .harf-card {
-        padding: var(--spacing-md);
+        padding: clamp(0.75rem, 2vw, var(--spacing-md));
     }
     
     .harf-arabic {
-        font-size: 2rem;
+        font-size: clamp(1.75rem, 5vw, 2rem);
     }
     
     .harf-name {
-        font-size: 0.7rem;
+        font-size: clamp(0.65rem, 1.8vw, 0.7rem);
     }
     
     .harf-isimler-grid {
         grid-template-columns: repeat(5, 1fr);
-        gap: var(--spacing-xs);
+        gap: clamp(0.25rem, 1.5vw, var(--spacing-xs));
     }
     
     .harf-isimler-card {
-        padding: var(--spacing-xs);
-        min-height: 70px;
+        padding: clamp(0.25rem, 1.5vw, var(--spacing-xs));
+        min-height: clamp(60px, 15vw, 70px);
     }
     
     .harf-isimler-arabic {
-        font-size: 1.5rem;
+        font-size: clamp(1.25rem, 4vw, 1.5rem);
     }
     
     .harf-isimler-name {
-        font-size: 0.65rem;
+        font-size: clamp(0.6rem, 1.8vw, 0.65rem);
     }
 
     .game-cards-container {
         grid-template-columns: 1fr;
+        gap: clamp(0.75rem, 2vw, var(--spacing-md));
     }
 
     .answer-options {
         grid-template-columns: 1fr;
+        gap: clamp(0.75rem, 2vw, 1rem);
+    }
+    
+    .difficulty-selector {
+        padding: clamp(0.5rem, 1.5vw, var(--spacing-sm));
+        gap: clamp(0.5rem, 1.5vw, var(--spacing-sm));
+    }
+    
+    .difficulty-btn {
+        padding: clamp(0.75rem, 2vw, var(--spacing-md));
+        font-size: clamp(0.8rem, 2.2vw, 0.875rem);
+    }
+    
+    .difficulty-icon {
+        font-size: clamp(1.25rem, 4vw, 1.5rem);
     }
 }
 
@@ -1979,16 +2022,17 @@ body {
    =================================== */
 .gender-btn {
     flex: 1;
-    padding: 12px;
+    padding: clamp(10px, 3vw, 12px);
     border: 2px solid rgba(255,255,255,0.3);
-    border-radius: 12px;
+    border-radius: clamp(10px, 2.5vw, 12px);
     background: rgba(255,255,255,0.2);
     cursor: pointer;
-    font-size: 24px;
+    font-size: clamp(20px, 5vw, 24px);
     transition: all 0.2s;
     display: flex;
     align-items: center;
     justify-content: center;
+    min-height: 44px; /* Touch-friendly */
 }
 
 .gender-btn:hover {
@@ -2525,18 +2569,18 @@ body {
 }
 
 .karma-arabic.harf {
-    font-size: 4rem;
+    font-size: clamp(3rem, 8vw, 4rem);
 }
 
 .karma-arabic.bosluk {
-    font-size: 1.8rem;
+    font-size: clamp(1.5rem, 4vw, 1.8rem);
     direction: rtl;
 }
 
 .karma-info {
     text-align: center;
     color: var(--text-secondary);
-    font-size: 0.85rem;
+    font-size: clamp(0.8rem, 2.2vw, 0.85rem);
     margin: 0 0 var(--spacing-md) 0;
     padding: 0;
 }
@@ -2544,7 +2588,7 @@ body {
 .karma-translation {
     text-align: center;
     color: var(--text-secondary);
-    font-size: 0.9rem;
+    font-size: clamp(0.85rem, 2.5vw, 0.9rem);
     margin-bottom: var(--spacing-lg);
     font-style: italic;
 }
@@ -2605,15 +2649,15 @@ body {
 }
 
 .match-item {
-    padding: var(--spacing-md);
+    padding: clamp(0.75rem, 2vw, var(--spacing-md));
     background: white;
     border: 2px solid rgba(0, 0, 0, 0.15);
-    border-radius: 12px;
-    font-size: 1rem;
+    border-radius: clamp(10px, 2.5vw, 12px);
+    font-size: clamp(0.9rem, 2.5vw, 1rem);
     cursor: pointer;
     transition: all 0.2s ease;
     text-align: center;
-    min-height: 60px;
+    min-height: clamp(50px, 12vw, 60px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2630,14 +2674,14 @@ body {
 
 .match-item.arabic {
     font-family: 'KFGQPC Uthmanic Script HAFS', 'Traditional Arabic', 'Amiri', serif;
-    font-size: 1.2rem;
+    font-size: clamp(1.1rem, 3vw, 1.2rem);
     direction: rtl;
-    min-height: 60px; /* Arapça için de aynı yükseklik */
+    min-height: clamp(50px, 12vw, 60px);
 }
 
 .match-item.turkish {
-    font-size: 1rem;
-    min-height: 60px; /* Türkçe için de aynı yükseklik */
+    font-size: clamp(0.9rem, 2.5vw, 1rem);
+    min-height: clamp(50px, 12vw, 60px);
 }
 
 .match-item:hover:not(.matched) {
@@ -3209,124 +3253,108 @@ body {
 /* Çok Küçük Telefon (360px ve altı) */
 @media (max-width: 360px) {
     html {
-        font-size: 13px;
+        font-size: clamp(12px, 3.5vw, 13px);
     }
     
     .game-content {
-        padding: var(--spacing-sm);
-    }
-    
-    .arabic-word,
-    .arabic-letter {
-        font-size: 2rem;
+        padding: clamp(0.5rem, 1.5vw, var(--spacing-sm));
     }
     
     .elif-question-instruction {
-        font-size: 0.75rem;
+        font-size: clamp(0.7rem, 2vw, 0.75rem);
         padding: 0;
         line-height: 1.2;
     }
     
     .elif-question-header .audio-btn {
-        width: 36px;
-        height: 36px;
-        font-size: 1rem;
+        width: clamp(32px, 8vw, 36px);
+        height: clamp(32px, 8vw, 36px);
+        font-size: clamp(0.9rem, 2.5vw, 1rem);
     }
     
     .elif-question-header .arabic-letter.hareke-symbol {
-        font-size: clamp(3rem, 12vw, 5rem);
-    }
-    
-    .arabic-verse {
-        font-size: 1.1rem;
-        line-height: 1.8;
-    }
-    
-    /* Word actions butonları çok küçük ekranlarda */
-    .word-actions .hint-btn,
-    .word-actions .audio-btn,
-    .word-actions .favorite-btn {
-        width: 36px;
-        height: 36px;
-        min-width: 36px;
-        min-height: 36px;
-        font-size: 0.9rem;
+        font-size: clamp(2.5rem, 12vw, 5rem);
     }
     
     /* Harf tablosu çok küçük ekranlar için */
     .harf-grid {
         grid-template-columns: repeat(3, 1fr);
-        gap: var(--spacing-xs);
+        gap: clamp(0.25rem, 1.5vw, var(--spacing-xs));
     }
     
     .harf-card {
-        padding: var(--spacing-xs);
-        min-height: 60px;
+        padding: clamp(0.25rem, 1.5vw, var(--spacing-xs));
+        min-height: clamp(55px, 15vw, 60px);
     }
     
     .harf-arabic {
-        font-size: 1.5rem;
+        font-size: clamp(1.25rem, 4vw, 1.5rem);
     }
     
     .harf-name {
-        font-size: 0.6rem;
+        font-size: clamp(0.55rem, 1.8vw, 0.6rem);
     }
     
     .harf-tablo-content {
-        padding: var(--spacing-sm);
+        padding: clamp(0.5rem, 1.5vw, var(--spacing-sm));
     }
     
     .harf-isimler-grid {
         grid-template-columns: repeat(3, 1fr);
-        gap: var(--spacing-xs);
+        gap: clamp(0.25rem, 1.5vw, var(--spacing-xs));
     }
     
     .harf-isimler-card {
-        padding: var(--spacing-xs);
-        min-height: 55px;
+        padding: clamp(0.25rem, 1.5vw, var(--spacing-xs));
+        min-height: clamp(50px, 13vw, 55px);
     }
     
     .harf-isimler-arabic {
-        font-size: 1.2rem;
+        font-size: clamp(1rem, 3.5vw, 1.2rem);
     }
     
     .harf-isimler-name {
-        font-size: 0.55rem;
+        font-size: clamp(0.5rem, 1.8vw, 0.55rem);
     }
     
     /* Karma eşleştirme çok küçük ekranlar için */
     .karma-match-grid {
-        gap: var(--spacing-xs);
+        gap: clamp(0.5rem, 1.5vw, var(--spacing-xs)) !important;
     }
     
     .match-item {
-        min-height: 48px;
-        padding: var(--spacing-xs);
-        font-size: 0.85rem;
+        min-height: clamp(44px, 11vw, 48px);
+        padding: clamp(0.5rem, 1.5vw, var(--spacing-xs));
+        font-size: clamp(0.8rem, 2.2vw, 0.85rem);
     }
     
     .match-item.arabic {
-        font-size: 0.95rem;
-        min-height: 48px;
+        font-size: clamp(0.9rem, 2.5vw, 0.95rem);
+        min-height: clamp(44px, 11vw, 48px);
     }
     
     .match-item.turkish {
-        font-size: 0.8rem;
-        min-height: 48px;
+        font-size: clamp(0.75rem, 2vw, 0.8rem);
+        min-height: clamp(44px, 11vw, 48px);
     }
     
     .badges-grid {
         grid-template-columns: repeat(2, 1fr);
+        gap: clamp(0.5rem, 1.5vw, var(--spacing-md));
     }
     
     .combo-display {
-        font-size: 0.8rem;
+        font-size: clamp(0.75rem, 2.2vw, 0.8rem);
     }
     
     /* Gender butonları küçük ekranlar için */
     .gender-btn {
-        padding: 10px;
-        font-size: 20px;
+        padding: clamp(8px, 2.5vw, 10px);
+        font-size: clamp(18px, 5vw, 20px);
+    }
+    
+    .modal-content {
+        padding: clamp(0.75rem, 2vw, var(--spacing-xl));
     }
 }
 
