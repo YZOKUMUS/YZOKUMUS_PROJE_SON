@@ -279,6 +279,19 @@ async function firestoreSet(collection, docId, data) {
             // Silent fail for permission denied - this is expected for local users
             return false;
         }
+        
+        // Check for network blocking (ad blocker, privacy extension, etc.)
+        if (error.message && (
+            error.message.includes('ERR_BLOCKED_BY_CLIENT') ||
+            error.message.includes('blocked') ||
+            error.message.includes('Failed to fetch')
+        )) {
+            // Network blocked - likely ad blocker or privacy extension
+            // This is not critical - localStorage still works
+            console.warn('⚠️ Firebase request blocked (likely by browser extension). localStorage will be used instead.');
+            return false;
+        }
+        
         // Only log unexpected errors
         console.error('❌ Firestore set error:', error);
         const errorDataUserId = data?.user_id || firebaseAuthUID;
