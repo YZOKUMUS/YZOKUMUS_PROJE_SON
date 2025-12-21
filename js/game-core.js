@@ -4863,7 +4863,6 @@ function renderEslestirmeKarma(container, question) {
     const turkishItems = shuffleArray([...question.pairs]);
     
     container.innerHTML = `
-        <div class="karma-type-badge">🔗 Eşleştir</div>
         <div class="karma-match-instruction">Arapça kelimeleri Türkçe anlamlarıyla eşleştir</div>
         <div class="karma-match-grid">
             <div class="match-column arabic-column">
