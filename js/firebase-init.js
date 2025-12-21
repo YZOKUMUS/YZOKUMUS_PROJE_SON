@@ -37,10 +37,11 @@ async function initFirebase() {
         window.firestore = firebase.firestore();
         
         // Enable offline persistence
-        // Note: Multiple tabs will work independently (localStorage still syncs)
+        // Note: enablePersistence() shows deprecation warning but still works in compat API
+        // The warning is expected and can be ignored - Firebase compat API still uses this method
         try {
             await window.firestore.enablePersistence({
-                synchronizeTabs: false // Single-tab mode to avoid deprecation warnings
+                synchronizeTabs: false // Single-tab mode
             });
             console.log('✅ Firestore offline persistence enabled');
         } catch (persistenceError) {
