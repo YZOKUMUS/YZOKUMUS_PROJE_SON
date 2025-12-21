@@ -240,14 +240,14 @@
     },
     {
       "id": 35,
-      "kelime": "وَا ثَاب",
+      "kelime": "وَا ثَابَ",
       "okunus": "ve sab",
       "anlam": "Ve sabır",
       "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_8.mp3"
     },
     {
       "id": 36,
-      "kelime": "رَمَضَان",
+      "kelime": "رَمَضَانَ",
       "okunus": "ramazan",
       "anlam": "Ramazan",
       "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_9.mp3"
@@ -478,7 +478,7 @@
     },
     {
       "id": 69,
-      "kelime": "وَمَنَوَّه",
+      "kelime": "وَمَنَوَّهَ",
       "okunus": "ve menavve",
       "anlam": "Ve yumuşattı",
       "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_42.mp3"
