@@ -318,7 +318,7 @@ const ISLAMIC_TEACHINGS = [
     }
 ];
 
-// Onboarding Slides - Basit ve net tanıtım
+// Onboarding Slides - Güncel ve detaylı tanıtım
 const ONBOARDING_SLIDES = [
     {
         icon: '🕌',
@@ -327,13 +327,23 @@ const ONBOARDING_SLIDES = [
     },
     {
         icon: '🎮',
-        title: 'Nasıl Oynanır?',
-        description: 'Oyun modlarından birini seçin, soruları cevaplayın. Her doğru cevap Hasene puanı kazandırır. Combo yaparak bonus puan toplayın!'
+        title: 'Oyun Modları',
+        description: '7 farklı oyun modu: Kelime Çevir (4 alt mod), Dinle Bul, Boşluk Doldur, Elif Ba (5 alt mod), Karma (karışık sorular), Ayet Oku, Dua Et, Hadis Oku. Her mod farklı bir öğrenme deneyimi sunar!'
     },
     {
         icon: '⭐',
+        title: 'Puan Sistemi',
+        description: 'Her doğru cevap Hasene puanı kazandırır. Combo yaparak bonus puan toplayın! Perfect ders (hatasız oyun) için ekstra 50 Hasene bonusu kazanın. Günlük hedefinizi tamamlayarak düzenli ilerleme kaydedin.'
+    },
+    {
+        icon: '🏆',
         title: 'Ödüller ve İlerleme',
-        description: 'Hasene puanlarıyla yıldız kazanın, günlük görevleri tamamlayın, rozetler ve başarımlar toplayın. Düzenli çalışarak seviyenizi yükseltin!'
+        description: 'Hasene puanlarıyla yıldız kazanın (250 Hasene = 1 Yıldız), günlük görevleri tamamlayın, rozetler ve başarımlar toplayın. Düzenli çalışarak seviyenizi yükseltin ve seri (streak) oluşturun!'
+    },
+    {
+        icon: '📊',
+        title: 'İstatistikler ve Özellikler',
+        description: 'Kelime istatistiklerinizi takip edin, favori kelimeler ekleyin, zorlandığınız kelimeleri tekrar edin. Günlük vird hedefinizi ayarlayın ve ilerlemenizi görsel olarak takip edin.'
     }
 ];
 
