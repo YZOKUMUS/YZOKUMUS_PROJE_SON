@@ -1284,8 +1284,14 @@ function goToMainMenu() {
     // Sesi durdur
     stopAllAudio();
     
-    // Eğer oyun devam ediyorsa, kazanılan puanları kaydet
-    if (currentGameMode && sessionScore > 0) {
+    // Eğer oyun devam ediyorsa VE oyun bitmemişse (endGame çağrılmamışsa), kazanılan puanları kaydet
+    // endGame() zaten totalPoints'e eklemiş olacak, burada tekrar eklememeliyiz
+    // Oyun ortasında çıkış kontrolü: currentGameMode var ama endGame çağrılmamış (sessionScore > 0 ve oyun bitmemiş)
+    const isGameInProgress = currentGameMode && sessionScore > 0;
+    const isGameFinished = currentGameMode && sessionScore === 0; // endGame() çağrıldıysa sessionScore zaten 0 olmalı
+    
+    // Sadece oyun ortasında çıkışta puan ekle (endGame çağrılmadan önce)
+    if (isGameInProgress && !isGameFinished) {
         // Oyun ortasında çıkılırsa bile kazanılan puanları kaydet
         totalPoints += sessionScore;
         // dailyProgress zaten her soruda güncelleniyor, burada eklemeye gerek yok
@@ -1338,6 +1344,11 @@ function endGame() {
     totalPoints += sessionScore;
     // NOT: dailyProgress zaten her soruda + perfect bonus ekleniyor, burada tekrar eklemeye gerek yok
     
+    // SessionScore'u sıfırla (goToMainMenu'de tekrar eklenmesini önlemek için)
+    // Önce sessionScore'u sakla (görev ilerlemesi için gerekli)
+    const finalSessionScore = sessionScore;
+    sessionScore = 0;
+    
     // Update game stats
     gameStats.totalCorrect = (gameStats.totalCorrect || 0) + correctCount;
     gameStats.totalWrong = (gameStats.totalWrong || 0) + wrongCount;
@@ -1356,7 +1367,7 @@ function endGame() {
     // Update task progress (sadece oyun modu için, doğru cevaplar zaten her soruda güncelleniyor)
     updateTaskProgress('game_modes', currentGameMode);
     // Hasene görevi için toplam sessionScore'u güncelle (görev ilerlemesi için)
-    updateTaskProgress('hasene', sessionScore);
+    updateTaskProgress('hasene', finalSessionScore);
     
     // Check level up
     const newLevel = calculateLevel(totalPoints);
@@ -1387,7 +1398,7 @@ function endGame() {
     
     // Update weekly XP for leaderboard
     if (typeof window.updateWeeklyXP === 'function') {
-        window.updateWeeklyXP(sessionScore).then(newWeeklyXP => {
+        window.updateWeeklyXP(finalSessionScore).then(newWeeklyXP => {
             console.log('✅ Weekly XP updated:', newWeeklyXP);
             // Check if league changed
             const newLeague = typeof window.getUserLeague === 'function' ? window.getUserLeague() : null;
@@ -1405,23 +1416,26 @@ function endGame() {
     // Save stats
     debouncedSaveStats();
     
-    // Show result modal
-    showResultModal(perfectBonus);
+    // Show result modal (finalSessionScore kullan, çünkü sessionScore artık 0)
+    showResultModal(perfectBonus, finalSessionScore);
 }
 
 /**
  * Show game result modal
  */
-function showResultModal(perfectBonus = 0) {
+function showResultModal(perfectBonus = 0, finalScore = null) {
     const correctEl = document.getElementById('result-correct');
     const wrongEl = document.getElementById('result-wrong');
     const pointsEl = document.getElementById('result-points');
     const perfectContainer = document.getElementById('result-perfect-container');
     const perfectEl = document.getElementById('result-perfect');
     
+    // finalScore null değilse kullan (endGame'den geldiyse), yoksa sessionScore kullan
+    const displayScore = finalScore !== null ? finalScore : sessionScore;
+    
     if (correctEl) correctEl.textContent = correctCount;
     if (wrongEl) wrongEl.textContent = wrongCount;
-    if (pointsEl) pointsEl.textContent = formatNumber(sessionScore);
+    if (pointsEl) pointsEl.textContent = formatNumber(displayScore);
     
     if (perfectContainer) {
         if (perfectBonus > 0) {
