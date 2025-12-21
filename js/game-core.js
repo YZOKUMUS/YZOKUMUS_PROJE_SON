@@ -3930,39 +3930,24 @@ function updateDailyGoalDisplay() {
     // - totalPoints: Tüm zamanlardan birikmiş toplam Hasene (birikimli, sıfırlanmaz)
     // - dailyProgress: Sadece bugün kazanılan Hasene (her gün sıfırlanır)
     // 
-    // Normal durum: totalPoints >= dailyProgress
-    //   - İlk oyunda: totalPoints = dailyProgress (eşit)
-    //   - Sonraki günlerde: totalPoints > dailyProgress (çünkü önceki günlerden birikmiş)
-    //
-    // Ancak mantık hatası varsa (örneğin dailyProgress yanlış kaydedilmişse), düzelt:
-    // Eğer dailyProgress > totalPoints ise (ve önceki günlerden birikim yoksa), bu hata demektir
-    // Çünkü dailyProgress sadece bugünkü puan, totalPoints ise birikimli
+    // ÖNEMLİ: dailyProgress bugünkü puanlar, totalPoints ise birikimli puan
+    // Oyun sırasında dailyProgress artar, oyun bitince totalPoints'e eklenir
+    // Bu yüzden oyun sırasında dailyProgress > totalPoints olabilir (normal!)
     
-    // İlk oyunda (totalPoints = 0 veya çok küçükse) ve dailyProgress fazlaysa, hata var
-    // Ancak önceki günlerden birikim varsa (totalPoints büyükse), fark normaldir
-    if (totalPoints < 500 && dailyProgress > totalPoints) {
-        // İlk oyunda veya az puan varsa, dailyProgress toplam puandan fazla olamaz
-        // Sessizce düzelt (console.warn yerine console.log kullan - çok fazla uyarı vermesin)
-        const today = getLocalDateString();
-        const savedProgress = loadFromStorage(CONFIG.STORAGE_KEYS.DAILY_PROGRESS, { date: '', points: 0 });
-        if (savedProgress.date !== today) {
-            // Tarih farklıysa, dailyProgress'i 0 yap (yeni gün)
-            dailyProgress = 0;
-        } else {
-            // Aynı günse, totalPoints'e eşitle (ama totalPoints 0 ise, dailyProgress de 0 olmalı)
-            dailyProgress = totalPoints || 0;
-        }
+    // Sadece tarih kontrolü yap - mantık hatası kontrolünü kaldır
+    const today = getLocalDateString();
+    const savedProgress = loadFromStorage(CONFIG.STORAGE_KEYS.DAILY_PROGRESS, { date: '', points: 0 });
+    
+    // Eğer kaydedilen tarih bugün değilse, dailyProgress'i sıfırla (yeni gün)
+    if (savedProgress.date !== today) {
+        dailyProgress = 0;
         saveToStorage(CONFIG.STORAGE_KEYS.DAILY_PROGRESS, { 
-            date: getLocalDateString(), 
-            points: dailyProgress 
+            date: today, 
+            points: 0 
         });
-        // Sadece bir kere log (çok fazla tekrar etmesin)
-        if (!window.dailyProgressFixLogged) {
-            console.log(`ℹ️ dailyProgress mantık hatası düzeltildi: ${dailyProgress} (totalPoints: ${totalPoints})`);
-            window.dailyProgressFixLogged = true;
-        }
     }
     
+    // Günlük hedef çubuğunu güncelle
     document.getElementById('daily-goal-text').textContent = 
         `${formatNumber(dailyProgress)} / ${formatNumber(dailyGoal)}`;
     
