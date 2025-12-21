@@ -5066,7 +5066,7 @@ function renderHarfBulKarma(container, question) {
                 <div></div>
             </div>
             <div class="arabic-letter">${question.question}</div>
-            <div class="word-info">Bu harfin okunuşunu seç</div>
+            <div class="word-info">Bu harfin okunuşunu seç${question.data?.id ? `<div class="word-id-debug">Harf ID: ${question.data.id}</div>` : ''}</div>
         </div>
         <div class="answer-options">
             ${question.options.map((opt, i) => `
