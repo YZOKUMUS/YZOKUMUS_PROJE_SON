@@ -2319,7 +2319,7 @@ function showWordAnalysisModal() {
 
 function playCurrentWordAudio() {
     if (currentQuestion) {
-        const audioUrl = currentQuestion.ses_dosyasi || currentQuestion.audio;
+        const audioUrl = currentQuestion.ses_dosyasi || currentQuestion.audio || currentQuestion.audioUrl;
         if (audioUrl) {
             playSafeAudio(audioUrl);
         }
@@ -3151,10 +3151,15 @@ function loadKelimeOkumaQuestion() {
     document.getElementById('elif-combo').textContent = comboCount;
     document.getElementById('elif-session-score').textContent = formatNumber(sessionScore);
     
-    // Ses butonunu gizle
+    // Ses butonunu göster ve ses URL'ini ayarla (Kelime Okuma modunda)
     const audioBtn = document.getElementById('elif-audio-btn');
     if (audioBtn) {
-        audioBtn.style.display = 'none';
+        if (currentQuestion.audioUrl) {
+            audioBtn.style.display = 'block';
+            audioBtn.onclick = () => playSafeAudio(currentQuestion.audioUrl);
+        } else {
+            audioBtn.style.display = 'none';
+        }
     }
     
     // Doğru cevap: kelimenin okunuşu
