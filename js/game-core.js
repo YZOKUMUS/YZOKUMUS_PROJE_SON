@@ -730,8 +730,21 @@ function setupBackButtonHandler() {
  */
 function registerServiceWorker() {
     if ('serviceWorker' in navigator) {
+        // Unregister old service workers first to force cache refresh
+        navigator.serviceWorker.getRegistrations().then(registrations => {
+            registrations.forEach(registration => {
+                registration.unregister();
+                console.log('🔄 Old Service Worker unregistered');
+            });
+        });
+        
+        // Register new service worker
         navigator.serviceWorker.register('./sw.js')
-            .then(reg => console.log('✅ Service Worker registered'))
+            .then(reg => {
+                console.log('✅ Service Worker registered');
+                // Force update
+                reg.update();
+            })
             .catch(err => console.warn('⚠️ Service Worker registration failed:', err));
     }
 }
