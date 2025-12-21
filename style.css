@@ -2479,40 +2479,49 @@ body {
 }
 
 .karma-game-content {
-    padding: var(--spacing-lg);
+    padding: var(--spacing-md);
     min-height: 60vh;
+    display: flex;
+    flex-direction: column;
 }
 
 .karma-question-container {
     background: transparent;
     border-radius: var(--radius-lg);
-    padding: var(--spacing-lg);
+    padding: var(--spacing-md) var(--spacing-lg);
     backdrop-filter: none;
     border: none;
-}
-
-.karma-type-badge {
-    display: inline-block;
-    background: rgba(157, 138, 255, 0.15);
-    color: var(--accent-primary);
-    padding: 0.4rem 0.8rem;
-    border-radius: var(--radius-md);
-    font-size: 0.75rem;
-    font-weight: 600;
-    margin-bottom: var(--spacing-md);
-    border: 1px solid rgba(157, 138, 255, 0.3);
-    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
     width: 100%;
     box-sizing: border-box;
 }
 
+.karma-type-badge {
+    display: block;
+    background: rgba(157, 138, 255, 0.15);
+    color: var(--accent-primary);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin: 0 auto var(--spacing-md) auto;
+    border: 1px solid rgba(157, 138, 255, 0.3);
+    text-align: center;
+    width: fit-content;
+    box-sizing: border-box;
+}
+
 .karma-arabic {
-    font-size: 2.5rem;
-    font-family: 'Traditional Arabic', 'Amiri', serif;
+    font-size: clamp(2rem, 5vw, 2.5rem);
+    font-family: 'KFGQPC Uthmanic Script HAFS', 'Traditional Arabic', 'Amiri', serif;
     text-align: center;
     color: var(--text-primary);
-    margin-bottom: var(--spacing-md);
+    margin: var(--spacing-md) 0;
     line-height: 1.6;
+    padding: var(--spacing-md) 0;
+    direction: rtl;
 }
 
 .karma-arabic.harf {
@@ -2527,8 +2536,9 @@ body {
 .karma-info {
     text-align: center;
     color: var(--text-secondary);
-    font-size: 0.9rem;
-    margin-bottom: var(--spacing-lg);
+    font-size: 0.85rem;
+    margin: 0 0 var(--spacing-md) 0;
+    padding: 0;
 }
 
 .karma-translation {
@@ -2559,7 +2569,9 @@ body {
 .karma-options {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-sm);
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-md);
+    width: 100%;
 }
 
 /* Eşleştirme */
