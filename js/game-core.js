@@ -2367,7 +2367,8 @@ function checkDinleAnswer(index, selectedAnswer) {
         maxCombo = Math.max(maxCombo, comboCount);
         
         const basePoints = getBasePoints(currentDifficulty);
-        const gained = basePoints + CONFIG.COMBO_BONUS_PER_CORRECT;
+        const comboBonus = CONFIG.COMBO_BONUS_PER_CORRECT;
+        const gained = basePoints + comboBonus;
         sessionScore += gained;
         dailyProgress += gained; // Günlük vird'e ekle
         updateTaskProgress('correct', 1); // Görev ilerlemesine ekle
