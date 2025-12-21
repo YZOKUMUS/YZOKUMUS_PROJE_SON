@@ -4693,7 +4693,10 @@ async function startKarmaGame() {
         : getRandomItems(filteredKelime, Math.min(4, filteredKelime.length));
     const kelimeQuestions = selectedKelime.map(word => ({
         type: 'kelime-cevir',
-        data: word,
+        data: {
+            ...word,
+            audioUrl: word.ses_dosyasi || word.audio || ''
+        },
         question: word.kelime,
         correctAnswer: word.anlam,
         options: generateOptions(word.anlam, kelimeData.map(w => w.anlam))
@@ -4749,6 +4752,7 @@ async function startKarmaGame() {
             question: displayWords.join(' '),
             translation: ayet.meal,
             correctAnswer: correctWord,
+            audioUrl: ayet.ayet_ses_dosyasi || ayet.audio || '',
             options: generateOptions(correctWord, words.filter((w, i) => i !== blankIndex))
         };
     });
