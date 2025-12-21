@@ -227,19 +227,19 @@
     },
     {
       "id": 26,
-      "harf": "ه",
-      "harfWithFetha": "هَ",
-      "isim": "Hâ",
-      "okunus": "he",
+      "harf": "و",
+      "harfWithFetha": "وَ",
+      "isim": "Vav",
+      "okunus": "ve",
       "audioUrl": "https://bilgiocakta.com/kuran/sound/ustun/btn_26.mp3",
       "sesTipi": "ince_sesli_harf"
     },
     {
       "id": 27,
-      "harf": "و",
-      "harfWithFetha": "وَ",
-      "isim": "Vav",
-      "okunus": "ve",
+      "harf": "ه",
+      "harfWithFetha": "هَ",
+      "isim": "Hâ",
+      "okunus": "he",
       "audioUrl": "https://bilgiocakta.com/kuran/sound/ustun/btn_27.mp3",
       "sesTipi": "ince_sesli_harf"
     },
