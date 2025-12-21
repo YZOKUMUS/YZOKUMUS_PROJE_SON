@@ -1351,6 +1351,9 @@ function endGame() {
         });
     }
     
+    // Update UI to reflect new total points
+    updateStatsDisplay();
+    
     // Save stats
     debouncedSaveStats();
     
