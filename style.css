@@ -2493,13 +2493,17 @@ body {
 
 .karma-type-badge {
     display: inline-block;
-    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-    color: white;
-    padding: var(--spacing-xs) var(--spacing-md);
-    border-radius: var(--radius-xl);
-    font-size: 0.85rem;
+    background: rgba(157, 138, 255, 0.15);
+    color: var(--accent-primary);
+    padding: 0.4rem 0.8rem;
+    border-radius: var(--radius-md);
+    font-size: 0.75rem;
     font-weight: 600;
-    margin-bottom: var(--spacing-lg);
+    margin-bottom: var(--spacing-md);
+    border: 1px solid rgba(157, 138, 255, 0.3);
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .karma-arabic {
@@ -2568,8 +2572,9 @@ body {
 .karma-match-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: var(--spacing-lg);
+    gap: var(--spacing-md);
     align-items: start;
+    margin-top: var(--spacing-md);
 }
 
 .match-column {
@@ -2582,8 +2587,8 @@ body {
 
 .match-item {
     padding: var(--spacing-md);
-    background: var(--glass-bg-dark);
-    border: 2px solid var(--glass-border);
+    background: white;
+    border: 2px solid rgba(0, 0, 0, 0.1);
     border-radius: var(--radius-md);
     font-size: 1rem;
     cursor: pointer;
@@ -2599,6 +2604,7 @@ body {
     width: 100%;
     box-sizing: border-box;
     line-height: 1.4;
+    color: var(--text-primary);
     /* Eşit boyutlar için */
     flex-shrink: 0;
 }
