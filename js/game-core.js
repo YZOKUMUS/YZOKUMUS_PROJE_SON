@@ -4729,7 +4729,8 @@ async function startKarmaGame() {
             pairs: matchWords.map(w => ({
                 arabic: w.kelime,
                 turkish: w.anlam,
-                id: w.id
+                id: w.id,
+                audioUrl: w.ses_dosyasi || w.audio || ''
             }))
         });
     }
@@ -4896,7 +4897,7 @@ function renderEslestirmeKarma(container, question) {
         <div class="karma-match-grid">
             <div class="match-column arabic-column">
                 ${arabicItems.map(p => `
-                    <button class="match-item arabic" data-id="${p.id}" onclick="selectKarmaMatch(this, 'arabic', '${p.id}')">
+                    <button class="match-item arabic" data-id="${p.id}" data-audio="${(p.audioUrl || '').replace(/"/g, '&quot;')}" onclick="selectKarmaMatch(this, 'arabic', '${p.id}')">
                         ${p.arabic}
                     </button>
                 `).join('')}
@@ -4918,6 +4919,14 @@ let karmaMatchedCount = 0;
 function selectKarmaMatch(element, type, id) {
     // Eşleşmiş öğeleri seçemezsin
     if (element.classList.contains('matched')) return;
+    
+    // Arapça kelime butonuna tıklandığında ses okuma yap
+    if (type === 'arabic') {
+        const audioUrl = element.getAttribute('data-audio');
+        if (audioUrl && audioUrl.trim() !== '') {
+            playSafeAudio(audioUrl);
+        }
+    }
     
     if (!karmaSelectedItem) {
         // İlk seçim - öğeyi seçili yap
