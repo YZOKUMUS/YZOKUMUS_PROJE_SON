@@ -252,5 +252,247 @@
       "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fetha/fetha/btn_27.mp3",
       "sesTipi": "kalın_sesli_harf"
     }
+  ],
+  "uygulama": [
+    {
+      "id": 1,
+      "kelime": "كما",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_1.mp3"
+    },
+    {
+      "id": 2,
+      "kelime": "جواب",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_2.mp3"
+    },
+    {
+      "id": 3,
+      "kelime": "بلغا",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_3.mp3"
+    },
+    {
+      "id": 4,
+      "kelime": "كلام",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_4.mp3"
+    },
+    {
+      "id": 5,
+      "kelime": "لكان",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_5.mp3"
+    },
+    {
+      "id": 6,
+      "kelime": "احاط",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_6.mp3"
+    },
+    {
+      "id": 7,
+      "kelime": "اخانا",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_7.mp3"
+    },
+    {
+      "id": 8,
+      "kelime": "وا ثاب",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_8.mp3"
+    },
+    {
+      "id": 9,
+      "kelime": "رمضان",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_9.mp3"
+    },
+    {
+      "id": 10,
+      "kelime": "وقاتل",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_10.mp3"
+    },
+    {
+      "id": 11,
+      "kelime": "فساهم",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_11.mp3"
+    },
+    {
+      "id": 12,
+      "kelime": "فوجدا",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_12.mp3"
+    },
+    {
+      "id": 13,
+      "kelime": "لفسدنا",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_13.mp3"
+    },
+    {
+      "id": 14,
+      "kelime": "ما كتب",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_14.mp3"
+    },
+    {
+      "id": 15,
+      "kelime": "فلا رفت",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_15.mp3"
+    },
+    {
+      "id": 16,
+      "kelime": "فما جعل",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_16.mp3"
+    },
+    {
+      "id": 17,
+      "kelime": "قال معاذ",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_17.mp3"
+    },
+    {
+      "id": 18,
+      "kelime": "وما منعنا",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_18.mp3"
+    },
+    {
+      "id": 19,
+      "kelime": "خاف عذاب",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_19.mp3"
+    },
+    {
+      "id": 20,
+      "kelime": "وضرب لنا",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_20.mp3"
+    },
+    {
+      "id": 21,
+      "kelime": "فما كان",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_21.mp3"
+    },
+    {
+      "id": 22,
+      "kelime": "جعل لك",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_22.mp3"
+    },
+    {
+      "id": 23,
+      "kelime": "جاوزا قال",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_23.mp3"
+    },
+    {
+      "id": 24,
+      "kelime": "قال لا تخافا",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_24.mp3"
+    },
+    {
+      "id": 25,
+      "kelime": "بلى",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_25.mp3"
+    },
+    {
+      "id": 26,
+      "kelime": "عمى",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_26.mp3"
+    },
+    {
+      "id": 27,
+      "kelime": "على",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_27.mp3"
+    },
+    {
+      "id": 28,
+      "kelime": "فهدى",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_28.mp3"
+    },
+    {
+      "id": 29,
+      "kelime": "فاوى",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_29.mp3"
+    },
+    {
+      "id": 30,
+      "kelime": "دحيها",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_30.mp3"
+    },
+    {
+      "id": 31,
+      "kelime": "قضيها",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_31.mp3"
+    },
+    {
+      "id": 32,
+      "kelime": "فناديها",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_32.mp3"
+    },
+    {
+      "id": 33,
+      "kelime": "ما سعى",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_33.mp3"
+    },
+    {
+      "id": 34,
+      "kelime": "وما بنيها",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_34.mp3"
+    },
+    {
+      "id": 35,
+      "kelime": "وما قلى",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_35.mp3"
+    },
+    {
+      "id": 36,
+      "kelime": "وما طحيها",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_36.mp3"
+    },
+    {
+      "id": 37,
+      "kelime": "يتورى",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_37.mp3"
+    },
+    {
+      "id": 38,
+      "kelime": "متى هذا",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_38.mp3"
+    },
+    {
+      "id": 39,
+      "kelime": "حيوة",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_39.mp3"
+    },
+    {
+      "id": 40,
+      "kelime": "صلوة",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_40.mp3"
+    },
+    {
+      "id": 41,
+      "kelime": "زكوة",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_41.mp3"
+    },
+    {
+      "id": 42,
+      "kelime": "ومنوه",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_42.mp3"
+    },
+    {
+      "id": 43,
+      "kelime": "تظهرا",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_43.mp3"
+    },
+    {
+      "id": 44,
+      "kelime": "ما عهد",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_44.mp3"
+    },
+    {
+      "id": 45,
+      "kelime": "وهمن",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_45.mp3"
+    },
+    {
+      "id": 46,
+      "kelime": "جهداك",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_46.mp3"
+    },
+    {
+      "id": 47,
+      "kelime": "تبرك",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_47.mp3"
+    },
+    {
+      "id": 48,
+      "kelime": "لنا خطينا",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_48.mp3"
+    }
   ]
 }

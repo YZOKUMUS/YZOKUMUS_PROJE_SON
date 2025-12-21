@@ -188,6 +188,342 @@
       "okunus": "zûkira",
       "anlam": "Zikredildi",
       "audioUrl": "https://bilgiocakta.com/kuran/sound/okuma/btn_27.mp3"
+    },
+    {
+      "id": 28,
+      "kelime": "كما",
+      "okunus": "kema",
+      "anlam": "Gibi",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_1.mp3"
+    },
+    {
+      "id": 29,
+      "kelime": "جواب",
+      "okunus": "cevab",
+      "anlam": "Cevap",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_2.mp3"
+    },
+    {
+      "id": 30,
+      "kelime": "بلغا",
+      "okunus": "belaga",
+      "anlam": "Ulaşmak için",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_3.mp3"
+    },
+    {
+      "id": 31,
+      "kelime": "كلام",
+      "okunus": "kelam",
+      "anlam": "Söz",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_4.mp3"
+    },
+    {
+      "id": 32,
+      "kelime": "لكان",
+      "okunus": "lekan",
+      "anlam": "Olurdu",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_5.mp3"
+    },
+    {
+      "id": 33,
+      "kelime": "احاط",
+      "okunus": "ihata",
+      "anlam": "Kuşattı",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_6.mp3"
+    },
+    {
+      "id": 34,
+      "kelime": "اخانا",
+      "okunus": "ihana",
+      "anlam": "Bize ihanet etti",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_7.mp3"
+    },
+    {
+      "id": 35,
+      "kelime": "وا ثاب",
+      "okunus": "ve sab",
+      "anlam": "Ve sabır",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_8.mp3"
+    },
+    {
+      "id": 36,
+      "kelime": "رمضان",
+      "okunus": "ramazan",
+      "anlam": "Ramazan",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_9.mp3"
+    },
+    {
+      "id": 37,
+      "kelime": "وقاتل",
+      "okunus": "ve katele",
+      "anlam": "Ve savaştı",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_10.mp3"
+    },
+    {
+      "id": 38,
+      "kelime": "فساهم",
+      "okunus": "fe saheme",
+      "anlam": "Ve katıldı",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_11.mp3"
+    },
+    {
+      "id": 39,
+      "kelime": "فوجدا",
+      "okunus": "fe vecede",
+      "anlam": "Ve buldu",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_12.mp3"
+    },
+    {
+      "id": 40,
+      "kelime": "لفسدنا",
+      "okunus": "le fesedna",
+      "anlam": "Bozduk",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_13.mp3"
+    },
+    {
+      "id": 41,
+      "kelime": "ما كتب",
+      "okunus": "ma ketebe",
+      "anlam": "Yazdığı",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_14.mp3"
+    },
+    {
+      "id": 42,
+      "kelime": "فلا رفت",
+      "okunus": "fe la refete",
+      "anlam": "Ve kaldırmadı",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_15.mp3"
+    },
+    {
+      "id": 43,
+      "kelime": "فما جعل",
+      "okunus": "fe ma ceale",
+      "anlam": "Ve yapmadı",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_16.mp3"
+    },
+    {
+      "id": 44,
+      "kelime": "قال معاذ",
+      "okunus": "kale muaz",
+      "anlam": "Muaz dedi",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_17.mp3"
+    },
+    {
+      "id": 45,
+      "kelime": "وما منعنا",
+      "okunus": "ve ma mena'na",
+      "anlam": "Ve engellemedik",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_18.mp3"
+    },
+    {
+      "id": 46,
+      "kelime": "خاف عذاب",
+      "okunus": "hafe azab",
+      "anlam": "Azaptan korktu",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_19.mp3"
+    },
+    {
+      "id": 47,
+      "kelime": "وضرب لنا",
+      "okunus": "ve darabe lena",
+      "anlam": "Ve bizim için vurdu",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_20.mp3"
+    },
+    {
+      "id": 48,
+      "kelime": "فما كان",
+      "okunus": "fe ma kane",
+      "anlam": "Ve olmadı",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_21.mp3"
+    },
+    {
+      "id": 49,
+      "kelime": "جعل لك",
+      "okunus": "ceale leke",
+      "anlam": "Sana yaptı",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_22.mp3"
+    },
+    {
+      "id": 50,
+      "kelime": "جاوزا قال",
+      "okunus": "ceveza kale",
+      "anlam": "Geçti dedi",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_23.mp3"
+    },
+    {
+      "id": 51,
+      "kelime": "قال لا تخافا",
+      "okunus": "kale la tehafa",
+      "anlam": "Korkmayın dedi",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_24.mp3"
+    },
+    {
+      "id": 52,
+      "kelime": "بلى",
+      "okunus": "bela",
+      "anlam": "Evet",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_25.mp3"
+    },
+    {
+      "id": 53,
+      "kelime": "عمى",
+      "okunus": "ama",
+      "anlam": "Kör",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_26.mp3"
+    },
+    {
+      "id": 54,
+      "kelime": "على",
+      "okunus": "ala",
+      "anlam": "Üzerinde",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_27.mp3"
+    },
+    {
+      "id": 55,
+      "kelime": "فهدى",
+      "okunus": "fe heda",
+      "anlam": "Ve hidayet etti",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_28.mp3"
+    },
+    {
+      "id": 56,
+      "kelime": "فاوى",
+      "okunus": "fe eva",
+      "anlam": "Ve sığındı",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_29.mp3"
+    },
+    {
+      "id": 57,
+      "kelime": "دحيها",
+      "okunus": "dehiha",
+      "anlam": "Yaydı onu",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_30.mp3"
+    },
+    {
+      "id": 58,
+      "kelime": "قضيها",
+      "okunus": "kadaha",
+      "anlam": "Tamamladı onu",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_31.mp3"
+    },
+    {
+      "id": 59,
+      "kelime": "فناديها",
+      "okunus": "fe nadaha",
+      "anlam": "Ve çağırdı onu",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_32.mp3"
+    },
+    {
+      "id": 60,
+      "kelime": "ما سعى",
+      "okunus": "ma sea",
+      "anlam": "Çalıştığı",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_33.mp3"
+    },
+    {
+      "id": 61,
+      "kelime": "وما بنيها",
+      "okunus": "ve ma benaha",
+      "anlam": "Ve inşa etmedi onu",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_34.mp3"
+    },
+    {
+      "id": 62,
+      "kelime": "وما قلى",
+      "okunus": "ve ma kela",
+      "anlam": "Ve kızartmadı",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_35.mp3"
+    },
+    {
+      "id": 63,
+      "kelime": "وما طحيها",
+      "okunus": "ve ma tahaha",
+      "anlam": "Ve yaymadı onu",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_36.mp3"
+    },
+    {
+      "id": 64,
+      "kelime": "يتورى",
+      "okunus": "yetevara",
+      "anlam": "Saklanır",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_37.mp3"
+    },
+    {
+      "id": 65,
+      "kelime": "متى هذا",
+      "okunus": "meta hazâ",
+      "anlam": "Ne zaman bu",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_38.mp3"
+    },
+    {
+      "id": 66,
+      "kelime": "حيوة",
+      "okunus": "hayat",
+      "anlam": "Hayat",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_39.mp3"
+    },
+    {
+      "id": 67,
+      "kelime": "صلوة",
+      "okunus": "salat",
+      "anlam": "Namaz",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_40.mp3"
+    },
+    {
+      "id": 68,
+      "kelime": "زكوة",
+      "okunus": "zekat",
+      "anlam": "Zekat",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_41.mp3"
+    },
+    {
+      "id": 69,
+      "kelime": "ومنوه",
+      "okunus": "ve menavve",
+      "anlam": "Ve yumuşattı",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_42.mp3"
+    },
+    {
+      "id": 70,
+      "kelime": "تظهرا",
+      "okunus": "tezhera",
+      "anlam": "Görünürsünüz",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_43.mp3"
+    },
+    {
+      "id": 71,
+      "kelime": "ما عهد",
+      "okunus": "ma ahide",
+      "anlam": "Ahdetmedi",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_44.mp3"
+    },
+    {
+      "id": 72,
+      "kelime": "وهمن",
+      "okunus": "ve hamene",
+      "anlam": "Ve hamile kaldı",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_45.mp3"
+    },
+    {
+      "id": 73,
+      "kelime": "جهداك",
+      "okunus": "cehdake",
+      "anlam": "Çalıştı seni",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_46.mp3"
+    },
+    {
+      "id": 74,
+      "kelime": "تبرك",
+      "okunus": "tebareke",
+      "anlam": "Mübarek",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_47.mp3"
+    },
+    {
+      "id": 75,
+      "kelime": "لنا خطينا",
+      "okunus": "lena hatina",
+      "anlam": "Bizim için hata ettik",
+      "audioUrl": "https://kuran.diyanet.gov.tr/elifba/data/sound/elifba/fethanin-uzatilmasi/uygulama/btn_48.mp3"
     }
   ]
 }
