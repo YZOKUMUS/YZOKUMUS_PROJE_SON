@@ -65,6 +65,8 @@ sw.js.map
 *.bak
 *.backup
 *~
+HASENE_BACKUP_*/
+backup/
 
 # Test files (if adding tests)
 test-results/
