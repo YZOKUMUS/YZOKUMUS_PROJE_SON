@@ -4856,6 +4856,9 @@ function loadKarmaQuestion() {
 }
 
 function renderKelimeCevirKarma(container, question) {
+    const wordId = question.data?.kelime_id || question.data?.id;
+    const wordInfoContent = (question.data?.sure_adi || '') + 
+        (wordId ? `<div class="word-id-debug">ID: ${wordId}</div>` : '');
     container.innerHTML = `
         <div class="question-card glass-card">
             <div class="word-actions">
@@ -4866,7 +4869,7 @@ function renderKelimeCevirKarma(container, question) {
                 </button>
             </div>
             <div class="arabic-word">${question.question}</div>
-            <div class="word-info">${question.data.sure_adi || ''}</div>
+            <div class="word-info">${wordInfoContent}</div>
         </div>
         <div class="answer-options">
             ${question.options.map((opt, i) => `
@@ -4879,6 +4882,8 @@ function renderKelimeCevirKarma(container, question) {
 }
 
 function renderDinleBulKarma(container, question) {
+    const wordId = question.data?.kelime_id || question.data?.id;
+    const debugInfo = wordId ? `<div class="word-id-debug">ID: ${wordId}</div>` : '';
     container.innerHTML = `
         <div class="question-card glass-card">
             <div class="word-actions">
@@ -4889,6 +4894,7 @@ function renderDinleBulKarma(container, question) {
                 </button>
             </div>
             <p class="dinle-instruction" style="margin-top: var(--spacing-lg); margin-bottom: var(--spacing-md);">Kelimeyi dinle ve doğru çeviriyi bul</p>
+            ${debugInfo}
         </div>
         <div class="answer-options">
             ${question.options.map((opt, i) => `
@@ -5026,6 +5032,9 @@ function selectKarmaMatch(element, type, id) {
 }
 
 function renderBoslukDoldurKarma(container, question) {
+    const ayetKimligi = question.data?.ayet_kimligi || question.data?.ayet_id || question.data?.id;
+    const translationContent = (question.translation || '') + 
+        (ayetKimligi ? `<div class="word-id-debug">Ayet Kimliği: ${ayetKimligi}</div>` : '');
     container.innerHTML = `
         <div class="question-card glass-card">
             <div class="word-actions">
@@ -5036,7 +5045,7 @@ function renderBoslukDoldurKarma(container, question) {
                 </button>
             </div>
             <div class="arabic-verse">${question.question}</div>
-            <div class="verse-translation">${question.translation}</div>
+            <div class="verse-translation">${translationContent}</div>
         </div>
         <div class="answer-options">
             ${question.options.map((opt, i) => `
