@@ -149,9 +149,6 @@ body {
     font-weight: 500;
     letter-spacing: 0.5px;
 }
-    color: var(--text-secondary);
-    margin-bottom: var(--spacing-xl);
-}
 
 .loading-spinner {
     width: 40px;
