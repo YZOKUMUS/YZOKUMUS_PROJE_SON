@@ -1557,7 +1557,6 @@ function loadKelimeQuestion() {
     document.getElementById('kelime-session-score').textContent = formatNumber(sessionScore);
     
     // Update favorite button
-    const wordId = currentQuestion.kelime_id || currentQuestion.id;
     const favBtn = document.getElementById('kelime-favorite-btn');
     if (favBtn) {
         favBtn.textContent = favorites.includes(wordId) ? '❤️' : '♡';
