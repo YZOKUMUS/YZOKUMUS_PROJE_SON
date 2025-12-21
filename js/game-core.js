@@ -1549,7 +1549,10 @@ function loadKelimeQuestion() {
     // Update UI
     document.getElementById('kelime-question-number').textContent = questionIndex + 1;
     document.getElementById('kelime-arabic').textContent = currentQuestion.kelime || currentQuestion.arabic;
-    document.getElementById('kelime-info').textContent = currentQuestion.sure_adi || '';
+    const wordId = currentQuestion.kelime_id || currentQuestion.id;
+    const wordInfoEl = document.getElementById('kelime-info');
+    wordInfoEl.innerHTML = (currentQuestion.sure_adi || '') + 
+        (wordId ? `<div class="word-id-debug">ID: ${wordId}</div>` : '');
     document.getElementById('kelime-combo').textContent = comboCount;
     document.getElementById('kelime-session-score').textContent = formatNumber(sessionScore);
     
@@ -2321,6 +2324,20 @@ function loadDinleQuestion() {
         </button>
     `).join('');
     
+    // Debug: Show word ID
+    const wordId = currentQuestion.kelime_id || currentQuestion.id;
+    const instructionEl = document.querySelector('#dinle-bul-screen .dinle-instruction');
+    if (instructionEl && wordId) {
+        const existingDebug = instructionEl.nextElementSibling;
+        if (existingDebug && existingDebug.classList.contains('word-id-debug')) {
+            existingDebug.remove();
+        }
+        const debugEl = document.createElement('div');
+        debugEl.className = 'word-id-debug';
+        debugEl.textContent = `ID: ${wordId}`;
+        instructionEl.parentNode.insertBefore(debugEl, instructionEl.nextSibling);
+    }
+    
     // Auto play audio
     setTimeout(() => playCurrentWordAudio(), 500);
 }
@@ -2421,7 +2438,10 @@ function loadBoslukQuestion() {
     displayWords[blankIndex] = '<span class="blank-word" id="bosluk-blank"></span>';
     
     document.getElementById('bosluk-arabic').innerHTML = displayWords.join(' ');
-    document.getElementById('bosluk-translation').textContent = currentQuestion.meal || '';
+    const translationEl = document.getElementById('bosluk-translation');
+    const ayetId = currentQuestion.ayet_id || currentQuestion.id;
+    translationEl.innerHTML = (currentQuestion.meal || '') + 
+        (ayetId ? `<div class="word-id-debug">Ayet ID: ${ayetId}</div>` : '');
     
     // Generate wrong options from other words in verse or other verses
     let wrongOptions = words.filter((w, i) => i !== blankIndex && w.length > 1).slice(0, 3);

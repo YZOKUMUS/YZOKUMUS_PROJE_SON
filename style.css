@@ -515,6 +515,15 @@ body {
     color: var(--text-secondary);
 }
 
+/* Debug: Kelime ID gösterimi (test için) */
+.word-id-debug {
+    font-size: 8px !important;
+    color: rgba(0, 0, 0, 0.3) !important;
+    font-family: monospace !important;
+    margin-top: 4px;
+    text-align: center;
+}
+
 .audio-btn {
     position: absolute;
     top: clamp(0.75rem, 2vw, var(--spacing-md));
