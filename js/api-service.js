@@ -437,9 +437,19 @@ async function saveUserStats(stats) {
                 }
                 return result;
             }).catch((error) => {
-                // Only log unexpected errors (not permission-denied)
+                // Only log unexpected errors (not permission-denied or blocked)
                 if (error.code !== 'permission-denied') {
-                    console.error('☁️ ❌ User stats Firebase save error:', error);
+                    // Check for network blocking
+                    if (error.message && (
+                        error.message.includes('ERR_BLOCKED_BY_CLIENT') ||
+                        error.message.includes('blocked') ||
+                        error.message.includes('Failed to fetch')
+                    )) {
+                        // Network blocked - localStorage will be used instead (not critical)
+                        console.warn('⚠️ Firebase sync blocked by browser extension. Using localStorage instead.');
+                    } else {
+                        console.error('☁️ ❌ User stats Firebase save error:', error);
+                    }
                 }
                 return false;
             })
