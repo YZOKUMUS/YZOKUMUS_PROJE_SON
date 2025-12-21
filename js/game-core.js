@@ -4832,10 +4832,18 @@ function loadKarmaQuestion() {
 
 function renderKelimeCevirKarma(container, question) {
     container.innerHTML = `
-        <div class="karma-type-badge">📝 Kelime Çevir</div>
-        <div class="karma-arabic">${question.question}</div>
-        <div class="karma-info">${question.data.sure_adi || ''}</div>
-        <div class="karma-options">
+        <div class="question-card glass-card">
+            <div class="word-actions">
+                <div></div>
+                <div></div>
+                <button class="audio-btn" onclick="playSafeAudio('${(question.data.audioUrl || '').replace(/'/g, "\\'")}')" title="Dinle">
+                    <img src="ASSETS/badges/hoparlor.png" alt="Dinle" class="audio-icon">
+                </button>
+            </div>
+            <div class="arabic-word">${question.question}</div>
+            <div class="word-info">${question.data.sure_adi || ''}</div>
+        </div>
+        <div class="answer-options">
             ${question.options.map((opt, i) => `
                 <button class="answer-option" onclick="checkKarmaAnswer('${opt.replace(/'/g, "\\'")}', '${question.correctAnswer.replace(/'/g, "\\'")}')">
                     ${opt}
@@ -4847,13 +4855,17 @@ function renderKelimeCevirKarma(container, question) {
 
 function renderDinleBulKarma(container, question) {
     container.innerHTML = `
-        <div class="karma-type-badge">🎧 Dinle Bul</div>
-        <div class="karma-audio-section">
-            <button class="audio-btn large" onclick="playSafeAudio('${question.audioUrl}')" title="Dinle">
-                <img src="ASSETS/badges/hoparlor.png" alt="Dinle" class="audio-icon-inline">
-            </button>
+        <div class="question-card glass-card">
+            <div class="word-actions">
+                <div></div>
+                <div></div>
+                <button class="audio-btn" onclick="playSafeAudio('${question.audioUrl.replace(/'/g, "\\'")}')" title="Dinle">
+                    <img src="ASSETS/badges/hoparlor.png" alt="Dinle" class="audio-icon">
+                </button>
+            </div>
+            <p class="dinle-instruction" style="margin-top: var(--spacing-lg); margin-bottom: var(--spacing-md);">Kelimeyi dinle ve doğru çeviriyi bul</p>
         </div>
-        <div class="karma-options">
+        <div class="answer-options">
             ${question.options.map((opt, i) => `
                 <button class="answer-option" onclick="checkKarmaAnswer('${opt.replace(/'/g, "\\'")}', '${question.correctAnswer.replace(/'/g, "\\'")}')">
                     ${opt}
@@ -4982,10 +4994,18 @@ function selectKarmaMatch(element, type, id) {
 
 function renderBoslukDoldurKarma(container, question) {
     container.innerHTML = `
-        <div class="karma-type-badge">✍️ Boşluk Doldur</div>
-        <div class="karma-arabic bosluk">${question.question}</div>
-        <div class="karma-translation">${question.translation}</div>
-        <div class="karma-options">
+        <div class="question-card glass-card">
+            <div class="word-actions">
+                <div></div>
+                <div></div>
+                <button class="audio-btn" onclick="playSafeAudio('${(question.audioUrl || '').replace(/'/g, "\\'")}')" title="Ayeti Dinle">
+                    <img src="ASSETS/badges/hoparlor.png" alt="Dinle" class="audio-icon">
+                </button>
+            </div>
+            <div class="arabic-verse">${question.question}</div>
+            <div class="verse-translation">${question.translation}</div>
+        </div>
+        <div class="answer-options">
             ${question.options.map((opt, i) => `
                 <button class="answer-option" onclick="checkKarmaAnswer('${opt.replace(/'/g, "\\'")}', '${question.correctAnswer.replace(/'/g, "\\'")}')">
                     ${opt}
@@ -4997,10 +5017,16 @@ function renderBoslukDoldurKarma(container, question) {
 
 function renderHarfBulKarma(container, question) {
     container.innerHTML = `
-        <div class="karma-type-badge">🔤 Harf Bul</div>
-        <div class="karma-arabic harf">${question.question}</div>
-        <div class="karma-info">Bu harfin okunuşunu seç</div>
-        <div class="karma-options">
+        <div class="question-card glass-card">
+            <div class="word-actions">
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+            <div class="arabic-letter">${question.question}</div>
+            <div class="word-info">Bu harfin okunuşunu seç</div>
+        </div>
+        <div class="answer-options">
             ${question.options.map((opt, i) => `
                 <button class="answer-option" onclick="checkKarmaAnswer('${opt.replace(/'/g, "\\'")}', '${question.correctAnswer.replace(/'/g, "\\'")}')">
                     ${opt}
