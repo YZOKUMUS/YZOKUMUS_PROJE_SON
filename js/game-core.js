@@ -1064,17 +1064,47 @@ async function startGame(gameMode) {
  * Go to Kelime Çevir submodes
  */
 function goToKelimeSubmodes() {
+    // Eğer oyun devam ediyorsa, kazanılan puanları kaydet
+    if (currentGameMode === 'kelime-cevir' && sessionScore > 0) {
+        totalPoints += sessionScore;
+        debouncedSaveStats();
+        console.log(`💾 Kelime Çevir oyun ortasında çıkış: ${sessionScore} Hasene toplam puana eklendi`);
+        // Session'ı sıfırla
+        sessionScore = 0;
+        questionIndex = 0;
+        correctCount = 0;
+        wrongCount = 0;
+        comboCount = 0;
+        maxCombo = 0;
+    }
+    
     document.getElementById('kelime-cevir-screen').classList.add('hidden');
     document.getElementById('kelime-submode-screen').classList.remove('hidden');
+    updateStatsDisplay();
 }
 
 /**
  * Go to Elif Ba submodes
  */
 function goToElifBaSubmodes() {
+    // Eğer oyun devam ediyorsa, kazanılan puanları kaydet
+    if (currentGameMode === 'elif-ba' && sessionScore > 0) {
+        totalPoints += sessionScore;
+        debouncedSaveStats();
+        console.log(`💾 Elif Ba oyun ortasında çıkış: ${sessionScore} Hasene toplam puana eklendi`);
+        // Session'ı sıfırla
+        sessionScore = 0;
+        questionIndex = 0;
+        correctCount = 0;
+        wrongCount = 0;
+        comboCount = 0;
+        maxCombo = 0;
+    }
+    
     document.getElementById('elif-ba-screen').classList.add('hidden');
     document.getElementById('elif-ba-tablo-screen').classList.add('hidden');
     document.getElementById('elif-ba-submode-screen').classList.remove('hidden');
+    updateStatsDisplay();
 }
 
 // ========================================
@@ -1253,6 +1283,24 @@ function hideAllScreens() {
 function goToMainMenu() {
     // Sesi durdur
     stopAllAudio();
+    
+    // Eğer oyun devam ediyorsa, kazanılan puanları kaydet
+    if (currentGameMode && sessionScore > 0) {
+        // Oyun ortasında çıkılırsa bile kazanılan puanları kaydet
+        totalPoints += sessionScore;
+        // dailyProgress zaten her soruda güncelleniyor, burada eklemeye gerek yok
+        // Ama kaydetmek için saveStats çağrılmalı
+        debouncedSaveStats();
+        console.log(`💾 Oyun ortasında çıkış: ${sessionScore} Hasene toplam puana eklendi`);
+    }
+    
+    // Session'ı sıfırla (bir sonraki oyun için)
+    sessionScore = 0;
+    questionIndex = 0;
+    correctCount = 0;
+    wrongCount = 0;
+    comboCount = 0;
+    maxCombo = 0;
     
     // Modalları kapat
     closeAllModals();
