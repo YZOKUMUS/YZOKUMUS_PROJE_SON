@@ -7,6 +7,22 @@
 // FIREBASE INITIALIZATION
 // ========================================
 
+// Suppress ERR_BLOCKED_BY_CLIENT errors in console (caused by browser extensions)
+// These errors are harmless - Firebase falls back to localStorage automatically
+if (typeof window !== 'undefined' && window.console) {
+    const originalError = console.error;
+    console.error = function(...args) {
+        const message = args.join(' ');
+        // Filter out ERR_BLOCKED_BY_CLIENT errors from Firebase
+        if (message.includes('ERR_BLOCKED_BY_CLIENT') && 
+            message.includes('firestore.googleapis.com')) {
+            // Silently ignore - this is expected when browser extensions block Firebase
+            return;
+        }
+        originalError.apply(console, args);
+    };
+}
+
 /**
  * Initialize Firebase
  * @returns {Promise<boolean>} Success status
