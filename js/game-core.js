@@ -2438,9 +2438,10 @@ function loadBoslukQuestion() {
     
     document.getElementById('bosluk-arabic').innerHTML = displayWords.join(' ');
     const translationEl = document.getElementById('bosluk-translation');
-    const ayetId = currentQuestion.ayet_id || currentQuestion.id;
-    translationEl.innerHTML = (currentQuestion.meal || '') + 
-        (ayetId ? `<div class="word-id-debug">Ayet ID: ${ayetId}</div>` : '');
+    const ayetId = currentQuestion.ayet_id || currentQuestion.id || currentQuestion._id;
+    const debugInfo = ayetId ? `<div class="word-id-debug">Ayet ID: ${ayetId}</div>` : 
+        `<div class="word-id-debug">Ayet ID: YOK (${JSON.stringify(Object.keys(currentQuestion)).substring(0, 50)})</div>`;
+    translationEl.innerHTML = (currentQuestion.meal || '') + debugInfo;
     
     // Generate wrong options from other words in verse or other verses
     let wrongOptions = words.filter((w, i) => i !== blankIndex && w.length > 1).slice(0, 3);
