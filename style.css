@@ -517,11 +517,15 @@ body {
 
 /* Debug: Kelime ID gösterimi (test için) */
 .word-id-debug {
-    font-size: 8px !important;
-    color: rgba(0, 0, 0, 0.3) !important;
+    font-size: 10px !important;
+    color: rgba(0, 0, 0, 0.7) !important;
     font-family: monospace !important;
     margin-top: 4px;
     text-align: center;
+    font-weight: 600 !important;
+    background: rgba(255, 255, 255, 0.5) !important;
+    padding: 2px 4px !important;
+    border-radius: 3px !important;
 }
 
 .audio-btn {
