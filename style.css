@@ -2007,13 +2007,13 @@ body {
 }
 
 .calendar-stat-value {
-    font-size: 1.5rem;
+    font-size: clamp(1.25rem, 4vw, 1.5rem);
     font-weight: 700;
     color: var(--accent-primary);
 }
 
 .calendar-stat-label {
-    font-size: 0.75rem;
+    font-size: clamp(0.7rem, 2vw, 0.75rem);
     color: var(--text-secondary);
 }
 
@@ -2744,12 +2744,12 @@ body {
     position: relative;
     top: auto;
     right: auto;
-    width: 36px;
-    height: 36px;
+    width: clamp(36px, 9vw, 40px);
+    height: clamp(36px, 9vw, 40px);
     min-width: 36px;
     min-height: 36px;
     padding: 0;
-    font-size: 1rem;
+    font-size: clamp(0.9rem, 2.5vw, 1rem);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -2760,11 +2760,11 @@ body {
     position: relative;
     top: auto;
     right: auto;
-    width: 36px;
-    height: 36px;
+    width: clamp(36px, 9vw, 40px);
+    height: clamp(36px, 9vw, 40px);
     min-width: 36px;
     min-height: 36px;
-    font-size: 1.1rem;
+    font-size: clamp(1rem, 3vw, 1.1rem);
     display: flex;
     align-items: center;
     justify-content: center;
