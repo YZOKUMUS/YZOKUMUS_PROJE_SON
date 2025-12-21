@@ -396,6 +396,23 @@ async function initApp() {
     // Setup PWA install banner
     setupPWAInstall();
     
+    // Save stats when page is about to close/unload
+    // This ensures data is saved even if user closes browser/app suddenly
+    window.addEventListener('beforeunload', () => {
+        // Synchronous save (no async operations)
+        saveStatsSync();
+    });
+    
+    // Also listen for pagehide (more reliable on mobile)
+    window.addEventListener('pagehide', () => {
+        saveStatsSync();
+    });
+    
+    // Save stats periodically (every 30 seconds) as backup
+    setInterval(() => {
+        saveStats().catch(err => console.warn('Periodic save error:', err));
+    }, 30000);
+    
     // Hide loading screen
     setTimeout(() => {
         document.getElementById('loadingScreen').classList.add('hidden');
@@ -573,6 +590,31 @@ async function loadStats() {
     checkStreak();
     
     console.log('📊 Stats loaded:', { totalPoints, currentLevel, streakData, source: isFirebaseUser ? 'Firebase+localStorage' : 'localStorage' });
+}
+
+/**
+ * Synchronous save (for beforeunload/pagehide events)
+ * Only saves to localStorage, no async operations
+ */
+function saveStatsSync() {
+    try {
+        saveToStorage(CONFIG.STORAGE_KEYS.TOTAL_POINTS, totalPoints);
+        saveToStorage(CONFIG.STORAGE_KEYS.STREAK_DATA, streakData);
+        saveToStorage(CONFIG.STORAGE_KEYS.GAME_STATS, gameStats);
+        saveToStorage(CONFIG.STORAGE_KEYS.DAILY_GOAL, dailyGoal);
+        saveToStorage(CONFIG.STORAGE_KEYS.DAILY_PROGRESS, { 
+            date: getLocalDateString(), 
+            points: dailyProgress 
+        });
+        saveToStorage(CONFIG.STORAGE_KEYS.DAILY_TASKS, dailyTasks);
+        saveToStorage('hasene_word_stats', wordStats);
+        saveToStorage('hasene_favorites', favorites);
+        saveToStorage('hasene_achievements', unlockedAchievements);
+        saveToStorage('hasene_badges', badgesUnlocked);
+        console.log('💾 Stats saved synchronously (page unload)');
+    } catch (err) {
+        console.error('Sync save error:', err);
+    }
 }
 
 /**
