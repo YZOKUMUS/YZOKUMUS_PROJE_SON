@@ -2565,18 +2565,20 @@ body {
 /* Eşleştirme */
 .karma-match-instruction {
     text-align: center;
-    color: var(--text-primary);
+    color: #1a1a2e;
     margin-bottom: var(--spacing-lg);
-    font-size: 0.9rem;
-    font-weight: 500;
+    font-size: 0.95rem;
+    font-weight: 600;
+    padding: 0;
 }
 
 .karma-match-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: var(--spacing-md);
+    gap: 1rem;
     align-items: start;
-    margin-top: var(--spacing-md);
+    margin-top: 0;
+    width: 100%;
 }
 
 .match-column {
