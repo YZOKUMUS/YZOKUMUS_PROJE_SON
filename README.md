@@ -17,15 +17,14 @@ Alt ayrıntılar için ayrıca `docs/sistem/HASENE_OYUN_TAM_DOKUMANTASYON.md` do
 - **Hedef cihaz**: Özellikle **mobil** (iOS/Android), ama tablet ve masaüstü de destekleniyor
 
 Temel özellikler:
-- **7 oyun/okuma modu** (toplam 8 alt mod ile)
+- **6 oyun/okuma modu** (toplam 8 alt mod ile)
   - Kelime Çevir (4 alt mod: Klasik, 30. cüz, Tekrar Et, Favoriler)
   - Dinle Bul (alt mod yok)
   - Boşluk Doldur (alt mod yok)
   - Ayet Oku (okuma modu)
   - Dua Et (okuma modu)
   - Hadis Oku (okuma modu)
-  - Elif Ba (4 alt mod: Harfler, Kelimeler, Harekeler, Fetha, Harf Tablosu)
-  - Karma (karışık soru modu: Kelime Çevir, Dinle Bul, Eşleştirme, Boşluk Doldur, Harf Bul)
+  - Elif Ba (4 alt mod: Harfler, Kelimeler, Harekeler, Harf Tablosu)
 - **Hasene puan sistemi + combo + perfect bonus**
 - **Yıldız / seviye (mertebe) / rozet sistemi**
 - **44 başarım (achievements)**
@@ -697,8 +696,6 @@ Güncel mantık `HASENE_OYUN_TAM_DOKUMANTASYON.md` içinde hem eski hem yeni hal
 - **Doğru cevap**: Temel Hasene (kelime zorluğuna göre 5–21 arası) + **her doğru için** combo bonusu (+2) 
 - **Yanlış cevap**: Puan kaybı yok (en son revizyonda cezalar kaldırıldı)
 
-**ÖNEMLİ**: Puanlar her doğru cevapta hem `sessionScore` hem de `dailyProgress`'e eklenir. `totalPoints`'e ekleme sadece oyun bitince (`endGame()`) veya oyun ortasında çıkışta (`goToMainMenu()`) yapılır.
-
 Örnek sadeleştirilmiş hesap:
 
 ```js
@@ -707,10 +704,11 @@ function onCorrectAnswer(basePoints) {
   const comboBonus = 2;          // her doğru için sabit
   const gained = basePoints + comboBonus;
 
-  sessionScore += gained;        // Oturum puanı (geçici)
-  dailyProgress += gained;       // Günlük vird (kalıcı - her soruda kaydediliyor)
-  
-  // totalPoints'e ekleme YAPILMAZ - sadece endGame() veya goToMainMenu() içinde
+  sessionScore += gained;
+  totalPoints += gained;
+
+  addSessionPoints(gained);      // points-manager.js
+  addDailyXP(gained);            // game-core.js tarafında
 }
 ```
 
@@ -727,17 +725,11 @@ Bonus:
 - README’yi uygularken **sabit 50** mantığını tercih edebilirsiniz (daha tutarlı):
 
 ```js
-// endGame() fonksiyonu içinde:
 if (wrongCount === 0 && correctCount >= 3) {
   const perfectBonus = 50;
   sessionScore += perfectBonus;
-  dailyProgress += perfectBonus;
+  totalPoints += perfectBonus;
 }
-
-// Sonra:
-totalPoints += sessionScore;  // Perfect bonus dahil tüm sessionScore
-const finalSessionScore = sessionScore;
-sessionScore = 0;  // Çift eklemeyi önlemek için sıfırla
 ```
 
 ### 5.3. Yıldız hesabı
@@ -3441,19 +3433,6 @@ Bu README'yi takip ederek oyunu yeniden yazmak için **kontrol listesi**:
 - Conflict resolution stratejisi: Son yazılan kazanır (last-write-wins)
 - Timestamp bazlı karşılaştırma
 - Kullanıcıya conflict durumunda seçim hakkı ver
-
-### 31.1.1. Puan Kaybı ve Çift Ekleme Sorunları (✅ ÇÖZÜLDÜ)
-
-**Sorun 1**: Oyun ortasında çıkışta `sessionScore` kayboluyordu.
-- **Çözüm**: `goToMainMenu()`, `goToKelimeSubmodes()`, `goToElifBaSubmodes()` fonksiyonlarında oyun ortasında çıkışta `totalPoints += sessionScore` eklendi.
-
-**Sorun 2**: Oyun bitince `endGame()` çağrıldıktan sonra `goToMainMenu()` tekrar puan ekliyordu (çift ekleme).
-- **Çözüm**: `endGame()` içinde `totalPoints += sessionScore` yaptıktan sonra `sessionScore = 0` yapılıyor. Böylece `goToMainMenu()` içindeki kontrol (`sessionScore > 0`) false oluyor ve tekrar ekleme yapılmıyor.
-
-**Puanlama Akışı**:
-1. Her doğru cevap: `sessionScore += gained` ve `dailyProgress += gained` (her soruda kaydediliyor)
-2. Oyun bitince: `endGame()` → `totalPoints += sessionScore` → `sessionScore = 0`
-3. Oyun ortasında çıkış: `goToMainMenu()` → `totalPoints += sessionScore` (sadece `sessionScore > 0` ise)
 
 ### 31.2. Performans Sorunları
 

@@ -246,7 +246,7 @@
                     <button class="hint-btn" id="kelime-hint-btn" onclick="useHint()" title="İpucu (1 şıkkı ele)">💡</button>
                     <button class="favorite-btn" id="kelime-favorite-btn" title="Favorilere Ekle">♡</button>
                     <button class="audio-btn" id="kelime-audio-btn" title="Dinle">
-                        <img src="ASSETS/badges/hoparlor.png" alt="" class="audio-icon">
+                        <img src="ASSETS/badges/hoparlor.png" alt="Dinle" class="audio-icon">
                     </button>
                 </div>
                 <div class="arabic-word" id="kelime-arabic">بِسْمِ</div>
@@ -276,12 +276,10 @@
 
         <div class="game-content">
             <div class="question-card glass-card">
-                <div class="word-actions">
-                    <button class="audio-btn" id="dinle-audio-btn" title="Dinle">
-                        <img src="ASSETS/badges/hoparlor.png" alt="" class="audio-icon">
-                    </button>
-                </div>
-                <p class="dinle-instruction" style="margin-top: var(--spacing-lg); margin-bottom: var(--spacing-md);">Kelimeyi dinle ve doğru çeviriyi bul</p>
+                <p class="dinle-instruction">Kelimeyi dinle ve doğru çeviriyi bul</p>
+                <button class="big-audio-btn" id="dinle-audio-btn" title="Dinle">
+                    <img src="ASSETS/badges/hoparlor.png" alt="Dinle" class="audio-icon-inline"> Dinle
+                </button>
             </div>
 
             <div class="answer-options" id="dinle-options">
@@ -309,7 +307,7 @@
             <div class="question-card glass-card">
                 <div class="word-actions">
                     <button class="audio-btn" id="bosluk-audio-btn" title="Ayeti Dinle">
-                        <img src="ASSETS/badges/hoparlor.png" alt="" class="audio-icon">
+                        <img src="ASSETS/badges/hoparlor.png" alt="Dinle" class="audio-icon">
                     </button>
                 </div>
                 <div class="arabic-verse" id="bosluk-arabic"></div>
@@ -339,8 +337,8 @@
                 <div class="surah-info" id="ayet-surah-info">Fâtiha Suresi</div>
                 <div class="arabic-text" id="ayet-arabic"></div>
                 <div class="translation-text" id="ayet-translation"></div>
-                <button class="audio-btn-large" id="ayet-audio-btn" title="Dinle">
-                    <img src="ASSETS/badges/hoparlor.png" alt="" class="audio-icon-inline">
+                <button class="audio-btn-large" id="ayet-audio-btn">
+                    <img src="ASSETS/badges/hoparlor.png" alt="Dinle" class="audio-icon-inline"> Dinle
                 </button>
             </div>
 
@@ -363,8 +361,8 @@
                 <div class="dua-reference" id="dua-reference">2:127</div>
                 <div class="arabic-text" id="dua-arabic"></div>
                 <div class="translation-text" id="dua-translation"></div>
-                <button class="audio-btn-large" id="dua-audio-btn" title="Dinle">
-                    <img src="ASSETS/badges/hoparlor.png" alt="" class="audio-icon-inline">
+                <button class="audio-btn-large" id="dua-audio-btn">
+                    <img src="ASSETS/badges/hoparlor.png" alt="Dinle" class="audio-icon-inline"> Dinle
                 </button>
             </div>
 
@@ -451,10 +449,17 @@
                     </div>
                 </button>
                 <button class="submode-btn" data-elif-submode="fetha">
-                    <div class="icon">🎓</div>
+                    <div class="icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 64 64" style="display: block;">
+                            <!-- Horizontal line representing a letter -->
+                            <line x1="16" y1="45" x2="48" y2="45" stroke="#1a1a2e" stroke-width="4" stroke-linecap="round"/>
+                            <!-- Diagonal line representing the fetha (ustun) mark -->
+                            <line x1="24" y1="35" x2="40" y2="35" stroke="#1a1a2e" stroke-width="5" stroke-linecap="round" transform="rotate(-15 32 35)"/>
+                        </svg>
+                    </div>
                     <div class="info">
                         <div class="name">Fetha</div>
-                        <div class="desc">Harfleri fetha harekesi ile öğren ve okunuşlarını öğren</div>
+                        <div class="desc">Harfin üzerine gelen bu işaret ince harfleri "e" sesi ile, kalın okunan harfleriyse "a" sesi ile okutur. İnce harflerden ع – ر – ح üstünlü olduğu zaman a sesiyle okunur.</div>
                     </div>
                 </button>
                 <button class="submode-btn" data-elif-submode="kelime-okuma">
@@ -490,7 +495,7 @@
                 <div class="elif-question-header">
                     <div class="arabic-letter" id="elif-letter">ا</div>
                     <button class="audio-btn" id="elif-audio-btn" title="Dinle">
-                        <img src="ASSETS/badges/hoparlor.png" alt="" class="audio-icon">
+                        <img src="ASSETS/badges/hoparlor.png" alt="Dinle" class="audio-icon">
                     </button>
                 </div>
                 <div class="elif-question-instruction" id="elif-question-instruction"></div>
@@ -906,6 +911,7 @@
     <script src="js/utils.js"></script>
     <script src="js/firebase-config.js"></script>
     <script src="js/firebase-init.js"></script>
+    <script src="js/firebase-debug.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/api-service.js"></script>
     <script src="js/data-loader.js"></script>

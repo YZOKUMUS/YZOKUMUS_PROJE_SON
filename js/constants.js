@@ -318,32 +318,37 @@ const ISLAMIC_TEACHINGS = [
     }
 ];
 
-// Onboarding Slides - Güncel ve detaylı tanıtım
+// Onboarding Slides
 const ONBOARDING_SLIDES = [
     {
         icon: '🕌',
         title: 'Hasene\'ye Hoş Geldiniz!',
-        description: 'Kuran\'daki Arapça kelimeleri oyunlaştırılmış yöntemlerle öğrenin. Eğlenceli ve etkili bir öğrenme deneyimi sizi bekliyor.'
+        description: 'Kuran kelimeleri ve İslami içeriklerle dolu eğlenceli bir öğrenme yolculuğuna başlayın.'
     },
     {
-        icon: '🎮',
-        title: 'Oyun Modları',
-        description: '7 farklı oyun modu: Kelime Çevir (4 alt mod), Dinle Bul, Boşluk Doldur, Elif Ba (5 alt mod), Karma (karışık sorular), Ayet Oku, Dua Et, Hadis Oku. Her mod farklı bir öğrenme deneyimi sunar!'
+        icon: '🎯',
+        title: 'Kimler İçin?',
+        description: 'Kuran\'daki Arapça kelimeleri öğrenmek isteyen herkes için tasarlandı. Başlangıç seviyesinden ileri seviyeye kadar.'
     },
     {
-        icon: '⭐',
-        title: 'Puan Sistemi',
-        description: 'Her doğru cevap Hasene puanı kazandırır. Combo yaparak bonus puan toplayın! Perfect ders (hatasız oyun) için ekstra 50 Hasene bonusu kazanın. Günlük hedefinizi tamamlayarak düzenli ilerleme kaydedin.'
+        icon: '📚',
+        title: '7 Oyun Modu',
+        description: 'Kelime Çevir, Dinle Bul, Boşluk Doldur, Ayet Oku, Dua Et, Hadis Oku ve Elif Ba modlarıyla öğrenin.'
+    },
+    {
+        icon: '💰',
+        title: 'Hasene Puan Sistemi',
+        description: 'Her doğru cevap için Hasene kazanın. Combo yaparak bonus puan toplayın. 250 Hasene = 1 Yıldız!'
+    },
+    {
+        icon: '📅',
+        title: 'Günlük Görevler & Seri',
+        description: 'Günlük görevleri tamamlayın, seri yapın ve özel ödüller kazanın. Düzenli çalışma başarının anahtarıdır.'
     },
     {
         icon: '🏆',
-        title: 'Ödüller ve İlerleme',
-        description: 'Hasene puanlarıyla yıldız kazanın (250 Hasene = 1 Yıldız), günlük görevleri tamamlayın, rozetler ve başarımlar toplayın. Düzenli çalışarak seviyenizi yükseltin ve seri (streak) oluşturun!'
-    },
-    {
-        icon: '📊',
-        title: 'İstatistikler ve Özellikler',
-        description: 'Kelime istatistiklerinizi takip edin, favori kelimeler ekleyin, zorlandığınız kelimeleri tekrar edin. Günlük vird hedefinizi ayarlayın ve ilerlemenizi görsel olarak takip edin.'
+        title: '44 Başarım & 42 Rozet',
+        description: 'Başarımlar kazanın, rozetler toplayın ve seviyenizi yükseltin. Hedef: Kurra Hafız olmak!'
     }
 ];
 

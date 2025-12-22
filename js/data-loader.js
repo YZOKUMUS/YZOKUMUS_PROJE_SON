@@ -10,7 +10,7 @@ let duaData = [];
 let hadisData = [];
 let harfData = [];
 let harf1Data = [];
-let fethaData = [];
+let ustnData = [];
 
 // Loading state
 let dataLoaded = {
@@ -20,7 +20,7 @@ let dataLoaded = {
     hadis: false,
     harf: false,
     harf1: false,
-    fetha: false
+    ustn: false
 };
 
 /**
@@ -198,30 +198,30 @@ async function loadHarf1Data() {
 }
 
 /**
- * Load Fetha data
+ * Load Ustn (Ustun/Fetha) data
  */
-async function loadFethaData() {
-    if (dataLoaded.fetha && fethaData.length > 0) {
-        return fethaData;
+async function loadUstnData() {
+    if (dataLoaded.ustn && ustnData.length > 0) {
+        return ustnData;
     }
     
     try {
-        const response = await fetch('./data/fetha.json');
-        if (!response.ok) throw new Error('Fetha data fetch failed');
+        const response = await fetch('./data/ustn.json');
+        if (!response.ok) throw new Error('Ustn data fetch failed');
         
         const data = await response.json();
-        fethaData = Array.isArray(data.harfler) ? data.harfler : [];
-        dataLoaded.fetha = true;
+        ustnData = Array.isArray(data.harfler) ? data.harfler : [];
+        dataLoaded.ustn = true;
         
         // Update global reference
         if (typeof window !== 'undefined') {
-            window.fethaData = fethaData;
+            window.ustnData = ustnData;
         }
         
-        console.log(`✅ Fetha data loaded: ${fethaData.length} letters`);
-        return fethaData;
+        console.log(`✅ Ustn data loaded: ${ustnData.length} letters`);
+        return ustnData;
     } catch (err) {
-        console.error('❌ Fetha data load error:', err);
+        console.error('❌ Ustn data load error:', err);
         return [];
     }
 }
@@ -238,8 +238,7 @@ async function preloadAllData() {
         loadDuaData(),
         loadHadisData(),
         loadHarfData(),
-        loadHarf1Data(),
-        loadFethaData()
+        loadHarf1Data()
     ]);
     
     console.log('✅ All data preloaded');
@@ -256,7 +255,7 @@ function getDataStatus() {
         hadis: { loaded: dataLoaded.hadis, count: hadisData.length },
         harf: { loaded: dataLoaded.harf, count: harfData.length },
         harf1: { loaded: dataLoaded.harf1, count: harf1Data.length },
-        fetha: { loaded: dataLoaded.fetha, count: fethaData.length }
+        ustn: { loaded: dataLoaded.ustn, count: ustnData.length }
     };
 }
 
@@ -268,7 +267,7 @@ if (typeof window !== 'undefined') {
     window.loadHadisData = loadHadisData;
     window.loadHarfData = loadHarfData;
     window.loadHarf1Data = loadHarf1Data;
-    window.loadFethaData = loadFethaData;
+    window.loadUstnData = loadUstnData;
     window.preloadAllData = preloadAllData;
     window.getDataStatus = getDataStatus;
     
@@ -279,5 +278,5 @@ if (typeof window !== 'undefined') {
     window.hadisData = hadisData;
     window.harfData = harfData;
     window.harf1Data = harf1Data;
-    window.fethaData = fethaData;
+    window.ustnData = ustnData;
 }

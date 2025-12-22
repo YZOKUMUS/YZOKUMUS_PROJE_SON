@@ -7,22 +7,6 @@
 // FIREBASE INITIALIZATION
 // ========================================
 
-// Suppress ERR_BLOCKED_BY_CLIENT errors in console (caused by browser extensions)
-// These errors are harmless - Firebase falls back to localStorage automatically
-if (typeof window !== 'undefined' && window.console) {
-    const originalError = console.error;
-    console.error = function(...args) {
-        const message = args.join(' ');
-        // Filter out ERR_BLOCKED_BY_CLIENT errors from Firebase
-        if (message.includes('ERR_BLOCKED_BY_CLIENT') && 
-            message.includes('firestore.googleapis.com')) {
-            // Silently ignore - this is expected when browser extensions block Firebase
-            return;
-        }
-        originalError.apply(console, args);
-    };
-}
-
 /**
  * Initialize Firebase
  * @returns {Promise<boolean>} Success status
@@ -53,11 +37,10 @@ async function initFirebase() {
         window.firestore = firebase.firestore();
         
         // Enable offline persistence
-        // Note: enablePersistence() shows deprecation warning but still works in compat API
-        // The warning is expected and can be ignored - Firebase compat API still uses this method
+        // Note: Multiple tabs will work independently (localStorage still syncs)
         try {
             await window.firestore.enablePersistence({
-                synchronizeTabs: false // Single-tab mode
+                synchronizeTabs: false // Single-tab mode to avoid deprecation warnings
             });
             console.log('✅ Firestore offline persistence enabled');
         } catch (persistenceError) {

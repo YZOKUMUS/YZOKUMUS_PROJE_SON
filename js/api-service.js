@@ -279,19 +279,6 @@ async function firestoreSet(collection, docId, data) {
             // Silent fail for permission denied - this is expected for local users
             return false;
         }
-        
-        // Check for network blocking (ad blocker, privacy extension, etc.)
-        if (error.message && (
-            error.message.includes('ERR_BLOCKED_BY_CLIENT') ||
-            error.message.includes('blocked') ||
-            error.message.includes('Failed to fetch')
-        )) {
-            // Network blocked - likely ad blocker or privacy extension
-            // This is not critical - localStorage still works
-            console.warn('⚠️ Firebase request blocked (likely by browser extension). localStorage will be used instead.');
-            return false;
-        }
-        
         // Only log unexpected errors
         console.error('❌ Firestore set error:', error);
         const errorDataUserId = data?.user_id || firebaseAuthUID;
@@ -437,19 +424,9 @@ async function saveUserStats(stats) {
                 }
                 return result;
             }).catch((error) => {
-                // Only log unexpected errors (not permission-denied or blocked)
+                // Only log unexpected errors (not permission-denied)
                 if (error.code !== 'permission-denied') {
-                    // Check for network blocking
-                    if (error.message && (
-                        error.message.includes('ERR_BLOCKED_BY_CLIENT') ||
-                        error.message.includes('blocked') ||
-                        error.message.includes('Failed to fetch')
-                    )) {
-                        // Network blocked - localStorage will be used instead (not critical)
-                        console.warn('⚠️ Firebase sync blocked by browser extension. Using localStorage instead.');
-                    } else {
-                        console.error('☁️ ❌ User stats Firebase save error:', error);
-                    }
+                    console.error('☁️ ❌ User stats Firebase save error:', error);
                 }
                 return false;
             })
