@@ -1214,15 +1214,12 @@ function checkKelimeAnswer(index, selectedAnswer) {
         const gained = basePoints + comboBonus;
         
         sessionScore += gained;
-        
-        showToast(`+${gained} Hasene! 🔥 Combo: ${comboCount}`, 'success', 1000);
     } else {
         // Wrong answer
         wrongCount++;
         comboCount = 0;
         
         buttons[index].classList.add('wrong');
-        showToast('Yanlış! Doğru cevap gösterildi.', 'error', 1000);
     }
     
     // Next question after delay
@@ -1747,13 +1744,10 @@ function checkDinleAnswer(index, selectedAnswer) {
         const basePoints = getBasePoints(currentDifficulty);
         const gained = basePoints + CONFIG.COMBO_BONUS_PER_CORRECT;
         sessionScore += gained;
-        
-        showToast(`+${gained} Hasene!`, 'success', 1000);
     } else {
         wrongCount++;
         comboCount = 0;
         buttons[index].classList.add('wrong');
-        showToast('Yanlış!', 'error', 1000);
     }
     
     setTimeout(() => {
@@ -1866,13 +1860,10 @@ function checkBoslukAnswer(index, selectedWord) {
         
         const gained = 10 + CONFIG.COMBO_BONUS_PER_CORRECT;
         sessionScore += gained;
-        
-        showToast(`+${gained} Hasene!`, 'success', 1000);
     } else {
         wrongCount++;
         comboCount = 0;
         buttons[index].classList.add('wrong');
-        showToast('Yanlış!', 'error', 1000);
     }
     
     setTimeout(() => {
@@ -2212,12 +2203,10 @@ function checkElifKelimelerAnswer(index, selectedAnswer) {
         maxCombo = Math.max(maxCombo, comboCount);
         const gained = 5 + CONFIG.COMBO_BONUS_PER_CORRECT;
         sessionScore += gained;
-        showToast(`+${gained} Hasene!`, 'success', 1000);
     } else {
         wrongCount++;
         comboCount = 0;
         buttons[index].classList.add('wrong');
-        showToast('Yanlış!', 'error', 1000);
     }
     
     setTimeout(() => {
@@ -2976,12 +2965,10 @@ function checkElifHarekelerAnswer(index, selectedAnswer) {
         maxCombo = Math.max(maxCombo, comboCount);
         const gained = 5 + CONFIG.COMBO_BONUS_PER_CORRECT;
         sessionScore += gained;
-        showToast(`+${gained} Hasene!`, 'success', 1000);
     } else {
         wrongCount++;
         comboCount = 0;
         buttons[index].classList.add('wrong');
-        showToast('Yanlış!', 'error', 1000);
     }
     
     setTimeout(() => {
@@ -3039,13 +3026,10 @@ function checkElifAnswer(index, selectedAnswer) {
         
         const gained = 5 + CONFIG.COMBO_BONUS_PER_CORRECT;
         sessionScore += gained;
-        
-        showToast(`+${gained} Hasene!`, 'success', 1000);
     } else {
         wrongCount++;
         comboCount = 0;
         buttons[index].classList.add('wrong');
-        showToast('Yanlış!', 'error', 1000);
     }
     
     setTimeout(() => {
@@ -4214,7 +4198,6 @@ function selectKarmaMatch(element, type, id) {
             comboCount++;
             const points = 25 + (comboCount * 5);
             sessionScore += points;
-            showToast(`+${points} Hasene!`, 'success', 800);
             
             // Check if all matched
             if (karmaMatchedCount >= 4) {
@@ -4298,8 +4281,6 @@ function checkKarmaAnswer(selected, correct) {
         const gained = basePoints + (comboCount * CONFIG.COMBO_BONUS_PER_CORRECT);
         sessionScore += gained;
         
-        showToast(`+${gained} Hasene!`, 'success', 1000);
-        
         if (wordId) updateWordStats(wordId, true);
     } else {
         wrongCount++;
@@ -4311,8 +4292,6 @@ function checkKarmaAnswer(selected, correct) {
                 btn.classList.add('wrong');
             }
         });
-        
-        showToast('Yanlış!', 'error', 1000);
         
         if (wordId) updateWordStats(wordId, false);
     }
