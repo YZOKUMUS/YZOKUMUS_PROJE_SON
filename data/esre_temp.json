@@ -1,0 +1,200 @@
+﻿{
+  "harfler": [
+    {
+      "harfWithEsre": "اِ",
+      "okunus": "i",
+      "sesTipi": "ince_sesli_harf",
+      "renkKodu": "#ADE2EF",
+      "audioUrl": "ASSETS/audio/esre/btn_1.mp3"
+    },
+    {
+      "harfWithEsre": "بِ",
+      "okunus": "bi",
+      "sesTipi": "ince_sesli_harf",
+      "renkKodu": "#ADE2EF",
+      "audioUrl": "ASSETS/audio/esre/btn_2.mp3"
+    },
+    {
+      "harfWithEsre": "تِ",
+      "okunus": "ti",
+      "sesTipi": "ince_sesli_harf",
+      "renkKodu": "#ADE2EF",
+      "audioUrl": "ASSETS/audio/esre/btn_3.mp3"
+    },
+    {
+      "harfWithEsre": "ثِ",
+      "okunus": "si",
+      "sesTipi": "peltek_sesli_harf",
+      "renkKodu": "#F09E9E",
+      "audioUrl": "ASSETS/audio/esre/btn_4.mp3"
+    },
+    {
+      "harfWithEsre": "جِ",
+      "okunus": "ci",
+      "sesTipi": "ince_sesli_harf",
+      "renkKodu": "#ADE2EF",
+      "audioUrl": "ASSETS/audio/esre/btn_5.mp3"
+    },
+    {
+      "harfWithEsre": "حِ",
+      "okunus": "hi",
+      "sesTipi": "ince_sesli_harf",
+      "renkKodu": "#ADE2EF",
+      "audioUrl": "ASSETS/audio/esre/btn_6.mp3"
+    },
+    {
+      "harfWithEsre": "خِ",
+      "okunus": "hı",
+      "sesTipi": "kalın_sesli_harf",
+      "renkKodu": "#BBEDBB",
+      "audioUrl": "ASSETS/audio/esre/btn_7.mp3"
+    },
+    {
+      "harfWithEsre": "دِ",
+      "okunus": "di",
+      "sesTipi": "ince_sesli_harf",
+      "renkKodu": "#ADE2EF",
+      "audioUrl": "ASSETS/audio/esre/btn_8.mp3"
+    },
+    {
+      "harfWithEsre": "ذِ",
+      "okunus": "zi",
+      "sesTipi": "peltek_sesli_harf",
+      "renkKodu": "#F09E9E",
+      "audioUrl": "ASSETS/audio/esre/btn_9.mp3"
+    },
+    {
+      "harfWithEsre": "رِ",
+      "okunus": "ri",
+      "sesTipi": "ince_sesli_harf",
+      "renkKodu": "#ADE2EF",
+      "audioUrl": "ASSETS/audio/esre/btn_10.mp3"
+    },
+    {
+      "harfWithEsre": "زِ",
+      "okunus": "zi",
+      "sesTipi": "ince_sesli_harf",
+      "renkKodu": "#ADE2EF",
+      "audioUrl": "ASSETS/audio/esre/btn_11.mp3"
+    },
+    {
+      "harfWithEsre": "سِ",
+      "okunus": "si",
+      "sesTipi": "ince_sesli_harf",
+      "renkKodu": "#ADE2EF",
+      "audioUrl": "ASSETS/audio/esre/btn_12.mp3"
+    },
+    {
+      "harfWithEsre": "شِ",
+      "okunus": "şi",
+      "sesTipi": "ince_sesli_harf",
+      "renkKodu": "#ADE2EF",
+      "audioUrl": "ASSETS/audio/esre/btn_13.mp3"
+    },
+    {
+      "harfWithEsre": "صِ",
+      "okunus": "sı",
+      "sesTipi": "kalın_sesli_harf",
+      "renkKodu": "#BBEDBB",
+      "audioUrl": "ASSETS/audio/esre/btn_14.mp3"
+    },
+    {
+      "harfWithEsre": "ضِ",
+      "okunus": "dı",
+      "sesTipi": "kalın_sesli_harf",
+      "renkKodu": "#BBEDBB",
+      "audioUrl": "ASSETS/audio/esre/btn_15.mp3"
+    },
+    {
+      "harfWithEsre": "طِ",
+      "okunus": "dı",
+      "sesTipi": "kalın_sesli_harf",
+      "renkKodu": "#BBEDBB",
+      "audioUrl": "ASSETS/audio/esre/btn_16.mp3"
+    },
+    {
+      "harfWithEsre": "ظِ",
+      "okunus": "zı",
+      "sesTipi": "peltek_sesli_harf",
+      "renkKodu": "#F09E9E",
+      "audioUrl": "ASSETS/audio/esre/btn_17.mp3"
+    },
+    {
+      "harfWithEsre": "عِ",
+      "okunus": "i",
+      "sesTipi": "ince_sesli_harf",
+      "renkKodu": "#ADE2EF",
+      "audioUrl": "ASSETS/audio/esre/btn_18.mp3"
+    },
+    {
+      "harfWithEsre": "غِ",
+      "okunus": "ğı",
+      "sesTipi": "kalın_sesli_harf",
+      "renkKodu": "#BBEDBB",
+      "audioUrl": "ASSETS/audio/esre/btn_19.mp3"
+    },
+    {
+      "harfWithEsre": "فِ",
+      "okunus": "fi",
+      "sesTipi": "ince_sesli_harf",
+      "renkKodu": "#ADE2EF",
+      "audioUrl": "ASSETS/audio/esre/btn_20.mp3"
+    },
+    {
+      "harfWithEsre": "قِ",
+      "okunus": "gı",
+      "sesTipi": "kalın_sesli_harf",
+      "renkKodu": "#BBEDBB",
+      "audioUrl": "ASSETS/audio/esre/btn_21.mp3"
+    },
+    {
+      "harfWithEsre": "كِ",
+      "okunus": "ki",
+      "sesTipi": "ince_sesli_harf",
+      "renkKodu": "#ADE2EF",
+      "audioUrl": "ASSETS/audio/esre/btn_22.mp3"
+    },
+    {
+      "harfWithEsre": "لِ",
+      "okunus": "li",
+      "sesTipi": "ince_sesli_harf",
+      "renkKodu": "#ADE2EF",
+      "audioUrl": "ASSETS/audio/esre/btn_23.mp3"
+    },
+    {
+      "harfWithEsre": "مِ",
+      "okunus": "mi",
+      "sesTipi": "ince_sesli_harf",
+      "renkKodu": "#ADE2EF",
+      "audioUrl": "ASSETS/audio/esre/btn_24.mp3"
+    },
+    {
+      "harfWithEsre": "نِ",
+      "okunus": "ni",
+      "sesTipi": "ince_sesli_harf",
+      "renkKodu": "#ADE2EF",
+      "audioUrl": "ASSETS/audio/esre/btn_25.mp3"
+    },
+    {
+      "harfWithEsre": "وِ",
+      "okunus": "vi",
+      "sesTipi": "ince_sesli_harf",
+      "renkKodu": "#ADE2EF",
+      "audioUrl": "ASSETS/audio/esre/btn_26.mp3"
+    },
+    {
+      "harfWithEsre": "هِـ",
+      "okunus": "hi",
+      "sesTipi": "ince_sesli_harf",
+      "renkKodu": "#ADE2EF",
+      "audioUrl": "ASSETS/audio/esre/btn_27.mp3"
+    },
+    {
+      "harfWithEsre": "ىِ",
+      "okunus": "yi",
+      "sesTipi": "ince_sesli_harf",
+      "renkKodu": "#ADE2EF",
+      "audioUrl": "ASSETS/audio/esre/btn_28.mp3"
+    }
+  ]
+}

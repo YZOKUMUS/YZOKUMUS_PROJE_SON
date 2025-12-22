@@ -328,7 +328,11 @@ function checkAndShowDailyReward() {
 /**
  * Load all saved stats
  */
-async function loadStats() {
+/**
+ * Load all stats from localStorage
+ * @param {boolean} skipStreakCheck - If true, skip checkStreak() call (used when resetting data)
+ */
+async function loadStats(skipStreakCheck = false) {
     // Total points
     totalPoints = loadFromStorage(CONFIG.STORAGE_KEYS.TOTAL_POINTS, 0);
     
@@ -370,8 +374,10 @@ async function loadStats() {
     // Daily tasks
     await checkDailyTasks();
     
-    // Check streak
-    checkStreak();
+    // Check streak (skip if resetting data)
+    if (!skipStreakCheck) {
+        checkStreak();
+    }
     
     console.log('📊 Stats loaded:', { totalPoints, currentLevel, streakData });
 }
@@ -484,12 +490,15 @@ function resetAllData() {
         }
     };
     
+    // Save the reset values to localStorage
+    saveStats();
+    
     // Close all modals and go to main menu
     closeAllModals();
     goToMainMenu();
     
-    // Reload stats and update display
-    loadStats().then(() => {
+    // Reload stats (skip streak check to preserve reset values) and update display
+    loadStats(true).then(() => {
         updateStatsDisplay();
         showToast('Tüm veriler sıfırlandı!', 'success');
     });
