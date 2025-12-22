@@ -399,6 +399,103 @@ function saveStats() {
 const debouncedSaveStats = debounce(saveStats, 500);
 
 /**
+ * Reset all game data (TEST function)
+ */
+function resetAllData() {
+    if (!confirm('Tüm oyun verilerini sıfırlamak istediğinizden emin misiniz? Bu işlem geri alınamaz!')) {
+        return;
+    }
+    
+    // Stop all audio
+    stopAllAudio();
+    
+    // Clear all localStorage keys
+    const storageKeys = [
+        CONFIG.STORAGE_KEYS.TOTAL_POINTS,
+        CONFIG.STORAGE_KEYS.STREAK_DATA,
+        CONFIG.STORAGE_KEYS.DAILY_TASKS,
+        CONFIG.STORAGE_KEYS.GAME_STATS,
+        CONFIG.STORAGE_KEYS.DAILY_GOAL,
+        CONFIG.STORAGE_KEYS.DAILY_PROGRESS,
+        CONFIG.STORAGE_KEYS.DIFFICULTY,
+        'hasene_word_stats',
+        'hasene_favorites',
+        'hasene_achievements',
+        'hasene_badges',
+        'hasene_onboarding_complete',
+        'hasene_username',
+        'hasene_user_id'
+    ];
+    
+    storageKeys.forEach(key => {
+        localStorage.removeItem(key);
+    });
+    
+    // Reset global state variables
+    totalPoints = 0;
+    sessionScore = 0;
+    currentLevel = 1;
+    currentGameMode = null;
+    questionIndex = 0;
+    correctCount = 0;
+    wrongCount = 0;
+    comboCount = 0;
+    maxCombo = 0;
+    currentQuestions = [];
+    currentQuestion = null;
+    currentOptions = [];
+    currentAyetIndex = 0;
+    currentDuaIndex = 0;
+    currentHadisIndex = 0;
+    wordStats = {};
+    favorites = [];
+    unlockedAchievements = [];
+    badgesUnlocked = {};
+    dailyGoal = 2700;
+    dailyProgress = 0;
+    
+    streakData = {
+        currentStreak: 0,
+        bestStreak: 0,
+        totalPlayDays: 0,
+        lastPlayDate: '',
+        playDates: []
+    };
+    
+    gameStats = {
+        totalCorrect: 0,
+        totalWrong: 0,
+        perfectLessons: 0,
+        gameModeCounts: {}
+    };
+    
+    dailyTasks = {
+        lastTaskDate: '',
+        tasks: [],
+        bonusTasks: [],
+        todayStats: {
+            toplamDogru: 0,
+            toplamPuan: 0,
+            comboCount: 0,
+            allGameModes: [],
+            ayet_oku: 0,
+            dua_et: 0,
+            hadis_oku: 0
+        }
+    };
+    
+    // Close all modals and go to main menu
+    closeAllModals();
+    goToMainMenu();
+    
+    // Reload stats and update display
+    loadStats().then(() => {
+        updateStatsDisplay();
+        showToast('Tüm veriler sıfırlandı!', 'success');
+    });
+}
+
+/**
  * Browser geri tuşu için handler
  */
 function setupBackButtonHandler() {
@@ -1963,6 +2060,13 @@ async function startElifBaGame(submode = 'harfler') {
         currentQuestions = shuffleArray([...data]).slice(0, CONFIG.QUESTIONS_PER_GAME);
         document.getElementById('elif-ba-screen').classList.remove('hidden');
         document.getElementById('elif-total-questions').textContent = CONFIG.QUESTIONS_PER_GAME;
+        
+        // Show audio button for harfler game
+        const audioBtn = document.getElementById('elif-audio-btn');
+        if (audioBtn) {
+            audioBtn.style.display = '';
+        }
+        
         loadElifQuestion();
         
     } else if (submode === 'kelimeler') {
@@ -1975,6 +2079,21 @@ async function startElifBaGame(submode = 'harfler') {
     } else if (submode === 'fetha') {
         // Fetha (Ustun) game - uses ustn.json
         await startElifFethaGame();
+    } else if (submode === 'esre') {
+        // Esre game - uses esre.json
+        await startElifEsreGame();
+    } else if (submode === 'otre') {
+        // Otre game - uses otre.json
+        await startElifOtreGame();
+    } else if (submode === 'uc-harfli-kelimeler') {
+        // Üç Harfli Kelimeler game - uses uc_harfli_kelimeler.json
+        await startUcHarfliKelimelerGame();
+    } else if (submode === 'sedde') {
+        // Şedde game - uses sedde.json
+        await startSeddeGame();
+    } else if (submode === 'cezm') {
+        // Cezm game - uses cezm.json
+        await startCezmGame();
     }
 }
 
@@ -2024,6 +2143,13 @@ async function startElifKelimelerGame(harfData) {
     currentQuestions = questions.slice(0, CONFIG.QUESTIONS_PER_GAME);
     document.getElementById('elif-ba-screen').classList.remove('hidden');
     document.getElementById('elif-total-questions').textContent = currentQuestions.length;
+    
+    // Show audio button for kelimeler game
+    const audioBtn = document.getElementById('elif-audio-btn');
+    if (audioBtn) {
+        audioBtn.style.display = '';
+    }
+    
     loadElifKelimelerQuestion();
 }
 
@@ -2107,6 +2233,13 @@ async function startElifFethaGame() {
     currentQuestions = shuffleArray([...ustnData]).slice(0, CONFIG.QUESTIONS_PER_GAME);
     document.getElementById('elif-ba-screen').classList.remove('hidden');
     document.getElementById('elif-total-questions').textContent = currentQuestions.length;
+    
+    // Show audio button for fetha game
+    const audioBtn = document.getElementById('elif-audio-btn');
+    if (audioBtn) {
+        audioBtn.style.display = '';
+    }
+    
     loadElifFethaQuestion();
 }
 
@@ -2166,10 +2299,7 @@ function loadElifFethaQuestion() {
         </button>
     `).join('');
     
-    // Auto-play audio when question loads
-    if (currentQuestion.audioUrl) {
-        setTimeout(() => playSafeAudio(currentQuestion.audioUrl), 300);
-    }
+    // Audio will be played when user clicks the audio button
 }
 
 function checkElifFethaAnswer(index, selectedAnswer) {
@@ -2199,6 +2329,543 @@ function checkElifFethaAnswer(index, selectedAnswer) {
     setTimeout(() => {
         questionIndex++;
         loadElifFethaQuestion();
+    }, 1200);
+}
+
+/**
+ * Elif Ba Esre submode - uses esre.json data
+ */
+async function startElifEsreGame() {
+    const esreData = await loadEsreData();
+    
+    if (esreData.length === 0) {
+        showToast('Esre verisi yüklenemedi', 'error');
+        goToMainMenu();
+        return;
+    }
+    
+    // Create questions from esre data
+    currentQuestions = shuffleArray([...esreData]).slice(0, CONFIG.QUESTIONS_PER_GAME);
+    document.getElementById('elif-ba-screen').classList.remove('hidden');
+    document.getElementById('elif-total-questions').textContent = currentQuestions.length;
+    
+    // Show audio button for esre game
+    const audioBtn = document.getElementById('elif-audio-btn');
+    if (audioBtn) {
+        audioBtn.style.display = '';
+    }
+    
+    loadElifEsreQuestion();
+}
+
+function loadElifEsreQuestion() {
+    if (questionIndex >= currentQuestions.length) {
+        endGame();
+        return;
+    }
+    
+    currentQuestion = currentQuestions[questionIndex];
+    
+    document.getElementById('elif-question-number').textContent = questionIndex + 1;
+    
+    // Set letter with color and type label
+    const letterElement = document.getElementById('elif-letter');
+    const renkKodu = currentQuestion.renkKodu || '#1a1a2e';
+    const sesTipi = currentQuestion.sesTipi || '';
+    
+    // Convert sesTipi to display text
+    let tipText = '';
+    if (sesTipi === 'ince_sesli_harf') {
+        tipText = 'İnce';
+    } else if (sesTipi === 'kalın_sesli_harf') {
+        tipText = 'Kalın';
+    } else if (sesTipi === 'peltek_sesli_harf') {
+        tipText = 'Peltek';
+    }
+    
+    letterElement.style.backgroundColor = renkKodu;
+    letterElement.style.color = '#1a1a2e';
+    letterElement.style.padding = '20px';
+    letterElement.style.borderRadius = '12px';
+    letterElement.innerHTML = `
+        <div style="font-size: 4rem; font-weight: bold; margin-bottom: 8px;">${currentQuestion.harfWithEsre}</div>
+        ${tipText ? `<div style="font-size: 0.75rem; opacity: 0.8; font-weight: 500;">${tipText}</div>` : ''}
+    `;
+    
+    // Generate options with only Turkish pronunciation
+    const correctAnswer = currentQuestion.okunus;
+    const allEsreData = window.esreData || [];
+    const wrongOptions = getRandomItems(
+        allEsreData.filter(h => h.okunus !== correctAnswer),
+        3
+    ).map(h => h.okunus);
+    
+    // Create options with only okunus (Turkish pronunciation)
+    const options = shuffleArray([correctAnswer, ...wrongOptions]);
+    
+    const optionsContainer = document.getElementById('elif-options');
+    optionsContainer.innerHTML = options.map((option, index) => `
+        <button class="answer-option" onclick="checkElifEsreAnswer(${index}, '${option.replace(/'/g, "\\'")}')">
+            ${option}
+        </button>
+    `).join('');
+    
+    // Audio will be played when user clicks the audio button
+}
+
+function checkElifEsreAnswer(index, selectedAnswer) {
+    const correctAnswer = currentQuestion.okunus;
+    const buttons = document.querySelectorAll('#elif-options .answer-option');
+    
+    buttons.forEach(btn => btn.classList.add('disabled'));
+    buttons.forEach(btn => {
+        if (btn.textContent.trim() === correctAnswer) {
+            btn.classList.add('correct');
+        }
+    });
+    
+    if (selectedAnswer === correctAnswer) {
+        correctCount++;
+        comboCount++;
+        maxCombo = Math.max(maxCombo, comboCount);
+        
+        const gained = 5 + (comboCount * CONFIG.COMBO_BONUS_PER_CORRECT);
+        sessionScore += gained;
+    } else {
+        wrongCount++;
+        comboCount = 0;
+        buttons[index].classList.add('wrong');
+    }
+    
+    setTimeout(() => {
+        questionIndex++;
+        loadElifEsreQuestion();
+    }, 1200);
+}
+
+/**
+ * Elif Ba Otre submode - uses otre.json data
+ */
+async function startElifOtreGame() {
+    const otreData = await loadOtreData();
+    
+    if (otreData.length === 0) {
+        showToast('Otre verisi yüklenemedi', 'error');
+        goToMainMenu();
+        return;
+    }
+    
+    // Create questions from otre data
+    currentQuestions = shuffleArray([...otreData]).slice(0, CONFIG.QUESTIONS_PER_GAME);
+    document.getElementById('elif-ba-screen').classList.remove('hidden');
+    document.getElementById('elif-total-questions').textContent = currentQuestions.length;
+    
+    // Show audio button for otre game
+    const audioBtn = document.getElementById('elif-audio-btn');
+    if (audioBtn) {
+        audioBtn.style.display = '';
+    }
+    
+    loadElifOtreQuestion();
+}
+
+function loadElifOtreQuestion() {
+    if (questionIndex >= currentQuestions.length) {
+        endGame();
+        return;
+    }
+    
+    currentQuestion = currentQuestions[questionIndex];
+    
+    document.getElementById('elif-question-number').textContent = questionIndex + 1;
+    
+    // Set letter with color and type label
+    const letterElement = document.getElementById('elif-letter');
+    const renkKodu = currentQuestion.renkKodu || '#1a1a2e';
+    const sesTipi = currentQuestion.sesTipi || '';
+    
+    // Convert sesTipi to display text
+    let tipText = '';
+    if (sesTipi === 'ince_sesli_harf') {
+        tipText = 'İnce';
+    } else if (sesTipi === 'kalın_sesli_harf') {
+        tipText = 'Kalın';
+    } else if (sesTipi === 'peltek_sesli_harf') {
+        tipText = 'Peltek';
+    }
+    
+    letterElement.style.backgroundColor = renkKodu;
+    letterElement.style.color = '#1a1a2e';
+    letterElement.style.padding = '20px';
+    letterElement.style.borderRadius = '12px';
+    letterElement.innerHTML = `
+        <div style="font-size: 4rem; font-weight: bold; margin-bottom: 8px;">${currentQuestion.harfWithOtre}</div>
+        ${tipText ? `<div style="font-size: 0.75rem; opacity: 0.8; font-weight: 500;">${tipText}</div>` : ''}
+    `;
+    
+    // Generate options with only Turkish pronunciation
+    const correctAnswer = currentQuestion.okunus;
+    const allOtreData = window.otreData || [];
+    const wrongOptions = getRandomItems(
+        allOtreData.filter(h => h.okunus !== correctAnswer),
+        3
+    ).map(h => h.okunus);
+    
+    // Create options with only okunus (Turkish pronunciation)
+    const options = shuffleArray([correctAnswer, ...wrongOptions]);
+    
+    const optionsContainer = document.getElementById('elif-options');
+    optionsContainer.innerHTML = options.map((option, index) => `
+        <button class="answer-option" onclick="checkElifOtreAnswer(${index}, '${option.replace(/'/g, "\\'")}')">
+            ${option}
+        </button>
+    `).join('');
+    
+    // Audio will be played when user clicks the audio button
+}
+
+function checkElifOtreAnswer(index, selectedAnswer) {
+    const correctAnswer = currentQuestion.okunus;
+    const buttons = document.querySelectorAll('#elif-options .answer-option');
+    
+    buttons.forEach(btn => btn.classList.add('disabled'));
+    buttons.forEach(btn => {
+        if (btn.textContent.trim() === correctAnswer) {
+            btn.classList.add('correct');
+        }
+    });
+    
+    if (selectedAnswer === correctAnswer) {
+        correctCount++;
+        comboCount++;
+        maxCombo = Math.max(maxCombo, comboCount);
+        
+        const gained = 5 + (comboCount * CONFIG.COMBO_BONUS_PER_CORRECT);
+        sessionScore += gained;
+    } else {
+        wrongCount++;
+        comboCount = 0;
+        buttons[index].classList.add('wrong');
+    }
+    
+    setTimeout(() => {
+        questionIndex++;
+        loadElifOtreQuestion();
+    }, 1200);
+}
+
+/**
+ * Üç Harfli Kelimeler game - uses uc_harfli_kelimeler.json
+ */
+async function startUcHarfliKelimelerGame() {
+    const ucHarfliKelimelerData = await loadUcHarfliKelimelerData();
+    
+    if (ucHarfliKelimelerData.length === 0) {
+        showToast('Üç Harfli Kelimeler verisi yüklenemedi', 'error');
+        goToMainMenu();
+        return;
+    }
+    
+    // Reset session
+    questionIndex = 0;
+    sessionScore = 0;
+    comboCount = 0;
+    maxCombo = 0;
+    correctCount = 0;
+    wrongCount = 0;
+    
+    // Create questions from uc harfli kelimeler data
+    currentQuestions = shuffleArray([...ucHarfliKelimelerData]).slice(0, CONFIG.QUESTIONS_PER_GAME);
+    document.getElementById('elif-ba-screen').classList.remove('hidden');
+    document.getElementById('elif-total-questions').textContent = currentQuestions.length;
+    
+    // Show audio button for uc harfli kelimeler game
+    const audioBtn = document.getElementById('elif-audio-btn');
+    if (audioBtn) {
+        audioBtn.style.display = '';
+    }
+    
+    loadUcHarfliKelimelerQuestion();
+}
+
+function loadUcHarfliKelimelerQuestion() {
+    if (questionIndex >= currentQuestions.length) {
+        endGame();
+        return;
+    }
+    
+    currentQuestion = currentQuestions[questionIndex];
+    
+    document.getElementById('elif-question-number').textContent = questionIndex + 1;
+    
+    // Set word display
+    const letterElement = document.getElementById('elif-letter');
+    letterElement.style.backgroundColor = '#1a1a2e';
+    letterElement.style.color = '#fff';
+    letterElement.style.padding = '20px';
+    letterElement.style.borderRadius = '12px';
+    letterElement.innerHTML = `
+        <div style="font-size: 3rem; font-weight: bold; font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif; direction: rtl; text-align: center;">${currentQuestion.kelime}</div>
+    `;
+    
+    // Generate options with only Turkish pronunciation
+    const correctAnswer = currentQuestion.okunus;
+    const allUcHarfliKelimelerData = window.ucHarfliKelimelerData || [];
+    const wrongOptions = getRandomItems(
+        allUcHarfliKelimelerData.filter(k => k.okunus !== correctAnswer),
+        3
+    ).map(k => k.okunus);
+    
+    // Create options with only okunus (Turkish pronunciation)
+    const options = shuffleArray([correctAnswer, ...wrongOptions]);
+    
+    const optionsContainer = document.getElementById('elif-options');
+    optionsContainer.innerHTML = options.map((option, index) => `
+        <button class="answer-option" onclick="checkUcHarfliKelimelerAnswer(${index}, '${option.replace(/'/g, "\\'")}')">
+            ${option}
+        </button>
+    `).join('');
+    
+    // Audio will be played when user clicks the audio button
+}
+
+function checkUcHarfliKelimelerAnswer(index, selectedAnswer) {
+    const correctAnswer = currentQuestion.okunus;
+    const buttons = document.querySelectorAll('#elif-options .answer-option');
+    
+    buttons.forEach(btn => btn.classList.add('disabled'));
+    buttons.forEach(btn => {
+        if (btn.textContent.trim() === correctAnswer) {
+            btn.classList.add('correct');
+        }
+    });
+    
+    if (selectedAnswer === correctAnswer) {
+        correctCount++;
+        comboCount++;
+        maxCombo = Math.max(maxCombo, comboCount);
+        
+        const gained = 5 + (comboCount * CONFIG.COMBO_BONUS_PER_CORRECT);
+        sessionScore += gained;
+    } else {
+        wrongCount++;
+        comboCount = 0;
+        buttons[index].classList.add('wrong');
+    }
+    
+    setTimeout(() => {
+        questionIndex++;
+        loadUcHarfliKelimelerQuestion();
+    }, 1200);
+}
+
+/**
+ * Şedde game - uses sedde.json
+ */
+async function startSeddeGame() {
+    const seddeData = await loadSeddeData();
+    
+    if (seddeData.length === 0) {
+        showToast('Şedde verisi yüklenemedi', 'error');
+        goToMainMenu();
+        return;
+    }
+    
+    // Reset session
+    questionIndex = 0;
+    sessionScore = 0;
+    comboCount = 0;
+    maxCombo = 0;
+    correctCount = 0;
+    wrongCount = 0;
+    
+    // Create questions from sedde data
+    currentQuestions = shuffleArray([...seddeData]).slice(0, CONFIG.QUESTIONS_PER_GAME);
+    document.getElementById('elif-ba-screen').classList.remove('hidden');
+    document.getElementById('elif-total-questions').textContent = currentQuestions.length;
+    
+    // Show audio button for sedde game
+    const audioBtn = document.getElementById('elif-audio-btn');
+    if (audioBtn) {
+        audioBtn.style.display = '';
+    }
+    
+    loadSeddeQuestion();
+}
+
+function loadSeddeQuestion() {
+    if (questionIndex >= currentQuestions.length) {
+        endGame();
+        return;
+    }
+    
+    currentQuestion = currentQuestions[questionIndex];
+    
+    document.getElementById('elif-question-number').textContent = questionIndex + 1;
+    
+    // Set word display
+    const letterElement = document.getElementById('elif-letter');
+    letterElement.style.backgroundColor = '#1a1a2e';
+    letterElement.style.color = '#fff';
+    letterElement.style.padding = '20px';
+    letterElement.style.borderRadius = '12px';
+    letterElement.innerHTML = `
+        <div style="font-size: 3rem; font-weight: bold; font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif; direction: rtl; text-align: center;">${currentQuestion.kelime}</div>
+    `;
+    
+    // Generate options with only Turkish pronunciation
+    const correctAnswer = currentQuestion.okunus;
+    const allSeddeData = window.seddeData || [];
+    const wrongOptions = getRandomItems(
+        allSeddeData.filter(k => k.okunus !== correctAnswer),
+        3
+    ).map(k => k.okunus);
+    
+    // Create options with only okunus (Turkish pronunciation)
+    const options = shuffleArray([correctAnswer, ...wrongOptions]);
+    
+    const optionsContainer = document.getElementById('elif-options');
+    optionsContainer.innerHTML = options.map((option, index) => `
+        <button class="answer-option" onclick="checkSeddeAnswer(${index}, '${option.replace(/'/g, "\\'")}')">
+            ${option}
+        </button>
+    `).join('');
+    
+    // Audio will be played when user clicks the audio button
+}
+
+function checkSeddeAnswer(index, selectedAnswer) {
+    const correctAnswer = currentQuestion.okunus;
+    const buttons = document.querySelectorAll('#elif-options .answer-option');
+    
+    buttons.forEach(btn => btn.classList.add('disabled'));
+    buttons.forEach(btn => {
+        if (btn.textContent.trim() === correctAnswer) {
+            btn.classList.add('correct');
+        }
+    });
+    
+    if (selectedAnswer === correctAnswer) {
+        correctCount++;
+        comboCount++;
+        maxCombo = Math.max(maxCombo, comboCount);
+        
+        const gained = 5 + (comboCount * CONFIG.COMBO_BONUS_PER_CORRECT);
+        sessionScore += gained;
+    } else {
+        wrongCount++;
+        comboCount = 0;
+        buttons[index].classList.add('wrong');
+    }
+    
+    setTimeout(() => {
+        questionIndex++;
+        loadSeddeQuestion();
+    }, 1200);
+}
+
+/**
+ * Cezm game - uses cezm.json
+ */
+async function startCezmGame() {
+    const cezmData = await loadCezmData();
+    
+    if (cezmData.length === 0) {
+        showToast('Cezm verisi yüklenemedi', 'error');
+        goToMainMenu();
+        return;
+    }
+    
+    // Reset session
+    questionIndex = 0;
+    sessionScore = 0;
+    comboCount = 0;
+    maxCombo = 0;
+    correctCount = 0;
+    wrongCount = 0;
+    
+    // Create questions from cezm data
+    currentQuestions = shuffleArray([...cezmData]).slice(0, CONFIG.QUESTIONS_PER_GAME);
+    document.getElementById('elif-ba-screen').classList.remove('hidden');
+    document.getElementById('elif-total-questions').textContent = currentQuestions.length;
+    
+    // Show audio button for cezm game
+    const audioBtn = document.getElementById('elif-audio-btn');
+    if (audioBtn) {
+        audioBtn.style.display = '';
+    }
+    
+    loadCezmQuestion();
+}
+
+function loadCezmQuestion() {
+    if (questionIndex >= currentQuestions.length) {
+        endGame();
+        return;
+    }
+    
+    currentQuestion = currentQuestions[questionIndex];
+    
+    document.getElementById('elif-question-number').textContent = questionIndex + 1;
+    
+    // Set word display
+    const letterElement = document.getElementById('elif-letter');
+    letterElement.style.backgroundColor = '#1a1a2e';
+    letterElement.style.color = '#fff';
+    letterElement.style.padding = '20px';
+    letterElement.style.borderRadius = '12px';
+    letterElement.innerHTML = `
+        <div style="font-size: 3rem; font-weight: bold; font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif; direction: rtl; text-align: center;">${currentQuestion.kelime}</div>
+    `;
+    
+    // Generate options with only Turkish pronunciation
+    const correctAnswer = currentQuestion.okunus;
+    const allCezmData = window.cezmData || [];
+    const wrongOptions = getRandomItems(
+        allCezmData.filter(k => k.okunus !== correctAnswer),
+        3
+    ).map(k => k.okunus);
+    
+    // Create options with only okunus (Turkish pronunciation)
+    const options = shuffleArray([correctAnswer, ...wrongOptions]);
+    
+    const optionsContainer = document.getElementById('elif-options');
+    optionsContainer.innerHTML = options.map((option, index) => `
+        <button class="answer-option" onclick="checkCezmAnswer(${index}, '${option.replace(/'/g, "\\'")}')">
+            ${option}
+        </button>
+    `).join('');
+    
+    // Audio will be played when user clicks the audio button
+}
+
+function checkCezmAnswer(index, selectedAnswer) {
+    const correctAnswer = currentQuestion.okunus;
+    const buttons = document.querySelectorAll('#elif-options .answer-option');
+    
+    buttons.forEach(btn => btn.classList.add('disabled'));
+    buttons.forEach(btn => {
+        if (btn.textContent.trim() === correctAnswer) {
+            btn.classList.add('correct');
+        }
+    });
+    
+    if (selectedAnswer === correctAnswer) {
+        correctCount++;
+        comboCount++;
+        maxCombo = Math.max(maxCombo, comboCount);
+        
+        const gained = 5 + (comboCount * CONFIG.COMBO_BONUS_PER_CORRECT);
+        sessionScore += gained;
+    } else {
+        wrongCount++;
+        comboCount = 0;
+        buttons[index].classList.add('wrong');
+    }
+    
+    setTimeout(() => {
+        questionIndex++;
+        loadCezmQuestion();
     }, 1200);
 }
 
@@ -2233,6 +2900,13 @@ async function startElifHarekelerGame(harfData) {
     currentQuestions = shuffleArray(questions);
     document.getElementById('elif-ba-screen').classList.remove('hidden');
     document.getElementById('elif-total-questions').textContent = currentQuestions.length;
+    
+    // Hide audio button for harekeler game (no audio in this mode)
+    const audioBtn = document.getElementById('elif-audio-btn');
+    if (audioBtn) {
+        audioBtn.style.display = 'none';
+    }
+    
     loadElifHarekelerQuestion();
 }
 
@@ -2799,12 +3473,20 @@ async function showHarfTablosu() {
     // Populate the harf grid
     const harfGrid = document.getElementById('harf-grid');
     if (harfGrid) {
-        harfGrid.innerHTML = data.map(harf => `
-            <div class="harf-card" onclick="playHarfAudio('${harf.ses_dosyasi || ''}', '${harf.harf}')">
-                <div class="harf-arabic">${harf.harf}</div>
-                <div class="harf-name">${harf.isim || harf.okunus || ''}</div>
-            </div>
-        `).join('');
+        harfGrid.innerHTML = data.map(harf => {
+            const renkKodu = harf.renkKodu || '#1a1a2e';
+            const audioUrl = harf.audioUrl || '';
+            const harfName = harf.isim || harf.okunus || harf.harf;
+            
+            return `
+                <div class="harf-card" 
+                     style="background-color: ${renkKodu};" 
+                     onclick="playHarfAudio('${audioUrl.replace(/'/g, "\\'")}', '${harfName.replace(/'/g, "\\'")}')">
+                    <div class="harf-arabic">${harf.harf}</div>
+                    <div class="harf-name">${harfName}</div>
+                </div>
+            `;
+        }).join('');
     }
     
     // Hide all screens and show Harf Tablosu
@@ -2813,7 +3495,7 @@ async function showHarfTablosu() {
 }
 
 function playHarfAudio(audioUrl, harfName) {
-    if (audioUrl) {
+    if (audioUrl && audioUrl.trim() !== '') {
         playSafeAudio(audioUrl);
     } else {
         showToast(`${harfName}`, 'info', 1000);
@@ -3655,6 +4337,11 @@ if (typeof window !== 'undefined') {
     window.checkElifKelimelerAnswer = checkElifKelimelerAnswer;
     window.checkElifHarekelerAnswer = checkElifHarekelerAnswer;
     window.checkElifFethaAnswer = checkElifFethaAnswer;
+    window.checkElifEsreAnswer = checkElifEsreAnswer;
+    window.checkElifOtreAnswer = checkElifOtreAnswer;
+    window.checkUcHarfliKelimelerAnswer = checkUcHarfliKelimelerAnswer;
+    window.checkSeddeAnswer = checkSeddeAnswer;
+    window.checkCezmAnswer = checkCezmAnswer;
     window.toggleCurrentWordFavorite = toggleCurrentWordFavorite;
     window.showHarfTablosu = showHarfTablosu;
     window.playHarfAudio = playHarfAudio;
@@ -3693,4 +4380,9 @@ if (typeof window !== 'undefined') {
     window.playSafeAudio = playSafeAudio;
     window.goToMainScreen = goToMainScreen;
     window.handleBackButton = handleBackButton;
+    
+    // Stats and Data Management
+    window.resetAllData = resetAllData;
+    window.saveStats = saveStats;
+    window.loadStats = loadStats;
 }

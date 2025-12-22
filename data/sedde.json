@@ -1,0 +1,104 @@
+{
+  "kelimeler": [
+    {
+      "kelime": "هُنَّ",
+      "okunus": "hünne",
+      "audioUrl": "ASSETS/audio/sedde/btn_1.mp3"
+    },
+    {
+      "kelime": "فَكَّ",
+      "okunus": "fekke",
+      "audioUrl": "ASSETS/audio/sedde/btn_2.mp3"
+    },
+    {
+      "kelime": "اَحَلَّ",
+      "okunus": "ehalelle",
+      "audioUrl": "ASSETS/audio/sedde/btn_3.mp3"
+    },
+    {
+      "kelime": "اَشُدُّ",
+      "okunus": "eşuddu",
+      "audioUrl": "ASSETS/audio/sedde/btn_4.mp3"
+    },
+    {
+      "kelime": "نَعُدُّ",
+      "okunus": "neuddu",
+      "audioUrl": "ASSETS/audio/sedde/btn_5.mp3"
+    },
+    {
+      "kelime": "اَقَلُّ",
+      "okunus": "ekellü",
+      "audioUrl": "ASSETS/audio/sedde/btn_6.mp3"
+    },
+    {
+      "kelime": "يَظُنُّ",
+      "okunus": "yezunnu",
+      "audioUrl": "ASSETS/audio/sedde/btn_7.mp3"
+    },
+    {
+      "kelime": "كَاَنَّ",
+      "okunus": "kane",
+      "audioUrl": "ASSETS/audio/sedde/btn_8.mp3"
+    },
+    {
+      "kelime": "صَدَّقَ",
+      "okunus": "saddaka",
+      "audioUrl": "ASSETS/audio/sedde/btn_9.mp3"
+    },
+    {
+      "kelime": "اَضَلُّ",
+      "okunus": "edellü",
+      "audioUrl": "ASSETS/audio/sedde/btn_10.mp3"
+    },
+    {
+      "kelime": "كَلَّمَ",
+      "okunus": "kelleme",
+      "audioUrl": "ASSETS/audio/sedde/btn_11.mp3"
+    },
+    {
+      "kelime": "رَبُّهُمْ",
+      "okunus": "rabbühüm",
+      "audioUrl": "ASSETS/audio/sedde/btn_12.mp3"
+    },
+    {
+      "kelime": "شَدَّ",
+      "okunus": "şedde",
+      "audioUrl": "ASSETS/audio/sedde/btn_13.mp3"
+    },
+    {
+      "kelime": "فَكَّرَ",
+      "okunus": "fekkera",
+      "audioUrl": "ASSETS/audio/sedde/btn_14.mp3"
+    },
+    {
+      "kelime": "سَبَّحَ",
+      "okunus": "sebbeha",
+      "audioUrl": "ASSETS/audio/sedde/btn_15.mp3"
+    },
+    {
+      "kelime": "اَسَّسَ",
+      "okunus": "essese",
+      "audioUrl": "ASSETS/audio/sedde/btn_16.mp3"
+    },
+    {
+      "kelime": "بَدَّلَ",
+      "okunus": "beddele",
+      "audioUrl": "ASSETS/audio/sedde/btn_17.mp3"
+    },
+    {
+      "kelime": "جَهَنَّمْ",
+      "okunus": "cehennem",
+      "audioUrl": "ASSETS/audio/sedde/btn_18.mp3"
+    },
+    {
+      "kelime": "تَنَفَّسْ",
+      "okunus": "teneffes",
+      "audioUrl": "ASSETS/audio/sedde/btn_19.mp3"
+    },
+    {
+      "kelime": "وَتَبَّ",
+      "okunus": "vetebbe",
+      "audioUrl": "ASSETS/audio/sedde/btn_20.mp3"
+    }
+  ]
+}

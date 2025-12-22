@@ -1,0 +1,104 @@
+{
+  "kelimeler": [
+    {
+      "kelime": "اِثْ",
+      "okunus": "is",
+      "audioUrl": "ASSETS/audio/cezm/btn_1.mp3"
+    },
+    {
+      "kelime": "اِطْ",
+      "okunus": "ıt",
+      "audioUrl": "ASSETS/audio/cezm/btn_2.mp3"
+    },
+    {
+      "kelime": "اَعْ",
+      "okunus": "a",
+      "audioUrl": "ASSETS/audio/cezm/btn_3.mp3"
+    },
+    {
+      "kelime": "اِشْ",
+      "okunus": "iş",
+      "audioUrl": "ASSETS/audio/cezm/btn_4.mp3"
+    },
+    {
+      "kelime": "اِكْ",
+      "okunus": "ik",
+      "audioUrl": "ASSETS/audio/cezm/btn_5.mp3"
+    },
+    {
+      "kelime": "اِصْ",
+      "okunus": "ıs",
+      "audioUrl": "ASSETS/audio/cezm/btn_6.mp3"
+    },
+    {
+      "kelime": "اَرْ",
+      "okunus": "er",
+      "audioUrl": "ASSETS/audio/cezm/btn_7.mp3"
+    },
+    {
+      "kelime": "اَخْ",
+      "okunus": "ah",
+      "audioUrl": "ASSETS/audio/cezm/btn_8.mp3"
+    },
+    {
+      "kelime": "اُلْ",
+      "okunus": "ul",
+      "audioUrl": "ASSETS/audio/cezm/btn_9.mp3"
+    },
+    {
+      "kelime": "اَيْنَ",
+      "okunus": "eyne",
+      "audioUrl": "ASSETS/audio/cezm/btn_10.mp3"
+    },
+    {
+      "kelime": "هَلْ",
+      "okunus": "hel",
+      "audioUrl": "ASSETS/audio/cezm/btn_11.mp3"
+    },
+    {
+      "kelime": "مِنْكَ",
+      "okunus": "minke",
+      "audioUrl": "ASSETS/audio/cezm/btn_12.mp3"
+    },
+    {
+      "kelime": "بَحْرُنْ",
+      "okunus": "bahrun",
+      "audioUrl": "ASSETS/audio/cezm/btn_13.mp3"
+    },
+    {
+      "kelime": "شَمْسُنْ",
+      "okunus": "şemsun",
+      "audioUrl": "ASSETS/audio/cezm/btn_14.mp3"
+    },
+    {
+      "kelime": "اَسْلَمَ",
+      "okunus": "esleme",
+      "audioUrl": "ASSETS/audio/cezm/btn_15.mp3"
+    },
+    {
+      "kelime": "اُدْخِلَ",
+      "okunus": "udhıle",
+      "audioUrl": "ASSETS/audio/cezm/btn_16.mp3"
+    },
+    {
+      "kelime": "اَمْهَلَهُمْ",
+      "okunus": "emhelehum",
+      "audioUrl": "ASSETS/audio/cezm/btn_17.mp3"
+    },
+    {
+      "kelime": "اُنْتُقِذَ",
+      "okunus": "untukıza",
+      "audioUrl": "ASSETS/audio/cezm/btn_18.mp3"
+    },
+    {
+      "kelime": "نَوْمَكُمْ",
+      "okunus": "nevkeküm",
+      "audioUrl": "ASSETS/audio/cezm/btn_19.mp3"
+    },
+    {
+      "kelime": "يُسْقَوْنَ",
+      "okunus": "yuskavne",
+      "audioUrl": "ASSETS/audio/cezm/btn_20.mp3"
+    }
+  ]
+}

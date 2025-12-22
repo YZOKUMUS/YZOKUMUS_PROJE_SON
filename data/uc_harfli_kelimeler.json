@@ -1,0 +1,139 @@
+{
+  "kelimeler": [
+    {
+      "kelime": "اَكَلَ",
+      "okunus": "ekele",
+      "audioUrl": "ASSETS/audio/okuma/btn_1.mp3"
+    },
+    {
+      "kelime": "اَمَلَ",
+      "okunus": "emele",
+      "audioUrl": "ASSETS/audio/okuma/btn_2.mp3"
+    },
+    {
+      "kelime": "ذَهَبَ",
+      "okunus": "zehebe",
+      "audioUrl": "ASSETS/audio/okuma/btn_3.mp3"
+    },
+    {
+      "kelime": "اَذِنَ",
+      "okunus": "ezine",
+      "audioUrl": "ASSETS/audio/okuma/btn_4.mp3"
+    },
+    {
+      "kelime": "عَلِمَ",
+      "okunus": "alime",
+      "audioUrl": "ASSETS/audio/okuma/btn_5.mp3"
+    },
+    {
+      "kelime": "فَهِمَ",
+      "okunus": "fehime",
+      "audioUrl": "ASSETS/audio/okuma/btn_6.mp3"
+    },
+    {
+      "kelime": "شَرِبَ",
+      "okunus": "şeribe",
+      "audioUrl": "ASSETS/audio/okuma/btn_7.mp3"
+    },
+    {
+      "kelime": "سَمِعَ",
+      "okunus": "semia",
+      "audioUrl": "ASSETS/audio/okuma/btn_8.mp3"
+    },
+    {
+      "kelime": "لُكِمَ",
+      "okunus": "lukime",
+      "audioUrl": "ASSETS/audio/okuma/btn_9.mp3"
+    },
+    {
+      "kelime": "عُلِمَ",
+      "okunus": "ulime",
+      "audioUrl": "ASSETS/audio/okuma/btn_10.mp3"
+    },
+    {
+      "kelime": "قُرِاَ",
+      "okunus": "kurie",
+      "audioUrl": "ASSETS/audio/okuma/btn_11.mp3"
+    },
+    {
+      "kelime": "سُمِعَ",
+      "okunus": "sumia",
+      "audioUrl": "ASSETS/audio/okuma/btn_12.mp3"
+    },
+    {
+      "kelime": "بَذَلَ",
+      "okunus": "bezele",
+      "audioUrl": "ASSETS/audio/okuma/btn_13.mp3"
+    },
+    {
+      "kelime": "نَصَرَ",
+      "okunus": "nesara",
+      "audioUrl": "ASSETS/audio/okuma/btn_14.mp3"
+    },
+    {
+      "kelime": "مَنَعَ",
+      "okunus": "menea",
+      "audioUrl": "ASSETS/audio/okuma/btn_15.mp3"
+    },
+    {
+      "kelime": "بَلَغَ",
+      "okunus": "beleğa",
+      "audioUrl": "ASSETS/audio/okuma/btn_16.mp3"
+    },
+    {
+      "kelime": "دَخَلَ",
+      "okunus": "dehale",
+      "audioUrl": "ASSETS/audio/okuma/btn_17.mp3"
+    },
+    {
+      "kelime": "شَهِدَ",
+      "okunus": "şehide",
+      "audioUrl": "ASSETS/audio/okuma/btn_18.mp3"
+    },
+    {
+      "kelime": "فُهِمَ",
+      "okunus": "fuhime",
+      "audioUrl": "ASSETS/audio/okuma/btn_19.mp3"
+    },
+    {
+      "kelime": "حَسِبَ",
+      "okunus": "hasibe",
+      "audioUrl": "ASSETS/audio/okuma/btn_20.mp3"
+    },
+    {
+      "kelime": "رَضِيَ",
+      "okunus": "radıye",
+      "audioUrl": "ASSETS/audio/okuma/btn_21.mp3"
+    },
+    {
+      "kelime": "كُدِمَ",
+      "okunus": "kudime",
+      "audioUrl": "ASSETS/audio/okuma/btn_22.mp3"
+    },
+    {
+      "kelime": "شُرِبَ",
+      "okunus": "şuribe",
+      "audioUrl": "ASSETS/audio/okuma/btn_23.mp3"
+    },
+    {
+      "kelime": "عُدِلَ",
+      "okunus": "udile",
+      "audioUrl": "ASSETS/audio/okuma/btn_24.mp3"
+    },
+    {
+      "kelime": "وُقِعَ",
+      "okunus": "vukia",
+      "audioUrl": "ASSETS/audio/okuma/btn_25.mp3"
+    },
+    {
+      "kelime": "كُشِفَ",
+      "okunus": "kuşife",
+      "audioUrl": "ASSETS/audio/okuma/btn_26.mp3"
+    },
+    {
+      "kelime": "ذُكِرَ",
+      "okunus": "zukira",
+      "audioUrl": "ASSETS/audio/okuma/btn_27.mp3"
+    }
+  ]
+}
