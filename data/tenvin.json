@@ -1,0 +1,201 @@
+{
+  "harfler": [
+    {
+      "harfWithTenvin": "اً",
+      "okunus": "en",
+      "sesTipi": "ince_sesli_harf",
+      "renkKodu": "#ADE2EF",
+      "audioUrl": "ASSETS/audio/tenvin/btn_1.mp3"
+    },
+    {
+      "harfWithTenvin": "باً",
+      "okunus": "ben",
+      "sesTipi": "ince_sesli_harf",
+      "renkKodu": "#ADE2EF",
+      "audioUrl": "ASSETS/audio/tenvin/btn_2.mp3"
+    },
+    {
+      "harfWithTenvin": "تاً",
+      "okunus": "ten",
+      "sesTipi": "ince_sesli_harf",
+      "renkKodu": "#ADE2EF",
+      "audioUrl": "ASSETS/audio/tenvin/btn_3.mp3"
+    },
+    {
+      "harfWithTenvin": "ثاً",
+      "okunus": "sen",
+      "sesTipi": "peltek_sesli_harf",
+      "renkKodu": "#F09E9E",
+      "audioUrl": "ASSETS/audio/tenvin/btn_4.mp3"
+    },
+    {
+      "harfWithTenvin": "جاً",
+      "okunus": "cen",
+      "sesTipi": "ince_sesli_harf",
+      "renkKodu": "#ADE2EF",
+      "audioUrl": "ASSETS/audio/tenvin/btn_5.mp3"
+    },
+    {
+      "harfWithTenvin": "حاً",
+      "okunus": "hen",
+      "sesTipi": "ince_sesli_harf",
+      "renkKodu": "#ADE2EF",
+      "audioUrl": "ASSETS/audio/tenvin/btn_6.mp3"
+    },
+    {
+      "harfWithTenvin": "خاً",
+      "okunus": "han",
+      "sesTipi": "kalın_sesli_harf",
+      "renkKodu": "#BBEDBB",
+      "audioUrl": "ASSETS/audio/tenvin/btn_7.mp3"
+    },
+    {
+      "harfWithTenvin": "داً",
+      "okunus": "den",
+      "sesTipi": "ince_sesli_harf",
+      "renkKodu": "#ADE2EF",
+      "audioUrl": "ASSETS/audio/tenvin/btn_8.mp3"
+    },
+    {
+      "harfWithTenvin": "ذاً",
+      "okunus": "zen",
+      "sesTipi": "peltek_sesli_harf",
+      "renkKodu": "#F09E9E",
+      "audioUrl": "ASSETS/audio/tenvin/btn_9.mp3"
+    },
+    {
+      "harfWithTenvin": "راً",
+      "okunus": "ren",
+      "sesTipi": "ince_sesli_harf",
+      "renkKodu": "#ADE2EF",
+      "audioUrl": "ASSETS/audio/tenvin/btn_10.mp3"
+    },
+    {
+      "harfWithTenvin": "زاً",
+      "okunus": "zen",
+      "sesTipi": "ince_sesli_harf",
+      "renkKodu": "#ADE2EF",
+      "audioUrl": "ASSETS/audio/tenvin/btn_11.mp3"
+    },
+    {
+      "harfWithTenvin": "ساً",
+      "okunus": "sen",
+      "sesTipi": "ince_sesli_harf",
+      "renkKodu": "#ADE2EF",
+      "audioUrl": "ASSETS/audio/tenvin/btn_12.mp3"
+    },
+    {
+      "harfWithTenvin": "شاً",
+      "okunus": "şen",
+      "sesTipi": "ince_sesli_harf",
+      "renkKodu": "#ADE2EF",
+      "audioUrl": "ASSETS/audio/tenvin/btn_13.mp3"
+    },
+    {
+      "harfWithTenvin": "صاً",
+      "okunus": "san",
+      "sesTipi": "kalın_sesli_harf",
+      "renkKodu": "#BBEDBB",
+      "audioUrl": "ASSETS/audio/tenvin/btn_14.mp3"
+    },
+    {
+      "harfWithTenvin": "ضاً",
+      "okunus": "dan",
+      "sesTipi": "kalın_sesli_harf",
+      "renkKodu": "#BBEDBB",
+      "audioUrl": "ASSETS/audio/tenvin/btn_15.mp3"
+    },
+    {
+      "harfWithTenvin": "طاً",
+      "okunus": "dan",
+      "sesTipi": "kalın_sesli_harf",
+      "renkKodu": "#BBEDBB",
+      "audioUrl": "ASSETS/audio/tenvin/btn_16.mp3"
+    },
+    {
+      "harfWithTenvin": "ظاً",
+      "okunus": "zan",
+      "sesTipi": "peltek_sesli_harf",
+      "renkKodu": "#F09E9E",
+      "audioUrl": "ASSETS/audio/tenvin/btn_17.mp3"
+    },
+    {
+      "harfWithTenvin": "عاً",
+      "okunus": "en",
+      "sesTipi": "ince_sesli_harf",
+      "renkKodu": "#ADE2EF",
+      "audioUrl": "ASSETS/audio/tenvin/btn_18.mp3"
+    },
+    {
+      "harfWithTenvin": "غاً",
+      "okunus": "ğan",
+      "sesTipi": "kalın_sesli_harf",
+      "renkKodu": "#BBEDBB",
+      "audioUrl": "ASSETS/audio/tenvin/btn_19.mp3"
+    },
+    {
+      "harfWithTenvin": "فاً",
+      "okunus": "fen",
+      "sesTipi": "ince_sesli_harf",
+      "renkKodu": "#ADE2EF",
+      "audioUrl": "ASSETS/audio/tenvin/btn_20.mp3"
+    },
+    {
+      "harfWithTenvin": "قاً",
+      "okunus": "gan",
+      "sesTipi": "kalın_sesli_harf",
+      "renkKodu": "#BBEDBB",
+      "audioUrl": "ASSETS/audio/tenvin/btn_21.mp3"
+    },
+    {
+      "harfWithTenvin": "كاً",
+      "okunus": "ken",
+      "sesTipi": "ince_sesli_harf",
+      "renkKodu": "#ADE2EF",
+      "audioUrl": "ASSETS/audio/tenvin/btn_22.mp3"
+    },
+    {
+      "harfWithTenvin": "لاً",
+      "okunus": "len",
+      "sesTipi": "ince_sesli_harf",
+      "renkKodu": "#ADE2EF",
+      "audioUrl": "ASSETS/audio/tenvin/btn_23.mp3"
+    },
+    {
+      "harfWithTenvin": "ماً",
+      "okunus": "men",
+      "sesTipi": "ince_sesli_harf",
+      "renkKodu": "#ADE2EF",
+      "audioUrl": "ASSETS/audio/tenvin/btn_24.mp3"
+    },
+    {
+      "harfWithTenvin": "ناً",
+      "okunus": "nen",
+      "sesTipi": "ince_sesli_harf",
+      "renkKodu": "#ADE2EF",
+      "audioUrl": "ASSETS/audio/tenvin/btn_25.mp3"
+    },
+    {
+      "harfWithTenvin": "واً",
+      "okunus": "ven",
+      "sesTipi": "ince_sesli_harf",
+      "renkKodu": "#ADE2EF",
+      "audioUrl": "ASSETS/audio/tenvin/btn_26.mp3"
+    },
+    {
+      "harfWithTenvin": "هاً",
+      "okunus": "hen",
+      "sesTipi": "ince_sesli_harf",
+      "renkKodu": "#ADE2EF",
+      "audioUrl": "ASSETS/audio/tenvin/btn_27.mp3"
+    },
+    {
+      "harfWithTenvin": "ياً",
+      "okunus": "yen",
+      "sesTipi": "ince_sesli_harf",
+      "renkKodu": "#ADE2EF",
+      "audioUrl": "ASSETS/audio/tenvin/btn_28.mp3"
+    }
+  ]
+}
+

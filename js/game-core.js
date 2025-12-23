@@ -2087,6 +2087,9 @@ async function startElifBaGame(submode = 'harfler') {
     } else if (submode === 'uc-harfli-kelimeler') {
         // Üç Harfli Kelimeler game - uses uc_harfli_kelimeler.json
         await startUcHarfliKelimelerGame();
+    } else if (submode === 'tenvin') {
+        // Tenvin game - uses tenvin.json
+        await startElifTenvinGame();
     } else if (submode === 'sedde') {
         // Şedde game - uses sedde.json
         await startSeddeGame();
@@ -2237,6 +2240,12 @@ async function startElifFethaGame() {
         audioBtn.style.display = '';
     }
     
+    // Show info button
+    const infoBtn = document.getElementById('elif-info-btn');
+    if (infoBtn) {
+        infoBtn.style.display = 'flex';
+    }
+    
     loadElifFethaQuestion();
 }
 
@@ -2355,6 +2364,12 @@ async function startElifEsreGame() {
         audioBtn.style.display = '';
     }
     
+    // Show info button
+    const infoBtn = document.getElementById('elif-info-btn');
+    if (infoBtn) {
+        infoBtn.style.display = 'flex';
+    }
+    
     loadElifEsreQuestion();
 }
 
@@ -2469,6 +2484,12 @@ async function startElifOtreGame() {
         audioBtn.style.display = '';
     }
     
+    // Show info button
+    const infoBtn = document.getElementById('elif-info-btn');
+    if (infoBtn) {
+        infoBtn.style.display = 'flex';
+    }
+    
     loadElifOtreQuestion();
 }
 
@@ -2561,6 +2582,134 @@ function checkElifOtreAnswer(index, selectedAnswer) {
 }
 
 /**
+ * Tenvin game - uses tenvin.json
+ */
+async function startElifTenvinGame() {
+    const tenvinData = await loadTenvinData();
+    
+    if (tenvinData.length === 0) {
+        showToast('Tenvin verisi yüklenemedi', 'error');
+        goToMainMenu();
+        return;
+    }
+    
+    // Reset session
+    questionIndex = 0;
+    sessionScore = 0;
+    comboCount = 0;
+    maxCombo = 0;
+    correctCount = 0;
+    wrongCount = 0;
+    
+    // Create questions from tenvin data
+    currentQuestions = shuffleArray([...tenvinData]).slice(0, CONFIG.QUESTIONS_PER_GAME);
+    document.getElementById('elif-ba-screen').classList.remove('hidden');
+    document.getElementById('elif-total-questions').textContent = currentQuestions.length;
+    
+    // Show audio button for tenvin game
+    const audioBtn = document.getElementById('elif-audio-btn');
+    if (audioBtn) {
+        audioBtn.style.display = '';
+    }
+    
+    // Show info button
+    const infoBtn = document.getElementById('elif-info-btn');
+    if (infoBtn) {
+        infoBtn.style.display = 'flex';
+    }
+    
+    loadElifTenvinQuestion();
+}
+
+function loadElifTenvinQuestion() {
+    if (questionIndex >= currentQuestions.length) {
+        endGame();
+        return;
+    }
+    
+    currentQuestion = currentQuestions[questionIndex];
+    
+    document.getElementById('elif-question-number').textContent = questionIndex + 1;
+    
+    // Set letter with color and type label
+    const letterElement = document.getElementById('elif-letter');
+    const renkKodu = currentQuestion.renkKodu || '#1a1a2e';
+    const sesTipi = currentQuestion.sesTipi || '';
+    
+    // Convert sesTipi to display text
+    let tipText = '';
+    if (sesTipi === 'ince_sesli_harf') {
+        tipText = 'İnce';
+    } else if (sesTipi === 'kalın_sesli_harf') {
+        tipText = 'Kalın';
+    } else if (sesTipi === 'peltek_sesli_harf') {
+        tipText = 'Peltek';
+    }
+    
+    letterElement.style.backgroundColor = renkKodu;
+    letterElement.style.color = '#1a1a2e';
+    letterElement.style.padding = '20px';
+    letterElement.style.borderRadius = '12px';
+    
+    const harfWithTenvin = currentQuestion.harfWithTenvin || '';
+    
+    letterElement.innerHTML = `
+        <div style="font-size: 4rem; font-weight: bold; margin-bottom: 8px; font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif; direction: rtl; line-height: 1.8; text-align: center;">${harfWithTenvin}</div>
+        ${tipText ? `<div style="font-size: 0.75rem; opacity: 0.8; font-weight: 500;">${tipText}</div>` : ''}
+    `;
+    
+    // Generate options with only Turkish pronunciation
+    const correctAnswer = currentQuestion.okunus;
+    const allTenvinData = window.tenvinData || [];
+    const wrongOptions = getRandomItems(
+        allTenvinData.filter(h => h.okunus !== correctAnswer),
+        3
+    ).map(h => h.okunus);
+    
+    // Create options with only okunus (Turkish pronunciation)
+    const options = shuffleArray([correctAnswer, ...wrongOptions]);
+    
+    const optionsContainer = document.getElementById('elif-options');
+    optionsContainer.innerHTML = options.map((option, index) => `
+        <button class="answer-option" onclick="checkElifTenvinAnswer(${index}, '${option.replace(/'/g, "\\'")}')">
+            ${option}
+        </button>
+    `).join('');
+    
+    // Audio will be played when user clicks the audio button
+}
+
+function checkElifTenvinAnswer(index, selectedAnswer) {
+    const correctAnswer = currentQuestion.okunus;
+    const buttons = document.querySelectorAll('#elif-options .answer-option');
+    
+    buttons.forEach(btn => btn.classList.add('disabled'));
+    buttons.forEach(btn => {
+        if (btn.textContent.trim() === correctAnswer) {
+            btn.classList.add('correct');
+        }
+    });
+    
+    if (selectedAnswer === correctAnswer) {
+        correctCount++;
+        comboCount++;
+        maxCombo = Math.max(maxCombo, comboCount);
+        
+        const gained = 5 + (comboCount * CONFIG.COMBO_BONUS_PER_CORRECT);
+        sessionScore += gained;
+    } else {
+        wrongCount++;
+        comboCount = 0;
+        buttons[index].classList.add('wrong');
+    }
+    
+    setTimeout(() => {
+        questionIndex++;
+        loadElifTenvinQuestion();
+    }, 1200);
+}
+
+/**
  * Üç Harfli Kelimeler game - uses uc_harfli_kelimeler.json
  */
 async function startUcHarfliKelimelerGame() {
@@ -2589,6 +2738,12 @@ async function startUcHarfliKelimelerGame() {
     const audioBtn = document.getElementById('elif-audio-btn');
     if (audioBtn) {
         audioBtn.style.display = '';
+    }
+    
+    // Show info button
+    const infoBtn = document.getElementById('elif-info-btn');
+    if (infoBtn) {
+        infoBtn.style.display = 'flex';
     }
     
     loadUcHarfliKelimelerQuestion();
@@ -2696,6 +2851,12 @@ async function startSeddeGame() {
         audioBtn.style.display = '';
     }
     
+    // Show info button
+    const infoBtn = document.getElementById('elif-info-btn');
+    if (infoBtn) {
+        infoBtn.style.display = 'flex';
+    }
+    
     loadSeddeQuestion();
 }
 
@@ -2799,6 +2960,12 @@ async function startCezmGame() {
     const audioBtn = document.getElementById('elif-audio-btn');
     if (audioBtn) {
         audioBtn.style.display = '';
+    }
+    
+    // Show info button
+    const infoBtn = document.getElementById('elif-info-btn');
+    if (infoBtn) {
+        infoBtn.style.display = 'flex';
     }
     
     loadCezmQuestion();
@@ -2911,6 +3078,12 @@ async function startElifHarekelerGame(harfData) {
     const audioBtn = document.getElementById('elif-audio-btn');
     if (audioBtn) {
         audioBtn.style.display = 'none';
+    }
+    
+    // Show info button
+    const infoBtn = document.getElementById('elif-info-btn');
+    if (infoBtn) {
+        infoBtn.style.display = 'flex';
     }
     
     loadElifHarekelerQuestion();
@@ -4436,6 +4609,61 @@ function renderBaglamsalOgrenmeKarma(container, question) {
             `).join('')}
         </div>
     `;
+}
+
+/**
+ * Show Elif Ba info modal with detailed explanation
+ */
+function showElifBaInfo() {
+    const infoData = {
+        'fetha': {
+            title: 'Üstün Hakkında',
+            content: 'Harfin üzerine gelen bu işaret ince harfleri "e" sesi ile, kalın okunan harfleriyse "a" sesi ile okutur. İnce harflerden ع – ر – ح üstünlü olduğu zaman a sesiyle okunur.'
+        },
+        'esre': {
+            title: 'Esre Hakkında',
+            content: 'Harfin altına gelen bu işaret ince harfleri "i" sesi ile, kalın okunan harfleriyse "ı" sesi ile okutur.'
+        },
+        'otre': {
+            title: 'Ötre Hakkında',
+            content: 'Harfin üstüne gelen bu işaret ince harfleri "u" ile "ü" sesi arasında bir sesle, kalın okunan harfleriyse "u" sesi ile okutur.'
+        },
+        'sedde': {
+            title: 'Şedde Hakkında',
+            content: 'Şedde, üzerinde bulunduğu harfin iki defa okunmasını sağlar. Yani, birinci defa cezimli, ikinci defa ise kendi harekesi gibi okutur.'
+        },
+        'cezm': {
+            title: 'Cezm Hakkında',
+            content: 'Cezm üzerinde bulunduğu harfi kendinden önceki harekeli harfe bağlar.'
+        },
+        'tenvin': {
+            title: 'Tenvin Hakkında',
+            content: 'Tenvin bir harfin sesine "n" sesi ilave etmektir. Kalın harfleri okurken harfin kendisi kalın, tenvini ince okunur. Sadece kelimelerin son harfinin üstünde görülen Tenvin\'e aynı zamanda iki üstün, iki esre ve iki ötre de denilmektedir.'
+        },
+        'harekeler': {
+            title: 'Harekeler Hakkında',
+            content: 'Harekeler, Arapça harflerin üzerine veya altına konulan işaretlerdir. Üstün, esre, ötre, cezm ve şedde olmak üzere beş temel hareke vardır. Her hareke harfin okunuşunu değiştirir.'
+        },
+        'tablo': {
+            title: 'Harf Tablosu Hakkında',
+            content: 'Arapça harflerin yazılışı ve okunuşu. Her harfin başta, ortada ve sonda yazılış şekilleri farklıdır.'
+        },
+        'uc-harfli-kelimeler': {
+            title: 'Üç Harfli Kelimeler Hakkında',
+            content: 'Üç harfli Arapça kelimeleri gör ve okunuşlarını öğren. Bu mod, temel kelime yapılarını öğrenmek için idealdir.'
+        }
+    };
+    
+    const submode = currentElifBaSubmode || 'harfler';
+    const info = infoData[submode] || {
+        title: 'Bilgi',
+        content: 'Bu mod hakkında bilgi bulunmamaktadır.'
+    };
+    
+    document.getElementById('elif-info-title').textContent = info.title;
+    document.getElementById('elif-info-content').textContent = info.content;
+    
+    openModal('elif-ba-info-modal');
 }
 
 /**

@@ -16,6 +16,7 @@ let otreData = [];
 let ucHarfliKelimelerData = [];
 let seddeData = [];
 let cezmData = [];
+let tenvinData = [];
 
 // Loading state
 let dataLoaded = {
@@ -30,7 +31,8 @@ let dataLoaded = {
     otre: false,
     ucHarfliKelimeler: false,
     sedde: false,
-    cezm: false
+    cezm: false,
+    tenvin: false
 };
 
 /**
@@ -324,6 +326,35 @@ async function loadUcHarfliKelimelerData() {
 }
 
 /**
+ * Load Tenvin data
+ */
+async function loadTenvinData() {
+    if (dataLoaded.tenvin && tenvinData.length > 0) {
+        return tenvinData;
+    }
+    
+    try {
+        const response = await fetch('./data/tenvin.json');
+        if (!response.ok) throw new Error('Tenvin data fetch failed');
+        
+        const data = await response.json();
+        tenvinData = Array.isArray(data.harfler) ? data.harfler : [];
+        dataLoaded.tenvin = true;
+        
+        // Update global reference
+        if (typeof window !== 'undefined') {
+            window.tenvinData = tenvinData;
+        }
+        
+        console.log(`✅ Tenvin data loaded: ${tenvinData.length} letters`);
+        return tenvinData;
+    } catch (err) {
+        console.error('❌ Tenvin data load error:', err);
+        return [];
+    }
+}
+
+/**
  * Load Şedde data
  */
 async function loadSeddeData() {
@@ -433,6 +464,7 @@ if (typeof window !== 'undefined') {
     window.loadUcHarfliKelimelerData = loadUcHarfliKelimelerData;
     window.loadSeddeData = loadSeddeData;
     window.loadCezmData = loadCezmData;
+    window.loadTenvinData = loadTenvinData;
     window.preloadAllData = preloadAllData;
     window.getDataStatus = getDataStatus;
     
@@ -449,4 +481,5 @@ if (typeof window !== 'undefined') {
     window.ucHarfliKelimelerData = ucHarfliKelimelerData;
     window.seddeData = seddeData;
     window.cezmData = cezmData;
+    window.tenvinData = tenvinData;
 }

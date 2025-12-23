@@ -452,35 +452,42 @@
                     <div class="icon"><img src="ASSETS/elifba-cover/üstün-icon.png" alt="Üstün" style="width: 2rem; height: 2rem; object-fit: contain; display: block;"></div>
                     <div class="info">
                         <div class="name">Üstün</div>
-                        <div class="desc">Harfin üzerine gelen bu işaret ince harfleri "e" sesi ile, kalın okunan harfleriyse "a" sesi ile okutur. İnce harflerden ع – ر – ح üstünlü olduğu zaman a sesiyle okunur.</div>
+                        <div class="desc">Harfin üzerine gelen işaret</div>
                     </div>
                 </button>
                 <button class="submode-btn" data-elif-submode="esre">
                     <div class="icon"><img src="ASSETS/elifba-cover/esre-icon.png" alt="Esre" style="width: 2rem; height: 2rem; object-fit: contain; display: block;"></div>
                     <div class="info">
                         <div class="name">Esre</div>
-                        <div class="desc">Harfin altına gelen bu işaret ince harfleri "i" sesi ile, kalın okunan harfleriyse "ı" sesi ile okutur.</div>
+                        <div class="desc">Harfin altına gelen işaret</div>
                     </div>
                 </button>
                 <button class="submode-btn" data-elif-submode="otre">
                     <div class="icon"><img src="ASSETS/elifba-cover/otre-icon.png" alt="Ötre" style="width: 2rem; height: 2rem; object-fit: contain; display: block;"></div>
                     <div class="info">
                         <div class="name">Ötre</div>
-                        <div class="desc">Harfin üstüne gelen bu işaret ince harfleri "u" ile "ü" sesi arasında bir sesle, kalın okunan harfleriyse "u" sesi ile okutur.</div>
+                        <div class="desc">Harfin üstüne gelen işaret</div>
                     </div>
                 </button>
                 <button class="submode-btn" data-elif-submode="sedde">
                     <div class="icon"><img src="ASSETS/elifba-cover/sedde-icon.png" alt="Şedde" style="width: 2rem; height: 2rem; object-fit: contain; display: block;"></div>
                     <div class="info">
                         <div class="name">Şedde</div>
-                        <div class="desc">Şedde, üzerinde bulunduğu harfin iki defa okunmasını sağlar. Yani, birinci defa cezimli, ikinci defa ise kendi harekesi gibi okutur.</div>
+                        <div class="desc">Harfin iki defa okunmasını sağlar</div>
                     </div>
                 </button>
                 <button class="submode-btn" data-elif-submode="cezm">
                     <div class="icon"><img src="ASSETS/elifba-cover/cezm-icon.png" alt="Cezm" style="width: 2rem; height: 2rem; object-fit: contain; display: block;"></div>
                     <div class="info">
                         <div class="name">Cezm</div>
-                        <div class="desc">Cezm üzerinde bulunduğu harfi kendinden önceki harekeli harfe bağlar.</div>
+                        <div class="desc">Harfi önceki harfe bağlar</div>
+                    </div>
+                </button>
+                <button class="submode-btn" data-elif-submode="tenvin">
+                    <div class="icon">✨</div>
+                    <div class="info">
+                        <div class="name">Tenvin</div>
+                        <div class="desc">Harfe "n" sesi ilave eder</div>
                     </div>
                 </button>
                 <button class="submode-btn" data-elif-submode="uc-harfli-kelimeler">
@@ -501,7 +508,10 @@
             <div class="game-progress">
                 <span id="elif-question-number">1</span> / <span id="elif-total-questions">10</span>
             </div>
-            <div class="combo-display" style="display: none;">🔥 <span id="elif-combo">0</span></div>
+            <div style="display: flex; align-items: center; gap: var(--spacing-sm);">
+                <div class="combo-display" style="display: none;">🔥 <span id="elif-combo">0</span></div>
+                <button class="info-btn" id="elif-info-btn" onclick="showElifBaInfo()" title="Bilgi" style="display: none;">ℹ️</button>
+            </div>
         </div>
 
         <div class="game-content">
@@ -881,6 +891,19 @@
                     <div class="loading-spinner"></div>
                     <p style="margin-top: 10px; font-size: 0.9rem;">Yükleniyor...</p>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Elif Ba Info Modal -->
+    <div id="elif-ba-info-modal" class="modal hidden">
+        <div class="modal-content glass-card" style="max-width: 500px; max-height: 80vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-md);">
+                <h2 style="font-size: 1.2rem; margin: 0;" id="elif-info-title">Bilgi</h2>
+                <button class="secondary-btn" onclick="closeModal('elif-ba-info-modal')" style="padding: 6px 12px; font-size: 0.9rem;">✕</button>
+            </div>
+            <div id="elif-info-content" style="line-height: 1.8; color: var(--text-primary);">
+                <!-- Content will be populated dynamically -->
             </div>
         </div>
     </div>
