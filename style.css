@@ -48,6 +48,18 @@
     /* Safe Areas */
     --safe-area-top: env(safe-area-inset-top, 0px);
     --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+    
+    /* Typography */
+    --font-arabic: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif;
+    --font-system: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
+    
+    /* Font Weights */
+    --font-weight-light: 300;
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    --font-weight-extrabold: 800;
 }
 
 /* Font Face */
@@ -71,7 +83,7 @@ html {
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
+    font-family: var(--font-system);
     background: var(--bg-primary);
     min-height: 100vh;
     min-height: 100dvh;
@@ -432,13 +444,13 @@ body {
 
 .arabic-word,
 .arabic-letter {
-    font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif;
+    font-family: var(--font-arabic);
     font-size: 3.5rem;
     color: #000000; /* Siyah - kelimeler her zaman siyah görünmeli */
     direction: rtl;
     line-height: 1.6;
     margin-bottom: var(--spacing-md);
-    font-weight: 600; /* Daha kalın yazı */
+    font-weight: 400; /* Normal kalınlık - daha ince görünüm */
 }
 
 /* Elif Ba Kelimeler Modu İçin Özel Düzen */
@@ -512,12 +524,13 @@ body {
 }
 
 .arabic-verse {
-    font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif;
+    font-family: var(--font-arabic);
     font-size: 2rem;
     color: var(--text-primary);
     direction: rtl;
     line-height: 1.8;
     margin-bottom: var(--spacing-md);
+    font-weight: 400; /* Normal kalınlık - daha ince görünüm */
 }
 
 .verse-translation {
@@ -609,17 +622,29 @@ body {
     border: 2px solid rgba(0, 0, 0, 0.15); /* Duolingo tarzı net border */
     border-radius: 16px; /* Duolingo tarzı yuvarlatılmış köşeler */
     font-size: clamp(1.1rem, 2.5vw, 1.35rem); /* Daha büyük ve okunabilir font */
-    font-weight: 600; /* Daha kalın font */
+    font-weight: 500; /* Orta kalınlık - Arapça metinler için uygun */
     text-align: center;
     cursor: pointer;
     transition: all 0.2s ease;
     color: var(--text-primary);
+}
+
+.answer-option {
     line-height: 1.5;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08); /* Hafif gölge */
     min-height: 56px; /* Minimum yükseklik okunabilirlik için */
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+/* Arapça karakter içeren cevap şıkları için özel stil */
+.answer-option.arabic-text,
+.answer-option.has-arabic,
+.answer-option[data-arabic="true"] {
+    font-family: var(--font-arabic);
+    font-weight: 400; /* Arapça metinler için daha ince */
+    direction: rtl;
 }
 
 .answer-option:hover {
@@ -691,10 +716,11 @@ body {
 }
 
 .arabic-text {
-    font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif;
+    font-family: var(--font-arabic);
     font-size: 1.75rem;
     color: var(--text-primary);
     direction: rtl;
+    font-weight: 400; /* Normal kalınlık - daha ince görünüm */
     line-height: 2;
     text-align: center;
     margin-bottom: var(--spacing-lg);
@@ -1110,11 +1136,12 @@ body {
 }
 
 .teaching-arabic {
-    font-family: 'KFGQPC Uthmanic Script HAFS', 'Amiri', serif;
+    font-family: var(--font-arabic);
     font-size: 1.5rem;
     color: var(--text-primary);
     direction: rtl;
     line-height: 2;
+    font-weight: 400; /* Normal kalınlık - daha ince görünüm */
     margin-bottom: var(--spacing-md);
 }
 
@@ -1608,7 +1635,7 @@ body {
 }
 
 .harf-arabic {
-    font-family: 'KFGQPC Uthmanic Script HAFS', 'Amiri', serif;
+    font-family: var(--font-arabic);
     font-size: 2.5rem;
     color: #000000; /* Siyah harfler */
     font-weight: 500;
@@ -1685,7 +1712,7 @@ body {
 }
 
 .harf-isimler-arabic {
-    font-family: 'KFGQPC Uthmanic Script HAFS', 'Amiri', serif;
+    font-family: var(--font-arabic);
     font-size: 1.8rem;
     color: #000000;
     font-weight: 600;
@@ -2362,7 +2389,7 @@ body {
 
 /* Arabic Text Style */
 .arabic-text {
-    font-family: 'KFGQPC Uthmanic Script HAFS', 'Amiri', serif;
+    font-family: var(--font-arabic);
     font-size: 1.2rem;
     direction: rtl;
 }
@@ -2653,11 +2680,12 @@ body {
 
 .karma-arabic {
     font-size: 2.5rem;
-    font-family: 'Traditional Arabic', 'Amiri', serif;
+    font-family: var(--font-arabic);
     text-align: center;
     color: var(--text-primary);
     margin-bottom: var(--spacing-md);
     line-height: 1.6;
+    font-weight: 400; /* Normal kalınlık - daha ince görünüm */
 }
 
 .karma-arabic.harf {
@@ -2695,12 +2723,13 @@ body {
 
 .karma-ayet-arabic {
     font-size: 1.8rem;
-    font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif;
+    font-family: var(--font-arabic);
     text-align: right;
     direction: rtl;
     color: var(--text-primary);
     margin-bottom: var(--spacing-md);
     line-height: 2;
+    font-weight: 400; /* Normal kalınlık - daha ince görünüm */
 }
 
 .karma-ayet-meal {
@@ -2721,8 +2750,13 @@ body {
 }
 
 .karma-baglamsal-question strong {
-    color: var(--accent-primary);
+    color: #DC143C;
     font-weight: 700;
+    font-size: 1.2em;
+    background: rgba(220, 20, 60, 0.1);
+    padding: 2px 8px;
+    border-radius: 6px;
+    display: inline-block;
 }
 
 .karma-audio-section {
@@ -2826,10 +2860,11 @@ body {
 }
 
 .match-item.arabic {
-    font-family: 'KFGQPC Uthmanic Script HAFS', 'Traditional Arabic', 'Amiri', serif;
+    font-family: var(--font-arabic);
     font-size: 1.2rem;
     direction: rtl;
     min-height: 60px; /* Arapça için de aynı yükseklik */
+    font-weight: 400; /* Normal kalınlık - daha ince görünüm */
 }
 
 .match-item.turkish {
@@ -3063,11 +3098,12 @@ body {
 }
 
 .teaching-arabic {
-    font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif;
+    font-family: var(--font-arabic);
     font-size: 1.8rem;
     direction: rtl;
     color: var(--accent-gold);
     margin-bottom: var(--spacing-md);
+    font-weight: 400; /* Normal kalınlık - daha ince görünüm */
     line-height: 2;
 }
 
