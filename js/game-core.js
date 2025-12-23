@@ -4142,6 +4142,7 @@ function renderKelimeCevirKarma(container, question) {
     
     container.innerHTML = `
         <div class="karma-type-badge">📝 Kelime Çevir</div>
+        <p class="karma-instruction">Arapça kelimenin Türkçe karşılığını seç</p>
         <div class="karma-arabic">${question.question || ''}</div>
         <div class="karma-info">${question.data?.sure_adi || ''}</div>
         <div class="karma-options">
@@ -4163,6 +4164,8 @@ function renderDinleBulKarma(container, question) {
     }
     
     container.innerHTML = `
+        <div class="karma-type-badge">🎧 Dinle Bul</div>
+        <p class="karma-instruction">Kelimeyi dinle ve doğru çeviriyi bul</p>
         <div class="karma-audio-section">
             <button class="audio-btn large" onclick="playSafeAudio('${(question.audioUrl || '').replace(/'/g, "\\'")}')">🔊</button>
         </div>
@@ -4287,6 +4290,7 @@ function renderBoslukDoldurKarma(container, question) {
     
     container.innerHTML = `
         <div class="karma-type-badge">📖 Boşluk Doldur</div>
+        <p class="karma-instruction">Boşluğa uygun kelimeyi seç</p>
         <div class="karma-arabic bosluk">${question.question || ''}</div>
         <div class="karma-translation">${question.translation || ''}</div>
         <div class="karma-options">
@@ -4310,8 +4314,8 @@ function renderHarfBulKarma(container, question) {
     
     container.innerHTML = `
         <div class="karma-type-badge">🔤 Harf Bul</div>
+        <p class="karma-instruction">Bu harfin okunuşunu seç</p>
         <div class="karma-arabic harf">${question.question || ''}</div>
-        <div class="karma-info">Bu harfin okunuşunu seç</div>
         <div class="karma-options">
             ${validOptions.map((opt, i) => `
                 <button class="answer-option" onclick="checkKarmaAnswer('${String(opt || '').replace(/'/g, "\\'")}', '${String(question.correctAnswer || '').replace(/'/g, "\\'")}')">
