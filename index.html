@@ -33,18 +33,18 @@
     <!-- Main Container -->
     <div id="main-container" class="main-container hidden">
         <!-- PWA Install Banner (Mobil cihazlar için) -->
-        <div id="install-banner" class="install-banner hidden" style="display: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 16px; margin: 8px 12px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-            <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
-                <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
-                    <div style="font-size: 24px;">📱</div>
-                    <div style="flex: 1;">
-                        <div style="font-weight: 600; font-size: 14px; margin-bottom: 2px;">Ana Ekrana Ekle</div>
-                        <div style="font-size: 12px; opacity: 0.9;">Uygulamayı ana ekranınıza ekleyerek daha hızlı erişin</div>
+        <div id="install-banner" class="install-banner hidden">
+            <div class="install-banner-content">
+                <div class="install-banner-info">
+                    <div class="install-banner-icon">📱</div>
+                    <div class="install-banner-text">
+                        <div class="install-banner-title">Ana Ekrana Ekle</div>
+                        <div class="install-banner-desc">Uygulamayı ana ekranınıza ekleyerek daha hızlı erişin</div>
                     </div>
                 </div>
-                <div style="display: flex; gap: 8px;">
-                    <button id="install-btn" style="background: white; color: #667eea; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer;">Ekle</button>
-                    <button id="install-dismiss" style="background: transparent; color: white; border: none; padding: 8px; font-size: 18px; cursor: pointer; opacity: 0.8;" title="Kapat">✕</button>
+                <div class="install-banner-actions">
+                    <button id="install-btn" class="install-btn-primary">Ekle</button>
+                    <button id="install-dismiss" class="install-btn-dismiss" title="Kapat">✕</button>
                 </div>
             </div>
         </div>
@@ -52,36 +52,36 @@
         <!-- Stats Header -->
         <div class="stats-header glass-card">
             <!-- User Status Bar with Reset Button -->
-            <div class="user-status-bar" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding: 6px 10px; background: rgba(255,255,255,0.05); border-radius: 8px;">
-                <div class="user-info" style="display: flex; align-items: center; gap: 8px;">
-                    <span id="user-avatar" style="font-size: 16px;">👤</span>
-                    <span id="current-username-display" style="font-weight: 600; color: #1a1a2e; font-size: 14px;">Misafir</span>
-                    <span id="user-status-indicator" style="font-size: 10px; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.1);">🔴 Çıkış Yapıldı</span>
+            <div class="user-status-bar">
+                <div class="user-info">
+                    <span id="user-avatar" class="user-avatar">👤</span>
+                    <span id="current-username-display" class="username-display">Misafir</span>
+                    <span id="user-status-indicator" class="user-status-indicator">🔴 Çıkış Yapıldı</span>
                 </div>
-                <div class="user-actions" style="display: flex; gap: 6px; align-items: center;">
-                    <button id="reset-all-btn" onclick="resetAllData()" style="background: #ff4444; color: white; border: none; border-radius: 6px; font-size: 10px; padding: 4px 8px; cursor: pointer; opacity: 0.8;" title="Tüm Oyunu Sıfırla (TEST)">🔄</button>
-                    <button id="user-login-btn" class="secondary-btn" onclick="showUsernameLoginModal()" style="font-size: 11px; padding: 5px 10px;">Giriş Yap</button>
-                    <button id="user-logout-btn" class="secondary-btn" onclick="handleUserLogout()" style="font-size: 11px; padding: 5px 10px; display: none;">Çıkış Yap</button>
+                <div class="user-actions">
+                    <button id="reset-all-btn" onclick="resetAllData()" class="reset-btn" title="Tüm Oyunu Sıfırla (TEST)">🔄</button>
+                    <button id="user-login-btn" class="secondary-btn user-action-btn" onclick="showUsernameLoginModal()">Giriş Yap</button>
+                    <button id="user-logout-btn" class="secondary-btn user-action-btn" onclick="handleUserLogout()" style="display: none;">Çıkış Yap</button>
                 </div>
             </div>
             
             <!-- Compact Stats Row - Single Line -->
-            <div class="stats-row-compact" style="display: flex; justify-content: space-around; align-items: center; margin-bottom: 12px; padding: 8px 4px;">
-                <div class="stat-item-compact" style="flex: 1; text-align: center;">
-                    <div class="stat-value-compact" id="total-hasene" style="font-size: 18px; font-weight: 700; color: #1a1a2e; line-height: 1.2;">0</div>
-                    <div class="stat-label-compact" style="font-size: 11px; color: #64748b; margin-top: 2px;">Hasene</div>
+            <div class="stats-row-compact">
+                <div class="stat-item-compact">
+                    <div class="stat-value-compact" id="total-hasene">0</div>
+                    <div class="stat-label-compact">Hasene</div>
                 </div>
-                <div class="stat-item-compact" style="flex: 1; text-align: center;">
-                    <div class="stat-value-compact" id="total-stars" style="font-size: 18px; font-weight: 700; color: #1a1a2e; line-height: 1.2;">⭐ 0</div>
-                    <div class="stat-label-compact" style="font-size: 11px; color: #64748b; margin-top: 2px;">Yıldız</div>
+                <div class="stat-item-compact">
+                    <div class="stat-value-compact" id="total-stars">⭐ 0</div>
+                    <div class="stat-label-compact">Yıldız</div>
                 </div>
-                <div class="stat-item-compact" style="flex: 1; text-align: center;">
-                    <div class="stat-value-compact" id="streak-count" style="font-size: 18px; font-weight: 700; color: #1a1a2e; line-height: 1.2;">🔥 0</div>
-                    <div class="stat-label-compact" style="font-size: 11px; color: #64748b; margin-top: 2px;">Seri</div>
+                <div class="stat-item-compact">
+                    <div class="stat-value-compact" id="streak-count">🔥 0</div>
+                    <div class="stat-label-compact">Seri</div>
                 </div>
-                <div class="stat-item-compact" style="flex: 1; text-align: center;">
-                    <div class="stat-value-compact" id="level-display" style="font-size: 18px; font-weight: 700; color: #1a1a2e; line-height: 1.2;">1</div>
-                    <div class="stat-label-compact" style="font-size: 11px; color: #64748b; margin-top: 2px;">Seviye</div>
+                <div class="stat-item-compact">
+                    <div class="stat-value-compact" id="level-display">1</div>
+                    <div class="stat-label-compact">Seviye</div>
                 </div>
             </div>
             
@@ -800,20 +800,19 @@
     <div id="username-login-modal" class="modal hidden">
         <div class="modal-content glass-card">
             <h2>👤 Kullanıcı Adı Girişi</h2>
-            <p style="margin-bottom: 20px; color: rgba(26,26,46,0.8);">Oyunu oynamak için bir kullanıcı adı girin</p>
+            <p class="modal-description">Oyunu oynamak için bir kullanıcı adı girin</p>
             <input 
                 type="text" 
                 id="username-input" 
                 class="username-input" 
                 placeholder="Kullanıcı adınızı girin..."
                 maxlength="50"
-                style="width: 100%; padding: 12px; margin-bottom: 16px; font-size: 16px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.2); color: rgba(26,26,46,0.9);"
                 onkeypress="if(event.key === 'Enter') confirmUsername();"
             />
             <!-- Cinsiyet Seçimi -->
             <div style="margin-bottom: 20px;">
-                <label style="display: block; margin-bottom: 8px; font-size: 14px; font-weight: 600; color: rgba(26,26,46,0.9);">Cinsiyet (Opsiyonel)</label>
-                <div style="display: flex; gap: 12px;">
+                <label class="gender-select-label">Cinsiyet (Opsiyonel)</label>
+                <div class="gender-select-buttons">
                     <button 
                         id="gender-male-btn" 
                         class="gender-btn" 
