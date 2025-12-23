@@ -304,10 +304,9 @@ async function initApp() {
         const onboardingComplete = localStorage.getItem('hasene_onboarding_complete');
         if (!onboardingComplete) {
             setTimeout(() => showOnboarding(), 500);
-        } else {
-            // Check for daily reward
-            checkAndShowDailyReward();
         }
+        // Günlük ödül artık otomatik gösterilmiyor
+        // Kullanıcı bir aktivite yaptıktan sonra (oyun tamamlandığında veya görevler tamamlandığında) gösterilecek
     }, 1500);
     
     console.log('✅ Uygulama başlatıldı');
@@ -2270,8 +2269,11 @@ function loadElifFethaQuestion() {
     letterElement.style.color = '#1a1a2e';
     letterElement.style.padding = '20px';
     letterElement.style.borderRadius = '12px';
+    
+    const harfWithUstun = currentQuestion.harfWithUstun || '';
+    
     letterElement.innerHTML = `
-        <div style="font-size: 4rem; font-weight: bold; margin-bottom: 8px;">${currentQuestion.harfWithUstun}</div>
+        <div style="font-size: 4rem; font-weight: bold; margin-bottom: 8px; font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif; direction: rtl; line-height: 1.8; text-align: center;">${harfWithUstun}</div>
         ${tipText ? `<div style="font-size: 0.75rem; opacity: 0.8; font-weight: 500;">${tipText}</div>` : ''}
     `;
     
@@ -2385,8 +2387,11 @@ function loadElifEsreQuestion() {
     letterElement.style.color = '#1a1a2e';
     letterElement.style.padding = '20px';
     letterElement.style.borderRadius = '12px';
+    
+    const harfWithEsre = currentQuestion.harfWithEsre || '';
+    
     letterElement.innerHTML = `
-        <div style="font-size: 4rem; font-weight: bold; margin-bottom: 8px;">${currentQuestion.harfWithEsre}</div>
+        <div style="font-size: 4rem; font-weight: bold; margin-bottom: 8px; font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif; direction: rtl; line-height: 1.8; text-align: center;">${harfWithEsre}</div>
         ${tipText ? `<div style="font-size: 0.75rem; opacity: 0.8; font-weight: 500;">${tipText}</div>` : ''}
     `;
     
@@ -2496,8 +2501,11 @@ function loadElifOtreQuestion() {
     letterElement.style.color = '#1a1a2e';
     letterElement.style.padding = '20px';
     letterElement.style.borderRadius = '12px';
+    
+    const harfWithOtre = currentQuestion.harfWithOtre || '';
+    
     letterElement.innerHTML = `
-        <div style="font-size: 4rem; font-weight: bold; margin-bottom: 8px;">${currentQuestion.harfWithOtre}</div>
+        <div style="font-size: 4rem; font-weight: bold; margin-bottom: 8px; font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif; direction: rtl; line-height: 1.8; text-align: center;">${harfWithOtre}</div>
         ${tipText ? `<div style="font-size: 0.75rem; opacity: 0.8; font-weight: 500;">${tipText}</div>` : ''}
     `;
     
@@ -2872,14 +2880,14 @@ function checkCezmAnswer(index, selectedAnswer) {
  */
 async function startElifHarekelerGame(harfData) {
     const harekeler = [
-        { name: 'Fetha', symbol: 'ـَ', sound: 'e' },
-        { name: 'Kesra', symbol: 'ـِ', sound: 'i' },
-        { name: 'Damme', symbol: 'ـُ', sound: 'u' },
-        { name: 'Sukun', symbol: 'ـْ', sound: '-' },
+        { name: 'Üstün', symbol: 'ـَ', sound: 'e' },
+        { name: 'Esre', symbol: 'ـِ', sound: 'i' },
+        { name: 'Ötre', symbol: 'ـُ', sound: 'u' },
+        { name: 'Cezm', symbol: 'ـْ', sound: '-' },
         { name: 'Şedde', symbol: 'ـّ', sound: 'çift' },
-        { name: 'Tenvin Fetha', symbol: 'ـً', sound: 'en' },
-        { name: 'Tenvin Kesra', symbol: 'ـٍ', sound: 'in' },
-        { name: 'Tenvin Damme', symbol: 'ـٌ', sound: 'un' }
+        { name: 'Tenvin Üstün', symbol: 'ـً', sound: 'en' },
+        { name: 'Tenvin Esre', symbol: 'ـٍ', sound: 'in' },
+        { name: 'Tenvin Ötre', symbol: 'ـٌ', sound: 'un' }
     ];
     
     // Create questions about harekeler
@@ -2922,14 +2930,14 @@ function loadElifHarekelerQuestion() {
     document.getElementById('elif-session-score').textContent = formatNumber(sessionScore);
     
     const harekeler = [
-        { name: 'Fetha', symbol: 'ـَ' },
-        { name: 'Kesra', symbol: 'ـِ' },
-        { name: 'Damme', symbol: 'ـُ' },
-        { name: 'Sukun', symbol: 'ـْ' },
+        { name: 'Üstün', symbol: 'ـَ' },
+        { name: 'Esre', symbol: 'ـِ' },
+        { name: 'Ötre', symbol: 'ـُ' },
+        { name: 'Cezm', symbol: 'ـْ' },
         { name: 'Şedde', symbol: 'ـّ' },
-        { name: 'Tenvin Fetha', symbol: 'ـً' },
-        { name: 'Tenvin Kesra', symbol: 'ـٍ' },
-        { name: 'Tenvin Damme', symbol: 'ـٌ' }
+        { name: 'Tenvin Üstün', symbol: 'ـً' },
+        { name: 'Tenvin Esre', symbol: 'ـٍ' },
+        { name: 'Tenvin Ötre', symbol: 'ـٌ' }
     ];
     
     const correctAnswer = currentQuestion.correctAnswer;
@@ -4005,7 +4013,8 @@ async function startKarmaGame() {
             pairs: matchWords.map(w => ({
                 arabic: w.kelime,
                 turkish: w.anlam,
-                id: w.id
+                id: w.id,
+                audioUrl: w.ses_dosyasi || w.audioUrl || ''
             }))
         });
     }
@@ -4033,12 +4042,18 @@ async function startKarmaGame() {
     });
     
     // 5. Harf soruları (3 adet)
-    const harfQuestions = getRandomItems(harfData, 3).map(harf => ({
+    const harfQuestions = getRandomItems(
+        harfData.filter(h => h && h.harf && h.okunus), // Sadece geçerli harfler
+        3
+    ).map(harf => ({
         type: 'harf-bul',
         data: harf,
         question: harf.harf,
-        correctAnswer: harf.okunusu,
-        options: generateOptions(harf.okunusu, harfData.map(h => h.okunusu))
+        correctAnswer: harf.okunus || '',
+        options: generateOptions(
+            harf.okunus || '', 
+            harfData.filter(h => h && h.okunus).map(h => h.okunus)
+        )
     }));
     
     // Combine and shuffle all questions
@@ -4065,9 +4080,17 @@ async function startKarmaGame() {
  * Generate 4 options including the correct answer
  */
 function generateOptions(correctAnswer, allAnswers) {
-    const uniqueAnswers = [...new Set(allAnswers.filter(a => a && a !== correctAnswer))];
+    // Filter out undefined/null/empty values
+    const cleanAllAnswers = (allAnswers || []).filter(a => a != null && a !== '' && typeof a === 'string');
+    const cleanCorrectAnswer = correctAnswer != null && correctAnswer !== '' ? String(correctAnswer) : '';
+    
+    if (!cleanCorrectAnswer) {
+        return [];
+    }
+    
+    const uniqueAnswers = [...new Set(cleanAllAnswers.filter(a => a !== cleanCorrectAnswer))];
     const wrongAnswers = getRandomItems(uniqueAnswers, 3);
-    return shuffleArray([correctAnswer, ...wrongAnswers]);
+    return shuffleArray([cleanCorrectAnswer, ...wrongAnswers]).filter(opt => opt != null && opt !== '');
 }
 
 /**
@@ -4110,14 +4133,21 @@ function loadKarmaQuestion() {
 }
 
 function renderKelimeCevirKarma(container, question) {
+    const validOptions = (question.options || []).filter(opt => opt != null && opt !== '');
+    
+    if (validOptions.length === 0) {
+        container.innerHTML = '<div class="error-message">Soru yüklenemedi</div>';
+        return;
+    }
+    
     container.innerHTML = `
         <div class="karma-type-badge">📝 Kelime Çevir</div>
-        <div class="karma-arabic">${question.question}</div>
-        <div class="karma-info">${question.data.sure_adi || ''}</div>
+        <div class="karma-arabic">${question.question || ''}</div>
+        <div class="karma-info">${question.data?.sure_adi || ''}</div>
         <div class="karma-options">
-            ${question.options.map((opt, i) => `
-                <button class="answer-option" onclick="checkKarmaAnswer('${opt.replace(/'/g, "\\'")}', '${question.correctAnswer.replace(/'/g, "\\'")}')">
-                    ${opt}
+            ${validOptions.map((opt, i) => `
+                <button class="answer-option" onclick="checkKarmaAnswer('${String(opt || '').replace(/'/g, "\\'")}', '${String(question.correctAnswer || '').replace(/'/g, "\\'")}')">
+                    ${opt || ''}
                 </button>
             `).join('')}
         </div>
@@ -4125,15 +4155,21 @@ function renderKelimeCevirKarma(container, question) {
 }
 
 function renderDinleBulKarma(container, question) {
+    const validOptions = (question.options || []).filter(opt => opt != null && opt !== '');
+    
+    if (validOptions.length === 0) {
+        container.innerHTML = '<div class="error-message">Soru yüklenemedi</div>';
+        return;
+    }
+    
     container.innerHTML = `
-        <div class="karma-type-badge">🎧 Dinle Bul</div>
         <div class="karma-audio-section">
-            <button class="audio-btn large" onclick="playSafeAudio('${question.audioUrl}')">🔊 Dinle</button>
+            <button class="audio-btn large" onclick="playSafeAudio('${(question.audioUrl || '').replace(/'/g, "\\'")}')">🔊</button>
         </div>
         <div class="karma-options">
-            ${question.options.map((opt, i) => `
-                <button class="answer-option" onclick="checkKarmaAnswer('${opt.replace(/'/g, "\\'")}', '${question.correctAnswer.replace(/'/g, "\\'")}')">
-                    ${opt}
+            ${validOptions.map((opt, i) => `
+                <button class="answer-option" onclick="checkKarmaAnswer('${String(opt || '').replace(/'/g, "\\'")}', '${String(question.correctAnswer || '').replace(/'/g, "\\'")}')">
+                    ${opt || ''}
                 </button>
             `).join('')}
         </div>
@@ -4143,8 +4179,10 @@ function renderDinleBulKarma(container, question) {
 }
 
 function renderEslestirmeKarma(container, question) {
+    // Reset match state
     karmaMatchPairs = question.pairs.map(p => ({ ...p, matched: false }));
-    let selectedArabic = null;
+    karmaSelectedItem = null;
+    karmaMatchedCount = 0;
     
     const arabicItems = shuffleArray([...question.pairs]);
     const turkishItems = shuffleArray([...question.pairs]);
@@ -4155,7 +4193,7 @@ function renderEslestirmeKarma(container, question) {
         <div class="karma-match-grid">
             <div class="match-column arabic-column">
                 ${arabicItems.map(p => `
-                    <button class="match-item arabic" data-id="${p.id}" onclick="selectKarmaMatch(this, 'arabic', '${p.id}')">
+                    <button class="match-item arabic" data-id="${p.id}" data-audio="${(p.audioUrl || '').replace(/"/g, '&quot;')}" onclick="selectKarmaMatch(this, 'arabic', '${p.id}')">
                         ${p.arabic}
                     </button>
                 `).join('')}
@@ -4177,6 +4215,14 @@ let karmaMatchedCount = 0;
 function selectKarmaMatch(element, type, id) {
     if (element.classList.contains('matched')) return;
     
+    // Arapça kelime tıklandığında ses çal
+    if (type === 'arabic') {
+        const audioUrl = element.getAttribute('data-audio');
+        if (audioUrl) {
+            playSafeAudio(audioUrl);
+        }
+    }
+    
     if (!karmaSelectedItem) {
         // First selection
         karmaSelectedItem = { element, type, id };
@@ -4188,6 +4234,9 @@ function selectKarmaMatch(element, type, id) {
         element.classList.add('selected');
     } else {
         // Different column - check match
+        // İkinci seçim yapılmadan önce, tıklanan butona selected ekleme (sadece kontrol için)
+        element.classList.remove('selected'); // Eğer varsa kaldır
+        
         if (karmaSelectedItem.id === id) {
             // Correct match!
             karmaSelectedItem.element.classList.remove('selected');
@@ -4213,27 +4262,37 @@ function selectKarmaMatch(element, type, id) {
             // Wrong match
             karmaSelectedItem.element.classList.remove('selected');
             karmaSelectedItem.element.classList.add('wrong');
+            element.classList.remove('selected'); // Türkçe butondan da selected kaldır
             element.classList.add('wrong');
             comboCount = 0;
             
             setTimeout(() => {
-                karmaSelectedItem.element.classList.remove('wrong');
-                element.classList.remove('wrong');
+                karmaSelectedItem.element.classList.remove('wrong', 'selected');
+                element.classList.remove('wrong', 'selected');
+                karmaSelectedItem = null;
             }, 500);
+            return; // Don't reset karmaSelectedItem here, wait for timeout
         }
         karmaSelectedItem = null;
     }
 }
 
 function renderBoslukDoldurKarma(container, question) {
+    const validOptions = (question.options || []).filter(opt => opt != null && opt !== '');
+    
+    if (validOptions.length === 0) {
+        container.innerHTML = '<div class="error-message">Soru yüklenemedi</div>';
+        return;
+    }
+    
     container.innerHTML = `
         <div class="karma-type-badge">📖 Boşluk Doldur</div>
-        <div class="karma-arabic bosluk">${question.question}</div>
-        <div class="karma-translation">${question.translation}</div>
+        <div class="karma-arabic bosluk">${question.question || ''}</div>
+        <div class="karma-translation">${question.translation || ''}</div>
         <div class="karma-options">
-            ${question.options.map((opt, i) => `
-                <button class="answer-option" onclick="checkKarmaAnswer('${opt.replace(/'/g, "\\'")}', '${question.correctAnswer.replace(/'/g, "\\'")}')">
-                    ${opt}
+            ${validOptions.map((opt, i) => `
+                <button class="answer-option" onclick="checkKarmaAnswer('${String(opt || '').replace(/'/g, "\\'")}', '${String(question.correctAnswer || '').replace(/'/g, "\\'")}')">
+                    ${opt || ''}
                 </button>
             `).join('')}
         </div>
@@ -4241,14 +4300,22 @@ function renderBoslukDoldurKarma(container, question) {
 }
 
 function renderHarfBulKarma(container, question) {
+    // Filter out undefined/null options
+    const validOptions = (question.options || []).filter(opt => opt != null && opt !== '');
+    
+    if (validOptions.length === 0) {
+        container.innerHTML = '<div class="error-message">Soru yüklenemedi</div>';
+        return;
+    }
+    
     container.innerHTML = `
         <div class="karma-type-badge">🔤 Harf Bul</div>
-        <div class="karma-arabic harf">${question.question}</div>
+        <div class="karma-arabic harf">${question.question || ''}</div>
         <div class="karma-info">Bu harfin okunuşunu seç</div>
         <div class="karma-options">
-            ${question.options.map((opt, i) => `
-                <button class="answer-option" onclick="checkKarmaAnswer('${opt.replace(/'/g, "\\'")}', '${question.correctAnswer.replace(/'/g, "\\'")}')">
-                    ${opt}
+            ${validOptions.map((opt, i) => `
+                <button class="answer-option" onclick="checkKarmaAnswer('${String(opt || '').replace(/'/g, "\\'")}', '${String(question.correctAnswer || '').replace(/'/g, "\\'")}')">
+                    ${opt || ''}
                 </button>
             `).join('')}
         </div>

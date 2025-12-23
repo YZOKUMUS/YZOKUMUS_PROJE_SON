@@ -468,6 +468,32 @@ body {
     color: #DC143C; /* Kırmızı harekeler */
 }
 
+/* Hareke Yanıp Sönme Animasyonu - Öğretme amaçlı */
+.hareke-blink {
+    animation: harekeBlink 1s ease-in-out infinite !important;
+    display: inline !important;
+    color: #f59e0b !important; /* Turuncu renk - dikkat çekmek için */
+    font-weight: 700 !important;
+    text-shadow: 0 0 10px rgba(245, 158, 11, 0.8), 0 0 15px rgba(245, 158, 11, 0.5) !important;
+    vertical-align: inherit !important;
+    line-height: inherit !important;
+    position: relative !important;
+    z-index: 10 !important;
+}
+
+@keyframes harekeBlink {
+    0%, 100% {
+        opacity: 1 !important;
+        transform: scale(1) !important;
+        filter: brightness(1.2) drop-shadow(0 0 8px rgba(245, 158, 11, 0.8));
+    }
+    50% {
+        opacity: 0.6 !important;
+        transform: scale(1.1) !important;
+        filter: brightness(1.5) drop-shadow(0 0 12px rgba(245, 158, 11, 1));
+    }
+}
+
 .elif-question-header .audio-btn {
     position: static;
     flex-shrink: 0;
@@ -2738,7 +2764,7 @@ body {
 }
 
 .match-item:hover:not(.matched) {
-    border-color: var(--accent-primary);
+    /* Hover'da sadece hafif büyütme, border rengini değiştirme */
     transform: scale(1.02);
 }
 
@@ -3092,12 +3118,13 @@ body {
     
     /* Karma eşleştirme responsive */
     .karma-match-grid {
-        grid-template-columns: 1fr;
-        gap: var(--spacing-md);
+        grid-template-columns: 1fr 1fr;
+        gap: var(--spacing-sm);
     }
     
     .match-column {
         width: 100%;
+        min-width: 0;
     }
     
     .match-item {
@@ -3189,8 +3216,8 @@ body {
     
     /* Karma eşleştirme küçük ekranlar için */
     .karma-match-grid {
-        grid-template-columns: 1fr;
-        gap: var(--spacing-sm);
+        grid-template-columns: 1fr 1fr;
+        gap: var(--spacing-xs);
     }
     
     .match-item {
