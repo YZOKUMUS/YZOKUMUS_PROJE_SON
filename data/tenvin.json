@@ -5,197 +5,196 @@
       "okunus": "en",
       "sesTipi": "ince_sesli_harf",
       "renkKodu": "#ADE2EF",
-      "audioUrl": "ASSETS/audio/tenvin/btn_1.mp3"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2001.mp3?_=1"
     },
     {
-      "harfWithTenvin": "باً",
+      "harfWithTenvin": "بًا",
       "okunus": "ben",
       "sesTipi": "ince_sesli_harf",
       "renkKodu": "#ADE2EF",
-      "audioUrl": "ASSETS/audio/tenvin/btn_2.mp3"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2002.mp3?_=2"
     },
     {
-      "harfWithTenvin": "تاً",
+      "harfWithTenvin": "تًا",
       "okunus": "ten",
       "sesTipi": "ince_sesli_harf",
       "renkKodu": "#ADE2EF",
-      "audioUrl": "ASSETS/audio/tenvin/btn_3.mp3"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2003.mp3?_=3"
     },
     {
-      "harfWithTenvin": "ثاً",
+      "harfWithTenvin": "ثًا",
       "okunus": "sen",
       "sesTipi": "peltek_sesli_harf",
       "renkKodu": "#F09E9E",
-      "audioUrl": "ASSETS/audio/tenvin/btn_4.mp3"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2004.mp3?_=4"
     },
     {
-      "harfWithTenvin": "جاً",
+      "harfWithTenvin": "جًا",
       "okunus": "cen",
       "sesTipi": "ince_sesli_harf",
       "renkKodu": "#ADE2EF",
-      "audioUrl": "ASSETS/audio/tenvin/btn_5.mp3"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2003.mp3?_=5"
     },
     {
-      "harfWithTenvin": "حاً",
+      "harfWithTenvin": "حًا",
       "okunus": "hen",
       "sesTipi": "ince_sesli_harf",
       "renkKodu": "#ADE2EF",
-      "audioUrl": "ASSETS/audio/tenvin/btn_6.mp3"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2003.mp3?_=6"
     },
     {
-      "harfWithTenvin": "خاً",
+      "harfWithTenvin": "خًا",
       "okunus": "han",
       "sesTipi": "kalın_sesli_harf",
       "renkKodu": "#BBEDBB",
-      "audioUrl": "ASSETS/audio/tenvin/btn_7.mp3"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2003.mp3?_=7"
     },
     {
-      "harfWithTenvin": "داً",
+      "harfWithTenvin": "دًا",
       "okunus": "den",
       "sesTipi": "ince_sesli_harf",
       "renkKodu": "#ADE2EF",
-      "audioUrl": "ASSETS/audio/tenvin/btn_8.mp3"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2003.mp3?_=8"
     },
     {
-      "harfWithTenvin": "ذاً",
+      "harfWithTenvin": "ذًا",
       "okunus": "zen",
       "sesTipi": "peltek_sesli_harf",
       "renkKodu": "#F09E9E",
-      "audioUrl": "ASSETS/audio/tenvin/btn_9.mp3"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2003.mp3?_=9"
     },
     {
-      "harfWithTenvin": "راً",
-      "okunus": "ren",
+      "harfWithTenvin": "رًا",
+      "okunus": "ran",
       "sesTipi": "ince_sesli_harf",
       "renkKodu": "#ADE2EF",
-      "audioUrl": "ASSETS/audio/tenvin/btn_10.mp3"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2010.mp3?_=10"
     },
     {
-      "harfWithTenvin": "زاً",
-      "okunus": "zen",
+      "harfWithTenvin": "زٍ",
+      "okunus": "zin",
       "sesTipi": "ince_sesli_harf",
       "renkKodu": "#ADE2EF",
-      "audioUrl": "ASSETS/audio/tenvin/btn_11.mp3"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2011.mp3?_=11"
     },
     {
-      "harfWithTenvin": "ساً",
-      "okunus": "sen",
+      "harfWithTenvin": "سٍ",
+      "okunus": "sin",
       "sesTipi": "ince_sesli_harf",
       "renkKodu": "#ADE2EF",
-      "audioUrl": "ASSETS/audio/tenvin/btn_12.mp3"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2012.mp3?_=12"
     },
     {
-      "harfWithTenvin": "شاً",
-      "okunus": "şen",
+      "harfWithTenvin": "شٍ",
+      "okunus": "şin",
       "sesTipi": "ince_sesli_harf",
       "renkKodu": "#ADE2EF",
-      "audioUrl": "ASSETS/audio/tenvin/btn_13.mp3"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2013.mp3?_=13"
     },
     {
-      "harfWithTenvin": "صاً",
-      "okunus": "san",
+      "harfWithTenvin": "صٍ",
+      "okunus": "sın",
       "sesTipi": "kalın_sesli_harf",
       "renkKodu": "#BBEDBB",
-      "audioUrl": "ASSETS/audio/tenvin/btn_14.mp3"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2014.mp3?_=14"
     },
     {
-      "harfWithTenvin": "ضاً",
-      "okunus": "dan",
+      "harfWithTenvin": "ضٍ",
+      "okunus": "zın",
       "sesTipi": "kalın_sesli_harf",
       "renkKodu": "#BBEDBB",
-      "audioUrl": "ASSETS/audio/tenvin/btn_15.mp3"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2015.mp3?_=15"
     },
     {
-      "harfWithTenvin": "طاً",
-      "okunus": "dan",
+      "harfWithTenvin": "طٍ",
+      "okunus": "tın",
       "sesTipi": "kalın_sesli_harf",
       "renkKodu": "#BBEDBB",
-      "audioUrl": "ASSETS/audio/tenvin/btn_16.mp3"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2016.mp3?_=16"
     },
     {
-      "harfWithTenvin": "ظاً",
-      "okunus": "zan",
+      "harfWithTenvin": "ظٍ",
+      "okunus": "zın",
       "sesTipi": "peltek_sesli_harf",
       "renkKodu": "#F09E9E",
-      "audioUrl": "ASSETS/audio/tenvin/btn_17.mp3"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2017.mp3?_=17"
     },
     {
-      "harfWithTenvin": "عاً",
-      "okunus": "en",
+      "harfWithTenvin": "عٍ",
+      "okunus": "in",
       "sesTipi": "ince_sesli_harf",
       "renkKodu": "#ADE2EF",
-      "audioUrl": "ASSETS/audio/tenvin/btn_18.mp3"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2018.mp3?_=18"
     },
     {
-      "harfWithTenvin": "غاً",
-      "okunus": "ğan",
+      "harfWithTenvin": "غٍ",
+      "okunus": "ğin",
       "sesTipi": "kalın_sesli_harf",
       "renkKodu": "#BBEDBB",
-      "audioUrl": "ASSETS/audio/tenvin/btn_19.mp3"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2019.mp3?_=19"
     },
     {
-      "harfWithTenvin": "فاً",
-      "okunus": "fen",
+      "harfWithTenvin": "فٍ",
+      "okunus": "fin",
       "sesTipi": "ince_sesli_harf",
       "renkKodu": "#ADE2EF",
-      "audioUrl": "ASSETS/audio/tenvin/btn_20.mp3"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2020.mp3?_=20"
     },
     {
-      "harfWithTenvin": "قاً",
-      "okunus": "gan",
+      "harfWithTenvin": "قٌ",
+      "okunus": "gun",
       "sesTipi": "kalın_sesli_harf",
       "renkKodu": "#BBEDBB",
-      "audioUrl": "ASSETS/audio/tenvin/btn_21.mp3"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2021.mp3?_=21"
     },
     {
-      "harfWithTenvin": "كاً",
-      "okunus": "ken",
+      "harfWithTenvin": "كٌ",
+      "okunus": "kun",
       "sesTipi": "ince_sesli_harf",
       "renkKodu": "#ADE2EF",
-      "audioUrl": "ASSETS/audio/tenvin/btn_22.mp3"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2022.mp3?_=22"
     },
     {
-      "harfWithTenvin": "لاً",
-      "okunus": "len",
+      "harfWithTenvin": "لٌ",
+      "okunus": "lun",
       "sesTipi": "ince_sesli_harf",
       "renkKodu": "#ADE2EF",
-      "audioUrl": "ASSETS/audio/tenvin/btn_23.mp3"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2023.mp3?_=23"
     },
     {
-      "harfWithTenvin": "ماً",
-      "okunus": "men",
+      "harfWithTenvin": "مٌ",
+      "okunus": "mun",
       "sesTipi": "ince_sesli_harf",
       "renkKodu": "#ADE2EF",
-      "audioUrl": "ASSETS/audio/tenvin/btn_24.mp3"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2024.mp3?_=24"
     },
     {
-      "harfWithTenvin": "ناً",
-      "okunus": "nen",
+      "harfWithTenvin": "نٌ",
+      "okunus": "nun",
       "sesTipi": "ince_sesli_harf",
       "renkKodu": "#ADE2EF",
-      "audioUrl": "ASSETS/audio/tenvin/btn_25.mp3"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2025.mp3?_=25"
     },
     {
-      "harfWithTenvin": "واً",
-      "okunus": "ven",
+      "harfWithTenvin": "وٌ",
+      "okunus": "vun",
       "sesTipi": "ince_sesli_harf",
       "renkKodu": "#ADE2EF",
-      "audioUrl": "ASSETS/audio/tenvin/btn_26.mp3"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2026.mp3?_=26"
     },
     {
-      "harfWithTenvin": "هاً",
-      "okunus": "hen",
+      "harfWithTenvin": "هٌ",
+      "okunus": "hun",
       "sesTipi": "ince_sesli_harf",
       "renkKodu": "#ADE2EF",
-      "audioUrl": "ASSETS/audio/tenvin/btn_27.mp3"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2027.mp3?_=27"
     },
     {
-      "harfWithTenvin": "ياً",
-      "okunus": "yen",
+      "harfWithTenvin": "ىٌ",
+      "okunus": "yun",
       "sesTipi": "ince_sesli_harf",
       "renkKodu": "#ADE2EF",
-      "audioUrl": "ASSETS/audio/tenvin/btn_28.mp3"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2028.mp3?_=28"
     }
   ]
 }
-
