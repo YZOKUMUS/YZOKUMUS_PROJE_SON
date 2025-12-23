@@ -2640,6 +2640,7 @@ body {
 }
 
 .karma-type-badge {
+    position: relative;
     display: inline-block;
     background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
     color: white;
@@ -2683,6 +2684,47 @@ body {
     font-style: italic;
 }
 
+/* Bağlamsal Öğrenme */
+.karma-ayet-container {
+    background: var(--glass-bg-dark);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+    border: 1px solid var(--glass-border);
+}
+
+.karma-ayet-arabic {
+    font-size: 1.8rem;
+    font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif;
+    text-align: right;
+    direction: rtl;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-md);
+    line-height: 2;
+}
+
+.karma-ayet-meal {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    text-align: center;
+    margin-bottom: var(--spacing-md);
+    line-height: 1.6;
+    font-style: italic;
+}
+
+
+.karma-baglamsal-question {
+    text-align: center;
+    margin-bottom: var(--spacing-lg);
+    font-size: 1.1rem;
+    color: var(--text-primary);
+}
+
+.karma-baglamsal-question strong {
+    color: var(--accent-primary);
+    font-weight: 700;
+}
+
 .karma-audio-section {
     display: flex;
     justify-content: center;
@@ -2698,6 +2740,30 @@ body {
     padding: var(--spacing-lg) var(--spacing-xl);
     border-radius: var(--radius-xl);
     position: static;
+}
+
+.karma-audio-btn-top {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--glass-bg-dark);
+    border: 2px solid var(--glass-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    z-index: 10;
+}
+
+.karma-audio-btn-top:hover {
+    background: rgba(157, 138, 255, 0.2);
+    border-color: var(--accent-primary);
+    transform: scale(1.1);
 }
 
 .karma-options {
