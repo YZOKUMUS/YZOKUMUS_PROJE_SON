@@ -3244,16 +3244,16 @@ function loadUzatmaMedQuestion() {
     
     document.getElementById('elif-question-number').textContent = questionIndex + 1;
     
-    // Set word display
+    // Set word display - responsive with clamp()
     const letterElement = document.getElementById('elif-letter');
     letterElement.style.backgroundColor = '#1a1a2e';
     letterElement.style.color = '#fff';
-    letterElement.style.padding = '20px';
+    letterElement.style.padding = 'clamp(12px, 3vw, 20px)';
     letterElement.style.borderRadius = '12px';
     letterElement.style.position = 'relative';
     letterElement.innerHTML = `
-        <div style="font-size: 3rem; font-weight: bold; font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif; direction: rtl; text-align: center; line-height: var(--arabic-line-height-normal); letter-spacing: var(--arabic-letter-spacing);">${currentQuestion.kelime}</div>
-        <div style="position: absolute; bottom: 8px; right: 12px; font-size: 0.7rem; opacity: 0.7; font-weight: 400;">${currentQuestion.anlam || ''}</div>
+        <div style="font-size: clamp(2rem, 6vw, 3rem); font-weight: bold; font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif; direction: rtl; text-align: center; line-height: var(--arabic-line-height-normal); letter-spacing: var(--arabic-letter-spacing);">${currentQuestion.kelime}</div>
+        <div style="position: absolute; bottom: clamp(6px, 1.5vw, 8px); right: clamp(8px, 2vw, 12px); font-size: clamp(0.6rem, 1.5vw, 0.7rem); opacity: 0.7; font-weight: 400;">${currentQuestion.anlam || ''}</div>
     `;
     
     // Generate options with only Turkish pronunciation

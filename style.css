@@ -1384,6 +1384,21 @@ body {
         font-size: 2rem;
     }
     
+    /* Uzatma Med oyunu için tablet responsive stiller */
+    #elif-letter {
+        padding: clamp(14px, 2.5vw, 18px) !important;
+    }
+    
+    #elif-letter > div:first-child {
+        font-size: clamp(2.25rem, 5vw, 2.75rem) !important;
+    }
+    
+    #elif-letter > div:last-child {
+        font-size: clamp(0.65rem, 1.3vw, 0.7rem) !important;
+        bottom: clamp(7px, 1.3vw, 8px) !important;
+        right: clamp(10px, 1.8vw, 12px) !important;
+    }
+    
     .modal-content {
         max-height: 90vh;
         margin: 2vh auto;
@@ -1496,11 +1511,41 @@ body {
     .answer-options {
         grid-template-columns: 1fr;
     }
+    
+    /* Uzatma Med oyunu için responsive stiller */
+    #elif-letter {
+        padding: clamp(12px, 3vw, 20px) !important;
+    }
+    
+    #elif-letter > div:first-child {
+        font-size: clamp(2rem, 6vw, 3rem) !important;
+    }
+    
+    #elif-letter > div:last-child {
+        font-size: clamp(0.6rem, 1.5vw, 0.7rem) !important;
+        bottom: clamp(6px, 1.5vw, 8px) !important;
+        right: clamp(8px, 2vw, 12px) !important;
+    }
 }
 
 @media (max-width: 360px) {
     html {
         font-size: 13px;
+    }
+    
+    /* Uzatma Med oyunu için küçük ekran stilleri */
+    #elif-letter {
+        padding: 12px !important;
+    }
+    
+    #elif-letter > div:first-child {
+        font-size: 2rem !important;
+    }
+    
+    #elif-letter > div:last-child {
+        font-size: 0.6rem !important;
+        bottom: 6px !important;
+        right: 8px !important;
     }
 }
 
