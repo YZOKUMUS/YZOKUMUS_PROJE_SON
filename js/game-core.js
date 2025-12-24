@@ -1542,8 +1542,10 @@ function getStrugglingWords() {
             const stats = wordStats[wordId];
             if (!stats) return false;
             const masteryLevel = stats.masteryLevel || 0;
-            // Zorlanılan kelimeler: masteryLevel < 4
-            return masteryLevel < 4;
+            const successRate = stats.successRate || 0;
+            // Zorlanılan kelimeler: masteryLevel < 4 VE başarı oranı < 100%
+            // Başarı oranı %100 olan kelimeler listeden çıkar
+            return masteryLevel < 4 && successRate < 100;
         })
         .map(wordId => ({
             id: wordId,
