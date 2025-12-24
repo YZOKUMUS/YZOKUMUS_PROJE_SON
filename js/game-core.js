@@ -641,7 +641,7 @@ function resetAllData() {
             const now = new Date();
             const day = now.getDay();
             const diff = now.getDate() - day + (day === 0 ? -6 : 1); // Monday
-            const monday = new Date(now.setDate(diff));
+            const monday = new Date(now.getFullYear(), now.getMonth(), diff);
             weekStart = monday.toISOString().split('T')[0];
         }
         
@@ -651,23 +651,32 @@ function resetAllData() {
             window.firestoreDelete('daily_tasks', docId).catch(() => false)
         ];
         
-        // Delete weekly leaderboard data for current week
-        if (weekStart) {
+        // Delete weekly leaderboard data for current week and previous weeks
+        if (weekStart && weekStart.length > 0) {
+            // Delete current week
             const leaderboardDocId = `${user.id}_${weekStart}`;
             deletePromises.push(
                 window.firestoreDelete('weekly_leaderboard', leaderboardDocId).catch(() => false)
             );
-        }
-        
-        // Also try to delete for previous weeks (last 4 weeks to be safe)
-        for (let i = 1; i <= 4; i++) {
-            const prevWeekDate = new Date(weekStart);
-            prevWeekDate.setDate(prevWeekDate.getDate() - (i * 7));
-            const prevWeekStart = prevWeekDate.toISOString().split('T')[0];
-            const prevLeaderboardDocId = `${user.id}_${prevWeekStart}`;
-            deletePromises.push(
-                window.firestoreDelete('weekly_leaderboard', prevLeaderboardDocId).catch(() => false)
-            );
+            
+            // Also try to delete for previous weeks (last 8 weeks to be safe)
+            for (let i = 1; i <= 8; i++) {
+                try {
+                    const prevWeekDate = new Date(weekStart + 'T00:00:00');
+                    prevWeekDate.setDate(prevWeekDate.getDate() - (i * 7));
+                    const prevWeekStart = prevWeekDate.toISOString().split('T')[0];
+                    const prevLeaderboardDocId = `${user.id}_${prevWeekStart}`;
+                    deletePromises.push(
+                        window.firestoreDelete('weekly_leaderboard', prevLeaderboardDocId).catch(() => false)
+                    );
+                } catch (e) {
+                    console.warn('⚠️ Hafta hesaplama hatası:', e);
+                }
+            }
+        } else {
+            // If weekStart is invalid, try to delete all weekly_leaderboard entries for this user
+            // by querying Firebase (if available)
+            console.warn('⚠️ weekStart hesaplanamadı, haftalık lig verileri manuel silinmeli');
         }
         
         Promise.all(deletePromises).then((results) => {
