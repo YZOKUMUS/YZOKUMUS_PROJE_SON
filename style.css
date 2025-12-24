@@ -4101,6 +4101,11 @@ body {
         padding: var(--spacing-md);
     }
     
+    .analysis-summary-compact {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-sm);
+    }
+    
     .badges-grid {
         grid-template-columns: repeat(4, 1fr);
     }
@@ -4156,6 +4161,48 @@ body {
     .arabic-verse {
         font-size: 1.4rem;
         line-height: 2;
+    }
+    
+    .analysis-summary-compact {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-xs);
+    }
+    
+    .analysis-stat-card-compact {
+        padding: var(--spacing-xs);
+    }
+    
+    .analysis-stat-card-compact .stat-icon-compact {
+        font-size: 1rem;
+    }
+    
+    .analysis-stat-card-compact .stat-value-compact {
+        font-size: 1rem;
+    }
+    
+    .analysis-stat-card-compact .stat-label-compact {
+        font-size: 0.65rem;
+    }
+    
+    .analysis-stat-card-compact .stat-percent-compact {
+        font-size: 0.6rem;
+    }
+    
+    .progress-info-compact {
+        gap: var(--spacing-xs);
+    }
+    
+    .progress-label-compact {
+        font-size: 0.65rem;
+    }
+    
+    .progress-value-compact {
+        font-size: 1.1rem;
+    }
+    
+    .progress-legend-compact {
+        font-size: 0.65rem;
+        gap: var(--spacing-xs);
     }
     
     .badges-grid {
