@@ -520,14 +520,52 @@ function resetAllData() {
     // Save the reset values to localStorage
     saveStats();
     
-    // Close all modals and go to main menu
+    // Delete Firebase data if user is logged in
+    const username = localStorage.getItem('hasene_username');
+    if (username && typeof window.firestoreDelete === 'function') {
+        // Delete user stats from Firebase
+        // Use usernameToDocId if available, otherwise create safe docId manually
+        let docId;
+        if (typeof window.usernameToDocId === 'function') {
+            docId = window.usernameToDocId(username);
+        } else {
+            // Fallback: manual conversion
+            docId = username.trim()
+                .toLowerCase()
+                .replace(/[^a-z0-9_]/g, '_')
+                .replace(/_+/g, '_')
+                .replace(/^_+|_+$/g, '') || 'user_unknown';
+        }
+        
+        // Try to delete from Firebase (non-blocking)
+        Promise.all([
+            window.firestoreDelete('user_stats', docId).catch(() => false),
+            window.firestoreDelete('daily_tasks', docId).catch(() => false)
+        ]).then(() => {
+            console.log('✅ Firebase verileri silindi (kelime analizi dahil)');
+        }).catch(() => {
+            console.log('ℹ️ Firebase verileri silinemedi (beklenen - kullanıcı giriş yapmamış olabilir)');
+        });
+    }
+    
+    // Close all modals (including word analysis modal if open)
     closeAllModals();
+    
+    // Clear any cached word analysis data
+    if (typeof window.getStrugglingWords === 'function') {
+        // Force refresh by clearing any cached results
+        const analysisContent = document.getElementById('analysis-content');
+        if (analysisContent) {
+            analysisContent.innerHTML = '';
+        }
+    }
+    
     goToMainMenu();
     
     // Reload stats (skip streak check to preserve reset values) and update display
     loadStats(true).then(() => {
         updateStatsDisplay();
-        showToast('Tüm veriler sıfırlandı!', 'success');
+        showToast('Tüm veriler sıfırlandı! Kelime analizi verileri de temizlendi.', 'success', 3000);
     });
 }
 
@@ -1701,10 +1739,10 @@ async function showWordAnalysisModal() {
     };
     
     // Helper function to render word list
-    const renderWordList = (words, maxCount = 10) => {
+    const renderWordList = (words, maxCount = 10, category = '') => {
         if (!words || words.length === 0) return '';
         
-        return words.slice(0, maxCount).map(w => {
+        return words.slice(0, maxCount).map((w, index) => {
             const wordDetail = findWordById(w.id);
             const arabicWord = wordDetail ? (wordDetail.kelime || wordDetail.arabic || '') : '';
             const turkishMeaning = wordDetail ? (wordDetail.anlam || wordDetail.translation || '') : '';
@@ -1712,88 +1750,195 @@ async function showWordAnalysisModal() {
             const correct = w.correct || 0;
             const wrong = w.wrong || 0;
             const masteryLevel = w.masteryLevel || 0;
+            const successRate = Math.round(w.successRate || 0);
+            
+            // Progress bar for success rate
+            const progressBar = `
+                <div class="word-progress-bar">
+                    <div class="word-progress-fill" style="width: ${successRate}%"></div>
+                </div>
+            `;
             
             return `
-                <li>
-                    <div class="word-detail-row">
-                        <div class="word-arabic">${arabicWord || w.id}</div>
-                        <div class="word-meaning">${turkishMeaning || 'Bilinmiyor'}</div>
+                <div class="word-card ${category}">
+                    <div class="word-card-header">
+                        <div class="word-number">#${index + 1}</div>
+                        <div class="word-main-info">
+                            <div class="word-arabic-large">${arabicWord || w.id}</div>
+                            <div class="word-meaning-large">${turkishMeaning || 'Bilinmiyor'}</div>
+                        </div>
                     </div>
-                    <div class="word-stats-row">
-                        <span class="word-rate">Başarı: ${Math.round(w.successRate || 0)}%</span>
-                        <span class="word-attempts">Deneme: ${attempts} (${correct}✓ / ${wrong}✗)</span>
-                        <span class="word-mastery">Seviye: ${masteryLevel}</span>
+                    <div class="word-card-body">
+                        <div class="word-stats-grid">
+                            <div class="word-stat-item">
+                                <span class="stat-icon">📊</span>
+                                <div class="stat-info">
+                                    <span class="stat-label-small">Başarı</span>
+                                    <span class="stat-value-small">${successRate}%</span>
+                                </div>
+                            </div>
+                            <div class="word-stat-item">
+                                <span class="stat-icon">🎯</span>
+                                <div class="stat-info">
+                                    <span class="stat-label-small">Seviye</span>
+                                    <span class="stat-value-small">${masteryLevel}/10</span>
+                                </div>
+                            </div>
+                            <div class="word-stat-item">
+                                <span class="stat-icon">✓</span>
+                                <div class="stat-info">
+                                    <span class="stat-label-small">Doğru</span>
+                                    <span class="stat-value-small">${correct}</span>
+                                </div>
+                            </div>
+                            <div class="word-stat-item">
+                                <span class="stat-icon">✗</span>
+                                <div class="stat-info">
+                                    <span class="stat-label-small">Yanlış</span>
+                                    <span class="stat-value-small">${wrong}</span>
+                                </div>
+                            </div>
+                        </div>
+                        ${progressBar}
                     </div>
-                </li>
+                </div>
             `;
         }).join('');
     };
     
+    // Calculate percentages
+    const masteredPercent = analysis.totalWords > 0 ? Math.round((analysis.mastered / analysis.totalWords) * 100) : 0;
+    const learningPercent = analysis.totalWords > 0 ? Math.round((analysis.learning / analysis.totalWords) * 100) : 0;
+    const strugglingPercent = analysis.totalWords > 0 ? Math.round((analysis.struggling / analysis.totalWords) * 100) : 0;
+    
     let content = `
-        <div class="analysis-summary">
-            <div class="analysis-stat">
-                <span class="stat-value">${analysis.totalWords}</span>
-                <span class="stat-label">Toplam Kelime</span>
-            </div>
-            <div class="analysis-stat mastered">
-                <span class="stat-value">${analysis.mastered}</span>
-                <span class="stat-label">Ustalaşılan</span>
-            </div>
-            <div class="analysis-stat learning">
-                <span class="stat-value">${analysis.learning}</span>
-                <span class="stat-label">Öğreniliyor</span>
-            </div>
-            <div class="analysis-stat struggling">
-                <span class="stat-value">${analysis.struggling}</span>
-                <span class="stat-label">Zorlanılan</span>
+        <div class="analysis-header">
+            <div class="analysis-title-section">
+                <h3 class="analysis-main-title">📊 Kelime İstatistikleri</h3>
+                <p class="analysis-subtitle">Öğrenme ilerlemenizi takip edin</p>
             </div>
         </div>
         
-        <div class="analysis-progress">
-            <div class="progress-bar">
-                <div class="progress-mastered" style="width: ${analysis.totalWords > 0 ? (analysis.mastered / analysis.totalWords * 100) : 0}%"></div>
-                <div class="progress-learning" style="width: ${analysis.totalWords > 0 ? (analysis.learning / analysis.totalWords * 100) : 0}%"></div>
+        <div class="analysis-summary">
+            <div class="analysis-stat-card total">
+                <div class="stat-icon">📚</div>
+                <div class="stat-content">
+                    <span class="stat-value">${analysis.totalWords}</span>
+                    <span class="stat-label">Toplam Kelime</span>
+                </div>
             </div>
-            <p>Ortalama Başarı: <strong>${analysis.averageSuccessRate}%</strong></p>
-            <p>Tekrar Bekleyen: <strong>${analysis.dueForReview}</strong> kelime</p>
+            <div class="analysis-stat-card mastered">
+                <div class="stat-icon">✅</div>
+                <div class="stat-content">
+                    <span class="stat-value">${analysis.mastered}</span>
+                    <span class="stat-label">Ustalaşılan</span>
+                    <span class="stat-percent">${masteredPercent}%</span>
+                </div>
+            </div>
+            <div class="analysis-stat-card learning">
+                <div class="stat-icon">🟡</div>
+                <div class="stat-content">
+                    <span class="stat-value">${analysis.learning}</span>
+                    <span class="stat-label">Öğreniliyor</span>
+                    <span class="stat-percent">${learningPercent}%</span>
+                </div>
+            </div>
+            <div class="analysis-stat-card struggling">
+                <div class="stat-icon">🔴</div>
+                <div class="stat-content">
+                    <span class="stat-value">${analysis.struggling}</span>
+                    <span class="stat-label">Zorlanılan</span>
+                    <span class="stat-percent">${strugglingPercent}%</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="analysis-progress-section">
+            <div class="progress-info">
+                <div class="progress-item">
+                    <span class="progress-label">Ortalama Başarı</span>
+                    <div class="progress-value-large">${analysis.averageSuccessRate}%</div>
+                </div>
+                <div class="progress-item">
+                    <span class="progress-label">Tekrar Bekleyen</span>
+                    <div class="progress-value-large">${analysis.dueForReview}</div>
+                </div>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar-full">
+                    <div class="progress-mastered" style="width: ${masteredPercent}%"></div>
+                    <div class="progress-learning" style="width: ${learningPercent}%"></div>
+                    <div class="progress-struggling" style="width: ${strugglingPercent}%"></div>
+                </div>
+                <div class="progress-legend">
+                    <span class="legend-item"><span class="legend-color mastered"></span> Ustalaşılan</span>
+                    <span class="legend-item"><span class="legend-color learning"></span> Öğreniliyor</span>
+                    <span class="legend-item"><span class="legend-color struggling"></span> Zorlanılan</span>
+                </div>
+            </div>
         </div>
     `;
     
-    // Ustalaşılan kelimeler
-    if (mastered.length > 0) {
-        content += `
-            <div class="mastered-words">
-                <h4>✅ Ustalaştığın Kelimeler (${mastered.length})</h4>
-                <ul>
-                    ${renderWordList(mastered, 10)}
-                </ul>
+    // Word categories with tabs
+    content += `
+        <div class="word-categories-section">
+            <div class="category-tabs">
+                <button class="category-tab active" data-category="mastered" onclick="switchWordCategory('mastered')">
+                    <span class="tab-icon">✅</span>
+                    <span class="tab-label">Ustalaşılan</span>
+                    <span class="tab-count">${mastered.length}</span>
+                </button>
+                <button class="category-tab" data-category="learning" onclick="switchWordCategory('learning')">
+                    <span class="tab-icon">🟡</span>
+                    <span class="tab-label">Öğreniliyor</span>
+                    <span class="tab-count">${learning.length}</span>
+                </button>
+                <button class="category-tab" data-category="struggling" onclick="switchWordCategory('struggling')">
+                    <span class="tab-icon">🔴</span>
+                    <span class="tab-label">Zorlanılan</span>
+                    <span class="tab-count">${struggling.length}</span>
+                </button>
             </div>
-        `;
-    }
-    
-    // Öğreniliyor kelimeler
-    if (learning.length > 0) {
-        content += `
-            <div class="learning-words">
-                <h4>🟡 Öğrendiğin Kelimeler (${learning.length})</h4>
-                <ul>
-                    ${renderWordList(learning, 10)}
-                </ul>
+            
+            <div class="category-content">
+                <div class="category-panel active" id="category-mastered">
+                    ${mastered.length > 0 ? `
+                        <div class="category-header">
+                            <h4>✅ Ustalaştığın Kelimeler</h4>
+                            <span class="category-badge">${mastered.length} kelime</span>
+                        </div>
+                        <div class="word-list">
+                            ${renderWordList(mastered, 10, 'mastered')}
+                        </div>
+                    ` : '<div class="empty-state">Henüz ustalaştığın kelime yok. Devam et! 💪</div>'}
+                </div>
+                
+                <div class="category-panel" id="category-learning">
+                    ${learning.length > 0 ? `
+                        <div class="category-header">
+                            <h4>🟡 Öğrendiğin Kelimeler</h4>
+                            <span class="category-badge">${learning.length} kelime</span>
+                        </div>
+                        <div class="word-list">
+                            ${renderWordList(learning, 10, 'learning')}
+                        </div>
+                    ` : '<div class="empty-state">Henüz öğrenmekte olduğun kelime yok. Başla! 🚀</div>'}
+                </div>
+                
+                <div class="category-panel" id="category-struggling">
+                    ${struggling.length > 0 ? `
+                        <div class="category-header">
+                            <h4>🔴 Zorlandığın Kelimeler</h4>
+                            <span class="category-badge">${struggling.length} kelime</span>
+                        </div>
+                        <div class="word-list">
+                            ${renderWordList(struggling, 10, 'struggling')}
+                        </div>
+                    ` : '<div class="empty-state">Harika! Zorlandığın kelime yok. 🎉</div>'}
+                </div>
             </div>
-        `;
-    }
-    
-    // Zorlanılan kelimeler
-    if (struggling.length > 0) {
-        content += `
-            <div class="struggling-words">
-                <h4>🔴 Zorlandığın Kelimeler (${struggling.length})</h4>
-                <ul>
-                    ${renderWordList(struggling, 10)}
-                </ul>
-            </div>
-        `;
-    }
+        </div>
+    `;
     
     // Create and show modal
     const modal = document.getElementById('word-analysis-modal');
@@ -1817,6 +1962,27 @@ async function showWordAnalysisModal() {
         // Fallback: show as toast summary
         showToast(`📊 ${analysis.totalWords} kelime öğrenildi, ${analysis.dueForReview} tekrar bekliyor`, 'info', 3000);
     }
+}
+
+/**
+ * Switch word category tab
+ */
+function switchWordCategory(category) {
+    // Update tabs
+    document.querySelectorAll('.category-tab').forEach(tab => {
+        tab.classList.remove('active');
+        if (tab.dataset.category === category) {
+            tab.classList.add('active');
+        }
+    });
+    
+    // Update panels
+    document.querySelectorAll('.category-panel').forEach(panel => {
+        panel.classList.remove('active');
+        if (panel.id === `category-${category}`) {
+            panel.classList.add('active');
+        }
+    });
 }
 
 function playCurrentWordAudio() {
@@ -5016,6 +5182,7 @@ if (typeof window !== 'undefined') {
     window.getStrugglingWords = getStrugglingWords;
     window.getLearningWords = getLearningWords;
     window.getMasteredWords = getMasteredWords;
+    window.switchWordCategory = switchWordCategory;
     window.selectIntelligentWords = selectIntelligentWords;
     window.renderAchievementsList = renderAchievementsList;
     window.startKarmaGame = startKarmaGame;

@@ -660,6 +660,7 @@ if (typeof window !== 'undefined') {
     // window.getBackendType is already set by auth.js, don't override it
     window.loadFromIndexedDB = loadFromIndexedDB;
     window.saveToIndexedDB = saveToIndexedDB;
+    window.usernameToDocId = usernameToDocId;
     window.firestoreGet = firestoreGet;
     window.firestoreSet = firestoreSet;
     window.firestoreDelete = firestoreDelete;
