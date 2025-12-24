@@ -4061,7 +4061,9 @@ function showDailyReward() {
     openModal('daily-reward-modal');
 }
 
-function claimDailyReward() {
+// Eski günlük ödül fonksiyonu - artık kullanılmıyor, yeni sistem claimDailyReward() kullanıyor
+// Bu fonksiyon sadece eski modal için tutuluyor, ama artık çağrılmıyor
+function claimDailyRewardOld() {
     const today = getLocalDateString();
     const streakBonus = Math.min(streakData.currentStreak * 5, 50);
     const baseReward = 20;
@@ -4770,7 +4772,8 @@ if (typeof window !== 'undefined') {
     window.nextOnboardingSlide = nextOnboardingSlide;
     window.prevOnboardingSlide = prevOnboardingSlide;
     window.showDailyReward = showDailyReward;
-    window.claimDailyReward = claimDailyReward;
+    // claimDailyReward zaten yukarıda tanımlı (günlük görevler sistemi için)
+    // window.claimDailyReward = claimDailyReward; // Bu satır kaldırıldı - çakışmayı önlemek için
     window.showAchievementsModal = showAchievementsModal;
     window.goToKelimeSubmodes = goToKelimeSubmodes;
     window.goToElifBaSubmodes = goToElifBaSubmodes;
