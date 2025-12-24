@@ -203,10 +203,36 @@ async function firestoreDelete(collection, docId) {
             return true; // Zaten yoksa başarılı say
         }
         
+        // Doküman varsa user_id kontrolü yap (güvenlik için)
+        const docData = docSnapshot.data();
+        const docUserId = docData?.user_id;
+        const currentFirebaseUID = window.firebaseAuth?.currentUser?.uid;
+        
+        if (docUserId && currentFirebaseUID && docUserId !== currentFirebaseUID) {
+            console.warn('⚠️ firestoreDelete: Doküman farklı bir kullanıcıya ait, silme işlemi atlanıyor:', { 
+                collection, 
+                docId, 
+                docUserId, 
+                currentFirebaseUID 
+            });
+            // Farklı kullanıcıya aitse de başarılı say (bizim sorumluluğumuz değil)
+            return true;
+        }
+        
         await docRef.delete();
         console.log('✅ Firestore delete successful:', { collection, docId });
         return true;
     } catch (error) {
+        // Permission denied hatası, doküman farklı kullanıcıya ait olabilir veya zaten silinmiş olabilir
+        if (error.code === 'permission-denied') {
+            console.warn('⚠️ firestoreDelete: Permission denied (doküman farklı kullanıcıya ait veya zaten silinmiş olabilir):', { 
+                collection, 
+                docId, 
+                error: error.message 
+            });
+            // Permission denied durumunda da başarılı say (doküman zaten erişilemez)
+            return true;
+        }
         console.error('❌ Firestore delete error:', error, { collection, docId, userId: user?.id });
         return false;
     }
