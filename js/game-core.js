@@ -286,6 +286,11 @@ async function initApp() {
     setupEventListeners();
     updateStatsDisplay();
     
+    // Update user status UI
+    if (typeof window.updateUserStatusUI === 'function') {
+        window.updateUserStatusUI();
+    }
+    
     // Browser geri tuşu dinleyicisi
     setupBackButtonHandler();
     
