@@ -854,6 +854,8 @@ body {
     z-index: 1000;
     padding: var(--spacing-md);
     animation: fadeIn 0.3s ease;
+    box-sizing: border-box;
+    overflow-y: auto;
 }
 
 .modal-content {
@@ -861,9 +863,11 @@ body {
     max-width: 400px;
     max-height: 90vh;
     overflow-y: auto;
+    overflow-x: hidden;
     padding: var(--spacing-xl);
     text-align: center;
     animation: slideUp 0.3s ease;
+    box-sizing: border-box;
 }
 
 .modal-content h2 {
@@ -1437,6 +1441,36 @@ body {
 
     .stats-row {
         grid-template-columns: repeat(2, 1fr);
+    }
+    
+    /* Modal padding çok küçük ekranlarda daha da azalt */
+    .modal {
+        padding: var(--spacing-xs);
+    }
+    
+    /* Kelime Analiz Modalı - Küçük Mobil */
+    #word-analysis-modal .modal-content {
+        max-width: 100%;
+        padding: var(--spacing-sm);
+        margin: var(--spacing-xs);
+        width: calc(100% - 2 * var(--spacing-xs));
+        max-width: calc(100vw - 2 * var(--spacing-xs));
+    }
+    
+    .analysis-stat-card {
+        padding: var(--spacing-sm);
+    }
+    
+    .analysis-stat-card .stat-value {
+        font-size: 1.5rem;
+    }
+    
+    .word-card {
+        padding: var(--spacing-sm);
+    }
+    
+    .word-arabic-large {
+        font-size: 1.2rem;
     }
 
     .arabic-word,
@@ -2600,6 +2634,20 @@ body {
 /* ===================================
    WORD ANALYSIS MODAL
    =================================== */
+/* Kelime Analiz Modalı için özel genişlik */
+#word-analysis-modal .modal-content {
+    max-width: 600px;
+    text-align: left;
+}
+
+/* Analysis Content - Responsive */
+.analysis-content {
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    word-wrap: break-word;
+}
+
 /* Analysis Header */
 .analysis-header {
     margin-bottom: var(--spacing-lg);
@@ -3174,6 +3222,10 @@ body {
     padding: var(--spacing-md);
     border: 1px solid var(--glass-border);
     transition: all 0.2s;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    word-wrap: break-word;
+    max-width: 100%;
 }
 
 .word-card:hover {
@@ -3222,6 +3274,8 @@ body {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-xs);
+    min-width: 0;
+    overflow: hidden;
 }
 
 .word-arabic-large {
@@ -3232,12 +3286,18 @@ body {
     color: var(--text-primary);
     font-weight: 600;
     line-height: 1.4;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
 }
 
 .word-meaning-large {
     font-size: 1rem;
     color: var(--text-secondary);
     text-align: right;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
 }
 
 .word-card-body {
@@ -3876,10 +3936,20 @@ body {
         grid-template-columns: repeat(2, 1fr);
     }
     
+    .modal {
+        padding: var(--spacing-sm);
+    }
+    
     .modal-content {
         width: 95%;
         max-height: 90vh;
         margin: 5vh auto;
+        padding: var(--spacing-lg);
+    }
+    
+    #word-analysis-modal .modal-content {
+        max-width: 95%;
+        padding: var(--spacing-md);
     }
     
     .badges-grid {
@@ -3999,6 +4069,36 @@ body {
     .karma-baglamsal-question {
         font-size: 1rem;
         padding: 0 var(--spacing-xs);
+    }
+    
+    /* Modal padding küçük ekranlarda azalt */
+    .modal {
+        padding: var(--spacing-xs);
+    }
+    
+    /* Kelime Analiz Modalı - Mobil */
+    #word-analysis-modal .modal-content {
+        max-width: 100%;
+        padding: var(--spacing-md);
+        margin: var(--spacing-xs);
+        width: calc(100% - 2 * var(--spacing-xs));
+    }
+    
+    .analysis-content {
+        padding: 0;
+    }
+    
+    .analysis-summary {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-sm);
+    }
+    
+    .progress-info {
+        grid-template-columns: 1fr;
+    }
+    
+    .word-stats-grid {
+        grid-template-columns: 1fr;
     }
     
     .karma-audio-btn-top {

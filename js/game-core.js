@@ -3924,7 +3924,16 @@ function areAllTasksComplete() {
     if (!dailyTasks.tasks || dailyTasks.tasks.length === 0) return false;
     
     // Ana görevlerin hepsinin tamamlanmış olması gerekiyor
-    return dailyTasks.tasks.every(task => task.progress >= task.target);
+    const mainTasksComplete = dailyTasks.tasks.every(task => task.progress >= task.target);
+    
+    // Bonus görevlerin de hepsinin tamamlanmış olması gerekiyor (500 Hasene dahil)
+    if (!dailyTasks.bonusTasks || dailyTasks.bonusTasks.length === 0) {
+        return mainTasksComplete;
+    }
+    
+    const bonusTasksComplete = dailyTasks.bonusTasks.every(task => task.progress >= task.target);
+    
+    return mainTasksComplete && bonusTasksComplete;
 }
 
 function claimDailyReward() {
