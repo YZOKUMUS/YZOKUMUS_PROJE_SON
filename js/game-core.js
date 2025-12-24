@@ -1541,8 +1541,9 @@ function getStrugglingWords() {
         .filter(wordId => {
             const stats = wordStats[wordId];
             if (!stats) return false;
-            // Zorlanılan kelimeler: en az 2 deneme ve başarı oranı %50'nin altında
-            return stats.attempts >= 2 && (stats.successRate || 0) < 50;
+            const masteryLevel = stats.masteryLevel || 0;
+            // Zorlanılan kelimeler: masteryLevel < 4
+            return masteryLevel < 4;
         })
         .map(wordId => ({
             id: wordId,
@@ -1550,6 +1551,58 @@ function getStrugglingWords() {
             successRate: wordStats[wordId].successRate || 0
         }))
         .sort((a, b) => (a.successRate || 0) - (b.successRate || 0))
+        .slice(0, 20);
+}
+
+/**
+ * Get learning words (masteryLevel 4-7)
+ * @returns {Array} Array of learning words with stats
+ */
+function getLearningWords() {
+    if (!wordStats || Object.keys(wordStats).length === 0) {
+        return [];
+    }
+    
+    return Object.keys(wordStats)
+        .filter(wordId => {
+            const stats = wordStats[wordId];
+            if (!stats) return false;
+            const masteryLevel = stats.masteryLevel || 0;
+            // Öğreniliyor kelimeler: masteryLevel >= 4 && masteryLevel < 8
+            return masteryLevel >= 4 && masteryLevel < 8;
+        })
+        .map(wordId => ({
+            id: wordId,
+            ...wordStats[wordId],
+            successRate: wordStats[wordId].successRate || 0
+        }))
+        .sort((a, b) => (b.successRate || 0) - (a.successRate || 0))
+        .slice(0, 20);
+}
+
+/**
+ * Get mastered words (masteryLevel >= 8)
+ * @returns {Array} Array of mastered words with stats
+ */
+function getMasteredWords() {
+    if (!wordStats || Object.keys(wordStats).length === 0) {
+        return [];
+    }
+    
+    return Object.keys(wordStats)
+        .filter(wordId => {
+            const stats = wordStats[wordId];
+            if (!stats) return false;
+            const masteryLevel = stats.masteryLevel || 0;
+            // Ustalaşılan kelimeler: masteryLevel >= 8
+            return masteryLevel >= 8;
+        })
+        .map(wordId => ({
+            id: wordId,
+            ...wordStats[wordId],
+            successRate: wordStats[wordId].successRate || 0
+        }))
+        .sort((a, b) => (b.successRate || 0) - (a.successRate || 0))
         .slice(0, 20);
 }
 
@@ -1630,6 +1683,8 @@ function getWordAnalysis() {
 async function showWordAnalysisModal() {
     const analysis = getWordAnalysis();
     const struggling = getStrugglingWords();
+    const learning = getLearningWords();
+    const mastered = getMasteredWords();
     
     // Load kelime data to get word details
     const kelimeData = await loadKelimeData();
@@ -1641,6 +1696,35 @@ async function showWordAnalysisModal() {
             (w.id && w.id.toString() === wordId.toString()) || 
             (w.kelime_id && w.kelime_id.toString() === wordId.toString())
         );
+    };
+    
+    // Helper function to render word list
+    const renderWordList = (words, maxCount = 10) => {
+        if (!words || words.length === 0) return '';
+        
+        return words.slice(0, maxCount).map(w => {
+            const wordDetail = findWordById(w.id);
+            const arabicWord = wordDetail ? (wordDetail.kelime || wordDetail.arabic || '') : '';
+            const turkishMeaning = wordDetail ? (wordDetail.anlam || wordDetail.translation || '') : '';
+            const attempts = w.attempts || 0;
+            const correct = w.correct || 0;
+            const wrong = w.wrong || 0;
+            const masteryLevel = w.masteryLevel || 0;
+            
+            return `
+                <li>
+                    <div class="word-detail-row">
+                        <div class="word-arabic">${arabicWord || w.id}</div>
+                        <div class="word-meaning">${turkishMeaning || 'Bilinmiyor'}</div>
+                    </div>
+                    <div class="word-stats-row">
+                        <span class="word-rate">Başarı: ${Math.round(w.successRate || 0)}%</span>
+                        <span class="word-attempts">Deneme: ${attempts} (${correct}✓ / ${wrong}✗)</span>
+                        <span class="word-mastery">Seviye: ${masteryLevel}</span>
+                    </div>
+                </li>
+            `;
+        }).join('');
     };
     
     let content = `
@@ -1673,32 +1757,37 @@ async function showWordAnalysisModal() {
         </div>
     `;
     
+    // Ustalaşılan kelimeler
+    if (mastered.length > 0) {
+        content += `
+            <div class="mastered-words">
+                <h4>✅ Ustalaştığın Kelimeler (${mastered.length})</h4>
+                <ul>
+                    ${renderWordList(mastered, 10)}
+                </ul>
+            </div>
+        `;
+    }
+    
+    // Öğreniliyor kelimeler
+    if (learning.length > 0) {
+        content += `
+            <div class="learning-words">
+                <h4>🟡 Öğrendiğin Kelimeler (${learning.length})</h4>
+                <ul>
+                    ${renderWordList(learning, 10)}
+                </ul>
+            </div>
+        `;
+    }
+    
+    // Zorlanılan kelimeler
     if (struggling.length > 0) {
         content += `
             <div class="struggling-words">
-                <h4>🔴 Zorlandığın Kelimeler</h4>
+                <h4>🔴 Zorlandığın Kelimeler (${struggling.length})</h4>
                 <ul>
-                    ${struggling.slice(0, 10).map(w => {
-                        const wordDetail = findWordById(w.id);
-                        const arabicWord = wordDetail ? (wordDetail.kelime || wordDetail.arabic || '') : '';
-                        const turkishMeaning = wordDetail ? (wordDetail.anlam || wordDetail.translation || '') : '';
-                        const attempts = w.attempts || 0;
-                        const correct = w.correct || 0;
-                        const wrong = w.wrong || 0;
-                        
-                        return `
-                        <li>
-                            <div class="word-detail-row">
-                                <div class="word-arabic">${arabicWord || w.id}</div>
-                                <div class="word-meaning">${turkishMeaning || 'Bilinmiyor'}</div>
-                            </div>
-                            <div class="word-stats-row">
-                                <span class="word-rate">Başarı: ${Math.round(w.successRate || 0)}%</span>
-                                <span class="word-attempts">Deneme: ${attempts} (${correct}✓ / ${wrong}✗)</span>
-                            </div>
-                        </li>
-                    `;
-                    }).join('')}
+                    ${renderWordList(struggling, 10)}
                 </ul>
             </div>
         `;
@@ -4923,6 +5012,8 @@ if (typeof window !== 'undefined') {
     window.showWordAnalysisModal = showWordAnalysisModal;
     window.getWordAnalysis = getWordAnalysis;
     window.getStrugglingWords = getStrugglingWords;
+    window.getLearningWords = getLearningWords;
+    window.getMasteredWords = getMasteredWords;
     window.selectIntelligentWords = selectIntelligentWords;
     window.renderAchievementsList = renderAchievementsList;
     window.startKarmaGame = startKarmaGame;
