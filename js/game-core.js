@@ -1213,6 +1213,9 @@ function loadKelimeQuestion() {
 }
 
 function checkKelimeAnswer(index, selectedAnswer) {
+    // Stop all audio immediately when answer is clicked
+    stopAllAudio();
+    
     const correctAnswer = currentQuestion.anlam || currentQuestion.translation;
     const wordId = currentQuestion.kelime_id || currentQuestion.id;
     const buttons = document.querySelectorAll('#kelime-options .answer-option');
@@ -1753,6 +1756,9 @@ function loadDinleQuestion() {
 }
 
 function checkDinleAnswer(index, selectedAnswer) {
+    // Stop all audio immediately when answer is clicked
+    stopAllAudio();
+    
     const correctAnswer = currentQuestion.anlam || currentQuestion.translation;
     const buttons = document.querySelectorAll('#dinle-options .answer-option');
     
@@ -1863,6 +1869,9 @@ function loadBoslukQuestion() {
 }
 
 function checkBoslukAnswer(index, selectedWord) {
+    // Stop all audio immediately when answer is clicked
+    stopAllAudio();
+    
     const correctWord = currentQuestion._correctWord;
     const buttons = document.querySelectorAll('#bosluk-options .answer-option');
     
@@ -2217,6 +2226,9 @@ function loadElifKelimelerQuestion() {
 }
 
 function checkElifKelimelerAnswer(index, selectedAnswer) {
+    // Stop all audio immediately when answer is clicked
+    stopAllAudio();
+    
     const correctAnswer = currentQuestion.correctAnswer;
     const buttons = document.querySelectorAll('#elif-options .answer-option');
     
@@ -2340,6 +2352,9 @@ function loadElifFethaQuestion() {
 }
 
 function checkElifFethaAnswer(index, selectedAnswer) {
+    // Stop all audio immediately when answer is clicked
+    stopAllAudio();
+    
     const correctAnswer = currentQuestion.okunus;
     const buttons = document.querySelectorAll('#elif-options .answer-option');
     
@@ -2460,6 +2475,9 @@ function loadElifEsreQuestion() {
 }
 
 function checkElifEsreAnswer(index, selectedAnswer) {
+    // Stop all audio immediately when answer is clicked
+    stopAllAudio();
+    
     const correctAnswer = currentQuestion.okunus;
     const buttons = document.querySelectorAll('#elif-options .answer-option');
     
@@ -2580,6 +2598,9 @@ function loadElifOtreQuestion() {
 }
 
 function checkElifOtreAnswer(index, selectedAnswer) {
+    // Stop all audio immediately when answer is clicked
+    stopAllAudio();
+    
     const correctAnswer = currentQuestion.okunus;
     const buttons = document.querySelectorAll('#elif-options .answer-option');
     
@@ -2708,6 +2729,9 @@ function loadElifTenvinQuestion() {
 }
 
 function checkElifTenvinAnswer(index, selectedAnswer) {
+    // Stop all audio immediately when answer is clicked
+    stopAllAudio();
+    
     const correctAnswer = currentQuestion.okunus;
     const buttons = document.querySelectorAll('#elif-options .answer-option');
     
@@ -2819,6 +2843,9 @@ function loadUcHarfliKelimelerQuestion() {
 }
 
 function checkUcHarfliKelimelerAnswer(index, selectedAnswer) {
+    // Stop all audio immediately when answer is clicked
+    stopAllAudio();
+    
     const correctAnswer = currentQuestion.okunus;
     const buttons = document.querySelectorAll('#elif-options .answer-option');
     
@@ -2930,6 +2957,9 @@ function loadSeddeQuestion() {
 }
 
 function checkSeddeAnswer(index, selectedAnswer) {
+    // Stop all audio immediately when answer is clicked
+    stopAllAudio();
+    
     const correctAnswer = currentQuestion.okunus;
     const buttons = document.querySelectorAll('#elif-options .answer-option');
     
@@ -3041,6 +3071,9 @@ function loadCezmQuestion() {
 }
 
 function checkCezmAnswer(index, selectedAnswer) {
+    // Stop all audio immediately when answer is clicked
+    stopAllAudio();
+    
     const correctAnswer = currentQuestion.okunus;
     const buttons = document.querySelectorAll('#elif-options .answer-option');
     
@@ -3158,6 +3191,9 @@ function loadElifHarekelerQuestion() {
 }
 
 function checkElifHarekelerAnswer(index, selectedAnswer) {
+    // Stop all audio immediately when answer is clicked
+    stopAllAudio();
+    
     const correctAnswer = currentQuestion.correctAnswer;
     const buttons = document.querySelectorAll('#elif-options .answer-option');
     
@@ -3218,6 +3254,9 @@ function loadElifQuestion() {
 }
 
 function checkElifAnswer(index, selectedAnswer) {
+    // Stop all audio immediately when answer is clicked
+    stopAllAudio();
+    
     const correctAnswer = currentQuestion.okunus || currentQuestion.isim;
     const buttons = document.querySelectorAll('#elif-options .answer-option');
     
