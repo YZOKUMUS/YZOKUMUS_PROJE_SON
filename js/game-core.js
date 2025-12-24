@@ -349,8 +349,29 @@ function checkAndShowDailyReward() {
  * @param {boolean} skipStreakCheck - If true, skip checkStreak() call (used when resetting data)
  */
 async function loadStats(skipStreakCheck = false) {
-    // Total points
+    // Total points - ÖNCE localStorage'dan yükle (ÖNCELİK LOCALSTORAGE'DA)
     totalPoints = loadFromStorage(CONFIG.STORAGE_KEYS.TOTAL_POINTS, 0);
+    
+    // Firebase'den kontrol et ama sadece localStorage'da değer yoksa veya 0 ise
+    // localStorage'daki değer her zaman öncelikli (yanlışlıkla sıfırlanmasını önle)
+    if (totalPoints === 0 && typeof window.loadUserStats === 'function') {
+        // localStorage'da değer yoksa veya 0 ise Firebase'den yükle
+        try {
+            const userStats = await window.loadUserStats();
+            if (userStats && userStats.total_points !== undefined && userStats.total_points !== null && userStats.total_points > 0) {
+                // Firebase'de geçerli bir değer varsa kullan
+                totalPoints = userStats.total_points;
+                // Firebase'den yüklenen değeri localStorage'a kaydet
+                saveToStorage(CONFIG.STORAGE_KEYS.TOTAL_POINTS, totalPoints);
+            }
+        } catch (error) {
+            console.warn('Firebase load failed, using localStorage value:', error);
+            // Hata durumunda localStorage'daki değeri koru (zaten 0)
+        }
+    } else if (totalPoints > 0 && typeof window.saveUserStats === 'function') {
+        // localStorage'da değer varsa Firebase'e senkronize et (arka planda)
+        window.saveUserStats({ total_points: totalPoints }).catch(() => {});
+    }
     
     // Current level
     currentLevel = calculateLevel(totalPoints);

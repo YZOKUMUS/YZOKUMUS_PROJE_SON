@@ -319,10 +319,20 @@ async function loadUserStats() {
                 const firebaseData = await firestoreGet('user_stats', docId);
                 if (firebaseData && firebaseData.total_points !== undefined) {
                     console.log('☁️ User stats loaded from Firebase (username:', savedUsername + ')');
-                    // Sync to localStorage and IndexedDB for offline access
-                    if (firebaseData.total_points !== undefined) {
+                    // ÖNEMLİ: Firebase'den gelen değer 0'dan büyükse veya localStorage'da değer yoksa güncelle
+                    // Aksi halde localStorage'daki değeri koru (yanlışlıkla sıfırlanmasını önle)
+                    const localPoints = parseInt(localStorage.getItem('hasene_totalPoints') || '0');
+                    if (firebaseData.total_points > 0 || localPoints === 0) {
+                        // Firebase'deki değer geçerli veya localStorage'da değer yok
                         localStorage.setItem('hasene_totalPoints', firebaseData.total_points.toString());
                         saveToIndexedDB('hasene_totalPoints', firebaseData.total_points).catch(() => {});
+                    } else {
+                        // localStorage'da değer varsa ve Firebase'de 0 ise, localStorage'daki değeri koru
+                        console.log('⚠️ Firebase total_points is 0, keeping localStorage value:', localPoints);
+                        // Firebase'i localStorage değeriyle güncelle
+                        if (typeof window.saveUserStats === 'function') {
+                            window.saveUserStats({ total_points: localPoints }).catch(() => {});
+                        }
                     }
                     return firebaseData;
                 }
