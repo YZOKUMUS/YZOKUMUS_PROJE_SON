@@ -2584,14 +2584,45 @@ body {
 
 .struggling-words li {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: var(--spacing-xs) 0;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-sm) 0;
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .struggling-words li:last-child {
     border-bottom: none;
+}
+
+.struggling-words .word-detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.struggling-words .word-arabic {
+    font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif;
+    font-size: 1.2rem;
+    direction: rtl;
+    text-align: right;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.struggling-words .word-meaning {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    text-align: right;
+    flex: 1;
+}
+
+.struggling-words .word-stats-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-size: 0.85rem;
 }
 
 .struggling-words .word-id {
@@ -2603,6 +2634,11 @@ body {
 .struggling-words .word-rate {
     font-weight: 600;
     color: var(--accent-error);
+}
+
+.struggling-words .word-attempts {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
 }
 
 /* ===================================
