@@ -4092,6 +4092,19 @@ function showRewardModal(amount, teaching) {
     
     document.body.insertAdjacentHTML('beforeend', modalHTML);
     
+    // Modal backdrop'a tıklanınca kapat
+    const modal = document.getElementById('reward-result-modal');
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            // Eğer modal içeriğine değil de backdrop'a tıklandıysa kapat
+            if (e.target === modal) {
+                closeRewardModal();
+            }
+        });
+        // currentOpenModal'ı güncelle
+        currentOpenModal = 'reward-result-modal';
+    }
+    
     // Konfeti efekti (basit)
     playSafeAudio && typeof playSuccessSound === 'function' && playSuccessSound();
 }
@@ -4099,7 +4112,12 @@ function showRewardModal(amount, teaching) {
 function closeRewardModal() {
     const modal = document.getElementById('reward-result-modal');
     if (modal) {
+        // Modal'ı hemen kaldır
         modal.remove();
+        // currentOpenModal'ı temizle
+        if (currentOpenModal === 'reward-result-modal') {
+            currentOpenModal = null;
+        }
     }
 }
 
