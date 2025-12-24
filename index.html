@@ -874,7 +874,7 @@
             <h2 class="daily-reward-title">Günlük Ödül!</h2>
             <div class="daily-reward-amount">+<span id="daily-reward-amount">20</span></div>
             <p class="daily-reward-streak" id="daily-reward-streak"></p>
-            <button class="claim-reward-btn" onclick="claimDailyReward()">Ödülü Al 🎁</button>
+            <button class="claim-reward-btn" onclick="if(typeof claimDailyReward === 'function') claimDailyReward(); else showToast('Bu özellik artık kullanılmıyor', 'info');">Ödülü Al 🎁</button>
         </div>
     </div>
 
