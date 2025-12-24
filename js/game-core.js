@@ -3360,15 +3360,31 @@ function areAllTasksComplete() {
 
 function claimDailyReward() {
     const rewardBox = document.getElementById('reward-box');
-    if (!rewardBox || !rewardBox.classList.contains('active')) return;
+    if (!rewardBox) return;
     
     const today = getLocalDateString();
     
-    // Zaten alındıysa çık
+    // ÖNCE kontrol et - zaten alındıysa çık (en önemli kontrol)
     if (dailyTasks.rewardClaimedDate === today) {
         showToast('Bugünkü ödül zaten alındı!', 'info');
+        // UI'ı güncelle
+        checkRewardBoxStatus();
         return;
     }
+    
+    // Active class kontrolü
+    if (!rewardBox.classList.contains('active')) {
+        showToast('Önce tüm görevleri tamamlamalısınız!', 'info');
+        return;
+    }
+    
+    // Ödül verilmeden ÖNCE hemen active class'ını kaldır (çift tıklamayı önlemek için)
+    rewardBox.classList.remove('active');
+    rewardBox.classList.add('claimed');
+    
+    // Ödül alındı olarak HEMEN işaretle (çift tıklamayı önlemek için)
+    dailyTasks.rewardClaimedDate = today;
+    saveToStorage(CONFIG.STORAGE_KEYS.DAILY_TASKS, dailyTasks);
     
     // Rastgele ödül seç
     const rewardAmount = DAILY_REWARDS[Math.floor(Math.random() * DAILY_REWARDS.length)];
@@ -3379,9 +3395,7 @@ function claimDailyReward() {
     // Hasene ekle
     totalHasene += rewardAmount;
     
-    // Ödül alındı olarak işaretle
-    dailyTasks.rewardClaimedDate = today;
-    saveToStorage(CONFIG.STORAGE_KEYS.DAILY_TASKS, dailyTasks);
+    // Stats kaydet
     debouncedSaveStats();
     
     // UI güncelle
