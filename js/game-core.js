@@ -133,7 +133,19 @@ function openModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
         modal.classList.remove('hidden');
+        // Mobilde modal'ın görünür olduğundan emin ol
+        if (modal.style) {
+            modal.style.display = 'flex';
+            modal.style.zIndex = '1000';
+        }
         currentOpenModal = modalId;
+        
+        // Mobilde scroll'u en üste al
+        if (modal.scrollTop !== undefined) {
+            modal.scrollTop = 0;
+        }
+    } else {
+        console.error('Modal not found:', modalId);
     }
 }
 

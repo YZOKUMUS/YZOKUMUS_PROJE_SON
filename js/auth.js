@@ -136,8 +136,6 @@ async function signOut() {
     if (user && user.type === 'firebase' && window.firebaseAuth) {
         try {
             await window.firebaseAuth.signOut();
-            localStorage.removeItem('hasene_firebase_user_id');
-            localStorage.setItem('hasene_user_type', 'local');
             console.log('✅ Firebase kullanıcı çıkış yaptı');
         } catch (error) {
             console.error('Firebase sign-out error:', error);
@@ -149,6 +147,8 @@ async function signOut() {
     localStorage.removeItem('hasene_username');
     localStorage.removeItem('hasene_user_email');
     localStorage.removeItem('hasene_user_gender');
+    localStorage.removeItem('hasene_firebase_user_id');
+    localStorage.removeItem('hasene_user_type');
     
     console.log('✅ Kullanıcı çıkış yaptı');
 }
@@ -212,6 +212,12 @@ function showUsernameLoginModal() {
             return;
         }
         
+        // Önce tüm modalları kapat
+        if (typeof window.closeAllModals === 'function') {
+            window.closeAllModals();
+        }
+        
+        // Modal'ı göster
         if (typeof window.openModal === 'function') {
             window.openModal('username-login-modal');
         } else {
@@ -219,6 +225,18 @@ function showUsernameLoginModal() {
             modal.classList.remove('hidden');
             console.warn('openModal function not available, using fallback');
         }
+        
+        // Mobilde modal'ın görünür olduğundan emin ol
+        setTimeout(() => {
+            if (modal.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+            }
+            // Z-index kontrolü (mobilde bazen sorun olabilir)
+            if (modal.style) {
+                modal.style.display = 'flex';
+                modal.style.zIndex = '1000';
+            }
+        }, 50);
         
         // Wait for modal to be visible before accessing DOM elements
         setTimeout(() => {
@@ -236,15 +254,20 @@ function showUsernameLoginModal() {
                     } else {
                         input.value = '';
                     }
-                    // Focus on input
-                    input.focus();
+                    // Focus on input (mobilde bazen çalışmaz, bu normal)
+                    try {
+                        input.focus();
+                    } catch (e) {
+                        // Mobilde focus bazen çalışmaz, bu normal
+                        console.log('Input focus failed (mobile may not support):', e);
+                    }
                 } else {
                     console.warn('Username input not found');
                 }
             } catch (error) {
                 console.error('Error initializing modal content:', error);
             }
-        }, 100);
+        }, 150);
     } catch (error) {
         console.error('Error showing username login modal:', error);
         alert('Modal açılırken bir hata oluştu. Sayfayı yenileyin.');
@@ -427,30 +450,57 @@ function confirmUsername() {
  * Handle user logout
  */
 async function handleUserLogout() {
-    await signOut();
-    updateUserStatusUI();
-    
-    if (typeof window.showToast === 'function') {
-        window.showToast('Çıkış yapıldı', 'info');
+    try {
+        await signOut();
+        
+        // UI'ı güncelle
+        if (typeof window.updateUserStatusUI === 'function') {
+            updateUserStatusUI();
+        }
+        
+        // Toast göster
+        if (typeof window.showToast === 'function') {
+            window.showToast('Çıkış yapıldı', 'info');
+        }
+        
+        console.log('✅ Kullanıcı çıkış yaptı');
+    } catch (error) {
+        console.error('Logout error:', error);
+        // Hata olsa bile UI'ı güncelle
+        if (typeof window.updateUserStatusUI === 'function') {
+            updateUserStatusUI();
+        }
     }
-    
-    console.log('✅ Kullanıcı çıkış yaptı');
 }
 
 /**
  * Handle user authentication (login/logout toggle)
  */
 function handleUserAuth() {
-    const userId = localStorage.getItem('hasene_user_id');
-    const username = localStorage.getItem('hasene_username');
-    const isLoggedIn = !!(userId && username);
-    
-    if (isLoggedIn) {
-        // User is logged in, show logout confirmation
-        handleUserLogout();
-    } else {
-        // User is not logged in, show login modal
-        showUsernameLoginModal();
+    try {
+        const userId = localStorage.getItem('hasene_user_id');
+        const username = localStorage.getItem('hasene_username');
+        const isLoggedIn = !!(userId && username);
+        
+        console.log('🔐 handleUserAuth called. isLoggedIn:', isLoggedIn, 'userId:', userId, 'username:', username);
+        
+        if (isLoggedIn) {
+            // User is logged in, show logout confirmation
+            handleUserLogout();
+        } else {
+            // User is not logged in, show login modal
+            console.log('📱 Opening login modal...');
+            showUsernameLoginModal();
+        }
+    } catch (error) {
+        console.error('Error in handleUserAuth:', error);
+        // Fallback: try to show login modal
+        try {
+            showUsernameLoginModal();
+        } catch (e) {
+            console.error('Failed to show login modal:', e);
+            alert('Giriş yapılırken bir hata oluştu. Sayfayı yenileyin.');
+        }
     }
 }
 
