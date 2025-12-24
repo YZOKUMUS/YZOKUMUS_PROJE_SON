@@ -1882,68 +1882,61 @@ async function showWordAnalysisModal() {
     const strugglingPercent = analysis.totalWords > 0 ? Math.round((analysis.struggling / analysis.totalWords) * 100) : 0;
     
     let content = `
-        <div class="analysis-header">
-            <div class="analysis-title-section">
-                <h3 class="analysis-main-title">📊 Kelime İstatistikleri</h3>
-                <p class="analysis-subtitle">Öğrenme ilerlemenizi takip edin</p>
-            </div>
-        </div>
-        
-        <div class="analysis-summary">
-            <div class="analysis-stat-card total">
-                <div class="stat-icon">📚</div>
-                <div class="stat-content">
-                    <span class="stat-value">${analysis.totalWords}</span>
-                    <span class="stat-label">Toplam Kelime</span>
+        <div class="analysis-summary-compact">
+            <div class="analysis-stat-card-compact total">
+                <div class="stat-icon-compact">📚</div>
+                <div class="stat-content-compact">
+                    <span class="stat-value-compact">${analysis.totalWords}</span>
+                    <span class="stat-label-compact">Toplam</span>
                 </div>
             </div>
-            <div class="analysis-stat-card mastered">
-                <div class="stat-icon">✅</div>
-                <div class="stat-content">
-                    <span class="stat-value">${analysis.mastered}</span>
-                    <span class="stat-label">Ustalaşılan</span>
-                    <span class="stat-percent">${masteredPercent}%</span>
+            <div class="analysis-stat-card-compact mastered">
+                <div class="stat-icon-compact">✅</div>
+                <div class="stat-content-compact">
+                    <span class="stat-value-compact">${analysis.mastered}</span>
+                    <span class="stat-label-compact">Ustalaşılan</span>
+                    <span class="stat-percent-compact">${masteredPercent}%</span>
                 </div>
             </div>
-            <div class="analysis-stat-card learning">
-                <div class="stat-icon">🟡</div>
-                <div class="stat-content">
-                    <span class="stat-value">${analysis.learning}</span>
-                    <span class="stat-label">Öğreniliyor</span>
-                    <span class="stat-percent">${learningPercent}%</span>
+            <div class="analysis-stat-card-compact learning">
+                <div class="stat-icon-compact">🟡</div>
+                <div class="stat-content-compact">
+                    <span class="stat-value-compact">${analysis.learning}</span>
+                    <span class="stat-label-compact">Öğreniliyor</span>
+                    <span class="stat-percent-compact">${learningPercent}%</span>
                 </div>
             </div>
-            <div class="analysis-stat-card struggling">
-                <div class="stat-icon">🔴</div>
-                <div class="stat-content">
-                    <span class="stat-value">${analysis.struggling}</span>
-                    <span class="stat-label">Zorlanılan</span>
-                    <span class="stat-percent">${strugglingPercent}%</span>
+            <div class="analysis-stat-card-compact struggling">
+                <div class="stat-icon-compact">🔴</div>
+                <div class="stat-content-compact">
+                    <span class="stat-value-compact">${analysis.struggling}</span>
+                    <span class="stat-label-compact">Zorlanılan</span>
+                    <span class="stat-percent-compact">${strugglingPercent}%</span>
                 </div>
             </div>
         </div>
         
-        <div class="analysis-progress-section">
-            <div class="progress-info">
-                <div class="progress-item">
-                    <span class="progress-label">Ortalama Başarı</span>
-                    <div class="progress-value-large">${analysis.averageSuccessRate}%</div>
+        <div class="analysis-progress-section-compact">
+            <div class="progress-info-compact">
+                <div class="progress-item-compact">
+                    <span class="progress-label-compact">Ortalama Başarı</span>
+                    <span class="progress-value-compact">${analysis.averageSuccessRate}%</span>
                 </div>
-                <div class="progress-item">
-                    <span class="progress-label">Tekrar Bekleyen</span>
-                    <div class="progress-value-large">${analysis.dueForReview}</div>
+                <div class="progress-item-compact">
+                    <span class="progress-label-compact">Tekrar Bekleyen</span>
+                    <span class="progress-value-compact">${analysis.dueForReview}</span>
                 </div>
             </div>
-            <div class="progress-bar-container">
+            <div class="progress-bar-container-compact">
                 <div class="progress-bar-full">
                     <div class="progress-mastered" style="width: ${masteredPercent}%"></div>
                     <div class="progress-learning" style="width: ${learningPercent}%"></div>
                     <div class="progress-struggling" style="width: ${strugglingPercent}%"></div>
                 </div>
-                <div class="progress-legend">
-                    <span class="legend-item"><span class="legend-color mastered"></span> Ustalaşılan</span>
-                    <span class="legend-item"><span class="legend-color learning"></span> Öğreniliyor</span>
-                    <span class="legend-item"><span class="legend-color struggling"></span> Zorlanılan</span>
+                <div class="progress-legend-compact">
+                    <span class="legend-item-compact"><span class="legend-color mastered"></span> Ustalaşılan</span>
+                    <span class="legend-item-compact"><span class="legend-color learning"></span> Öğreniliyor</span>
+                    <span class="legend-item-compact"><span class="legend-color struggling"></span> Zorlanılan</span>
                 </div>
             </div>
         </div>

@@ -2758,12 +2758,115 @@ body {
     color: var(--accent-primary);
 }
 
+/* Kompakt Versiyon - Analysis Summary */
+.analysis-summary-compact {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+}
+
+.analysis-stat-card-compact {
+    background: var(--glass-bg);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-sm) var(--spacing-xs);
+    border: 1px solid var(--glass-border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--spacing-xs);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.analysis-stat-card-compact:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.analysis-stat-card-compact .stat-icon-compact {
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+.analysis-stat-card-compact .stat-content-compact {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    width: 100%;
+}
+
+.analysis-stat-card-compact .stat-value-compact {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+
+.analysis-stat-card-compact .stat-label-compact {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.analysis-stat-card-compact .stat-percent-compact {
+    font-size: 0.65rem;
+    color: var(--text-secondary);
+    opacity: 0.7;
+    margin-top: 2px;
+}
+
+.analysis-stat-card-compact.mastered {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%);
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+.analysis-stat-card-compact.mastered .stat-value-compact {
+    color: #10b981;
+}
+
+.analysis-stat-card-compact.learning {
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.1) 0%, rgba(251, 191, 36, 0.05) 100%);
+    border-color: rgba(251, 191, 36, 0.3);
+}
+
+.analysis-stat-card-compact.learning .stat-value-compact {
+    color: #fbbf24;
+}
+
+.analysis-stat-card-compact.struggling {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.05) 100%);
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.analysis-stat-card-compact.struggling .stat-value-compact {
+    color: #ef4444;
+}
+
+.analysis-stat-card-compact.total {
+    background: linear-gradient(135deg, rgba(157, 138, 255, 0.1) 0%, rgba(157, 138, 255, 0.05) 100%);
+    border-color: rgba(157, 138, 255, 0.3);
+}
+
+.analysis-stat-card-compact.total .stat-value-compact {
+    color: var(--accent-primary);
+}
+
 /* Progress Section */
 .analysis-progress-section {
     background: var(--glass-bg);
     border-radius: var(--radius-lg);
     padding: var(--spacing-lg);
     margin-bottom: var(--spacing-lg);
+    border: 1px solid var(--glass-border);
+}
+
+/* Kompakt Versiyon - Progress Section */
+.analysis-progress-section-compact {
+    background: var(--glass-bg);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
     border: 1px solid var(--glass-border);
 }
 
@@ -2774,8 +2877,22 @@ body {
     margin-bottom: var(--spacing-md);
 }
 
+.progress-info-compact {
+    display: flex;
+    justify-content: space-around;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+}
+
 .progress-item {
     text-align: center;
+}
+
+.progress-item-compact {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
 }
 
 .progress-label {
@@ -2785,14 +2902,31 @@ body {
     margin-bottom: var(--spacing-xs);
 }
 
+.progress-label-compact {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
 .progress-value-large {
     font-size: 2rem;
     font-weight: 700;
     color: var(--text-primary);
 }
 
+.progress-value-compact {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+
 .progress-bar-container {
     margin-top: var(--spacing-md);
+}
+
+.progress-bar-container-compact {
+    margin-top: var(--spacing-sm);
 }
 
 .progress-bar-full {
@@ -2830,10 +2964,25 @@ body {
     font-size: 0.8rem;
 }
 
+.progress-legend-compact {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+    font-size: 0.7rem;
+}
+
 .legend-item {
     display: flex;
     align-items: center;
     gap: var(--spacing-xs);
+    color: var(--text-secondary);
+}
+
+.legend-item-compact {
+    display: flex;
+    align-items: center;
+    gap: 4px;
     color: var(--text-secondary);
 }
 
