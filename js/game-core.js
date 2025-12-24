@@ -390,6 +390,7 @@ async function loadStats(skipStreakCheck = false) {
  * Save all stats
  */
 function saveStats() {
+    // Save to localStorage (always)
     saveToStorage(CONFIG.STORAGE_KEYS.TOTAL_POINTS, totalPoints);
     saveToStorage(CONFIG.STORAGE_KEYS.STREAK_DATA, streakData);
     saveToStorage(CONFIG.STORAGE_KEYS.GAME_STATS, gameStats);
@@ -403,6 +404,28 @@ function saveStats() {
     saveToStorage('hasene_favorites', favorites);
     saveToStorage('hasene_achievements', unlockedAchievements);
     saveToStorage('hasene_badges', badgesUnlocked);
+    
+    // Sync to Firebase backend (if user has real username)
+    if (typeof window.saveUserStats === 'function') {
+        window.saveUserStats({ 
+            total_points: totalPoints,
+            streak_data: streakData,
+            game_stats: gameStats,
+            daily_goal: dailyGoal,
+            daily_progress: dailyProgress
+        }).catch(err => {
+            // Silent fail - Firebase sync is optional
+            console.warn('User stats Firebase sync failed (non-critical):', err);
+        });
+    }
+    
+    // Sync daily tasks to Firebase
+    if (typeof window.saveDailyTasks === 'function') {
+        window.saveDailyTasks(dailyTasks).catch(err => {
+            // Silent fail - Firebase sync is optional
+            console.warn('Daily tasks Firebase sync failed (non-critical):', err);
+        });
+    }
 }
 
 // Debounced save
@@ -3403,8 +3426,15 @@ function claimDailyReward() {
     // Hasene ekle
     totalHasene += rewardAmount;
     
-    // Stats kaydet
+    // Stats kaydet (localStorage + Firebase)
     debouncedSaveStats();
+    
+    // Günlük görevleri Firebase'e senkronize et
+    if (typeof window.saveDailyTasks === 'function') {
+        window.saveDailyTasks(dailyTasks).catch(err => {
+            console.warn('Daily tasks sync to Firebase failed:', err);
+        });
+    }
     
     // UI güncelle
     updateDisplay();

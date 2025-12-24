@@ -390,6 +390,32 @@ function confirmUsername() {
             window.showToast(`Hoş geldiniz, ${username}!`, 'success');
         }
         
+        // Backend'e senkronize et (Firebase'e veri gönder)
+        try {
+            // Kullanıcı istatistiklerini senkronize et
+            if (typeof window.saveUserStats === 'function') {
+                const currentPoints = parseInt(localStorage.getItem('hasene_totalPoints') || '0');
+                window.saveUserStats({ total_points: currentPoints }).catch(err => {
+                    console.warn('User stats sync to Firebase failed:', err);
+                });
+            }
+            
+            // Günlük görevleri senkronize et
+            if (typeof window.saveDailyTasks === 'function' && typeof window.loadDailyTasks === 'function') {
+                window.loadDailyTasks().then(tasks => {
+                    if (tasks) {
+                        window.saveDailyTasks(tasks).catch(err => {
+                            console.warn('Daily tasks sync to Firebase failed:', err);
+                        });
+                    }
+                }).catch(err => {
+                    console.warn('Daily tasks load failed:', err);
+                });
+            }
+        } catch (error) {
+            console.warn('Backend sync error (non-critical):', error);
+        }
+        
         console.log('✅ Kullanıcı giriş yaptı:', username);
     } catch (error) {
         console.error('Error in confirmUsername:', error);
