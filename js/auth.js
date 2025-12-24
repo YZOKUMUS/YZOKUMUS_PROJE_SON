@@ -451,6 +451,19 @@ function confirmUsername() {
  */
 async function handleUserLogout() {
     try {
+        // Önce tüm modalları kapat (giriş modalı dahil)
+        if (typeof window.closeAllModals === 'function') {
+            window.closeAllModals();
+        } else if (typeof window.closeModal === 'function') {
+            window.closeModal('username-login-modal');
+        } else {
+            // Fallback: manually close modal
+            const modal = document.getElementById('username-login-modal');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+        }
+        
         await signOut();
         
         // UI'ı güncelle
@@ -485,8 +498,10 @@ function handleUserAuth() {
         console.log('🔐 handleUserAuth called. isLoggedIn:', isLoggedIn, 'userId:', userId, 'username:', username);
         
         if (isLoggedIn) {
-            // User is logged in, show logout confirmation
+            // User is logged in, logout (no modal needed)
             handleUserLogout();
+            // Return early to prevent any modal from opening
+            return;
         } else {
             // User is not logged in, show login modal
             console.log('📱 Opening login modal...');
@@ -494,12 +509,18 @@ function handleUserAuth() {
         }
     } catch (error) {
         console.error('Error in handleUserAuth:', error);
-        // Fallback: try to show login modal
-        try {
-            showUsernameLoginModal();
-        } catch (e) {
-            console.error('Failed to show login modal:', e);
-            alert('Giriş yapılırken bir hata oluştu. Sayfayı yenileyin.');
+        // Only show login modal if there's an error and user is not logged in
+        const userId = localStorage.getItem('hasene_user_id');
+        const username = localStorage.getItem('hasene_username');
+        const isLoggedIn = !!(userId && username);
+        
+        if (!isLoggedIn) {
+            try {
+                showUsernameLoginModal();
+            } catch (e) {
+                console.error('Failed to show login modal:', e);
+                alert('Giriş yapılırken bir hata oluştu. Sayfayı yenileyin.');
+            }
         }
     }
 }
