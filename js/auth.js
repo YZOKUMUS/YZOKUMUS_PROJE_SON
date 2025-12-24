@@ -401,16 +401,14 @@ function confirmUsername() {
  * Handle user logout
  */
 async function handleUserLogout() {
-    if (confirm('Çıkış yapmak istediğinize emin misiniz?')) {
-        await signOut();
-        updateUserStatusUI();
-        
-        if (typeof window.showToast === 'function') {
-            window.showToast('Çıkış yapıldı', 'info');
-        }
-        
-        console.log('✅ Kullanıcı çıkış yaptı');
+    await signOut();
+    updateUserStatusUI();
+    
+    if (typeof window.showToast === 'function') {
+        window.showToast('Çıkış yapıldı', 'info');
     }
+    
+    console.log('✅ Kullanıcı çıkış yaptı');
 }
 
 /**
