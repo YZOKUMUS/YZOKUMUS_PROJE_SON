@@ -87,9 +87,9 @@ async function updateWeeklyXP(points) {
     // Save to localStorage
     localStorage.setItem(key, newXP.toString());
     
-    // Save to Firebase if Firebase user
+    // Save to Firebase if Firebase is available (works for both Firebase and local users)
     const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : null;
-    if (user && !user.id.startsWith('local-') && typeof window.firestoreSet === 'function') {
+    if (user && typeof window.firestoreSet === 'function' && window.firestore) {
         const username = localStorage.getItem('hasene_username') || user.username || 'Anonim Kullanıcı';
         try {
             const result = await window.firestoreSet('weekly_leaderboard', `${user.id}_${weekStart}`, {
@@ -100,13 +100,15 @@ async function updateWeeklyXP(points) {
                 updated_at: new Date().toISOString()
             });
             if (result) {
-                console.log('✅ Weekly XP saved to Firebase:', newXP);
+                console.log('✅ Weekly XP saved to Firebase:', newXP, '(user:', username + ')');
             } else {
                 console.warn('⚠️ Firebase weekly XP save returned false');
             }
         } catch (error) {
             console.warn('⚠️ Firebase weekly XP save failed:', error);
         }
+    } else {
+        console.log('📱 Local user - Weekly XP saved to localStorage only:', newXP);
     }
     
     return newXP;
@@ -153,8 +155,8 @@ async function loadLeaderboard() {
     const weekStart = getWeekStartString();
     const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : null;
     
-    // If Firebase user, try to load from Firebase
-    if (user && !user.id.startsWith('local-') && window.firestore) {
+    // Try to load from Firebase (works for both Firebase and local users if backend is available)
+    if (window.firestore) {
         try {
             // Use Firestore directly for querying
             const snapshot = await window.firestore
@@ -222,7 +224,8 @@ async function loadLeaderboard() {
         }
     }
     
-    // Fallback: Return empty array (local users can't see global leaderboard)
+    // Fallback: Return empty array (Firebase not available)
+    console.warn('⚠️ Firebase not available, returning empty leaderboard');
     return [];
 }
 
