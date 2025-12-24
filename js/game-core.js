@@ -1004,6 +1004,13 @@ function endGame() {
     // Check daily goal
     checkDailyGoal();
     
+    // Update weekly XP for leaderboard
+    if (typeof window.updateWeeklyXP === 'function' && sessionScore > 0) {
+        window.updateWeeklyXP(sessionScore).catch(err => {
+            console.warn('Weekly XP update failed (non-critical):', err);
+        });
+    }
+    
     // Save stats
     debouncedSaveStats();
     
