@@ -1533,16 +1533,23 @@ function selectIntelligentWords(words, count, isReviewMode = false) {
  * @returns {Array} Array of struggling words with stats
  */
 function getStrugglingWords() {
+    if (!wordStats || Object.keys(wordStats).length === 0) {
+        return [];
+    }
+    
     return Object.keys(wordStats)
         .filter(wordId => {
             const stats = wordStats[wordId];
-            return stats.attempts >= 2 && stats.successRate < 50;
+            if (!stats) return false;
+            // Zorlanılan kelimeler: en az 2 deneme ve başarı oranı %50'nin altında
+            return stats.attempts >= 2 && (stats.successRate || 0) < 50;
         })
         .map(wordId => ({
             id: wordId,
-            ...wordStats[wordId]
+            ...wordStats[wordId],
+            successRate: wordStats[wordId].successRate || 0
         }))
-        .sort((a, b) => a.successRate - b.successRate)
+        .sort((a, b) => (a.successRate || 0) - (b.successRate || 0))
         .slice(0, 20);
 }
 
@@ -1551,7 +1558,13 @@ function getStrugglingWords() {
  * @returns {Object} Word analysis data
  */
 function getWordAnalysis() {
-    const allStats = Object.entries(wordStats);
+    // Ensure wordStats is loaded
+    if (!wordStats || Object.keys(wordStats).length === 0) {
+        // Try to reload from storage
+        wordStats = loadFromStorage('hasene_word_stats', {});
+    }
+    
+    const allStats = Object.entries(wordStats || {});
     const totalWords = allStats.length;
     
     if (totalWords === 0) {
@@ -1574,20 +1587,29 @@ function getWordAnalysis() {
     let totalSuccessRate = 0;
     
     allStats.forEach(([id, stats]) => {
-        totalSuccessRate += stats.successRate || 0;
+        if (!stats) return;
         
-        if (stats.masteryLevel >= 8) {
+        const successRate = stats.successRate || 0;
+        const masteryLevel = stats.masteryLevel || 0;
+        
+        totalSuccessRate += successRate;
+        
+        if (masteryLevel >= 8) {
             mastered++;
-        } else if (stats.masteryLevel >= 4) {
+        } else if (masteryLevel >= 4) {
             learning++;
         } else {
             struggling++;
         }
         
         if (stats.nextReviewDate) {
-            const reviewDate = new Date(stats.nextReviewDate);
-            if (reviewDate <= today) {
-                dueForReview++;
+            try {
+                const reviewDate = new Date(stats.nextReviewDate);
+                if (reviewDate <= today) {
+                    dueForReview++;
+                }
+            } catch (e) {
+                // Invalid date, skip
             }
         }
     });
@@ -1597,7 +1619,7 @@ function getWordAnalysis() {
         mastered,
         learning,
         struggling,
-        averageSuccessRate: Math.round(totalSuccessRate / totalWords),
+        averageSuccessRate: totalWords > 0 ? Math.round(totalSuccessRate / totalWords) : 0,
         dueForReview
     };
 }
@@ -1658,12 +1680,22 @@ function showWordAnalysisModal() {
     // Create and show modal
     const modal = document.getElementById('word-analysis-modal');
     if (modal) {
-        const modalContent = modal.querySelector('.modal-body') || modal.querySelector('.analysis-content');
+        // Try multiple selectors to find the content container
+        const modalContent = document.getElementById('analysis-content') || 
+                            modal.querySelector('#analysis-content') ||
+                            modal.querySelector('.analysis-content') ||
+                            modal.querySelector('.modal-body');
+        
         if (modalContent) {
             modalContent.innerHTML = content;
+            openModal('word-analysis-modal');
+        } else {
+            console.error('Analysis content container not found');
+            // Fallback: show as toast summary
+            showToast(`📊 ${analysis.totalWords} kelime öğrenildi, ${analysis.dueForReview} tekrar bekliyor`, 'info', 3000);
         }
-        openModal('word-analysis-modal');
     } else {
+        console.error('Word analysis modal not found');
         // Fallback: show as toast summary
         showToast(`📊 ${analysis.totalWords} kelime öğrenildi, ${analysis.dueForReview} tekrar bekliyor`, 'info', 3000);
     }
