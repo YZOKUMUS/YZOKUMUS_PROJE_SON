@@ -3246,14 +3246,20 @@ function loadUzatmaMedQuestion() {
     
     // Set word display - responsive with clamp()
     const letterElement = document.getElementById('elif-letter');
-    letterElement.style.backgroundColor = '#1a1a2e';
+    letterElement.style.background = 'linear-gradient(135deg, rgba(157, 138, 255, 0.95) 0%, rgba(184, 165, 232, 0.95) 100%)';
     letterElement.style.color = '#fff';
     letterElement.style.padding = 'clamp(12px, 3vw, 20px)';
     letterElement.style.borderRadius = '12px';
     letterElement.style.position = 'relative';
+    letterElement.style.boxShadow = '0 8px 32px rgba(157, 138, 255, 0.3)';
+    letterElement.style.display = 'flex';
+    letterElement.style.flexDirection = 'column';
+    letterElement.style.alignItems = 'center';
+    letterElement.style.justifyContent = 'center';
+    letterElement.style.gap = 'clamp(8px, 2vw, 12px)';
     letterElement.innerHTML = `
         <div style="font-size: clamp(2rem, 6vw, 3rem); font-weight: bold; font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif; direction: rtl; text-align: center; line-height: var(--arabic-line-height-normal); letter-spacing: var(--arabic-letter-spacing);">${currentQuestion.kelime}</div>
-        <div style="position: absolute; bottom: clamp(6px, 1.5vw, 8px); right: clamp(8px, 2vw, 12px); font-size: clamp(0.6rem, 1.5vw, 0.7rem); opacity: 0.7; font-weight: 400;">${currentQuestion.anlam || ''}</div>
+        <div style="font-size: clamp(0.85rem, 2vw, 1rem); font-weight: 400; text-align: center; color: rgba(255, 255, 255, 0.9); line-height: 1.4; padding-top: clamp(4px, 1vw, 8px);">${currentQuestion.anlam || ''}</div>
     `;
     
     // Generate options with only Turkish pronunciation
@@ -5184,6 +5190,10 @@ function showElifBaInfo() {
         'uc-harfli-kelimeler': {
             title: 'Üç Harfli Kelimeler Hakkında',
             content: 'Üç harfli Arapça kelimeleri gör ve okunuşlarını öğren. Bu mod, temel kelime yapılarını öğrenmek için idealdir.'
+        },
+        'uzatma-med': {
+            title: 'Uzatma (Med) Harfleri Hakkında',
+            content: 'Üstünlü bir harften sonra görebileceğimiz harekesiz Elif harfi kendinden önce gelen harfi bir elif miktarı uzatır. Harekesiz Elif, kalın harfleri a sesiyle, ince okunan harfleri ise e ile a arası bir sesle uzatarak okutur.\n\nVav harekesiz ise ve kendinden önce gelen harfin harekesi ötre ise kendinden önce gelen harfi bir elif miktarı uzatır. Harekesiz Vav, kalın okunan harfleri u sesiyle, ince okunan harfleriyse u ile ü arasında bir sesle uzatarak okutur.\n\nYa harfi harekesiz ise ve kendinden önce gelen harfin harekesi esre ise kendinden önce gelen harfi bir elif miktarı uzatır. Harekesiz Ya, kalın okunan harfleri ı\'dan i\'ye geçen bir sesle, ince okunan harfleriyse i sesiyle uzatarak okutur.\n\nHarfin üzerine veya altına (Çeker) gelen dik çizgi harfi bir elif miktarı uzatır. Harfin üzerindeki dik çizgi kalın okunan harfleri a sesiyle, ince okunan harfleriyse a ile e arasında bir sesle uzatarak okutur.\n\nHarfin üzerine gelen yatay çizgi, harfi bir elif miktarından fazla uzatır. Yatay çizginin bulunduğu harfler en fazla dört elif miktarı uzatılır.'
         }
     };
     
@@ -5194,7 +5204,10 @@ function showElifBaInfo() {
     };
     
     document.getElementById('elif-info-title').textContent = info.title;
-    document.getElementById('elif-info-content').textContent = info.content;
+    const contentElement = document.getElementById('elif-info-content');
+    // Use innerHTML to preserve line breaks, or use textContent with CSS white-space: pre-line
+    contentElement.textContent = info.content;
+    contentElement.style.whiteSpace = 'pre-line'; // Preserve line breaks from \n
     
     openModal('elif-ba-info-modal');
 }

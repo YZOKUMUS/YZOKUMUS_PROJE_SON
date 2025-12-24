@@ -1394,9 +1394,7 @@ body {
     }
     
     #elif-letter > div:last-child {
-        font-size: clamp(0.65rem, 1.3vw, 0.7rem) !important;
-        bottom: clamp(7px, 1.3vw, 8px) !important;
-        right: clamp(10px, 1.8vw, 12px) !important;
+        font-size: clamp(0.8rem, 1.8vw, 0.95rem) !important;
     }
     
     .modal-content {
@@ -1522,9 +1520,7 @@ body {
     }
     
     #elif-letter > div:last-child {
-        font-size: clamp(0.6rem, 1.5vw, 0.7rem) !important;
-        bottom: clamp(6px, 1.5vw, 8px) !important;
-        right: clamp(8px, 2vw, 12px) !important;
+        font-size: clamp(0.85rem, 2vw, 1rem) !important;
     }
 }
 
@@ -1543,9 +1539,7 @@ body {
     }
     
     #elif-letter > div:last-child {
-        font-size: 0.6rem !important;
-        bottom: 6px !important;
-        right: 8px !important;
+        font-size: 0.85rem !important;
     }
 }
 
