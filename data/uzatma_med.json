@@ -3,14 +3,14 @@
     {
       "id": 1,
       "kelime": "قَا",
-      "okunus": "ka",
+      "okunus": "gaa",
       "anlam": "Ve",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2201.mp3?_=1"
     },
     {
       "id": 2,
       "kelime": "كَا",
-      "okunus": "ka",
+      "okunus": "kâa",
       "anlam": "Ve",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2202.mp3?_=2"
     },
@@ -24,119 +24,119 @@
     {
       "id": 4,
       "kelime": "سَامِعُ",
-      "okunus": "saami'u",
+      "okunus": "samiun",
       "anlam": "Dinleyen",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2204.mp3?_=4"
     },
     {
       "id": 5,
       "kelime": "شِمَالُ",
-      "okunus": "shimaalu",
+      "okunus": "şimalun",
       "anlam": "Sol",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2205.mp3?_=5"
     },
     {
       "id": 6,
       "kelime": "قَالَ",
-      "okunus": "qaala",
+      "okunus": "gale",
       "anlam": "Dedi",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2206.mp3?_=6"
     },
     {
       "id": 7,
       "kelime": "كَانَ",
-      "okunus": "kaana",
+      "okunus": "kane",
       "anlam": "Oldu, idi",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2207.mp3?_=7"
     },
     {
       "id": 8,
       "kelime": "كَشَفْنَا",
-      "okunus": "kashafnaa",
+      "okunus": "keşefna",
       "anlam": "Açtık, keşfettik",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2208.mp3?_=8"
     },
     {
       "id": 9,
       "kelime": "أَجَابَ",
-      "okunus": "ajaaba",
+      "okunus": "ecâba",
       "anlam": "Cevap verdi",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2209.mp3?_=9"
     },
     {
       "id": 10,
       "kelime": "فَاعَلَ",
-      "okunus": "faa'ala",
+      "okunus": "fa'alâ",
       "anlam": "Yaptı",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2210.mp3?_=10"
     },
     {
       "id": 11,
       "kelime": "شَخْصَانِ",
-      "okunus": "shakhsaani",
+      "okunus": "şehsani",
       "anlam": "İki kişi",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2211.mp3?_=11"
     },
     {
       "id": 12,
       "kelime": "ذَاهِبَانِ",
-      "okunus": "dhaahibaani",
+      "okunus": "zahibani",
       "anlam": "İki giden",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2212.mp3?_=12"
     },
     {
       "id": 13,
       "kelime": "اثْنَانِ",
-      "okunus": "ithnaani",
+      "okunus": "isnani",
       "anlam": "İki",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2213.mp3?_=13"
     },
     {
       "id": 14,
       "kelime": "صِرَاطٌ",
-      "okunus": "siraatun",
+      "okunus": "sıratun",
       "anlam": "Yol",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2214.mp3?_=14"
     },
     {
       "id": 15,
       "kelime": "جَنَّاتٌ",
-      "okunus": "jannaatun",
+      "okunus": "cennâtun",
       "anlam": "Cennetler",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2215.mp3?_=15"
     },
     {
       "id": 16,
       "kelime": "مَا قَالَ",
-      "okunus": "maa qaala",
+      "okunus": "ma gale",
       "anlam": "Ne dedi",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2216.mp3?_=16"
     },
     {
       "id": 17,
       "kelime": "سُبْحَانَكَ",
-      "okunus": "subhaanaka",
+      "okunus": "subhanek",
       "anlam": "Seni tesbih ederim",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2217.mp3?_=17"
     },
     {
       "id": 18,
       "kelime": "تَبَارَكَتْ",
-      "okunus": "tabaarakat",
+      "okunus": "tebâraket",
       "anlam": "Mübarek oldu",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2218.mp3?_=18"
     },
     {
       "id": 19,
       "kelime": "غُفْرَانَكْ",
-      "okunus": "ghufranak",
+      "okunus": "gufranek",
       "anlam": "Bağışlaman",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2219.mp3?_=19"
     },
     {
       "id": 20,
       "kelime": "بُرْهَانَانِ",
-      "okunus": "burhaanaani",
+      "okunus": "burhanani",
       "anlam": "İki delil",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2220.mp3?_=20"
     },
@@ -150,7 +150,7 @@
     {
       "id": 22,
       "kelime": "يَقُولُ",
-      "okunus": "yaqulu",
+      "okunus": "yegulu",
       "anlam": "Diyor",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2402.mp3?_=22"
     },
@@ -164,14 +164,14 @@
     {
       "id": 24,
       "kelime": "الْقَهَّارُ",
-      "okunus": "al-qahharu",
+      "okunus": "el gahharu",
       "anlam": "Kahredici (Allah'ın ismi)",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2404.mp3?_=24"
     },
     {
       "id": 25,
       "kelime": "مَكْتُوبٌ",
-      "okunus": "maktubun",
+      "okunus": "mektubun",
       "anlam": "Yazılmış",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2405.mp3?_=25"
     },
@@ -185,14 +185,14 @@
     {
       "id": 27,
       "kelime": "يَفُوتُ",
-      "okunus": "yafutu",
+      "okunus": "yefutu",
       "anlam": "Kaçırır, geçer",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2407.mp3?_=27"
     },
     {
       "id": 28,
       "kelime": "يَلِدُونَ",
-      "okunus": "yaliduna",
+      "okunus": "yeliduna",
       "anlam": "Doğururlar",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2408.mp3?_=28"
     },
@@ -206,7 +206,7 @@
     {
       "id": 30,
       "kelime": "يَتُوبُونَ",
-      "okunus": "yatubuna",
+      "okunus": "yetubuna",
       "anlam": "Tövbe ederler",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2410.mp3?_=30"
     },
@@ -220,63 +220,63 @@
     {
       "id": 32,
       "kelime": "مُخَلَّدُونَ",
-      "okunus": "mukhalladuna",
+      "okunus": "muhâlledunâ",
       "anlam": "Ebedi kalacaklar",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2412.mp3?_=32"
     },
     {
       "id": 33,
       "kelime": "تُحَاجُّونَ",
-      "okunus": "tuhajjuna",
+      "okunus": "tuhaccunâ",
       "anlam": "Tartışırsınız",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2413.mp3?_=33"
     },
     {
       "id": 34,
       "kelime": "يَعْمَلُونَ",
-      "okunus": "ya'maluna",
+      "okunus": "yağmelunâ",
       "anlam": "Yaparlar",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2414.mp3?_=34"
     },
     {
       "id": 35,
       "kelime": "الْكَاذِبُونَ",
-      "okunus": "al-kadhibuna",
+      "okunus": "el kazibunâ",
       "anlam": "Yalancılar",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2415.mp3?_=35"
     },
     {
       "id": 36,
       "kelime": "الْمُفْلِحُونَ",
-      "okunus": "al-muflihuna",
+      "okunus": "el muflihunâ",
       "anlam": "Kurtuluşa erenler",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2416.mp3?_=36"
     },
     {
       "id": 37,
       "kelime": "الْجَبَّارُ",
-      "okunus": "al-jabbaru",
+      "okunus": "el cebbaru",
       "anlam": "Cebbar (Allah'ın ismi)",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2417.mp3?_=37"
     },
     {
       "id": 38,
       "kelime": "الْوَارِثُونَ",
-      "okunus": "al-warithuna",
+      "okunus": "e varisune",
       "anlam": "Mirasçılar",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2418.mp3?_=38"
     },
     {
       "id": 39,
       "kelime": "الْخَاسِرُونَ",
-      "okunus": "al-khasiruna",
+      "okunus": "el hasirune",
       "anlam": "Zarar edenler",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2419.mp3?_=39"
     },
     {
       "id": 40,
       "kelime": "مُشْرِكُونَ",
-      "okunus": "mushrikuna",
+      "okunus": "müşrikunâ",
       "anlam": "Müşrikler, ortak koşanlar",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2420.mp3?_=40"
     },
@@ -297,7 +297,7 @@
     {
       "id": 43,
       "kelime": "قِيلَ",
-      "okunus": "qila",
+      "okunus": "gıyla",
       "anlam": "Denildi",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2303.mp3?_=43"
     },
@@ -332,21 +332,15 @@
     {
       "id": 48,
       "kelime": "خَلَقَنِي",
-      "okunus": "khalaqani",
+      "okunus": "halagani",
       "anlam": "Beni yarattı",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2308.mp3?_=48"
     },
-    {
-      "id": 49,
-      "kelime": "وَعِيدٌ",
-      "okunus": "wa'idun",
-      "anlam": "Tehdit, vaat",
-      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2309.mp3?_=49"
-    },
+    
     {
       "id": 50,
       "kelime": "سَمِيعٌ",
-      "okunus": "sami'un",
+      "okunus": "semi'un",
       "anlam": "İşiten (Allah'ın ismi)",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2310.mp3?_=50"
     },
@@ -360,42 +354,42 @@
     {
       "id": 52,
       "kelime": "أَيْدِيهِمْ",
-      "okunus": "aydihim",
+      "okunus": "eydiyhhim",
       "anlam": "Elleri",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2312.mp3?_=52"
     },
     {
       "id": 53,
       "kelime": "مَرِيضٌ",
-      "okunus": "maridun",
+      "okunus": "merizun",
       "anlam": "Hasta",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2313.mp3?_=53"
     },
     {
       "id": 54,
       "kelime": "الَّذِينَ",
-      "okunus": "alladhina",
+      "okunus": "ellezine",
       "anlam": "Onlar ki, o kimseler",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2314.mp3?_=54"
     },
     {
       "id": 55,
       "kelime": "دِينَهُمْ",
-      "okunus": "dinihim",
+      "okunus": "diynahum",
       "anlam": "Dinleri",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2315.mp3?_=55"
     },
     {
       "id": 56,
       "kelime": "يَزِيدُ",
-      "okunus": "yazidu",
+      "okunus": "yezidu",
       "anlam": "Artırır, çoğaltır",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2316.mp3?_=56"
     },
     {
       "id": 57,
       "kelime": "مُجِيبٌ",
-      "okunus": "mujibun",
+      "okunus": "mucibun",
       "anlam": "Cevap veren",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2317.mp3?_=57"
     },
@@ -409,14 +403,14 @@
     {
       "id": 59,
       "kelime": "بُرْهَانَانِ",
-      "okunus": "burhaanaani",
+      "okunus": "burhanani",
       "anlam": "İki delil",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2319.mp3?_=59"
     },
     {
       "id": 60,
       "kelime": "أَجْمَعِينَ",
-      "okunus": "ajma'in",
+      "okunus": "ecmaine",
       "anlam": "Hep birlikte, topluca",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2320.mp3?_=60"
     },
@@ -430,58 +424,58 @@
     {
       "id": 62,
       "kelime": "ذلِكَ",
-      "okunus": "dhalika",
+      "okunus": "zalike",
       "anlam": "O, şu",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2504.mp3?_=63"
     },
     {
       "id": 63,
       "kelime": "طه",
-      "okunus": "taha",
+      "okunus": "daha",
       "anlam": "Taha (Kur'an suresi)",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2503.mp3?_=63"
     },
     {
       "id": 64,
       "kelime": "آدَمَ",
-      "okunus": "adama",
+      "okunus": "ademe",
       "anlam": "Adem (peygamber)",
-      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2504.mp3?_=64"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2502.mp3?_=62"
     },
     {
       "id": 65,
       "kelime": "بِهِ",
       "okunus": "bihi",
       "anlam": "Onunla, onun ile",
-      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2505.mp3?_=65"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2501.mp3?_=60"
     },
     {
       "id": 66,
       "kelime": "سُلَيْمَنُ",
       "okunus": "sulaymanu",
       "anlam": "Süleyman (peygamber)",
-      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2506.mp3?_=66"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2510.mp3?_=69"
     },
     {
       "id": 67,
       "kelime": "لَكِنَّ",
-      "okunus": "lakinna",
+      "okunus": "lakinne",
       "anlam": "Ancak, fakat",
-      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2507.mp3?_=67"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2509.mp3?_=69"
     },
     {
       "id": 68,
       "kelime": "كَذلِكَ",
-      "okunus": "kadhalika",
+      "okunus": "kezalike",
       "anlam": "Böyle, böylece",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2508.mp3?_=68"
     },
     {
       "id": 69,
       "kelime": "هذِهِ",
-      "okunus": "hadhihi",
+      "okunus": "hazihi",
       "anlam": "Bu (dişil)",
-      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2509.mp3?_=69"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2507.mp3?_=67"
     },
     {
       "id": 70,
@@ -495,112 +489,112 @@
       "kelime": "إِبْرَهِيمُ",
       "okunus": "ibrahimu",
       "anlam": "İbrahim (peygamber)",
-      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2511.mp3?_=71"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2515.mp3?_=73"
     },
     {
       "id": 72,
       "kelime": "زَكُوةٌ",
       "okunus": "zakātun",
       "anlam": "Zekat",
-      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2512.mp3?_=72"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2514.mp3?_=72"
     },
     {
       "id": 73,
       "kelime": "صَلوةٌ",
       "okunus": "salātun",
       "anlam": "Namaz",
-      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2513.mp3?_=73"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2513.mp3?_=71"
     },
     {
       "id": 74,
       "kelime": "نَجُوةٌ",
-      "okunus": "najātun",
+      "okunus": "necatun",
       "anlam": "Kurtuluş",
-      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2514.mp3?_=74"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2512.mp3?_=70"
     },
     {
       "id": 75,
       "kelime": "هُدَى",
       "okunus": "hudā",
       "anlam": "Hidayet, doğru yol",
-      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2515.mp3?_=75"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2511.mp3?_=70"
     },
     {
       "id": 76,
       "kelime": "الشهداء",
-      "okunus": "ash-shuhada'",
+      "okunus": "eş şüheda'",
       "anlam": "Şehitler",
-      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2601.mp3?_=76"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2605.mp3?_=78"
     },
     {
       "id": 77,
       "kelime": "أولئك",
-      "okunus": "ula'ika",
+      "okunus": "ula'ike",
       "anlam": "Onlar",
-      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2602.mp3?_=77"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2604.mp3?_=77"
     },
     {
       "id": 78,
       "kelime": "يَا أَيُّهَا",
       "okunus": "ya ayyuha",
       "anlam": "Ey (hitap edatı)",
-      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2603.mp3?_=78"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2603.mp3?_=76"
     },
     {
       "id": 79,
       "kelime": "يُرَاؤُنَ",
-      "okunus": "yura'una",
+      "okunus": "yura'une",
       "anlam": "Gösteriş yaparlar",
-      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2604.mp3?_=79"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2602.mp3?_=75"
     },
     {
       "id": 80,
       "kelime": "جَاءَ",
-      "okunus": "ja'a",
+      "okunus": "ca'e",
       "anlam": "Geldi",
-      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2605.mp3?_=80"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2601.mp3?_=74"
     },
     {
       "id": 81,
       "kelime": "بِمَا أُنْزِلَ",
-      "okunus": "bima unzila",
+      "okunus": "bima unzile",
       "anlam": "İndirilenle",
-      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2606.mp3?_=81"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2610.mp3?_=83"
     },
     {
       "id": 82,
       "kelime": "كَمَا أَمَنَ",
-      "okunus": "kama amana",
+      "okunus": "kema amene",
       "anlam": "İman ettiği gibi",
-      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2607.mp3?_=82"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2609.mp3?_=82"
     },
     {
       "id": 83,
       "kelime": "وَمَا أَنَا",
-      "okunus": "wa ma ana",
+      "okunus": "ve ma ena",
       "anlam": "Ve ben değilim",
-      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2608.mp3?_=83"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2607.mp3?_=80"
     },
     {
       "id": 84,
       "kelime": "تَشَاؤُنَ",
-      "okunus": "tasha'una",
+      "okunus": "teşaune",
       "anlam": "İstiyorsunuz",
-      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2609.mp3?_=84"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2606.mp3?_=79"
     },
     {
       "id": 85,
       "kelime": "قُلْ يَا أَيُّهَا",
-      "okunus": "qul ya ayyuha",
+      "okunus": "gul ya eyyuha",
       "anlam": "De ki ey",
-      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2610.mp3?_=85"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2614.mp3?_=85"
     },
     {
       "id": 86,
       "kelime": "سَوَاءٌ",
-      "okunus": "sawa'un",
+      "okunus": "sevaun",
       "anlam": "Eşit, aynı",
-      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2611.mp3?_=86"
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2611.mp3?_=84"
     }
   ]
 }
