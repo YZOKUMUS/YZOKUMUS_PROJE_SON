@@ -172,26 +172,42 @@ async function firestoreDelete(collection, docId) {
     const backendType = getBackendTypeFromAuth();
     
     if (backendType !== 'firebase' || !window.firestore) {
+        console.warn('⚠️ firestoreDelete: Firebase kullanılamıyor', { backendType, firestoreExists: !!window.firestore });
         return false;
     }
     
     // Check if user is authenticated
     const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : null;
-    if (!user || user.id.startsWith('local-')) {
+    if (!user) {
+        console.warn('⚠️ firestoreDelete: Kullanıcı bulunamadı');
+        return false;
+    }
+    
+    if (user.id.startsWith('local-')) {
+        console.warn('⚠️ firestoreDelete: Local kullanıcı, Firebase silme yapılmıyor', { userId: user.id });
         return false;
     }
     
     // Check Firebase auth
     if (window.firebaseAuth && !window.firebaseAuth.currentUser) {
+        console.warn('⚠️ firestoreDelete: Firebase auth kullanıcısı yok');
         return false;
     }
     
     try {
-        await window.firestore.collection(collection).doc(docId).delete();
+        const docRef = window.firestore.collection(collection).doc(docId);
+        // Önce dokümanın var olup olmadığını kontrol et
+        const docSnapshot = await docRef.get();
+        if (!docSnapshot.exists) {
+            console.log('ℹ️ firestoreDelete: Doküman zaten yok:', { collection, docId });
+            return true; // Zaten yoksa başarılı say
+        }
+        
+        await docRef.delete();
         console.log('✅ Firestore delete successful:', { collection, docId });
         return true;
     } catch (error) {
-        console.error('❌ Firestore delete error:', error);
+        console.error('❌ Firestore delete error:', error, { collection, docId, userId: user?.id });
         return false;
     }
 }

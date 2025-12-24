@@ -645,18 +645,30 @@ function resetAllData() {
             weekStart = monday.toISOString().split('T')[0];
         }
         
+        console.log('🔄 Firebase silme işlemi başlatılıyor:', { userId: user.id, username, docId, weekStart });
+        
         // Delete from Firebase (non-blocking)
         const deletePromises = [
-            window.firestoreDelete('user_stats', docId).catch(() => false),
-            window.firestoreDelete('daily_tasks', docId).catch(() => false)
+            window.firestoreDelete('user_stats', docId).catch((e) => {
+                console.warn('⚠️ user_stats silme hatası:', e);
+                return false;
+            }),
+            window.firestoreDelete('daily_tasks', docId).catch((e) => {
+                console.warn('⚠️ daily_tasks silme hatası:', e);
+                return false;
+            })
         ];
         
         // Delete weekly leaderboard data for current week and previous weeks
         if (weekStart && weekStart.length > 0) {
             // Delete current week
             const leaderboardDocId = `${user.id}_${weekStart}`;
+            console.log('🔄 Mevcut hafta lig verisi siliniyor:', leaderboardDocId);
             deletePromises.push(
-                window.firestoreDelete('weekly_leaderboard', leaderboardDocId).catch(() => false)
+                window.firestoreDelete('weekly_leaderboard', leaderboardDocId).catch((e) => {
+                    console.warn('⚠️ weekly_leaderboard (mevcut hafta) silme hatası:', e, { docId: leaderboardDocId });
+                    return false;
+                })
             );
             
             // Also try to delete for previous weeks (last 8 weeks to be safe)
@@ -666,8 +678,12 @@ function resetAllData() {
                     prevWeekDate.setDate(prevWeekDate.getDate() - (i * 7));
                     const prevWeekStart = prevWeekDate.toISOString().split('T')[0];
                     const prevLeaderboardDocId = `${user.id}_${prevWeekStart}`;
+                    console.log(`🔄 Önceki hafta (${i}) lig verisi siliniyor:`, prevLeaderboardDocId);
                     deletePromises.push(
-                        window.firestoreDelete('weekly_leaderboard', prevLeaderboardDocId).catch(() => false)
+                        window.firestoreDelete('weekly_leaderboard', prevLeaderboardDocId).catch((e) => {
+                            console.warn(`⚠️ weekly_leaderboard (önceki hafta ${i}) silme hatası:`, e, { docId: prevLeaderboardDocId });
+                            return false;
+                        })
                     );
                 } catch (e) {
                     console.warn('⚠️ Hafta hesaplama hatası:', e);
@@ -681,12 +697,37 @@ function resetAllData() {
         
         Promise.all(deletePromises).then((results) => {
             const successCount = results.filter(r => r === true).length;
-            console.log(`✅ Firebase verileri silindi: ${successCount}/${deletePromises.length} başarılı (user_stats, daily_tasks, weekly_leaderboard dahil)`);
+            const totalCount = deletePromises.length;
+            const weeklyLeaderboardCount = results.slice(2).filter(r => r === true).length; // İlk 2: user_stats ve daily_tasks
+            
+            console.log(`✅ Firebase verileri silindi: ${successCount}/${totalCount} başarılı (user_stats, daily_tasks, weekly_leaderboard dahil)`);
+            console.log('📊 Silme sonuçları:', results);
+            
+            // Leaderboard modal açıksa yeniden yükle
+            const leaderboardModal = document.getElementById('leaderboard-modal');
+            if (leaderboardModal && !leaderboardModal.classList.contains('hidden')) {
+                if (typeof window.showLeaderboardModal === 'function') {
+                    setTimeout(() => {
+                        window.showLeaderboardModal();
+                    }, 500);
+                }
+            }
+            
             if (typeof window.showToast === 'function') {
-                window.showToast('Tüm veriler sıfırlandı! Frontend ve backend temizlendi.', 'success', 3000);
+                if (successCount === totalCount) {
+                    window.showToast(`✅ Tüm veriler sıfırlandı! (${successCount}/${totalCount} başarılı, ${weeklyLeaderboardCount} lig verisi silindi)`, 'success', 4000);
+                } else if (successCount > 0) {
+                    window.showToast(`⚠️ Veriler sıfırlandı! (${successCount}/${totalCount} başarılı, ${weeklyLeaderboardCount} lig verisi silindi)`, 'info', 4000);
+                } else {
+                    window.showToast('⚠️ Frontend temizlendi, ancak Firebase verileri silinemedi. Kullanıcı giriş yapmamış olabilir.', 'warning', 5000);
+                }
             }
         }).catch((error) => {
+            console.error('❌ Firebase verileri silinirken hata:', error);
             console.log('ℹ️ Firebase verileri silinemedi (beklenen - kullanıcı giriş yapmamış olabilir):', error);
+            if (typeof window.showToast === 'function') {
+                window.showToast('⚠️ Frontend temizlendi, ancak Firebase verileri silinemedi.', 'warning', 4000);
+            }
         });
     } else {
         // Even if not logged in, show success message
