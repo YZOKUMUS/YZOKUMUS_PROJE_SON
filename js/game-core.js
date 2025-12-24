@@ -699,9 +699,20 @@ function resetAllData() {
             const successCount = results.filter(r => r === true).length;
             const totalCount = deletePromises.length;
             const weeklyLeaderboardCount = results.slice(2).filter(r => r === true).length; // İlk 2: user_stats ve daily_tasks
+            const userStatsSuccess = results[0] === true;
+            const dailyTasksSuccess = results[1] === true;
             
             console.log(`✅ Firebase verileri silindi: ${successCount}/${totalCount} başarılı (user_stats, daily_tasks, weekly_leaderboard dahil)`);
             console.log('📊 Silme sonuçları:', results);
+            
+            // Başarısız işlemleri belirle
+            const failedItems = [];
+            if (!userStatsSuccess) failedItems.push('user_stats');
+            if (!dailyTasksSuccess) failedItems.push('daily_tasks');
+            const failedWeeklyCount = results.slice(2).filter(r => r === false).length;
+            if (failedWeeklyCount > 0) {
+                failedItems.push(`${failedWeeklyCount} lig verisi`);
+            }
             
             // Leaderboard modal açıksa yeniden yükle
             const leaderboardModal = document.getElementById('leaderboard-modal');
@@ -716,8 +727,12 @@ function resetAllData() {
             if (typeof window.showToast === 'function') {
                 if (successCount === totalCount) {
                     window.showToast(`✅ Tüm veriler sıfırlandı! (${successCount}/${totalCount} başarılı, ${weeklyLeaderboardCount} lig verisi silindi)`, 'success', 4000);
+                } else if (weeklyLeaderboardCount > 0) {
+                    // Lig verileri silinmiş ama bazı işlemler başarısız
+                    const failedText = failedItems.length > 0 ? ` (Başarısız: ${failedItems.join(', ')})` : '';
+                    window.showToast(`✅ Lig verileri sıfırlandı! (${successCount}/${totalCount} başarılı, ${weeklyLeaderboardCount} lig verisi silindi${failedText})`, 'success', 5000);
                 } else if (successCount > 0) {
-                    window.showToast(`⚠️ Veriler sıfırlandı! (${successCount}/${totalCount} başarılı, ${weeklyLeaderboardCount} lig verisi silindi)`, 'info', 4000);
+                    window.showToast(`⚠️ Veriler kısmen sıfırlandı! (${successCount}/${totalCount} başarılı${failedItems.length > 0 ? ', Başarısız: ' + failedItems.join(', ') : ''})`, 'info', 5000);
                 } else {
                     window.showToast('⚠️ Frontend temizlendi, ancak Firebase verileri silinemedi. Kullanıcı giriş yapmamış olabilir.', 'warning', 5000);
                 }

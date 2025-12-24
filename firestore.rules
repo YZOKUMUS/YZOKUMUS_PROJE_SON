@@ -17,6 +17,11 @@ service cloud.firestore {
       allow update: if request.auth != null && 
                     request.resource.data.user_id == request.auth.uid &&
                     resource.data.user_id == request.auth.uid;
+      
+      // Delete: Sadece kendi verilerini silebilir
+      allow delete: if request.auth != null && 
+                    resource != null && 
+                    resource.data.user_id == request.auth.uid;
     }
     
     match /daily_tasks/{docId} {
@@ -32,6 +37,11 @@ service cloud.firestore {
       // Update: Güncellemede de user_id alanı request.auth.uid ile eşleşmeli
       allow update: if request.auth != null && 
                     request.resource.data.user_id == request.auth.uid &&
+                    resource.data.user_id == request.auth.uid;
+      
+      // Delete: Sadece kendi verilerini silebilir
+      allow delete: if request.auth != null && 
+                    resource != null && 
                     resource.data.user_id == request.auth.uid;
     }
     
