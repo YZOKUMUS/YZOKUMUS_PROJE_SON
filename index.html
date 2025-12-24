@@ -514,21 +514,20 @@
             <div class="game-progress">
                 <span id="elif-question-number">1</span> / <span id="elif-total-questions">10</span>
             </div>
-            <div style="display: flex; align-items: center; gap: var(--spacing-sm);">
-                <div class="combo-display" style="display: none;">🔥 <span id="elif-combo">0</span></div>
-                <button class="info-btn" id="elif-info-btn" onclick="showElifBaInfo()" title="Bilgi" style="display: none;">ℹ️</button>
-            </div>
+            <div class="combo-display">🔥 <span id="elif-combo">0</span></div>
         </div>
 
         <div class="game-content">
             <div class="question-card glass-card">
-                <div class="elif-question-header">
-                    <div class="arabic-letter" id="elif-letter">ا</div>
+                <div class="word-actions">
+                    <div style="flex: 1;"></div>
+                    <button class="info-btn" id="elif-info-btn-header" onclick="showElifBaInfo()" title="Bilgi" style="display: none;">ℹ️</button>
                     <button class="audio-btn" id="elif-audio-btn" title="Dinle">
                         <img src="ASSETS/badges/hoparlor.png" alt="Dinle" class="audio-icon">
                     </button>
                 </div>
-                <div class="elif-question-instruction" id="elif-question-instruction"></div>
+                <div class="arabic-word" id="elif-letter">ا</div>
+                <div class="word-info" id="elif-question-instruction"></div>
             </div>
 
             <div class="answer-options" id="elif-options">

@@ -2599,8 +2599,8 @@ async function startElifFethaGame() {
         audioBtn.style.display = '';
     }
     
-    // Show info button
-    const infoBtn = document.getElementById('elif-info-btn');
+    // Show info button in word-actions
+    const infoBtn = document.getElementById('elif-info-btn-header');
     if (infoBtn) {
         infoBtn.style.display = 'flex';
     }
@@ -2633,18 +2633,25 @@ function loadElifFethaQuestion() {
         tipText = 'Peltek';
     }
     
+    // Reset styles - use arabic-word class styling
+    letterElement.className = 'arabic-word';
     letterElement.style.background = 'none';
     letterElement.style.border = 'none';
     letterElement.style.padding = '0';
     letterElement.style.borderRadius = '0';
     letterElement.style.boxShadow = 'none';
+    letterElement.style.fontSize = 'clamp(3rem, 7vw, 4.5rem)';
+    letterElement.style.fontWeight = 'bold';
+    letterElement.style.color = 'var(--text-primary)';
     
     const harfWithUstun = currentQuestion.harfWithUstun || '';
+    letterElement.textContent = harfWithUstun;
     
-    letterElement.innerHTML = `
-        <div style="font-size: clamp(3rem, 7vw, 4.5rem); font-weight: bold; font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif; direction: rtl; line-height: var(--arabic-line-height-normal); letter-spacing: var(--arabic-letter-spacing); text-align: center; color: var(--text-primary);">${harfWithUstun}</div>
-        ${tipText ? `<div style="font-size: 0.75rem; opacity: 0.7; font-weight: 500; color: var(--text-secondary); margin-top: 0.25rem;">${tipText}</div>` : ''}
-    `;
+    // Set tip text in word-info
+    const wordInfoElement = document.getElementById('elif-question-instruction');
+    if (wordInfoElement) {
+        wordInfoElement.textContent = tipText || '';
+    }
     
     document.getElementById('elif-combo').textContent = comboCount;
     document.getElementById('elif-session-score').textContent = formatNumber(sessionScore);
@@ -2727,8 +2734,8 @@ async function startElifEsreGame() {
         audioBtn.style.display = '';
     }
     
-    // Show info button
-    const infoBtn = document.getElementById('elif-info-btn');
+    // Show info button in word-actions
+    const infoBtn = document.getElementById('elif-info-btn-header');
     if (infoBtn) {
         infoBtn.style.display = 'flex';
     }
@@ -2761,18 +2768,25 @@ function loadElifEsreQuestion() {
         tipText = 'Peltek';
     }
     
+    // Reset styles - use arabic-word class styling
+    letterElement.className = 'arabic-word';
     letterElement.style.background = 'none';
     letterElement.style.border = 'none';
     letterElement.style.padding = '0';
     letterElement.style.borderRadius = '0';
     letterElement.style.boxShadow = 'none';
+    letterElement.style.fontSize = 'clamp(3rem, 7vw, 4.5rem)';
+    letterElement.style.fontWeight = 'bold';
+    letterElement.style.color = 'var(--text-primary)';
     
     const harfWithEsre = currentQuestion.harfWithEsre || '';
+    letterElement.textContent = harfWithEsre;
     
-    letterElement.innerHTML = `
-        <div style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: bold; font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif; direction: rtl; line-height: var(--arabic-line-height-normal); letter-spacing: var(--arabic-letter-spacing); text-align: center; color: var(--text-primary);">${harfWithEsre}</div>
-        ${tipText ? `<div style="font-size: 0.75rem; opacity: 0.7; font-weight: 500; color: var(--text-secondary); margin-top: 0.25rem;">${tipText}</div>` : ''}
-    `;
+    // Set tip text in word-info
+    const wordInfoElement = document.getElementById('elif-question-instruction');
+    if (wordInfoElement) {
+        wordInfoElement.textContent = tipText || '';
+    }
     
     // Generate options with only Turkish pronunciation
     const correctAnswer = currentQuestion.okunus;
@@ -2851,8 +2865,8 @@ async function startElifOtreGame() {
         audioBtn.style.display = '';
     }
     
-    // Show info button
-    const infoBtn = document.getElementById('elif-info-btn');
+    // Show info button in word-actions
+    const infoBtn = document.getElementById('elif-info-btn-header');
     if (infoBtn) {
         infoBtn.style.display = 'flex';
     }
@@ -2885,18 +2899,25 @@ function loadElifOtreQuestion() {
         tipText = 'Peltek';
     }
     
+    // Reset styles - use arabic-word class styling
+    letterElement.className = 'arabic-word';
     letterElement.style.background = 'none';
     letterElement.style.border = 'none';
     letterElement.style.padding = '0';
     letterElement.style.borderRadius = '0';
     letterElement.style.boxShadow = 'none';
+    letterElement.style.fontSize = 'clamp(3rem, 7vw, 4.5rem)';
+    letterElement.style.fontWeight = 'bold';
+    letterElement.style.color = 'var(--text-primary)';
     
     const harfWithOtre = currentQuestion.harfWithOtre || '';
+    letterElement.textContent = harfWithOtre;
     
-    letterElement.innerHTML = `
-        <div style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: bold; font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif; direction: rtl; line-height: var(--arabic-line-height-normal); letter-spacing: var(--arabic-letter-spacing); text-align: center; color: var(--text-primary);">${harfWithOtre}</div>
-        ${tipText ? `<div style="font-size: 0.75rem; opacity: 0.7; font-weight: 500; color: var(--text-secondary); margin-top: 0.25rem;">${tipText}</div>` : ''}
-    `;
+    // Set tip text in word-info
+    const wordInfoElement = document.getElementById('elif-question-instruction');
+    if (wordInfoElement) {
+        wordInfoElement.textContent = tipText || '';
+    }
     
     // Generate options with only Turkish pronunciation
     const correctAnswer = currentQuestion.okunus;
@@ -2983,8 +3004,8 @@ async function startElifTenvinGame() {
         audioBtn.style.display = '';
     }
     
-    // Show info button
-    const infoBtn = document.getElementById('elif-info-btn');
+    // Show info button in word-actions
+    const infoBtn = document.getElementById('elif-info-btn-header');
     if (infoBtn) {
         infoBtn.style.display = 'flex';
     }
@@ -3017,18 +3038,25 @@ function loadElifTenvinQuestion() {
         tipText = 'Peltek';
     }
     
+    // Reset styles - use arabic-word class styling
+    letterElement.className = 'arabic-word';
     letterElement.style.background = 'none';
     letterElement.style.border = 'none';
     letterElement.style.padding = '0';
     letterElement.style.borderRadius = '0';
     letterElement.style.boxShadow = 'none';
+    letterElement.style.fontSize = 'clamp(3rem, 7vw, 4.5rem)';
+    letterElement.style.fontWeight = 'bold';
+    letterElement.style.color = 'var(--text-primary)';
     
     const harfWithTenvin = currentQuestion.harfWithTenvin || '';
+    letterElement.textContent = harfWithTenvin;
     
-    letterElement.innerHTML = `
-        <div style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: bold; font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif; direction: rtl; line-height: var(--arabic-line-height-normal); letter-spacing: var(--arabic-letter-spacing); text-align: center; color: var(--text-primary);">${harfWithTenvin}</div>
-        ${tipText ? `<div style="font-size: 0.75rem; opacity: 0.7; font-weight: 500; color: var(--text-secondary); margin-top: 0.25rem;">${tipText}</div>` : ''}
-    `;
+    // Set tip text in word-info
+    const wordInfoElement = document.getElementById('elif-question-instruction');
+    if (wordInfoElement) {
+        wordInfoElement.textContent = tipText || '';
+    }
     
     // Generate options with only Turkish pronunciation
     const correctAnswer = currentQuestion.okunus;
@@ -3115,8 +3143,8 @@ async function startUcHarfliKelimelerGame() {
         audioBtn.style.display = '';
     }
     
-    // Show info button
-    const infoBtn = document.getElementById('elif-info-btn');
+    // Show info button in word-actions
+    const infoBtn = document.getElementById('elif-info-btn-header');
     if (infoBtn) {
         infoBtn.style.display = 'flex';
     }
@@ -3134,16 +3162,24 @@ function loadUcHarfliKelimelerQuestion() {
     
     document.getElementById('elif-question-number').textContent = questionIndex + 1;
     
-    // Set word display
+    // Set word display - use arabic-word class styling
     const letterElement = document.getElementById('elif-letter');
+    letterElement.className = 'arabic-word';
     letterElement.style.background = 'none';
     letterElement.style.border = 'none';
     letterElement.style.padding = '0';
     letterElement.style.borderRadius = '0';
     letterElement.style.boxShadow = 'none';
-    letterElement.innerHTML = `
-        <div style="font-size: clamp(2.5rem, 7vw, 3.5rem); font-weight: bold; font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif; direction: rtl; text-align: center; line-height: var(--arabic-line-height-normal); letter-spacing: var(--arabic-letter-spacing); color: var(--text-primary);">${currentQuestion.kelime}</div>
-    `;
+    letterElement.style.fontSize = 'clamp(2.5rem, 7vw, 3.5rem)';
+    letterElement.style.fontWeight = 'bold';
+    letterElement.style.color = 'var(--text-primary)';
+    letterElement.textContent = currentQuestion.kelime || '';
+    
+    // Clear word-info
+    const wordInfoElement = document.getElementById('elif-question-instruction');
+    if (wordInfoElement) {
+        wordInfoElement.textContent = '';
+    }
     
     // Generate options with only Turkish pronunciation
     const correctAnswer = currentQuestion.okunus;
@@ -3230,8 +3266,8 @@ async function startUzatmaMedGame() {
         audioBtn.style.display = '';
     }
     
-    // Show info button
-    const infoBtn = document.getElementById('elif-info-btn');
+    // Show info button in word-actions
+    const infoBtn = document.getElementById('elif-info-btn-header');
     if (infoBtn) {
         infoBtn.style.display = 'flex';
     }
@@ -3249,23 +3285,24 @@ function loadUzatmaMedQuestion() {
     
     document.getElementById('elif-question-number').textContent = questionIndex + 1;
     
-    // Set word display - simple, no border, no background
+    // Set word display - use arabic-word class styling
     const letterElement = document.getElementById('elif-letter');
+    letterElement.className = 'arabic-word';
     letterElement.style.background = 'none';
     letterElement.style.border = 'none';
     letterElement.style.padding = '0';
     letterElement.style.borderRadius = '0';
     letterElement.style.boxShadow = 'none';
-    letterElement.style.display = 'flex';
-    letterElement.style.flexDirection = 'column';
-    letterElement.style.alignItems = 'center';
-    letterElement.style.justifyContent = 'center';
-    letterElement.style.gap = '0.5rem';
-    letterElement.style.minHeight = 'auto';
-    letterElement.innerHTML = `
-        <div style="font-size: clamp(2.5rem, 7vw, 3.5rem); font-weight: bold; font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif; direction: rtl; text-align: center; line-height: var(--arabic-line-height-normal); letter-spacing: var(--arabic-letter-spacing); color: var(--text-primary);">${currentQuestion.kelime}</div>
-        <div style="font-size: clamp(0.85rem, 2vw, 1rem); font-weight: 400; text-align: center; color: var(--text-secondary); line-height: 1.4;">${currentQuestion.anlam || ''}</div>
-    `;
+    letterElement.style.fontSize = 'clamp(2.5rem, 7vw, 3.5rem)';
+    letterElement.style.fontWeight = 'bold';
+    letterElement.style.color = 'var(--text-primary)';
+    letterElement.textContent = currentQuestion.kelime || '';
+    
+    // Set Turkish meaning in word-info
+    const wordInfoElement = document.getElementById('elif-question-instruction');
+    if (wordInfoElement) {
+        wordInfoElement.textContent = currentQuestion.anlam || '';
+    }
     
     // Generate options with only Turkish pronunciation
     const correctAnswer = currentQuestion.okunus;
@@ -3352,8 +3389,8 @@ async function startSeddeGame() {
         audioBtn.style.display = '';
     }
     
-    // Show info button
-    const infoBtn = document.getElementById('elif-info-btn');
+    // Show info button in word-actions
+    const infoBtn = document.getElementById('elif-info-btn-header');
     if (infoBtn) {
         infoBtn.style.display = 'flex';
     }
@@ -3371,16 +3408,24 @@ function loadSeddeQuestion() {
     
     document.getElementById('elif-question-number').textContent = questionIndex + 1;
     
-    // Set word display
+    // Set word display - use arabic-word class styling
     const letterElement = document.getElementById('elif-letter');
+    letterElement.className = 'arabic-word';
     letterElement.style.background = 'none';
     letterElement.style.border = 'none';
     letterElement.style.padding = '0';
     letterElement.style.borderRadius = '0';
     letterElement.style.boxShadow = 'none';
-    letterElement.innerHTML = `
-        <div style="font-size: clamp(2.5rem, 7vw, 3.5rem); font-weight: bold; font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif; direction: rtl; text-align: center; line-height: var(--arabic-line-height-normal); letter-spacing: var(--arabic-letter-spacing); color: var(--text-primary);">${currentQuestion.kelime}</div>
-    `;
+    letterElement.style.fontSize = 'clamp(2.5rem, 7vw, 3.5rem)';
+    letterElement.style.fontWeight = 'bold';
+    letterElement.style.color = 'var(--text-primary)';
+    letterElement.textContent = currentQuestion.kelime || '';
+    
+    // Clear word-info
+    const wordInfoElement = document.getElementById('elif-question-instruction');
+    if (wordInfoElement) {
+        wordInfoElement.textContent = '';
+    }
     
     // Generate options with only Turkish pronunciation
     const correctAnswer = currentQuestion.okunus;
@@ -3467,8 +3512,8 @@ async function startCezmGame() {
         audioBtn.style.display = '';
     }
     
-    // Show info button
-    const infoBtn = document.getElementById('elif-info-btn');
+    // Show info button in word-actions
+    const infoBtn = document.getElementById('elif-info-btn-header');
     if (infoBtn) {
         infoBtn.style.display = 'flex';
     }
@@ -3486,16 +3531,24 @@ function loadCezmQuestion() {
     
     document.getElementById('elif-question-number').textContent = questionIndex + 1;
     
-    // Set word display
+    // Set word display - use arabic-word class styling
     const letterElement = document.getElementById('elif-letter');
+    letterElement.className = 'arabic-word';
     letterElement.style.background = 'none';
     letterElement.style.border = 'none';
     letterElement.style.padding = '0';
     letterElement.style.borderRadius = '0';
     letterElement.style.boxShadow = 'none';
-    letterElement.innerHTML = `
-        <div style="font-size: clamp(2.5rem, 7vw, 3.5rem); font-weight: bold; font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif; direction: rtl; text-align: center; line-height: var(--arabic-line-height-normal); letter-spacing: var(--arabic-letter-spacing); color: var(--text-primary);">${currentQuestion.kelime}</div>
-    `;
+    letterElement.style.fontSize = 'clamp(2.5rem, 7vw, 3.5rem)';
+    letterElement.style.fontWeight = 'bold';
+    letterElement.style.color = 'var(--text-primary)';
+    letterElement.textContent = currentQuestion.kelime || '';
+    
+    // Clear word-info
+    const wordInfoElement = document.getElementById('elif-question-instruction');
+    if (wordInfoElement) {
+        wordInfoElement.textContent = '';
+    }
     
     // Generate options with only Turkish pronunciation
     const correctAnswer = currentQuestion.okunus;
@@ -3589,8 +3642,8 @@ async function startElifHarekelerGame(harfData) {
         audioBtn.style.display = 'none';
     }
     
-    // Show info button
-    const infoBtn = document.getElementById('elif-info-btn');
+    // Show info button in word-actions
+    const infoBtn = document.getElementById('elif-info-btn-header');
     if (infoBtn) {
         infoBtn.style.display = 'flex';
     }

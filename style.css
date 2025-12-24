@@ -3658,7 +3658,8 @@ body {
 
 /* Word Actions içindeki butonlar - aynı boyut */
 .word-actions .hint-btn,
-.word-actions .audio-btn {
+.word-actions .audio-btn,
+.word-actions .info-btn {
     position: relative;
     top: auto;
     right: auto;
