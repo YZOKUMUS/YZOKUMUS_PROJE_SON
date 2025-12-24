@@ -442,9 +442,31 @@ async function saveUserStats(stats) {
     // Wait for all async operations (but don't fail if Firebase fails)
     try {
         const results = await Promise.allSettled(promises);
-        console.log('📊 Save operations completed:', results.map(r => r.status));
+        const successCount = results.filter(r => r.status === 'fulfilled').length;
+        const failCount = results.filter(r => r.status === 'rejected').length;
+        
+        if (successCount > 0) {
+            console.log(`📊 Save operations completed: ${successCount} succeeded${failCount > 0 ? `, ${failCount} failed (non-critical)` : ''}`);
+        }
+        
+        // Log failures only if they're not expected (permission-denied is expected for local users)
+        results.forEach((result, index) => {
+            if (result.status === 'rejected') {
+                const error = result.reason;
+                // Only log unexpected errors (not permission-denied or blocked-by-client)
+                if (error && error.code !== 'permission-denied' && 
+                    !error.message?.includes('ERR_BLOCKED_BY_CLIENT') &&
+                    !error.message?.includes('webchannel')) {
+                    console.warn('⚠️ Save operation failed:', error);
+                }
+            }
+        });
     } catch (error) {
-        console.warn('Some save operations failed:', error);
+        // Only log if it's not a blocked-by-client error
+        if (!error.message?.includes('ERR_BLOCKED_BY_CLIENT') &&
+            !error.message?.includes('webchannel')) {
+            console.warn('Some save operations failed:', error);
+        }
     }
     
     return success;

@@ -63,6 +63,24 @@ async function initFirebase() {
         // Firebase will only be used after user explicitly logs in with username
         // await autoSignInAnonymous(); // REMOVED - Only sign in after username login
         
+        // Suppress ERR_BLOCKED_BY_CLIENT errors from Firestore WebChannel (caused by browser extensions)
+        // These are non-critical connection termination errors
+        if (typeof window.addEventListener === 'function') {
+            window.addEventListener('error', (event) => {
+                // Filter out Firestore WebChannel connection errors (non-critical)
+                if (event.message && (
+                    event.message.includes('ERR_BLOCKED_BY_CLIENT') ||
+                    event.message.includes('webchannel_connection') ||
+                    (event.filename && event.filename.includes('webchannel_connection'))
+                )) {
+                    // Suppress these errors - they're caused by browser extensions blocking Firestore connections
+                    // Data is still saved successfully via other channels
+                    event.preventDefault();
+                    return false;
+                }
+            }, true);
+        }
+        
         return true;
     } catch (error) {
         console.error('❌ Firebase initialization error:', error);
