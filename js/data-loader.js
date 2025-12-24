@@ -17,6 +17,7 @@ let ucHarfliKelimelerData = [];
 let seddeData = [];
 let cezmData = [];
 let tenvinData = [];
+let uzatmaMedData = [];
 
 // Loading state
 let dataLoaded = {
@@ -32,7 +33,8 @@ let dataLoaded = {
     ucHarfliKelimeler: false,
     sedde: false,
     cezm: false,
-    tenvin: false
+    tenvin: false,
+    uzatmaMed: false
 };
 
 /**
@@ -390,6 +392,35 @@ async function loadCezmData() {
 }
 
 /**
+ * Load Uzatma (Med) Harfleri data
+ */
+async function loadUzatmaMedData() {
+    if (dataLoaded.uzatmaMed && uzatmaMedData.length > 0) {
+        return uzatmaMedData;
+    }
+    
+    try {
+        const response = await fetch('./data/uzatma_med.json');
+        if (!response.ok) throw new Error('Uzatma Med data fetch failed');
+        
+        const data = await response.json();
+        uzatmaMedData = Array.isArray(data.kelimeler) ? data.kelimeler : [];
+        dataLoaded.uzatmaMed = true;
+        
+        // Update global reference
+        if (typeof window !== 'undefined') {
+            window.uzatmaMedData = uzatmaMedData;
+        }
+        
+        console.log(`✅ Uzatma (Med) Harfleri data loaded: ${uzatmaMedData.length} words`);
+        return uzatmaMedData;
+    } catch (err) {
+        console.error('❌ Uzatma Med data load error:', err);
+        return [];
+    }
+}
+
+/**
  * Preload all data in background
  */
 async function preloadAllData() {
@@ -400,7 +431,8 @@ async function preloadAllData() {
         loadAyetData(),
         loadDuaData(),
         loadHadisData(),
-        loadHarfData()
+        loadHarfData(),
+        loadUzatmaMedData()
         // Removed: loadHarf1Data() - not used
     ]);
     
@@ -423,7 +455,9 @@ function getDataStatus() {
         otre: { loaded: dataLoaded.otre, count: otreData.length },
         ucHarfliKelimeler: { loaded: dataLoaded.ucHarfliKelimeler, count: ucHarfliKelimelerData.length },
         sedde: { loaded: dataLoaded.sedde, count: seddeData.length },
-        cezm: { loaded: dataLoaded.cezm, count: cezmData.length }
+        cezm: { loaded: dataLoaded.cezm, count: cezmData.length },
+        tenvin: { loaded: dataLoaded.tenvin, count: tenvinData.length },
+        uzatmaMed: { loaded: dataLoaded.uzatmaMed, count: uzatmaMedData.length }
     };
 }
 
@@ -442,6 +476,7 @@ if (typeof window !== 'undefined') {
     window.loadSeddeData = loadSeddeData;
     window.loadCezmData = loadCezmData;
     window.loadTenvinData = loadTenvinData;
+    window.loadUzatmaMedData = loadUzatmaMedData;
     window.preloadAllData = preloadAllData;
     window.getDataStatus = getDataStatus;
     
@@ -459,4 +494,5 @@ if (typeof window !== 'undefined') {
     window.seddeData = seddeData;
     window.cezmData = cezmData;
     window.tenvinData = tenvinData;
+    window.uzatmaMedData = uzatmaMedData;
 }
