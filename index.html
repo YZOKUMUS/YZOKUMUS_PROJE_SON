@@ -946,14 +946,24 @@
     <script src="js/utils.js"></script>
     <script src="js/firebase-config.js"></script>
     <script src="js/firebase-init.js"></script>
-    <script src="js/firebase-debug.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/api-service.js"></script>
     <script src="js/data-loader.js"></script>
     <script src="js/points-manager.js"></script>
     <script src="js/leaderboard.js"></script>
     <script src="js/game-core.js"></script>
-    <!-- Test Scripts (Development) -->
-    <script src="js/quick-test.js"></script>
+    <!-- Debug/Test Scripts (Only loaded in development mode) -->
+    <script>
+        // Only load debug/test scripts if DEBUG mode is enabled
+        if (typeof CONFIG !== 'undefined' && CONFIG.DEBUG) {
+            const firebaseDebug = document.createElement('script');
+            firebaseDebug.src = 'js/firebase-debug.js';
+            document.body.appendChild(firebaseDebug);
+            
+            const quickTest = document.createElement('script');
+            quickTest.src = 'js/quick-test.js';
+            document.body.appendChild(quickTest);
+        }
+    </script>
 </body>
 </html>

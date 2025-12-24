@@ -9,7 +9,7 @@ let ayetData = [];
 let duaData = [];
 let hadisData = [];
 let harfData = [];
-let harf1Data = [];
+// Removed: harf1Data - not used in game-core.js
 let ustnData = [];
 let esreData = [];
 let otreData = [];
@@ -25,7 +25,7 @@ let dataLoaded = {
     dua: false,
     hadis: false,
     harf: false,
-    harf1: false,
+    // Removed: harf1 - not used
     ustn: false,
     esre: false,
     otre: false,
@@ -182,32 +182,9 @@ async function loadHarfData() {
 
 /**
  * Load Harf1 (Kelime Okuma) data
+ * REMOVED: This data is not used in game-core.js, so it's been removed to clean up the codebase
  */
-async function loadHarf1Data() {
-    if (dataLoaded.harf1 && harf1Data.length > 0) {
-        return harf1Data;
-    }
-    
-    try {
-        const response = await fetch('./data/harf1.json');
-        if (!response.ok) throw new Error('Harf1 data fetch failed');
-        
-        const data = await response.json();
-        harf1Data = Array.isArray(data.kelimeler) ? data.kelimeler : [];
-        dataLoaded.harf1 = true;
-        
-        // Update global reference
-        if (typeof window !== 'undefined') {
-            window.harf1Data = harf1Data;
-        }
-        
-        console.log(`✅ Harf1 (Kelime Okuma) data loaded: ${harf1Data.length} words`);
-        return harf1Data;
-    } catch (err) {
-        console.error('❌ Harf1 data load error:', err);
-        return [];
-    }
-}
+// async function loadHarf1Data() { ... }
 
 /**
  * Load Ustn (Ustun/Fetha) data
@@ -423,8 +400,8 @@ async function preloadAllData() {
         loadAyetData(),
         loadDuaData(),
         loadHadisData(),
-        loadHarfData(),
-        loadHarf1Data()
+        loadHarfData()
+        // Removed: loadHarf1Data() - not used
     ]);
     
     console.log('✅ All data preloaded');
@@ -440,7 +417,7 @@ function getDataStatus() {
         dua: { loaded: dataLoaded.dua, count: duaData.length },
         hadis: { loaded: dataLoaded.hadis, count: hadisData.length },
         harf: { loaded: dataLoaded.harf, count: harfData.length },
-        harf1: { loaded: dataLoaded.harf1, count: harf1Data.length },
+        // Removed: harf1 - not used
         ustn: { loaded: dataLoaded.ustn, count: ustnData.length },
         esre: { loaded: dataLoaded.esre, count: esreData.length },
         otre: { loaded: dataLoaded.otre, count: otreData.length },
@@ -457,7 +434,7 @@ if (typeof window !== 'undefined') {
     window.loadDuaData = loadDuaData;
     window.loadHadisData = loadHadisData;
     window.loadHarfData = loadHarfData;
-    window.loadHarf1Data = loadHarf1Data;
+    // Removed: window.loadHarf1Data - not used
     window.loadUstnData = loadUstnData;
     window.loadEsreData = loadEsreData;
     window.loadOtreData = loadOtreData;
@@ -474,7 +451,7 @@ if (typeof window !== 'undefined') {
     window.duaData = duaData;
     window.hadisData = hadisData;
     window.harfData = harfData;
-    window.harf1Data = harf1Data;
+    // Removed: window.harf1Data - not used
     window.ustnData = ustnData;
     window.esreData = esreData;
     window.otreData = otreData;
