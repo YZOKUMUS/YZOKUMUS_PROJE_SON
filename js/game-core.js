@@ -1627,9 +1627,21 @@ function getWordAnalysis() {
 /**
  * Show word analysis modal
  */
-function showWordAnalysisModal() {
+async function showWordAnalysisModal() {
     const analysis = getWordAnalysis();
     const struggling = getStrugglingWords();
+    
+    // Load kelime data to get word details
+    const kelimeData = await loadKelimeData();
+    
+    // Helper function to find word by ID
+    const findWordById = (wordId) => {
+        if (!wordId || !kelimeData || kelimeData.length === 0) return null;
+        return kelimeData.find(w => 
+            (w.id && w.id.toString() === wordId.toString()) || 
+            (w.kelime_id && w.kelime_id.toString() === wordId.toString())
+        );
+    };
     
     let content = `
         <div class="analysis-summary">
@@ -1666,12 +1678,27 @@ function showWordAnalysisModal() {
             <div class="struggling-words">
                 <h4>🔴 Zorlandığın Kelimeler</h4>
                 <ul>
-                    ${struggling.slice(0, 5).map(w => `
+                    ${struggling.slice(0, 10).map(w => {
+                        const wordDetail = findWordById(w.id);
+                        const arabicWord = wordDetail ? (wordDetail.kelime || wordDetail.arabic || '') : '';
+                        const turkishMeaning = wordDetail ? (wordDetail.anlam || wordDetail.translation || '') : '';
+                        const attempts = w.attempts || 0;
+                        const correct = w.correct || 0;
+                        const wrong = w.wrong || 0;
+                        
+                        return `
                         <li>
-                            <span class="word-id">${w.id}</span>
-                            <span class="word-rate">${w.successRate}%</span>
+                            <div class="word-detail-row">
+                                <div class="word-arabic">${arabicWord || w.id}</div>
+                                <div class="word-meaning">${turkishMeaning || 'Bilinmiyor'}</div>
+                            </div>
+                            <div class="word-stats-row">
+                                <span class="word-rate">Başarı: ${Math.round(w.successRate || 0)}%</span>
+                                <span class="word-attempts">Deneme: ${attempts} (${correct}✓ / ${wrong}✗)</span>
+                            </div>
                         </li>
-                    `).join('')}
+                    `;
+                    }).join('')}
                 </ul>
             </div>
         `;
