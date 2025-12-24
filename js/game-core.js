@@ -2449,6 +2449,9 @@ async function startElifBaGame(submode = 'harfler') {
     } else if (submode === 'cezm') {
         // Cezm game - uses cezm.json
         await startCezmGame();
+    } else if (submode === 'uzatma-med') {
+        // Uzatma (Med) Harfleri game - uses uzatma_med.json
+        await startUzatmaMedGame();
     }
 }
 
@@ -3188,6 +3191,120 @@ function checkUcHarfliKelimelerAnswer(index, selectedAnswer) {
     setTimeout(() => {
         questionIndex++;
         loadUcHarfliKelimelerQuestion();
+    }, 1200);
+}
+
+/**
+ * Uzatma (Med) Harfleri game - uses uzatma_med.json
+ */
+async function startUzatmaMedGame() {
+    const uzatmaMedData = await loadUzatmaMedData();
+    
+    if (uzatmaMedData.length === 0) {
+        showToast('Uzatma (Med) Harfleri verisi yüklenemedi', 'error');
+        goToMainMenu();
+        return;
+    }
+    
+    // Reset session
+    questionIndex = 0;
+    sessionScore = 0;
+    comboCount = 0;
+    maxCombo = 0;
+    correctCount = 0;
+    wrongCount = 0;
+    
+    // Create questions from uzatma med data
+    currentQuestions = shuffleArray([...uzatmaMedData]).slice(0, CONFIG.QUESTIONS_PER_GAME);
+    document.getElementById('elif-ba-screen').classList.remove('hidden');
+    document.getElementById('elif-total-questions').textContent = currentQuestions.length;
+    
+    // Show audio button for uzatma med game
+    const audioBtn = document.getElementById('elif-audio-btn');
+    if (audioBtn) {
+        audioBtn.style.display = '';
+    }
+    
+    // Show info button
+    const infoBtn = document.getElementById('elif-info-btn');
+    if (infoBtn) {
+        infoBtn.style.display = 'flex';
+    }
+    
+    loadUzatmaMedQuestion();
+}
+
+function loadUzatmaMedQuestion() {
+    if (questionIndex >= currentQuestions.length) {
+        endGame();
+        return;
+    }
+    
+    currentQuestion = currentQuestions[questionIndex];
+    
+    document.getElementById('elif-question-number').textContent = questionIndex + 1;
+    
+    // Set word display
+    const letterElement = document.getElementById('elif-letter');
+    letterElement.style.backgroundColor = '#1a1a2e';
+    letterElement.style.color = '#fff';
+    letterElement.style.padding = '20px';
+    letterElement.style.borderRadius = '12px';
+    letterElement.innerHTML = `
+        <div style="font-size: 3rem; font-weight: bold; font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif; direction: rtl; text-align: center; line-height: var(--arabic-line-height-normal); letter-spacing: var(--arabic-letter-spacing);">${currentQuestion.kelime}</div>
+    `;
+    
+    // Generate options with only Turkish pronunciation
+    const correctAnswer = currentQuestion.okunus;
+    const allUzatmaMedData = window.uzatmaMedData || [];
+    const wrongOptions = getRandomItems(
+        allUzatmaMedData.filter(k => k.okunus !== correctAnswer),
+        3
+    ).map(k => k.okunus);
+    
+    // Create options with only okunus (Turkish pronunciation)
+    const options = shuffleArray([correctAnswer, ...wrongOptions]);
+    
+    const optionsContainer = document.getElementById('elif-options');
+    optionsContainer.innerHTML = options.map((option, index) => `
+        <button class="answer-option" onclick="checkUzatmaMedAnswer(${index}, '${option.replace(/'/g, "\\'")}')">
+            ${option}
+        </button>
+    `).join('');
+    
+    // Audio will be played when user clicks the audio button
+}
+
+function checkUzatmaMedAnswer(index, selectedAnswer) {
+    // Stop all audio immediately when answer is clicked
+    stopAllAudio();
+    
+    const correctAnswer = currentQuestion.okunus;
+    const buttons = document.querySelectorAll('#elif-options .answer-option');
+    
+    buttons.forEach(btn => btn.classList.add('disabled'));
+    buttons.forEach(btn => {
+        if (btn.textContent.trim() === correctAnswer) {
+            btn.classList.add('correct');
+        }
+    });
+    
+    if (selectedAnswer === correctAnswer) {
+        correctCount++;
+        comboCount++;
+        maxCombo = Math.max(maxCombo, comboCount);
+        
+        const gained = 5 + (comboCount * CONFIG.COMBO_BONUS_PER_CORRECT);
+        sessionScore += gained;
+    } else {
+        wrongCount++;
+        comboCount = 0;
+        buttons[index].classList.add('wrong');
+    }
+    
+    setTimeout(() => {
+        questionIndex++;
+        loadUzatmaMedQuestion();
     }, 1200);
 }
 
@@ -5158,6 +5275,7 @@ if (typeof window !== 'undefined') {
     window.checkUcHarfliKelimelerAnswer = checkUcHarfliKelimelerAnswer;
     window.checkSeddeAnswer = checkSeddeAnswer;
     window.checkCezmAnswer = checkCezmAnswer;
+    window.checkUzatmaMedAnswer = checkUzatmaMedAnswer;
     window.toggleCurrentWordFavorite = toggleCurrentWordFavorite;
     window.showHarfTablosu = showHarfTablosu;
     window.playHarfAudio = playHarfAudio;
