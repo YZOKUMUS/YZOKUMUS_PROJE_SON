@@ -4729,6 +4729,9 @@ function showElifBaInfo() {
  * Check karma answer
  */
 function checkKarmaAnswer(selected, correct) {
+    // Stop all audio immediately when answer is clicked
+    stopAllAudio();
+    
     const buttons = document.querySelectorAll('#karma-question-container .answer-option');
     buttons.forEach(btn => btn.classList.add('disabled'));
     
