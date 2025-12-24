@@ -499,7 +499,7 @@ body {
     gap: var(--spacing-md);
     margin-bottom: var(--spacing-md);
     position: relative;
-    min-height: 80px;
+    min-height: auto;
 }
 
 .elif-question-header .arabic-letter {
@@ -1384,17 +1384,24 @@ body {
         font-size: 2rem;
     }
     
-    /* Uzatma Med oyunu için tablet responsive stiller */
+    /* Elif Ba alt modları için tablet responsive stiller */
     #elif-letter {
-        padding: clamp(14px, 2.5vw, 18px) !important;
+        padding: 0 !important;
     }
     
+    /* Tüm Arapça metinler için tablet - inline style öncelikli olacak */
     #elif-letter > div:first-child {
-        font-size: clamp(2.25rem, 5vw, 2.75rem) !important;
+        font-size: clamp(2.5rem, 6.5vw, 4rem) !important;
     }
     
-    #elif-letter > div:last-child {
+    /* Türkçe anlam için tablet */
+    #elif-letter > div:last-child:not(:first-child) {
         font-size: clamp(0.8rem, 1.8vw, 0.95rem) !important;
+    }
+    
+    /* Tip metni (İnce, Kalın, Peltek) için tablet */
+    #elif-letter > div:last-child:has(+ *) {
+        font-size: clamp(0.7rem, 1.5vw, 0.8rem) !important;
     }
     
     .modal-content {
@@ -1440,7 +1447,27 @@ body {
     .elif-question-header {
         flex-direction: column;
         gap: var(--spacing-sm);
-        min-height: 120px; /* Harekeler için daha fazla alan */
+        min-height: auto; /* Yüksekliği azalt */
+    }
+    
+    /* Elif Ba alt modları için mobil responsive */
+    #elif-letter {
+        padding: 0 !important;
+    }
+    
+    /* Tüm Arapça metinler için mobil - inline style öncelikli olacak */
+    #elif-letter > div:first-child {
+        font-size: clamp(2.25rem, 8vw, 3.75rem) !important;
+    }
+    
+    /* Türkçe anlam için mobil */
+    #elif-letter > div:last-child:not(:first-child) {
+        font-size: clamp(0.75rem, 2.5vw, 1rem) !important;
+    }
+    
+    /* Tip metni (İnce, Kalın, Peltek) için mobil */
+    #elif-letter > div:last-child:has(+ *) {
+        font-size: clamp(0.65rem, 2vw, 0.8rem) !important;
     }
     
     /* Harfler modu için orta ekranlarda büyük harfler */
@@ -1510,17 +1537,24 @@ body {
         grid-template-columns: 1fr;
     }
     
-    /* Uzatma Med oyunu için responsive stiller */
+    /* Elif Ba alt modları için mobil responsive stiller (480px) */
     #elif-letter {
-        padding: clamp(12px, 3vw, 20px) !important;
+        padding: 0 !important;
     }
     
+    /* Tüm Arapça metinler için mobil - inline style öncelikli olacak */
     #elif-letter > div:first-child {
-        font-size: clamp(2rem, 6vw, 3rem) !important;
+        font-size: clamp(2.25rem, 8vw, 3.75rem) !important;
     }
     
-    #elif-letter > div:last-child {
-        font-size: clamp(0.85rem, 2vw, 1rem) !important;
+    /* Türkçe anlam için mobil */
+    #elif-letter > div:last-child:not(:first-child) {
+        font-size: clamp(0.75rem, 2.5vw, 1rem) !important;
+    }
+    
+    /* Tip metni (İnce, Kalın, Peltek) için mobil */
+    #elif-letter > div:last-child:has(+ *) {
+        font-size: clamp(0.65rem, 2vw, 0.8rem) !important;
     }
 }
 
@@ -1529,17 +1563,24 @@ body {
         font-size: 13px;
     }
     
-    /* Uzatma Med oyunu için küçük ekran stilleri */
+    /* Elif Ba alt modları için çok küçük ekran stilleri (360px) */
     #elif-letter {
-        padding: 12px !important;
+        padding: 0 !important;
     }
     
+    /* Tüm Arapça metinler için çok küçük ekran - inline style öncelikli olacak */
     #elif-letter > div:first-child {
-        font-size: 2rem !important;
+        font-size: clamp(2rem, 7vw, 3.25rem) !important;
     }
     
-    #elif-letter > div:last-child {
-        font-size: 0.85rem !important;
+    /* Türkçe anlam için çok küçük ekran */
+    #elif-letter > div:last-child:not(:first-child) {
+        font-size: clamp(0.7rem, 2vw, 0.9rem) !important;
+    }
+    
+    /* Tip metni (İnce, Kalın, Peltek) için çok küçük ekran */
+    #elif-letter > div:last-child:has(+ *) {
+        font-size: clamp(0.6rem, 1.8vw, 0.75rem) !important;
     }
 }
 

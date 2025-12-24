@@ -2633,16 +2633,17 @@ function loadElifFethaQuestion() {
         tipText = 'Peltek';
     }
     
-    letterElement.style.backgroundColor = renkKodu;
-    letterElement.style.color = '#1a1a2e';
-    letterElement.style.padding = '20px';
-    letterElement.style.borderRadius = '12px';
+    letterElement.style.background = 'none';
+    letterElement.style.border = 'none';
+    letterElement.style.padding = '0';
+    letterElement.style.borderRadius = '0';
+    letterElement.style.boxShadow = 'none';
     
     const harfWithUstun = currentQuestion.harfWithUstun || '';
     
     letterElement.innerHTML = `
-        <div style="font-size: 4rem; font-weight: bold; margin-bottom: 8px; font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif; direction: rtl; line-height: 1.8; text-align: center;">${harfWithUstun}</div>
-        ${tipText ? `<div style="font-size: 0.75rem; opacity: 0.8; font-weight: 500;">${tipText}</div>` : ''}
+        <div style="font-size: clamp(3rem, 7vw, 4.5rem); font-weight: bold; font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif; direction: rtl; line-height: var(--arabic-line-height-normal); letter-spacing: var(--arabic-letter-spacing); text-align: center; color: var(--text-primary);">${harfWithUstun}</div>
+        ${tipText ? `<div style="font-size: 0.75rem; opacity: 0.7; font-weight: 500; color: var(--text-secondary); margin-top: 0.25rem;">${tipText}</div>` : ''}
     `;
     
     document.getElementById('elif-combo').textContent = comboCount;
@@ -2760,16 +2761,17 @@ function loadElifEsreQuestion() {
         tipText = 'Peltek';
     }
     
-    letterElement.style.backgroundColor = renkKodu;
-    letterElement.style.color = '#1a1a2e';
-    letterElement.style.padding = '20px';
-    letterElement.style.borderRadius = '12px';
+    letterElement.style.background = 'none';
+    letterElement.style.border = 'none';
+    letterElement.style.padding = '0';
+    letterElement.style.borderRadius = '0';
+    letterElement.style.boxShadow = 'none';
     
     const harfWithEsre = currentQuestion.harfWithEsre || '';
     
     letterElement.innerHTML = `
-        <div style="font-size: 4rem; font-weight: bold; margin-bottom: 8px; font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif; direction: rtl; line-height: 1.8; text-align: center;">${harfWithEsre}</div>
-        ${tipText ? `<div style="font-size: 0.75rem; opacity: 0.8; font-weight: 500;">${tipText}</div>` : ''}
+        <div style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: bold; font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif; direction: rtl; line-height: var(--arabic-line-height-normal); letter-spacing: var(--arabic-letter-spacing); text-align: center; color: var(--text-primary);">${harfWithEsre}</div>
+        ${tipText ? `<div style="font-size: 0.75rem; opacity: 0.7; font-weight: 500; color: var(--text-secondary); margin-top: 0.25rem;">${tipText}</div>` : ''}
     `;
     
     // Generate options with only Turkish pronunciation
@@ -2883,16 +2885,17 @@ function loadElifOtreQuestion() {
         tipText = 'Peltek';
     }
     
-    letterElement.style.backgroundColor = renkKodu;
-    letterElement.style.color = '#1a1a2e';
-    letterElement.style.padding = '20px';
-    letterElement.style.borderRadius = '12px';
+    letterElement.style.background = 'none';
+    letterElement.style.border = 'none';
+    letterElement.style.padding = '0';
+    letterElement.style.borderRadius = '0';
+    letterElement.style.boxShadow = 'none';
     
     const harfWithOtre = currentQuestion.harfWithOtre || '';
     
     letterElement.innerHTML = `
-        <div style="font-size: 4rem; font-weight: bold; margin-bottom: 8px; font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif; direction: rtl; line-height: 1.8; text-align: center;">${harfWithOtre}</div>
-        ${tipText ? `<div style="font-size: 0.75rem; opacity: 0.8; font-weight: 500;">${tipText}</div>` : ''}
+        <div style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: bold; font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif; direction: rtl; line-height: var(--arabic-line-height-normal); letter-spacing: var(--arabic-letter-spacing); text-align: center; color: var(--text-primary);">${harfWithOtre}</div>
+        ${tipText ? `<div style="font-size: 0.75rem; opacity: 0.7; font-weight: 500; color: var(--text-secondary); margin-top: 0.25rem;">${tipText}</div>` : ''}
     `;
     
     // Generate options with only Turkish pronunciation
@@ -3014,16 +3017,17 @@ function loadElifTenvinQuestion() {
         tipText = 'Peltek';
     }
     
-    letterElement.style.backgroundColor = renkKodu;
-    letterElement.style.color = '#1a1a2e';
-    letterElement.style.padding = '20px';
-    letterElement.style.borderRadius = '12px';
+    letterElement.style.background = 'none';
+    letterElement.style.border = 'none';
+    letterElement.style.padding = '0';
+    letterElement.style.borderRadius = '0';
+    letterElement.style.boxShadow = 'none';
     
     const harfWithTenvin = currentQuestion.harfWithTenvin || '';
     
     letterElement.innerHTML = `
-        <div style="font-size: 4rem; font-weight: bold; margin-bottom: 8px; font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif; direction: rtl; line-height: 1.8; text-align: center;">${harfWithTenvin}</div>
-        ${tipText ? `<div style="font-size: 0.75rem; opacity: 0.8; font-weight: 500;">${tipText}</div>` : ''}
+        <div style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: bold; font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif; direction: rtl; line-height: var(--arabic-line-height-normal); letter-spacing: var(--arabic-letter-spacing); text-align: center; color: var(--text-primary);">${harfWithTenvin}</div>
+        ${tipText ? `<div style="font-size: 0.75rem; opacity: 0.7; font-weight: 500; color: var(--text-secondary); margin-top: 0.25rem;">${tipText}</div>` : ''}
     `;
     
     // Generate options with only Turkish pronunciation
@@ -3132,12 +3136,13 @@ function loadUcHarfliKelimelerQuestion() {
     
     // Set word display
     const letterElement = document.getElementById('elif-letter');
-    letterElement.style.backgroundColor = '#1a1a2e';
-    letterElement.style.color = '#fff';
-    letterElement.style.padding = '20px';
-    letterElement.style.borderRadius = '12px';
+    letterElement.style.background = 'none';
+    letterElement.style.border = 'none';
+    letterElement.style.padding = '0';
+    letterElement.style.borderRadius = '0';
+    letterElement.style.boxShadow = 'none';
     letterElement.innerHTML = `
-        <div style="font-size: 3rem; font-weight: bold; font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif; direction: rtl; text-align: center;">${currentQuestion.kelime}</div>
+        <div style="font-size: clamp(2.5rem, 7vw, 3.5rem); font-weight: bold; font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif; direction: rtl; text-align: center; line-height: var(--arabic-line-height-normal); letter-spacing: var(--arabic-letter-spacing); color: var(--text-primary);">${currentQuestion.kelime}</div>
     `;
     
     // Generate options with only Turkish pronunciation
@@ -3244,22 +3249,22 @@ function loadUzatmaMedQuestion() {
     
     document.getElementById('elif-question-number').textContent = questionIndex + 1;
     
-    // Set word display - responsive with clamp()
+    // Set word display - simple, no border, no background
     const letterElement = document.getElementById('elif-letter');
-    letterElement.style.background = 'linear-gradient(135deg, rgba(157, 138, 255, 0.95) 0%, rgba(184, 165, 232, 0.95) 100%)';
-    letterElement.style.color = '#fff';
-    letterElement.style.padding = 'clamp(12px, 3vw, 20px)';
-    letterElement.style.borderRadius = '12px';
-    letterElement.style.position = 'relative';
-    letterElement.style.boxShadow = '0 8px 32px rgba(157, 138, 255, 0.3)';
+    letterElement.style.background = 'none';
+    letterElement.style.border = 'none';
+    letterElement.style.padding = '0';
+    letterElement.style.borderRadius = '0';
+    letterElement.style.boxShadow = 'none';
     letterElement.style.display = 'flex';
     letterElement.style.flexDirection = 'column';
     letterElement.style.alignItems = 'center';
     letterElement.style.justifyContent = 'center';
-    letterElement.style.gap = 'clamp(8px, 2vw, 12px)';
+    letterElement.style.gap = '0.5rem';
+    letterElement.style.minHeight = 'auto';
     letterElement.innerHTML = `
-        <div style="font-size: clamp(2rem, 6vw, 3rem); font-weight: bold; font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif; direction: rtl; text-align: center; line-height: var(--arabic-line-height-normal); letter-spacing: var(--arabic-letter-spacing);">${currentQuestion.kelime}</div>
-        <div style="font-size: clamp(0.85rem, 2vw, 1rem); font-weight: 400; text-align: center; color: rgba(255, 255, 255, 0.9); line-height: 1.4; padding-top: clamp(4px, 1vw, 8px);">${currentQuestion.anlam || ''}</div>
+        <div style="font-size: clamp(2.5rem, 7vw, 3.5rem); font-weight: bold; font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif; direction: rtl; text-align: center; line-height: var(--arabic-line-height-normal); letter-spacing: var(--arabic-letter-spacing); color: var(--text-primary);">${currentQuestion.kelime}</div>
+        <div style="font-size: clamp(0.85rem, 2vw, 1rem); font-weight: 400; text-align: center; color: var(--text-secondary); line-height: 1.4;">${currentQuestion.anlam || ''}</div>
     `;
     
     // Generate options with only Turkish pronunciation
@@ -3368,12 +3373,13 @@ function loadSeddeQuestion() {
     
     // Set word display
     const letterElement = document.getElementById('elif-letter');
-    letterElement.style.backgroundColor = '#1a1a2e';
-    letterElement.style.color = '#fff';
-    letterElement.style.padding = '20px';
-    letterElement.style.borderRadius = '12px';
+    letterElement.style.background = 'none';
+    letterElement.style.border = 'none';
+    letterElement.style.padding = '0';
+    letterElement.style.borderRadius = '0';
+    letterElement.style.boxShadow = 'none';
     letterElement.innerHTML = `
-        <div style="font-size: 3rem; font-weight: bold; font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif; direction: rtl; text-align: center;">${currentQuestion.kelime}</div>
+        <div style="font-size: clamp(2.5rem, 7vw, 3.5rem); font-weight: bold; font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif; direction: rtl; text-align: center; line-height: var(--arabic-line-height-normal); letter-spacing: var(--arabic-letter-spacing); color: var(--text-primary);">${currentQuestion.kelime}</div>
     `;
     
     // Generate options with only Turkish pronunciation
@@ -3482,12 +3488,13 @@ function loadCezmQuestion() {
     
     // Set word display
     const letterElement = document.getElementById('elif-letter');
-    letterElement.style.backgroundColor = '#1a1a2e';
-    letterElement.style.color = '#fff';
-    letterElement.style.padding = '20px';
-    letterElement.style.borderRadius = '12px';
+    letterElement.style.background = 'none';
+    letterElement.style.border = 'none';
+    letterElement.style.padding = '0';
+    letterElement.style.borderRadius = '0';
+    letterElement.style.boxShadow = 'none';
     letterElement.innerHTML = `
-        <div style="font-size: 3rem; font-weight: bold; font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif; direction: rtl; text-align: center;">${currentQuestion.kelime}</div>
+        <div style="font-size: clamp(2.5rem, 7vw, 3.5rem); font-weight: bold; font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif; direction: rtl; text-align: center; line-height: var(--arabic-line-height-normal); letter-spacing: var(--arabic-letter-spacing); color: var(--text-primary);">${currentQuestion.kelime}</div>
     `;
     
     // Generate options with only Turkish pronunciation
