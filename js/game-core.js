@@ -540,28 +540,64 @@ function resetAllData() {
     saveStats();
     
     // Delete Firebase data if user is logged in
+    const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : null;
     const username = localStorage.getItem('hasene_username');
-    if (username && typeof window.firestoreDelete === 'function') {
+    
+    if (user && user.id && typeof window.firestoreDelete === 'function') {
         // Delete user stats from Firebase
         // Use usernameToDocId if available, otherwise create safe docId manually
         let docId;
         if (typeof window.usernameToDocId === 'function') {
-            docId = window.usernameToDocId(username);
+            docId = window.usernameToDocId(username || 'user_unknown');
         } else {
             // Fallback: manual conversion
-            docId = username.trim()
+            docId = (username || 'user_unknown').trim()
                 .toLowerCase()
                 .replace(/[^a-z0-9_]/g, '_')
                 .replace(/_+/g, '_')
                 .replace(/^_+|_+$/g, '') || 'user_unknown';
         }
         
-        // Try to delete from Firebase (non-blocking)
-        Promise.all([
+        // Get current week start for leaderboard deletion
+        let weekStart = '';
+        if (typeof window.getWeekStartString === 'function') {
+            weekStart = window.getWeekStartString();
+        } else {
+            // Fallback: calculate week start manually
+            const now = new Date();
+            const day = now.getDay();
+            const diff = now.getDate() - day + (day === 0 ? -6 : 1); // Monday
+            const monday = new Date(now.setDate(diff));
+            weekStart = monday.toISOString().split('T')[0];
+        }
+        
+        // Delete from Firebase (non-blocking)
+        const deletePromises = [
             window.firestoreDelete('user_stats', docId).catch(() => false),
             window.firestoreDelete('daily_tasks', docId).catch(() => false)
-        ]).then(() => {
-            console.log('✅ Firebase verileri silindi (kelime analizi dahil)');
+        ];
+        
+        // Delete weekly leaderboard data for current week
+        if (weekStart) {
+            const leaderboardDocId = `${user.id}_${weekStart}`;
+            deletePromises.push(
+                window.firestoreDelete('weekly_leaderboard', leaderboardDocId).catch(() => false)
+            );
+        }
+        
+        // Also try to delete for previous weeks (last 4 weeks to be safe)
+        for (let i = 1; i <= 4; i++) {
+            const prevWeekDate = new Date(weekStart);
+            prevWeekDate.setDate(prevWeekDate.getDate() - (i * 7));
+            const prevWeekStart = prevWeekDate.toISOString().split('T')[0];
+            const prevLeaderboardDocId = `${user.id}_${prevWeekStart}`;
+            deletePromises.push(
+                window.firestoreDelete('weekly_leaderboard', prevLeaderboardDocId).catch(() => false)
+            );
+        }
+        
+        Promise.all(deletePromises).then(() => {
+            console.log('✅ Firebase verileri silindi (user_stats, daily_tasks, weekly_leaderboard dahil)');
         }).catch(() => {
             console.log('ℹ️ Firebase verileri silinemedi (beklenen - kullanıcı giriş yapmamış olabilir)');
         });
