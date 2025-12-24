@@ -1488,8 +1488,40 @@ function selectIntelligentWords(words, count, isReviewMode = false) {
     const today = getLocalDateString();
     const todayDate = new Date(today);
     
+    // Önce kelimeleri filtrele: Ustalaşılan kelimeler sadece tekrar zamanı gelmişse dahil edilir
+    const filteredWords = words.filter(word => {
+        const stats = wordStats[word.id];
+        
+        // İstatistik yoksa dahil et (yeni kelime)
+        if (!stats) {
+            return true;
+        }
+        
+        const masteryLevel = stats.masteryLevel || 0;
+        
+        // Ustalaşılan kelimeler (masteryLevel >= 8): Sadece tekrar zamanı gelmişse dahil et
+        if (masteryLevel >= 8) {
+            if (stats.nextReviewDate) {
+                const reviewDate = new Date(stats.nextReviewDate);
+                // Tekrar zamanı gelmişse (bugün veya geçmiş) dahil et
+                return reviewDate <= todayDate;
+            }
+            // nextReviewDate yoksa (eski sistem uyumluluğu) dahil etme
+            return false;
+        }
+        
+        // Diğer tüm kelimeler dahil edilir
+        return true;
+    });
+    
+    // Yeterli kelime yoksa, ustalaşılan kelimeleri de dahil et (fallback)
+    if (filteredWords.length < count) {
+        console.log(`⚠️ Yeterli kelime yok (${filteredWords.length}/${count}), ustalaşılan kelimeler de dahil ediliyor`);
+        return shuffleArray(words).slice(0, count);
+    }
+    
     // Kategorize words by priority
-    const prioritizedWords = words.map(word => {
+    const prioritizedWords = filteredWords.map(word => {
         const stats = wordStats[word.id];
         let priority = 1;
         
@@ -1532,6 +1564,11 @@ function selectIntelligentWords(words, count, isReviewMode = false) {
             // 4. Düşük Ustalık Seviyesi
             if (stats.masteryLevel <= 3 && stats.attempts >= 1) {
                 priority = Math.max(priority, 2);
+            }
+            
+            // 5. Ustalaşılan kelimeler için düşük öncelik (tekrar zamanı gelmiş olsa bile nadiren sor)
+            if (stats.masteryLevel >= 8) {
+                priority = Math.min(priority, 0.5); // Çok düşük öncelik
             }
         }
         
