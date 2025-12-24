@@ -3250,8 +3250,10 @@ function loadUzatmaMedQuestion() {
     letterElement.style.color = '#fff';
     letterElement.style.padding = '20px';
     letterElement.style.borderRadius = '12px';
+    letterElement.style.position = 'relative';
     letterElement.innerHTML = `
         <div style="font-size: 3rem; font-weight: bold; font-family: 'KFGQPC Uthmanic Script HAFS', 'Scheherazade New', serif; direction: rtl; text-align: center; line-height: var(--arabic-line-height-normal); letter-spacing: var(--arabic-letter-spacing);">${currentQuestion.kelime}</div>
+        <div style="position: absolute; bottom: 8px; right: 12px; font-size: 0.7rem; opacity: 0.7; font-weight: 400;">${currentQuestion.anlam || ''}</div>
     `;
     
     // Generate options with only Turkish pronunciation
