@@ -419,6 +419,111 @@
       "okunus": "ajma'in",
       "anlam": "Hep birlikte, topluca",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2320.mp3?_=60"
+    },
+    {
+      "id": 61,
+      "kelime": "أَمَنَ",
+      "okunus": "amana",
+      "anlam": "İman etti, güvendi",
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2501.mp3?_=61"
+    },
+    {
+      "id": 62,
+      "kelime": "ذلِكَ",
+      "okunus": "dhalika",
+      "anlam": "O, şu",
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2502.mp3?_=62"
+    },
+    {
+      "id": 63,
+      "kelime": "طه",
+      "okunus": "taha",
+      "anlam": "Taha (Kur'an suresi)",
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2503.mp3?_=63"
+    },
+    {
+      "id": 64,
+      "kelime": "آدَمَ",
+      "okunus": "adama",
+      "anlam": "Adem (peygamber)",
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2504.mp3?_=64"
+    },
+    {
+      "id": 65,
+      "kelime": "بِهِ",
+      "okunus": "bihi",
+      "anlam": "Onunla, onun ile",
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2505.mp3?_=65"
+    },
+    {
+      "id": 66,
+      "kelime": "سُلَيْمَنُ",
+      "okunus": "sulaymanu",
+      "anlam": "Süleyman (peygamber)",
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2506.mp3?_=66"
+    },
+    {
+      "id": 67,
+      "kelime": "لَكِنَّ",
+      "okunus": "lakinna",
+      "anlam": "Ancak, fakat",
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2507.mp3?_=67"
+    },
+    {
+      "id": 68,
+      "kelime": "كَذلِكَ",
+      "okunus": "kadhalika",
+      "anlam": "Böyle, böylece",
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2508.mp3?_=68"
+    },
+    {
+      "id": 69,
+      "kelime": "هذِهِ",
+      "okunus": "hadhihi",
+      "anlam": "Bu (dişil)",
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2509.mp3?_=69"
+    },
+    {
+      "id": 70,
+      "kelime": "لَكِنْ",
+      "okunus": "lakin",
+      "anlam": "Ancak, fakat",
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2510.mp3?_=70"
+    },
+    {
+      "id": 71,
+      "kelime": "إِبْرَهِيمُ",
+      "okunus": "ibrahimu",
+      "anlam": "İbrahim (peygamber)",
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2511.mp3?_=71"
+    },
+    {
+      "id": 72,
+      "kelime": "زَكُوةٌ",
+      "okunus": "zakātun",
+      "anlam": "Zekat",
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2512.mp3?_=72"
+    },
+    {
+      "id": 73,
+      "kelime": "صَلوةٌ",
+      "okunus": "salātun",
+      "anlam": "Namaz",
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2513.mp3?_=73"
+    },
+    {
+      "id": 74,
+      "kelime": "نَجُوةٌ",
+      "okunus": "najātun",
+      "anlam": "Kurtuluş",
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2514.mp3?_=74"
+    },
+    {
+      "id": 75,
+      "kelime": "هُدَى",
+      "okunus": "hudā",
+      "anlam": "Hidayet, doğru yol",
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2515.mp3?_=75"
     }
   ]
 }
