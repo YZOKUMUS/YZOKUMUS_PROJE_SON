@@ -1408,26 +1408,46 @@ function updateWordStats(wordId, isCorrect) {
         stats.correct++;
         stats.lastCorrect = today;
         
-        // SM-2 Interval Hesaplama
-        if (previousAttempts === 0) {
+        // SM-2 Interval Hesaplama (SuperMemo 2 Algorithm)
+        if (stats.interval === 0) {
             // İlk öğrenme: 1 gün sonra tekrar
             stats.interval = 1;
-        } else if (previousAttempts === 1 && stats.correct === 2) {
-            // İkinci doğru cevap: 6 gün sonra tekrar
+        } else if (stats.interval === 1) {
+            // İkinci tekrar: 6 gün sonra
             stats.interval = 6;
         } else {
-            // Sonraki doğru cevaplar: interval * easeFactor
+            // Sonraki tekrarlar: interval * easeFactor
             stats.interval = Math.max(1, Math.floor(stats.interval * stats.easeFactor));
         }
         
-        // SM-2 Ease Factor Güncellemesi
+        // SM-2 Ease Factor Güncellemesi (Quality-based, success rate'e göre)
+        // Quality 5 = Mükemmel (>=95%), Quality 4 = Kolay (>=85%), Quality 3 = Normal (>=70%)
         const currentSuccessRate = (stats.correct / stats.attempts) * 100;
-        if (currentSuccessRate >= 90) {
-            stats.easeFactor = Math.min(2.5, stats.easeFactor + 0.15);
+        let quality = 3; // Varsayılan normal
+        
+        if (currentSuccessRate >= 95) {
+            quality = 5; // Mükemmel
+        } else if (currentSuccessRate >= 85) {
+            quality = 4; // Kolay
         } else if (currentSuccessRate >= 70) {
-            stats.easeFactor = Math.min(2.5, stats.easeFactor + 0.05);
-        } else if (currentSuccessRate < 50) {
-            stats.easeFactor = Math.max(1.3, stats.easeFactor - 0.15);
+            quality = 3; // Normal
+        } else if (currentSuccessRate >= 50) {
+            quality = 2; // Zor
+        } else {
+            quality = 1; // Çok zor
+        }
+        
+        // SM-2 Ease Factor formülü: EF' = EF + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02))
+        // Basitleştirilmiş versiyon: Quality'ye göre ease factor güncelle
+        if (quality >= 4) {
+            // Kolay/Mükemmel: Ease factor artır
+            stats.easeFactor = Math.min(2.5, stats.easeFactor + (quality === 5 ? 0.15 : 0.10));
+        } else if (quality === 3) {
+            // Normal: Ease factor sabit kalır (çok küçük artış)
+            stats.easeFactor = Math.min(2.5, stats.easeFactor + 0.02);
+        } else {
+            // Zor/Çok zor: Ease factor azalt
+            stats.easeFactor = Math.max(1.3, stats.easeFactor - (quality === 1 ? 0.20 : 0.15));
         }
         
     } else {
@@ -1442,12 +1462,18 @@ function updateWordStats(wordId, isCorrect) {
         addToReviewList(wordId);
     }
     
-    // Sonraki tekrar tarihini hesapla
-    stats.nextReviewDate = addDaysToDate(today, stats.interval);
-    
-    // Başarı oranı ve ustalık seviyesi
+    // Başarı oranı ve ustalık seviyesi (önce hesapla, interval için kullanılacak)
     stats.successRate = Math.round((stats.correct / stats.attempts) * 100);
+    const oldMasteryLevel = stats.masteryLevel || 0;
     stats.masteryLevel = Math.min(10, Math.floor(stats.successRate / 10));
+    
+    // Sonraki tekrar tarihini hesapla
+    // Ustalaşılan kelimeler için maksimum interval: 365 gün (1 yıl)
+    // Bu, kelimenin tamamen unutulmasını önler ama çok nadiren sorar
+    const currentMasteryLevel = stats.masteryLevel;
+    const maxInterval = currentMasteryLevel >= 8 ? 365 : Infinity;
+    stats.interval = Math.min(stats.interval, maxInterval);
+    stats.nextReviewDate = addDaysToDate(today, stats.interval);
     
     debouncedSaveStats();
 }
