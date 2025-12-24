@@ -472,6 +472,13 @@ function resetAllData() {
         'hasene_user_id'
     ];
     
+    // Clear all weekly XP data from localStorage
+    Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('hasene_weekly_xp_')) {
+            localStorage.removeItem(key);
+        }
+    });
+    
     storageKeys.forEach(key => {
         localStorage.removeItem(key);
     });
