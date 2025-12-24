@@ -139,6 +139,146 @@
       "okunus": "burhaanaani",
       "anlam": "İki delil",
       "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2220.mp3?_=20"
+    },
+    {
+      "id": 21,
+      "kelime": "نُورٌ",
+      "okunus": "nurun",
+      "anlam": "Nur, ışık",
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2401.mp3?_=21"
+    },
+    {
+      "id": 22,
+      "kelime": "يَقُولُ",
+      "okunus": "yaqulu",
+      "anlam": "Diyor",
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2402.mp3?_=22"
+    },
+    {
+      "id": 23,
+      "kelime": "رَسُولٌ",
+      "okunus": "rasulun",
+      "anlam": "Elçi, peygamber",
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2403.mp3?_=23"
+    },
+    {
+      "id": 24,
+      "kelime": "الْقَهَّارُ",
+      "okunus": "al-qahharu",
+      "anlam": "Kahredici (Allah'ın ismi)",
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2404.mp3?_=24"
+    },
+    {
+      "id": 25,
+      "kelime": "مَكْتُوبٌ",
+      "okunus": "maktubun",
+      "anlam": "Yazılmış",
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2405.mp3?_=25"
+    },
+    {
+      "id": 26,
+      "kelime": "كَانُو",
+      "okunus": "kanu",
+      "anlam": "Oldular",
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2406.mp3?_=26"
+    },
+    {
+      "id": 27,
+      "kelime": "يَفُوتُ",
+      "okunus": "yafutu",
+      "anlam": "Kaçırır, geçer",
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2407.mp3?_=27"
+    },
+    {
+      "id": 28,
+      "kelime": "يَلِدُونَ",
+      "okunus": "yaliduna",
+      "anlam": "Doğururlar",
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2408.mp3?_=28"
+    },
+    {
+      "id": 29,
+      "kelime": "تَصِفُونَ",
+      "okunus": "tasifuna",
+      "anlam": "Vasfedersiniz, anlatırsınız",
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2409.mp3?_=29"
+    },
+    {
+      "id": 30,
+      "kelime": "يَتُوبُونَ",
+      "okunus": "yatubuna",
+      "anlam": "Tövbe ederler",
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2410.mp3?_=30"
+    },
+    {
+      "id": 31,
+      "kelime": "مُسْلِمُونَ",
+      "okunus": "muslimuna",
+      "anlam": "Müslümanlar",
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2411.mp3?_=31"
+    },
+    {
+      "id": 32,
+      "kelime": "مُخَلَّدُونَ",
+      "okunus": "mukhalladuna",
+      "anlam": "Ebedi kalacaklar",
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2412.mp3?_=32"
+    },
+    {
+      "id": 33,
+      "kelime": "تُحَاجُّونَ",
+      "okunus": "tuhajjuna",
+      "anlam": "Tartışırsınız",
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2413.mp3?_=33"
+    },
+    {
+      "id": 34,
+      "kelime": "يَعْمَلُونَ",
+      "okunus": "ya'maluna",
+      "anlam": "Yaparlar",
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2414.mp3?_=34"
+    },
+    {
+      "id": 35,
+      "kelime": "الْكَاذِبُونَ",
+      "okunus": "al-kadhibuna",
+      "anlam": "Yalancılar",
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2415.mp3?_=35"
+    },
+    {
+      "id": 36,
+      "kelime": "الْمُفْلِحُونَ",
+      "okunus": "al-muflihuna",
+      "anlam": "Kurtuluşa erenler",
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2416.mp3?_=36"
+    },
+    {
+      "id": 37,
+      "kelime": "الْجَبَّارُ",
+      "okunus": "al-jabbaru",
+      "anlam": "Cebbar (Allah'ın ismi)",
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2417.mp3?_=37"
+    },
+    {
+      "id": 38,
+      "kelime": "الْوَارِثُونَ",
+      "okunus": "al-warithuna",
+      "anlam": "Mirasçılar",
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2418.mp3?_=38"
+    },
+    {
+      "id": 39,
+      "kelime": "الْخَاسِرُونَ",
+      "okunus": "al-khasiruna",
+      "anlam": "Zarar edenler",
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2419.mp3?_=39"
+    },
+    {
+      "id": 40,
+      "kelime": "مُشْرِكُونَ",
+      "okunus": "mushrikuna",
+      "anlam": "Müşrikler, ortak koşanlar",
+      "audioUrl": "https://ilminur.com/wp-content/uploads/2020/04/2420.mp3?_=40"
     }
   ]
 }
