@@ -3334,6 +3334,8 @@ function checkRewardBoxStatus() {
     if (dailyTasks.rewardClaimedDate === today) {
         rewardBox.classList.remove('active');
         rewardBox.classList.add('claimed');
+        rewardBox.style.pointerEvents = 'none'; // Tıklamayı devre dışı bırak
+        rewardBox.style.opacity = '0.6'; // Görsel olarak devre dışı olduğunu göster
         statusEl.textContent = '✓ Bugünkü ödül alındı!';
         return;
     }
@@ -3344,9 +3346,13 @@ function checkRewardBoxStatus() {
     if (allTasksComplete) {
         rewardBox.classList.add('active');
         rewardBox.classList.remove('claimed');
+        rewardBox.style.pointerEvents = 'auto'; // Tıklamayı aktif et
+        rewardBox.style.opacity = '1'; // Tam opaklık
         statusEl.textContent = '🎉 Tıkla ve ödülünü al!';
     } else {
         rewardBox.classList.remove('active', 'claimed');
+        rewardBox.style.pointerEvents = 'none'; // Tıklamayı devre dışı bırak
+        rewardBox.style.opacity = '0.6'; // Görsel olarak devre dışı olduğunu göster
         statusEl.textContent = 'Görevleri tamamla!';
     }
 }
@@ -3378,9 +3384,11 @@ function claimDailyReward() {
         return;
     }
     
-    // Ödül verilmeden ÖNCE hemen active class'ını kaldır (çift tıklamayı önlemek için)
+    // Ödül verilmeden ÖNCE hemen active class'ını kaldır ve butonu devre dışı bırak (çift tıklamayı önlemek için)
     rewardBox.classList.remove('active');
     rewardBox.classList.add('claimed');
+    rewardBox.style.pointerEvents = 'none'; // Tıklamayı devre dışı bırak
+    rewardBox.style.opacity = '0.6'; // Görsel olarak devre dışı olduğunu göster
     
     // Ödül alındı olarak HEMEN işaretle (çift tıklamayı önlemek için)
     dailyTasks.rewardClaimedDate = today;
