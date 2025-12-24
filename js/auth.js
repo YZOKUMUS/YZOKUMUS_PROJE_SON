@@ -204,6 +204,12 @@ async function signInWithFirebaseAnonymous() {
  * Show username login modal
  */
 function showUsernameLoginModal() {
+    // Eğer logout işlemi devam ediyorsa, modal açma
+    if (isLoggingOut) {
+        console.log('⚠️ Logout in progress, cannot open login modal');
+        return;
+    }
+    
     try {
         const modal = document.getElementById('username-login-modal');
         if (!modal) {
@@ -390,19 +396,33 @@ function confirmUsername() {
             console.warn('Error updating UI:', error);
         }
         
-        // Close modal
+        // Close modal - önce tüm modalları kapat
         try {
-            if (typeof window.closeModal === 'function') {
+            // Önce tüm modalları kapat
+            if (typeof window.closeAllModals === 'function') {
+                window.closeAllModals();
+            } else if (typeof window.closeModal === 'function') {
                 window.closeModal('username-login-modal');
             } else {
                 // Fallback: manually hide modal
                 const modal = document.getElementById('username-login-modal');
                 if (modal) {
                     modal.classList.add('hidden');
+                    if (modal.style) {
+                        modal.style.display = 'none';
+                    }
                 }
             }
         } catch (error) {
             console.warn('Error closing modal:', error);
+            // Fallback: force close
+            const modal = document.getElementById('username-login-modal');
+            if (modal) {
+                modal.classList.add('hidden');
+                if (modal.style) {
+                    modal.style.display = 'none';
+                }
+            }
         }
         
         // Clear input
@@ -446,23 +466,43 @@ function confirmUsername() {
     }
 }
 
+// Logout işlemi devam ederken modal açılmasını engellemek için flag
+let isLoggingOut = false;
+
 /**
  * Handle user logout
  */
 async function handleUserLogout() {
+    // Eğer zaten logout işlemi devam ediyorsa, tekrar çalıştırma
+    if (isLoggingOut) {
+        console.log('⚠️ Logout already in progress, skipping...');
+        return;
+    }
+    
+    isLoggingOut = true;
+    
     try {
         // Önce tüm modalları kapat (giriş modalı dahil)
         if (typeof window.closeAllModals === 'function') {
             window.closeAllModals();
-        } else if (typeof window.closeModal === 'function') {
-            window.closeModal('username-login-modal');
-        } else {
-            // Fallback: manually close modal
-            const modal = document.getElementById('username-login-modal');
-            if (modal) {
-                modal.classList.add('hidden');
+        }
+        
+        // Giriş modalını özellikle kapat
+        const loginModal = document.getElementById('username-login-modal');
+        if (loginModal) {
+            loginModal.classList.add('hidden');
+            if (loginModal.style) {
+                loginModal.style.display = 'none';
             }
         }
+        
+        // Tüm modalları da kapat (ekstra güvenlik)
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.classList.add('hidden');
+            if (modal.style) {
+                modal.style.display = 'none';
+            }
+        });
         
         await signOut();
         
@@ -483,13 +523,24 @@ async function handleUserLogout() {
         if (typeof window.updateUserStatusUI === 'function') {
             updateUserStatusUI();
         }
+    } finally {
+        // Flag'i sıfırla (kısa bir gecikme ile, modal açılmasını engellemek için)
+        setTimeout(() => {
+            isLoggingOut = false;
+        }, 500);
     }
 }
 
 /**
  * Handle user authentication (login/logout toggle)
  */
-function handleUserAuth() {
+async function handleUserAuth() {
+    // Eğer logout işlemi devam ediyorsa, hiçbir şey yapma
+    if (isLoggingOut) {
+        console.log('⚠️ Logout in progress, ignoring auth request');
+        return;
+    }
+    
     try {
         const userId = localStorage.getItem('hasene_user_id');
         const username = localStorage.getItem('hasene_username');
@@ -499,12 +550,17 @@ function handleUserAuth() {
         
         if (isLoggedIn) {
             // User is logged in, logout (no modal needed)
-            handleUserLogout();
+            await handleUserLogout();
             // Return early to prevent any modal from opening
             return;
         } else {
             // User is not logged in, show login modal
             console.log('📱 Opening login modal...');
+            // Önce tüm modalları kapat
+            if (typeof window.closeAllModals === 'function') {
+                window.closeAllModals();
+            }
+            // Sonra giriş modalını aç
             showUsernameLoginModal();
         }
     } catch (error) {
@@ -514,8 +570,12 @@ function handleUserAuth() {
         const username = localStorage.getItem('hasene_username');
         const isLoggedIn = !!(userId && username);
         
-        if (!isLoggedIn) {
+        if (!isLoggedIn && !isLoggingOut) {
             try {
+                // Önce tüm modalları kapat
+                if (typeof window.closeAllModals === 'function') {
+                    window.closeAllModals();
+                }
                 showUsernameLoginModal();
             } catch (e) {
                 console.error('Failed to show login modal:', e);

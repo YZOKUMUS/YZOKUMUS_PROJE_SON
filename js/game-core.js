@@ -475,6 +475,14 @@ function resetAllData() {
     // Stop all audio
     stopAllAudio();
     
+    // ÖNEMLİ: Kullanıcı bilgilerini sakla (giriş/çıkış durumunu koru)
+    const savedUsername = localStorage.getItem('hasene_username');
+    const savedUserId = localStorage.getItem('hasene_user_id');
+    const savedUserEmail = localStorage.getItem('hasene_user_email');
+    const savedUserGender = localStorage.getItem('hasene_user_gender');
+    const savedFirebaseUserId = localStorage.getItem('hasene_firebase_user_id');
+    const savedUserType = localStorage.getItem('hasene_user_type');
+    
     // Clear all localStorage keys
     const storageKeys = [
         CONFIG.STORAGE_KEYS.TOTAL_POINTS,
@@ -488,9 +496,8 @@ function resetAllData() {
         'hasene_favorites',
         'hasene_achievements',
         'hasene_badges',
-        'hasene_onboarding_complete',
-        'hasene_username',
-        'hasene_user_id'
+        'hasene_onboarding_complete'
+        // hasene_username ve hasene_user_id silinmeyecek - kullanıcı giriş durumu korunacak
     ];
     
     // Clear all weekly XP data from localStorage
@@ -501,8 +508,15 @@ function resetAllData() {
     });
     
     // Clear all hasene_* keys from localStorage (comprehensive cleanup)
+    // Ama kullanıcı bilgilerini koru
     Object.keys(localStorage).forEach(key => {
-        if (key.startsWith('hasene_')) {
+        if (key.startsWith('hasene_') && 
+            key !== 'hasene_username' && 
+            key !== 'hasene_user_id' && 
+            key !== 'hasene_user_email' && 
+            key !== 'hasene_user_gender' &&
+            key !== 'hasene_firebase_user_id' &&
+            key !== 'hasene_user_type') {
             localStorage.removeItem(key);
         }
     });
@@ -511,6 +525,14 @@ function resetAllData() {
     storageKeys.forEach(key => {
         localStorage.removeItem(key);
     });
+    
+    // Kullanıcı bilgilerini geri yükle (giriş durumunu koru)
+    if (savedUsername) localStorage.setItem('hasene_username', savedUsername);
+    if (savedUserId) localStorage.setItem('hasene_user_id', savedUserId);
+    if (savedUserEmail) localStorage.setItem('hasene_user_email', savedUserEmail);
+    if (savedUserGender) localStorage.setItem('hasene_user_gender', savedUserGender);
+    if (savedFirebaseUserId) localStorage.setItem('hasene_firebase_user_id', savedFirebaseUserId);
+    if (savedUserType) localStorage.setItem('hasene_user_type', savedUserType);
     
     // Clear IndexedDB if available (placeholder implementation)
     if (typeof window.saveToIndexedDB === 'function') {
@@ -587,8 +609,13 @@ function resetAllData() {
     saveStats();
     
     // Delete Firebase data if user is logged in
-    const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : null;
-    const username = localStorage.getItem('hasene_username');
+    // Kullanıcı bilgilerini saklanan değerlerden al (localStorage'dan değil, çünkü silinmiş olabilir)
+    const user = savedUserId ? {
+        id: savedUserId,
+        username: savedUsername,
+        type: savedUserType || 'local'
+    } : null;
+    const username = savedUsername;
     
     if (user && user.id && typeof window.firestoreDelete === 'function') {
         // Delete user stats from Firebase
@@ -676,6 +703,12 @@ function resetAllData() {
     // Reload stats (skip streak check to preserve reset values) and update display
     loadStats(true).then(() => {
         updateStatsDisplay();
+        
+        // Kullanıcı durumunu güncelle (giriş/çıkış durumu)
+        if (typeof window.updateUserStatusUI === 'function') {
+            window.updateUserStatusUI();
+        }
+        
         showToast('Tüm veriler sıfırlandı! Kelime analizi verileri de temizlendi.', 'success', 3000);
     });
 }
