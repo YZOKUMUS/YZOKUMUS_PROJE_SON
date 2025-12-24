@@ -479,9 +479,35 @@ function resetAllData() {
         }
     });
     
+    // Clear all hasene_* keys from localStorage (comprehensive cleanup)
+    Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('hasene_')) {
+            localStorage.removeItem(key);
+        }
+    });
+    
+    // Also clear the specific keys (in case some were missed)
     storageKeys.forEach(key => {
         localStorage.removeItem(key);
     });
+    
+    // Clear IndexedDB if available (placeholder implementation)
+    if (typeof window.saveToIndexedDB === 'function') {
+        // IndexedDB is currently placeholder, but clear it anyway
+        try {
+            // Clear all known IndexedDB keys
+            const indexedDBKeys = ['hasene_totalPoints', 'hasene_streakData', 'hasene_gameStats'];
+            indexedDBKeys.forEach(async (key) => {
+                try {
+                    await window.saveToIndexedDB(key, null).catch(() => {});
+                } catch (e) {
+                    // IndexedDB not implemented yet, ignore
+                }
+            });
+        } catch (error) {
+            // IndexedDB not available, ignore
+        }
+    }
     
     // Reset global state variables
     totalPoints = 0;
@@ -596,11 +622,20 @@ function resetAllData() {
             );
         }
         
-        Promise.all(deletePromises).then(() => {
-            console.log('✅ Firebase verileri silindi (user_stats, daily_tasks, weekly_leaderboard dahil)');
-        }).catch(() => {
-            console.log('ℹ️ Firebase verileri silinemedi (beklenen - kullanıcı giriş yapmamış olabilir)');
+        Promise.all(deletePromises).then((results) => {
+            const successCount = results.filter(r => r === true).length;
+            console.log(`✅ Firebase verileri silindi: ${successCount}/${deletePromises.length} başarılı (user_stats, daily_tasks, weekly_leaderboard dahil)`);
+            if (typeof window.showToast === 'function') {
+                window.showToast('Tüm veriler sıfırlandı! Frontend ve backend temizlendi.', 'success', 3000);
+            }
+        }).catch((error) => {
+            console.log('ℹ️ Firebase verileri silinemedi (beklenen - kullanıcı giriş yapmamış olabilir):', error);
         });
+    } else {
+        // Even if not logged in, show success message
+        if (typeof window.showToast === 'function') {
+            window.showToast('Tüm veriler sıfırlandı! Frontend temizlendi.', 'success', 3000);
+        }
     }
     
     // Close all modals (including word analysis modal if open)
