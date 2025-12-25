@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Clear Storage - Debug</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #cc0000;
+        }
+        .success {
+            background: #00cc00;
+        }
+        .success:hover {
+            background: #009900;
+        }
+        .info {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #9d8aff;
+        }
+        pre {
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Storage Debug Tool</h1>
+        
+        <div class="info">
+            <strong>⚠️ Bu sayfa localStorage ve IndexedDB'yi temizler!</strong><br>
+            Kullanıcı verileriniz silinecektir. Devam etmeden önce emin olun.
+        </div>
+
+        <h2>Mevcut localStorage Verileri:</h2>
+        <pre id="current-data"></pre>
+
+        <h2>İşlemler:</h2>
+        <button onclick="showData()">Verileri Göster</button>
+        <button onclick="clearAll()">Tüm Verileri Temizle</button>
+        <button onclick="clearUserOnly()">Sadece Kullanıcı Verilerini Temizle</button>
+        <button class="success" onclick="goToApp()">Ana Uygulamaya Dön</button>
+
+        <h2>Log:</h2>
+        <pre id="log"></pre>
+    </div>
+
+    <script>
+        function log(message) {
+            const logEl = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logEl.textContent += `[${timestamp}] ${message}\n`;
+            console.log(message);
+        }
+
+        function showData() {
+            const data = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('hasene_')) {
+                    data[key] = localStorage.getItem(key);
+                }
+            }
+            document.getElementById('current-data').textContent = JSON.stringify(data, null, 2);
+            log('✅ Veriler gösterildi');
+        }
+
+        function clearAll() {
+            if (!confirm('TÜM VERİLER SİLİNECEK! Emin misiniz?')) {
+                log('❌ İptal edildi');
+                return;
+            }
+
+            localStorage.clear();
+            log('✅ localStorage tamamen temizlendi');
+
+            // Clear IndexedDB
+            if (window.indexedDB) {
+                const dbs = ['hasene_cache', 'firebaseLocalStorageDb'];
+                dbs.forEach(dbName => {
+                    const req = indexedDB.deleteDatabase(dbName);
+                    req.onsuccess = () => log(`✅ ${dbName} silindi`);
+                    req.onerror = () => log(`❌ ${dbName} silinemedi`);
+                });
+            }
+
+            showData();
+        }
+
+        function clearUserOnly() {
+            if (!confirm('Kullanıcı verileri silinecek! Emin misiniz?')) {
+                log('❌ İptal edildi');
+                return;
+            }
+
+            const keysToRemove = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('hasene_')) {
+                    keysToRemove.push(key);
+                }
+            }
+
+            keysToRemove.forEach(key => {
+                localStorage.removeItem(key);
+                log(`🗑️ ${key} silindi`);
+            });
+
+            log(`✅ ${keysToRemove.length} adet kullanıcı verisi temizlendi`);
+            showData();
+        }
+
+        function goToApp() {
+            window.location.href = '/';
+        }
+
+        // Sayfa yüklendiğinde verileri göster
+        window.addEventListener('DOMContentLoaded', () => {
+            showData();
+            log('📱 Debug tool hazır');
+        });
+    </script>
+</body>
+</html>
+
