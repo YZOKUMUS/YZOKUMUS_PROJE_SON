@@ -422,10 +422,11 @@ async function loadStats(skipStreakCheck = false) {
     // Daily tasks
     await checkDailyTasks();
     
-    // Check streak (skip if resetting data)
-    if (!skipStreakCheck) {
-        checkStreak();
-    }
+    // DON'T check streak on page load - only when user actually plays
+    // Streak will be updated when user completes a game and earns points
+    // if (!skipStreakCheck) {
+    //     checkStreak();
+    // }
     
     // Update UI display after loading stats
     updateStatsDisplay();
@@ -1188,6 +1189,11 @@ function endGame() {
     // Add to total points
     totalPoints += sessionScore;
     dailyProgress += sessionScore;
+    
+    // Update streak (only when user actually plays and earns points)
+    if (sessionScore > 0) {
+        updateStreakOnPlay();
+    }
     
     // Update game stats
     gameStats.totalCorrect = (gameStats.totalCorrect || 0) + correctCount;
@@ -4350,14 +4356,65 @@ function checkStreak() {
         return;
     }
     
+    // Only update streak if user actually plays (not just on page load)
+    // This function should be called when user completes a game, not on app init
+    if (!streakData.lastPlayDate || streakData.lastPlayDate === '') {
+        // First time playing - don't set streak yet
+        return;
+    }
+    
     if (streakData.lastPlayDate === yesterday) {
         // Continue streak
         streakData.currentStreak++;
-    } else if (streakData.lastPlayDate !== today) {
+    } else {
         // Streak broken
         streakData.currentStreak = 1;
     }
     
+    streakData.lastPlayDate = today;
+    streakData.bestStreak = Math.max(streakData.bestStreak, streakData.currentStreak);
+    
+    if (!streakData.playDates.includes(today)) {
+        streakData.playDates.push(today);
+        streakData.totalPlayDays++;
+    }
+    
+    debouncedSaveStats();
+}
+
+/**
+ * Update streak when user actually plays a game
+ * Called from endGameSession() only when user earns points
+ */
+function updateStreakOnPlay() {
+    const today = getLocalDateString();
+    const yesterday = getLocalDateString(new Date(Date.now() - 86400000));
+    
+    // Already updated today
+    if (streakData.lastPlayDate === today) {
+        return;
+    }
+    
+    // First time ever playing
+    if (!streakData.lastPlayDate || streakData.lastPlayDate === '') {
+        streakData.currentStreak = 1;
+        streakData.bestStreak = 1;
+        streakData.lastPlayDate = today;
+        streakData.playDates = [today];
+        streakData.totalPlayDays = 1;
+        debouncedSaveStats();
+        return;
+    }
+    
+    // Check if yesterday was last play date (streak continues)
+    if (streakData.lastPlayDate === yesterday) {
+        streakData.currentStreak++;
+    } else {
+        // Streak broken - start new streak
+        streakData.currentStreak = 1;
+    }
+    
+    // Update data
     streakData.lastPlayDate = today;
     streakData.bestStreak = Math.max(streakData.bestStreak, streakData.currentStreak);
     
