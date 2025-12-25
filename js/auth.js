@@ -150,6 +150,36 @@ async function signOut() {
     localStorage.removeItem('hasene_firebase_user_id');
     localStorage.removeItem('hasene_user_type');
     
+    // Clear all game data (puanlar, rozetler, günlük görevler, streak vb.)
+    // Bu sayede yeni kullanıcı giriş yaptığında sıfırdan başlar
+    if (typeof window.CONFIG !== 'undefined' && window.CONFIG.STORAGE_KEYS) {
+        const storageKeys = [
+            window.CONFIG.STORAGE_KEYS.TOTAL_POINTS,
+            window.CONFIG.STORAGE_KEYS.STREAK_DATA,
+            window.CONFIG.STORAGE_KEYS.DAILY_TASKS,
+            window.CONFIG.STORAGE_KEYS.GAME_STATS,
+            window.CONFIG.STORAGE_KEYS.DAILY_GOAL,
+            window.CONFIG.STORAGE_KEYS.DAILY_PROGRESS,
+            'hasene_word_stats',
+            'hasene_favorites',
+            'hasene_achievements',
+            'hasene_badges'
+        ];
+        
+        storageKeys.forEach(key => {
+            localStorage.removeItem(key);
+        });
+        
+        // Clear all weekly XP data
+        Object.keys(localStorage).forEach(key => {
+            if (key.startsWith('hasene_weekly_xp_')) {
+                localStorage.removeItem(key);
+            }
+        });
+        
+        console.log('✅ Oyun verileri temizlendi');
+    }
+    
     console.log('✅ Kullanıcı çıkış yaptı');
 }
 
@@ -361,20 +391,62 @@ function confirmUsername() {
         
         // Get current user
         const currentUser = getCurrentUser();
+        const previousUsername = currentUser ? currentUser.username : null;
+        const previousUserId = currentUser ? currentUser.id : null;
+        
+        // Check if this is a different user logging in
+        const isDifferentUser = previousUsername && previousUsername !== username;
         
         // Update or create user
+        let newUserId = null;
         try {
-            if (currentUser && currentUser.id) {
-                // Update existing user
+            if (currentUser && currentUser.id && !isDifferentUser) {
+                // Update existing user (same user, just updating username)
                 if (currentUser.type === 'local') {
                     updateLocalUser(username);
+                    newUserId = currentUser.id;
                 } else {
                     // For Firebase users, just update username in localStorage
                     localStorage.setItem('hasene_username', username);
+                    newUserId = currentUser.id;
                 }
             } else {
-                // Create new user (user is logging in for the first time)
-                createLocalUser(username);
+                // Create new user (user is logging in for the first time OR different user)
+                if (isDifferentUser) {
+                    // Different user is logging in - clear all game data first
+                    console.log('🔄 Farklı kullanıcı giriş yapıyor, oyun verileri temizleniyor...');
+                    
+                    if (typeof window.CONFIG !== 'undefined' && window.CONFIG.STORAGE_KEYS) {
+                        const storageKeys = [
+                            window.CONFIG.STORAGE_KEYS.TOTAL_POINTS,
+                            window.CONFIG.STORAGE_KEYS.STREAK_DATA,
+                            window.CONFIG.STORAGE_KEYS.DAILY_TASKS,
+                            window.CONFIG.STORAGE_KEYS.GAME_STATS,
+                            window.CONFIG.STORAGE_KEYS.DAILY_GOAL,
+                            window.CONFIG.STORAGE_KEYS.DAILY_PROGRESS,
+                            'hasene_word_stats',
+                            'hasene_favorites',
+                            'hasene_achievements',
+                            'hasene_badges'
+                        ];
+                        
+                        storageKeys.forEach(key => {
+                            localStorage.removeItem(key);
+                        });
+                        
+                        // Clear all weekly XP data
+                        Object.keys(localStorage).forEach(key => {
+                            if (key.startsWith('hasene_weekly_xp_')) {
+                                localStorage.removeItem(key);
+                            }
+                        });
+                        
+                        console.log('✅ Önceki kullanıcının oyun verileri temizlendi');
+                    }
+                }
+                
+                const newUser = createLocalUser(username);
+                newUserId = newUser.id;
             }
         } catch (error) {
             console.error('Error updating/creating user:', error);
@@ -431,6 +503,24 @@ function confirmUsername() {
         // Show success message
         if (typeof window.showToast === 'function') {
             window.showToast(`Hoş geldiniz, ${username}!`, 'success');
+        }
+        
+        // If different user logged in, reload stats and refresh UI
+        if (isDifferentUser) {
+            console.log('🔄 Farklı kullanıcı giriş yaptı, istatistikler yeniden yükleniyor...');
+            
+            // Reload stats to reset all game data
+            if (typeof window.loadStats === 'function') {
+                window.loadStats(true).then(() => {
+                    // Update stats display
+                    if (typeof window.updateStatsDisplay === 'function') {
+                        window.updateStatsDisplay();
+                    }
+                    console.log('✅ Yeni kullanıcı için istatistikler sıfırlandı');
+                }).catch(err => {
+                    console.error('Error reloading stats:', err);
+                });
+            }
         }
         
         // Backend'e senkronize et (Firebase'e veri gönder)

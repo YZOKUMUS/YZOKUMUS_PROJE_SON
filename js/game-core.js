@@ -5703,4 +5703,5 @@ if (typeof window !== 'undefined') {
     window.resetAllData = resetAllData;
     window.saveStats = saveStats;
     window.loadStats = loadStats;
+    window.updateStatsDisplay = updateStatsDisplay;
 }
