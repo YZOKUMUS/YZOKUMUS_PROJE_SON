@@ -966,6 +966,10 @@
             firebaseDebug.src = 'js/firebase-debug.js';
             document.body.appendChild(firebaseDebug);
             
+            const firebaseDebugTool = document.createElement('script');
+            firebaseDebugTool.src = 'js/firebase-debug-tool.js';
+            document.body.appendChild(firebaseDebugTool);
+            
             const quickTest = document.createElement('script');
             quickTest.src = 'js/quick-test.js';
             document.body.appendChild(quickTest);
