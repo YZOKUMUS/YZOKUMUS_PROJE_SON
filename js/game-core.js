@@ -349,28 +349,39 @@ function checkAndShowDailyReward() {
  * @param {boolean} skipStreakCheck - If true, skip checkStreak() call (used when resetting data)
  */
 async function loadStats(skipStreakCheck = false) {
-    // Total points - ÖNCE localStorage'dan yükle (ÖNCELİK LOCALSTORAGE'DA)
-    totalPoints = loadFromStorage(CONFIG.STORAGE_KEYS.TOTAL_POINTS, 0);
+    // Total points - ÖNCE localStorage'dan oku
+    const localPoints = loadFromStorage(CONFIG.STORAGE_KEYS.TOTAL_POINTS, 0);
     
-    // Firebase'den kontrol et ama sadece localStorage'da değer yoksa veya 0 ise
-    // localStorage'daki değer her zaman öncelikli (yanlışlıkla sıfırlanmasını önle)
-    if (totalPoints === 0 && typeof window.loadUserStats === 'function') {
-        // localStorage'da değer yoksa veya 0 ise Firebase'den yükle
+    // ✅ HER ZAMAN Firebase'den kontrol et (kullanıcı giriş yaptıysa)
+    // Bu sayede çıkış/giriş sonrası veriler Firebase'den gelir
+    if (typeof window.loadUserStats === 'function') {
         try {
+            console.log('🔄 Firebase\'den kullanıcı istatistikleri yükleniyor...');
             const userStats = await window.loadUserStats();
-            if (userStats && userStats.total_points !== undefined && userStats.total_points !== null && userStats.total_points > 0) {
-                // Firebase'de geçerli bir değer varsa kullan
+            
+            if (userStats && userStats.total_points !== undefined && userStats.total_points !== null) {
+                console.log('☁️ Firebase\'den veri geldi:', userStats.total_points, 'puan');
+                
+                // Firebase'den gelen değeri kullan
                 totalPoints = userStats.total_points;
+                
                 // Firebase'den yüklenen değeri localStorage'a kaydet
                 saveToStorage(CONFIG.STORAGE_KEYS.TOTAL_POINTS, totalPoints);
+                
+                console.log('✅ Firebase verisi localStorage\'a kaydedildi');
+            } else {
+                // Firebase'de veri yoksa localStorage'daki değeri kullan
+                console.log('ℹ️ Firebase\'de veri yok, localStorage değeri kullanılıyor:', localPoints);
+                totalPoints = localPoints;
             }
         } catch (error) {
-            console.warn('Firebase load failed, using localStorage value:', error);
-            // Hata durumunda localStorage'daki değeri koru (zaten 0)
+            console.warn('⚠️ Firebase load failed, using localStorage value:', error);
+            // Hata durumunda localStorage'daki değeri kullan
+            totalPoints = localPoints;
         }
-    } else if (totalPoints > 0 && typeof window.saveUserStats === 'function') {
-        // localStorage'da değer varsa Firebase'e senkronize et (arka planda)
-        window.saveUserStats({ total_points: totalPoints }).catch(() => {});
+    } else {
+        // loadUserStats fonksiyonu yoksa localStorage'daki değeri kullan
+        totalPoints = localPoints;
     }
     
     // Current level

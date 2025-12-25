@@ -505,22 +505,28 @@ function confirmUsername() {
             window.showToast(`Hoş geldiniz, ${username}!`, 'success');
         }
         
-        // If different user logged in, reload stats and refresh UI
-        if (isDifferentUser) {
-            console.log('🔄 Farklı kullanıcı giriş yaptı, istatistikler yeniden yükleniyor...');
+        // Reload stats after login (for both same and different users)
+        // This ensures Firebase data is synced to localStorage
+        console.log('🔄 Kullanıcı giriş yaptı, istatistikler Firebase\'den yükleniyor...');
+        
+        if (typeof window.loadStats === 'function') {
+            // For different users, skip streak check to reset properly
+            const skipStreakCheck = isDifferentUser;
             
-            // Reload stats to reset all game data
-            if (typeof window.loadStats === 'function') {
-                window.loadStats(true).then(() => {
-                    // Update stats display
-                    if (typeof window.updateStatsDisplay === 'function') {
-                        window.updateStatsDisplay();
-                    }
+            window.loadStats(skipStreakCheck).then(() => {
+                // Update stats display
+                if (typeof window.updateStatsDisplay === 'function') {
+                    window.updateStatsDisplay();
+                }
+                
+                if (isDifferentUser) {
                     console.log('✅ Yeni kullanıcı için istatistikler sıfırlandı');
-                }).catch(err => {
-                    console.error('Error reloading stats:', err);
-                });
-            }
+                } else {
+                    console.log('✅ Kullanıcı istatistikleri Firebase\'den yüklendi');
+                }
+            }).catch(err => {
+                console.error('Error reloading stats:', err);
+            });
         }
         
         // Backend'e senkronize et (Firebase'e veri gönder)
