@@ -180,7 +180,37 @@ async function signOut() {
         console.log('✅ Oyun verileri temizlendi');
     }
     
-    console.log('✅ Kullanıcı çıkış yaptı');
+    // Reset UI display values to zero
+    if (document.getElementById('total-hasene')) {
+        document.getElementById('total-hasene').textContent = '0';
+    }
+    if (document.getElementById('total-stars')) {
+        document.getElementById('total-stars').textContent = '⭐ 0';
+    }
+    if (document.getElementById('streak-count')) {
+        document.getElementById('streak-count').textContent = '🔥 0';
+    }
+    if (document.getElementById('level-display')) {
+        document.getElementById('level-display').textContent = '1';
+    }
+    
+    // Reset global variables if they exist
+    if (typeof window.totalPoints !== 'undefined') {
+        window.totalPoints = 0;
+    }
+    if (typeof window.currentLevel !== 'undefined') {
+        window.currentLevel = 1;
+    }
+    if (typeof window.streakData !== 'undefined') {
+        window.streakData = { currentStreak: 0, longestStreak: 0, lastPlayedDate: null };
+    }
+    
+    // Update stats display if function exists
+    if (typeof window.updateStatsDisplay === 'function') {
+        window.updateStatsDisplay();
+    }
+    
+    console.log('✅ Kullanıcı çıkış yaptı ve UI temizlendi');
 }
 
 // ========================================

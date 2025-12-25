@@ -427,6 +427,9 @@ async function loadStats(skipStreakCheck = false) {
         checkStreak();
     }
     
+    // Update UI display after loading stats
+    updateStatsDisplay();
+    
     console.log('📊 Stats loaded:', { totalPoints, currentLevel, streakData });
 }
 
