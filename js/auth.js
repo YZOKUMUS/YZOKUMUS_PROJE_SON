@@ -863,15 +863,29 @@ if (typeof window !== 'undefined') {
     window.handleUserAuth = handleUserAuth;
     window.updateUserStatusUI = updateUserStatusUI;
     
+    // Setup auth button click handler
+    function setupAuthButton() {
+        const authBtn = document.getElementById('user-auth-btn');
+        if (authBtn) {
+            // Remove any existing onclick attribute
+            authBtn.removeAttribute('onclick');
+            // Add event listener
+            authBtn.addEventListener('click', handleUserAuth);
+            console.log('✅ Auth button event listener attached');
+        }
+    }
+    
     // Ensure UI is updated when DOM is ready
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {
+            setupAuthButton();
             setTimeout(() => {
                 updateUserStatusUI();
             }, 100);
         });
     } else {
         // DOM already loaded
+        setupAuthButton();
         setTimeout(() => {
             updateUserStatusUI();
         }, 100);
