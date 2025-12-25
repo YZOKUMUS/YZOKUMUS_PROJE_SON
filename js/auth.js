@@ -225,6 +225,12 @@ async function signOut() {
     // Update user UI
     updateUserStatusUI();
     
+    // Clear leaderboard modal if it exists
+    const leaderboardContent = document.getElementById('leaderboard-content');
+    if (leaderboardContent) {
+        leaderboardContent.innerHTML = '';
+    }
+    
     console.log('✅ Kullanıcı çıkış yaptı ve UI temizlendi');
     
     // Show toast and reload page for clean state
