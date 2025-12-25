@@ -175,12 +175,30 @@ async function loadLeaderboard() {
             const rankings = [];
             snapshot.forEach(doc => {
                 const data = doc.data();
-                rankings.push({
-                    user_id: data.user_id || doc.id.split('_')[0],
-                    username: data.username || 'Anonim Kullanıcı',
-                    weekly_xp: data.weekly_xp || 0,
-                    league: calculateLeague(data.weekly_xp || 0)
-                });
+                const docId = doc.id;
+                
+                // Filter: Only accept username-based docIds (format: username_YYYY-MM-DD)
+                // Skip old UID-based docIds (format: long alphanumeric string)
+                // Check if docId contains underscore and looks like username_date format
+                if (docId.includes('_')) {
+                    const parts = docId.split('_');
+                    const datePart = parts[parts.length - 1]; // Last part should be date
+                    
+                    // Validate date format (YYYY-MM-DD)
+                    if (/^\d{4}-\d{2}-\d{2}$/.test(datePart)) {
+                        rankings.push({
+                            user_id: data.user_id || parts.slice(0, -1).join('_'), // Username part
+                            username: data.username || parts.slice(0, -1).join('_'),
+                            usernameDisplay: data.usernameDisplay || data.username || parts.slice(0, -1).join('_'),
+                            weekly_xp: data.weekly_xp || 0,
+                            league: calculateLeague(data.weekly_xp || 0)
+                        });
+                    } else {
+                        console.log('⚠️ Skipping old UID-based entry:', docId);
+                    }
+                } else {
+                    console.log('⚠️ Skipping invalid docId format:', docId);
+                }
             });
             
             console.log('✅ Leaderboard loaded from Firebase:', rankings.length, 'users');
