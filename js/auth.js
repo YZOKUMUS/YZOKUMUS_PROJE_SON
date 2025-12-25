@@ -222,7 +222,20 @@ async function signOut() {
         window.updateStatsDisplay();
     }
     
+    // Update user UI
+    updateUserStatusUI();
+    
     console.log('✅ Kullanıcı çıkış yaptı ve UI temizlendi');
+    
+    // Show toast and reload page for clean state
+    if (typeof window.showToast === 'function') {
+        window.showToast('Çıkış yapıldı. Sayfa yenileniyor...', 'success', 1500);
+    }
+    
+    // Reload page after 1.5 seconds
+    setTimeout(() => {
+        window.location.reload();
+    }, 1500);
 }
 
 // ========================================
