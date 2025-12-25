@@ -468,10 +468,14 @@ async function saveUserStats(stats) {
         const docId = usernameToDocId(savedUsername);
         console.log('📝 saveUserStats - Document ID generated:', docId, 'for username:', savedUsername);
         
+        // Get display username (original case) for leaderboard display
+        const savedUsernameDisplay = localStorage.getItem('hasene_username_display') || savedUsername;
+        
         // Add username and user_id to stats for tracking
         const statsWithUsername = {
             ...stats,
-            username: savedUsername,
+            username: savedUsername, // Lowercase for consistency
+            usernameDisplay: savedUsernameDisplay, // Original case for display
             user_id: user.id, // Keep original user ID for reference
             user_type: user.type || 'local'
         };

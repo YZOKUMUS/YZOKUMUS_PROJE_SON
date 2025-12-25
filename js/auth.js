@@ -18,9 +18,11 @@ function getCurrentUser() {
         const firebaseUser = window.firebaseAuth.currentUser;
         // Check localStorage for saved username (user might have set a custom username)
         const savedUsername = localStorage.getItem('hasene_username');
+        const savedUsernameDisplay = localStorage.getItem('hasene_username_display');
         return {
             id: firebaseUser.uid,
             username: savedUsername || firebaseUser.displayName || 'Anonim Kullanıcı',
+            usernameDisplay: savedUsernameDisplay || savedUsername || firebaseUser.displayName || 'Anonim Kullanıcı',
             email: firebaseUser.email || '',
             type: 'firebase'
         };
@@ -31,9 +33,11 @@ function getCurrentUser() {
     const userType = localStorage.getItem('hasene_user_type');
     if (firebaseUserId && userType === 'firebase') {
         const savedUsername = localStorage.getItem('hasene_username');
+        const savedUsernameDisplay = localStorage.getItem('hasene_username_display');
         return {
             id: firebaseUserId,
             username: savedUsername || 'Anonim Kullanıcı',
+            usernameDisplay: savedUsernameDisplay || savedUsername || 'Anonim Kullanıcı',
             email: '',
             type: 'firebase'
         };
@@ -42,6 +46,7 @@ function getCurrentUser() {
     // Fallback to local user
     const userId = localStorage.getItem('hasene_user_id');
     const username = localStorage.getItem('hasene_username');
+    const usernameDisplay = localStorage.getItem('hasene_username_display');
     const email = localStorage.getItem('hasene_user_email') || '';
     
     // Only return user if userId exists (user has logged in)
@@ -52,6 +57,7 @@ function getCurrentUser() {
     return {
         id: userId,
         username: username,
+        usernameDisplay: usernameDisplay || username,
         email: email,
         type: 'local'
     };
@@ -65,9 +71,11 @@ function getCurrentUser() {
  */
 function createLocalUser(username = 'Kullanıcı', email = '') {
     const userId = `local-${Date.now()}`;
+    const usernameLower = username.toLowerCase(); // Normalize to lowercase
     
     localStorage.setItem('hasene_user_id', userId);
-    localStorage.setItem('hasene_username', username);
+    localStorage.setItem('hasene_username', usernameLower); // Store lowercase for DB operations
+    localStorage.setItem('hasene_username_display', username); // Store original for display
     if (email) {
         localStorage.setItem('hasene_user_email', email);
     }
@@ -76,7 +84,8 @@ function createLocalUser(username = 'Kullanıcı', email = '') {
     
     return {
         id: userId,
-        username: username,
+        username: usernameLower,
+        usernameDisplay: username,
         email: email,
         type: 'local'
     };
@@ -95,7 +104,9 @@ function updateLocalUser(username, email = '') {
     }
     
     if (username) {
-        localStorage.setItem('hasene_username', username);
+        const usernameLower = username.toLowerCase(); // Normalize to lowercase
+        localStorage.setItem('hasene_username', usernameLower); // Store lowercase for DB
+        localStorage.setItem('hasene_username_display', username); // Store original for display
     }
     if (email) {
         localStorage.setItem('hasene_user_email', email);
@@ -145,6 +156,7 @@ async function signOut() {
     // Clear all user data (both local and Firebase)
     localStorage.removeItem('hasene_user_id');
     localStorage.removeItem('hasene_username');
+    localStorage.removeItem('hasene_username_display'); // Also remove display username
     localStorage.removeItem('hasene_user_email');
     localStorage.removeItem('hasene_user_gender');
     localStorage.removeItem('hasene_firebase_user_id');
@@ -386,7 +398,9 @@ async function confirmUsername() {
         }
         
         // Normalize username to lowercase for consistency
-        const username = usernameInput.value.trim().toLowerCase();
+        // Get original username for display, normalize to lowercase for database operations
+        const usernameOriginal = usernameInput.value.trim();
+        const username = usernameOriginal.toLowerCase(); // Lowercase for consistency in DB
         
         if (!username || username.length === 0) {
             if (typeof window.showToast === 'function') {
@@ -425,8 +439,8 @@ async function confirmUsername() {
         const previousUsername = currentUser ? currentUser.username : null;
         const previousUserId = currentUser ? currentUser.id : null;
         
-        // Check if this is a different user logging in
-        const isDifferentUser = previousUsername && previousUsername !== username;
+        // Check if this is a different user logging in (compare lowercase versions)
+        const isDifferentUser = previousUsername && previousUsername.toLowerCase() !== username;
         
         // Update or create user
         let newUserId = null;
@@ -438,7 +452,8 @@ async function confirmUsername() {
                     newUserId = currentUser.id;
                 } else {
                     // For Firebase users, just update username in localStorage
-                    localStorage.setItem('hasene_username', username);
+                    localStorage.setItem('hasene_username', username); // Lowercase for DB
+                    localStorage.setItem('hasene_username_display', usernameOriginal); // Original for display
                     newUserId = currentUser.id;
                 }
             } else {
@@ -730,6 +745,7 @@ function updateUserStatusUI() {
     // Check if user is actually logged in by checking localStorage directly
     const userId = localStorage.getItem('hasene_user_id');
     const username = localStorage.getItem('hasene_username');
+    const usernameDisplayText = localStorage.getItem('hasene_username_display') || username; // Get display version
     const isLoggedIn = !!(userId && username);
     
     const usernameDisplay = document.getElementById('current-username-display');
@@ -834,7 +850,7 @@ function updateUserStatusUI() {
     
     if (isLoggedIn) {
         // User is logged in
-        usernameDisplay.textContent = username;
+        usernameDisplay.textContent = usernameDisplayText; // Use display version (original case)
         statusIndicator.textContent = '🟢 Giriş Yapıldı';
         statusIndicator.style.color = '#10b981';
         authBtn.textContent = 'Çıkış Yap';

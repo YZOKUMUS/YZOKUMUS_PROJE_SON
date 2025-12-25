@@ -91,10 +91,12 @@ async function updateWeeklyXP(points) {
     const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : null;
     if (user && typeof window.firestoreSet === 'function' && window.firestore) {
         const username = localStorage.getItem('hasene_username') || user.username || 'Anonim Kullanıcı';
+        const usernameDisplay = localStorage.getItem('hasene_username_display') || username;
         try {
             const result = await window.firestoreSet('weekly_leaderboard', `${user.id}_${weekStart}`, {
                 user_id: user.id,
-                username: username,
+                username: username, // Lowercase for consistency
+                usernameDisplay: usernameDisplay, // Original case for display
                 weekly_xp: newXP,
                 week_start: weekStart,
                 updated_at: new Date().toISOString()
@@ -422,7 +424,7 @@ function renderLeaderboardList(leaderboard, userPos, mode = 'all') {
                 <div style="font-size: 18px;">${entry.league.icon}</div>
                 <div style="flex: 1;">
                     <div style="font-size: 13px; font-weight: ${isCurrentUser ? 'bold' : '500'}; color: ${isCurrentUser ? entry.league.color : 'rgba(26,26,46,0.9)'}; line-height: 1.2;">
-                        ${entry.username}
+                        ${entry.usernameDisplay || entry.username}
                     </div>
                     <div style="font-size: 10px; color: rgba(26,26,46,0.7); margin-top: 1px; line-height: 1.2;">
                         ${entry.league.name} • ${formatNumber(entry.weekly_xp)} XP
