@@ -347,10 +347,6 @@ async function firestoreSet(collection, docId, data) {
 async function loadUserStats() {
     const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : null;
     
-    console.log('🔍 loadUserStats called with user:', user);
-    console.log('🔍 localStorage hasene_username:', localStorage.getItem('hasene_username'));
-    console.log('🔍 localStorage hasene_username_display:', localStorage.getItem('hasene_username_display'));
-    
     // Try Firebase first if user has a real username (works for both local and Firebase users)
     // ALWAYS use localStorage username - don't fall back to user.username
     if (user && window.FIREBASE_ENABLED && window.firestore) {
@@ -359,13 +355,10 @@ async function loadUserStats() {
             const defaultUsernames = ['Kullanıcı', 'Misafir', 'Anonim Kullanıcı', ''];
             const hasRealUsername = savedUsername && savedUsername.trim() !== '' && !defaultUsernames.includes(savedUsername.trim());
             
-            console.log('🔍 hasRealUsername:', hasRealUsername, 'savedUsername:', savedUsername);
-            
             if (hasRealUsername) {
                 const docId = usernameToDocId(savedUsername);
                 console.log('🔍 loadUserStats - Attempting to load from Firebase with docId:', docId, 'for username:', savedUsername);
                 const firebaseData = await firestoreGet('user_stats', docId);
-                console.log('🔍 Firebase data received:', firebaseData);
                 if (firebaseData && firebaseData.total_points !== undefined) {
                     console.log('☁️ User stats loaded from Firebase (username:', savedUsername + ')');
                     // ÖNEMLİ: Firebase'den gelen değer 0'dan büyükse veya localStorage'da değer yoksa güncelle
