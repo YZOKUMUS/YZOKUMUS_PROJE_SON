@@ -234,9 +234,10 @@ async function signOut() {
     // Clear weekly leaderboard from Firebase if user is logged in
     if (user && window.FIREBASE_ENABLED && typeof window.firestoreDelete === 'function') {
         try {
+            const username = localStorage.getItem('hasene_username') || user.username;
             const weekStart = typeof window.getWeekStartString === 'function' ? 
                 window.getWeekStartString() : new Date().toISOString().split('T')[0];
-            const docId = `${user.id}_${weekStart}`;
+            const docId = `${username}_${weekStart}`;
             await window.firestoreDelete('weekly_leaderboard', docId);
             console.log('✅ Firebase leaderboard verisi silindi');
         } catch (error) {

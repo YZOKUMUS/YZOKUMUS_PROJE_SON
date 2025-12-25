@@ -92,9 +92,13 @@ async function updateWeeklyXP(points) {
     if (user && typeof window.firestoreSet === 'function' && window.firestore) {
         const username = localStorage.getItem('hasene_username') || user.username || 'Anonim Kullanıcı';
         const usernameDisplay = localStorage.getItem('hasene_username_display') || username;
+        
+        // Use username instead of user.id for consistency with other collections
+        const docId = `${username}_${weekStart}`;
+        
         try {
-            const result = await window.firestoreSet('weekly_leaderboard', `${user.id}_${weekStart}`, {
-                user_id: user.id,
+            const result = await window.firestoreSet('weekly_leaderboard', docId, {
+                user_id: user.id, // Keep for reference
                 username: username, // Lowercase for consistency
                 usernameDisplay: usernameDisplay, // Original case for display
                 weekly_xp: newXP,
