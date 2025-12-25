@@ -5502,13 +5502,12 @@ function renderBaglamsalOgrenmeKarma(container, question) {
                 <button class="karma-audio-btn-top" onclick="playSafeAudio('${(question.audioUrl || '').replace(/'/g, "\\'")}')" title="Dinle">🔊</button>
             ` : ''}
         </div>
-        <p class="karma-instruction">Yukarıdaki cümlede geçen kelimenin anlamını bul</p>
+        <div class="karma-baglamsal-question">
+            <p>Aşağıdaki cümlede <strong>"${question.questionWord || ''}"</strong> kelimesinin anlamı nedir?</p>
+        </div>
         <div class="karma-ayet-container">
             <div class="karma-ayet-arabic">${question.ayetMetni || ''}</div>
             <div class="karma-ayet-meal">${question.ayetMeal || ''}</div>
-        </div>
-        <div class="karma-baglamsal-question">
-            <p>Yukarıdaki cümlede <strong>"${question.questionWord || ''}"</strong> kelimesinin anlamı nedir?</p>
         </div>
         <div class="karma-options">
             ${validOptions.map((opt, i) => `
