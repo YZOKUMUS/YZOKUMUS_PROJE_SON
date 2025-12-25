@@ -42,7 +42,8 @@ async function initFirebase() {
             // Enable offline persistence using the new cache settings API
             // This replaces the deprecated enableIndexedDbPersistence()
             window.firestore.settings({
-                cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED
+                cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED,
+                merge: true // Merge with existing settings
             });
             
             // Note: Persistence is now enabled by default in newer Firebase versions
