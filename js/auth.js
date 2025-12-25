@@ -376,7 +376,7 @@ function selectGender(gender) {
 /**
  * Confirm username and login
  */
-function confirmUsername() {
+async function confirmUsername() {
     try {
         const usernameInput = document.getElementById('username-input');
         if (!usernameInput) {
