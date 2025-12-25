@@ -543,20 +543,19 @@ function confirmUsername() {
             // For different users, skip streak check to reset properly
             const skipStreakCheck = isDifferentUser;
             
-            window.loadStats(skipStreakCheck).then(() => {
-                // Update stats display
-                if (typeof window.updateStatsDisplay === 'function') {
-                    window.updateStatsDisplay();
-                }
-                
-                if (isDifferentUser) {
-                    console.log('✅ Yeni kullanıcı için istatistikler sıfırlandı');
-                } else {
-                    console.log('✅ Kullanıcı istatistikleri Firebase\'den yüklendi');
-                }
-            }).catch(err => {
-                console.error('Error reloading stats:', err);
-            });
+            await window.loadStats(skipStreakCheck);
+            
+            // Update stats display after loading
+            if (typeof window.updateStatsDisplay === 'function') {
+                window.updateStatsDisplay();
+                console.log('✅ UI güncellendi');
+            }
+            
+            if (isDifferentUser) {
+                console.log('✅ Yeni kullanıcı için istatistikler sıfırlandı');
+            } else {
+                console.log('✅ Kullanıcı istatistikleri Firebase\'den yüklendi');
+            }
         }
         
         // Backend'e senkronize et (Firebase'e veri gönder)
