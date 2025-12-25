@@ -418,12 +418,21 @@ async function loadUserStats() {
  */
 async function saveUserStats(stats) {
     const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : null;
-    if (!user) {
+    
+    // Check if user exists, if not check localStorage directly
+    const userId = localStorage.getItem('hasene_user_id');
+    const username = localStorage.getItem('hasene_username');
+    
+    if (!user && (!userId || !username)) {
         console.warn('⚠️ No user found, cannot save stats');
         return false;
     }
     
-    console.log('💾 saveUserStats called:', { userId: user.id, userType: user.type, stats: Object.keys(stats) });
+    console.log('💾 saveUserStats called:', { 
+        userId: user?.id || userId, 
+        userType: user?.type || 'local', 
+        stats: Object.keys(stats) 
+    });
     
     const promises = [];
     let success = false;

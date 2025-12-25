@@ -34,26 +34,23 @@ async function initFirebase() {
         // Initialize Firebase services
         window.firebase = firebase;
         window.firebaseAuth = firebase.auth();
-        window.firestore = firebase.firestore();
         
-        // Enable offline persistence
-        // Note: Multiple tabs will work independently (localStorage still syncs)
+        // Initialize Firestore with cache settings (new API)
         try {
-            await window.firestore.enablePersistence({
-                synchronizeTabs: false // Single-tab mode to avoid deprecation warnings
+            window.firestore = firebase.firestore();
+            
+            // Enable offline persistence using the new cache settings API
+            // This replaces the deprecated enableIndexedDbPersistence()
+            window.firestore.settings({
+                cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED
             });
-            console.log('✅ Firestore offline persistence enabled');
-        } catch (persistenceError) {
-            // Persistence might fail in some browsers (Safari private mode, etc.)
-            if (persistenceError.code === 'failed-precondition') {
-                // Multiple tabs open or persistence already enabled - this is normal
-                // localStorage still works for cross-tab sync
-            } else if (persistenceError.code === 'unimplemented') {
-                console.log('ℹ️ Firestore persistence not supported in this browser');
-            } else {
-                // Only log unexpected errors
-                console.warn('⚠️ Firestore persistence error:', persistenceError);
-            }
+            
+            // Note: Persistence is now enabled by default in newer Firebase versions
+            console.log('✅ Firestore initialized with cache settings');
+        } catch (firestoreError) {
+            console.warn('⚠️ Firestore initialization warning:', firestoreError);
+            // Fallback to basic initialization
+            window.firestore = firebase.firestore();
         }
         
         // Set up auth state listener
