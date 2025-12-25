@@ -545,10 +545,22 @@ async function confirmUsername() {
             
             await window.loadStats(skipStreakCheck);
             
-            // Update stats display after loading
+            // Force update stats display multiple times to ensure UI refresh
             if (typeof window.updateStatsDisplay === 'function') {
                 window.updateStatsDisplay();
-                console.log('✅ UI güncellendi');
+                console.log('✅ UI güncellendi (ilk)');
+                
+                // Update again after a short delay to ensure DOM is ready
+                setTimeout(() => {
+                    window.updateStatsDisplay();
+                    console.log('✅ UI güncellendi (ikinci)');
+                }, 100);
+                
+                // One more update after a longer delay
+                setTimeout(() => {
+                    window.updateStatsDisplay();
+                    console.log('✅ UI güncellendi (üçüncü - final)');
+                }, 500);
             }
             
             if (isDifferentUser) {
