@@ -448,7 +448,7 @@ async function confirmUsername() {
             if (currentUser && currentUser.id && !isDifferentUser) {
                 // Update existing user (same user, just updating username)
                 if (currentUser.type === 'local') {
-                    updateLocalUser(username);
+                    updateLocalUser(usernameOriginal); // Pass original to preserve case
                     newUserId = currentUser.id;
                 } else {
                     // For Firebase users, just update username in localStorage
@@ -491,7 +491,7 @@ async function confirmUsername() {
                     }
                 }
                 
-                const newUser = createLocalUser(username);
+                const newUser = createLocalUser(usernameOriginal); // Pass original to preserve case
                 newUserId = newUser.id;
             }
         } catch (error) {
