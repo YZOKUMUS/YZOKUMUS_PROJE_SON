@@ -66,6 +66,7 @@ async function initFirebase() {
         // Suppress ERR_BLOCKED_BY_CLIENT errors from Firestore WebChannel (caused by browser extensions)
         // These are non-critical connection termination errors
         if (typeof window.addEventListener === 'function') {
+            // Global error handler
             window.addEventListener('error', (event) => {
                 // Filter out Firestore WebChannel connection errors (non-critical)
                 if (event.message && (
@@ -76,9 +77,26 @@ async function initFirebase() {
                     // Suppress these errors - they're caused by browser extensions blocking Firestore connections
                     // Data is still saved successfully via other channels
                     event.preventDefault();
+                    event.stopPropagation();
+                    event.stopImmediatePropagation();
                     return false;
                 }
             }, true);
+            
+            // Console.error override to suppress Firestore WebChannel errors
+            const originalConsoleError = console.error;
+            console.error = function(...args) {
+                // Check if this is a Firestore WebChannel error
+                const message = args.join(' ');
+                if (message.includes('ERR_BLOCKED_BY_CLIENT') || 
+                    message.includes('webchannel_connection') ||
+                    message.includes('Firestore/Write/channel')) {
+                    // Suppress these errors - non-critical
+                    return;
+                }
+                // Call original console.error for other errors
+                originalConsoleError.apply(console, args);
+            };
         }
         
         return true;
