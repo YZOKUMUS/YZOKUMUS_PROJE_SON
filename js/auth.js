@@ -231,6 +231,19 @@ async function signOut() {
         leaderboardContent.innerHTML = '';
     }
     
+    // Clear weekly leaderboard from Firebase if user is logged in
+    if (user && window.FIREBASE_ENABLED && typeof window.firestoreDelete === 'function') {
+        try {
+            const weekStart = typeof window.getWeekStartString === 'function' ? 
+                window.getWeekStartString() : new Date().toISOString().split('T')[0];
+            const docId = `${user.id}_${weekStart}`;
+            await window.firestoreDelete('weekly_leaderboard', docId);
+            console.log('✅ Firebase leaderboard verisi silindi');
+        } catch (error) {
+            console.warn('⚠️ Firebase leaderboard silme hatası:', error);
+        }
+    }
+    
     console.log('✅ Kullanıcı çıkış yaptı ve UI temizlendi');
     
     // Show toast and reload page for clean state
