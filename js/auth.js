@@ -385,7 +385,8 @@ async function confirmUsername() {
             return;
         }
         
-        const username = usernameInput.value.trim();
+        // Normalize username to lowercase for consistency
+        const username = usernameInput.value.trim().toLowerCase();
         
         if (!username || username.length === 0) {
             if (typeof window.showToast === 'function') {
