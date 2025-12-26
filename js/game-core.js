@@ -4341,6 +4341,18 @@ function closeRewardModal() {
             currentOpenModal = null;
         }
     }
+    
+    // Ana ekrana dön
+    goToMainMenu();
+    
+    // Görevler modalı açıksa kapat
+    const tasksModal = document.getElementById('tasks-modal');
+    if (tasksModal && !tasksModal.classList.contains('hidden')) {
+        closeModal('tasks-modal');
+    }
+    
+    // Başarı mesajı göster
+    showToast('✅ Günlük ödül alındı! Ana menüye döndürüldünüz.', 'success', 2000);
 }
 
 // Window'a export et
