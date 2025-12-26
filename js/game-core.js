@@ -3476,10 +3476,10 @@ function loadUcHarfliKelimelerQuestion() {
     letterElement.style.color = 'var(--text-primary)';
     letterElement.textContent = currentQuestion.kelime || '';
     
-    // Clear word-info
+    // Set Turkish meaning in word-info (same as uzatma-med)
     const wordInfoElement = document.getElementById('elif-question-instruction');
     if (wordInfoElement) {
-        wordInfoElement.textContent = '';
+        wordInfoElement.textContent = currentQuestion.anlam || '';
     }
     
     // Generate options with only Turkish pronunciation

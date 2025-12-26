@@ -584,9 +584,11 @@ body {
 }
 
 .verse-translation {
+    /* Standart çeviri stili - word-info ile aynı */
     font-size: 0.875rem;
     color: var(--text-secondary);
     line-height: 1.6;
+    text-align: center;
 }
 
 .word-info {
@@ -752,55 +754,72 @@ body {
 /* ===================================
    READING SCREENS
    =================================== */
+/* Okuma modları artık .game-content ve .question-card kullanıyor (klasik oyun stili) */
 .reading-content {
-    padding: var(--spacing-md);
+    /* Artık game-content ile aynı */
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    max-height: calc(100vh - 200px);
+    padding-bottom: var(--spacing-lg);
 }
 
 .reading-card {
+    /* Artık question-card ile aynı stil */
     padding: var(--spacing-xl);
+    text-align: center;
     margin-bottom: var(--spacing-lg);
+    position: relative;
 }
 
 .surah-info,
 .dua-reference,
 .hadis-section {
+    /* Standart üst bilgi stili */
     font-size: 0.875rem;
     color: var(--accent-primary);
     font-weight: 600;
     margin-bottom: var(--spacing-md);
+    text-align: center;
 }
 
 .arabic-text {
+    /* Okuma modlarında da aynı stil (arabic-word ile uyumlu) */
     font-family: var(--font-arabic);
-    font-size: 1.75rem;
-    color: var(--text-primary);
+    font-size: 3.5rem;
+    color: #000000; /* Siyah - kelimeler her zaman siyah görünmeli */
     direction: rtl;
     font-weight: 400; /* Normal kalınlık - daha ince görünüm */
-    line-height: var(--arabic-line-height-loose);
+    line-height: var(--arabic-line-height-normal);
     letter-spacing: var(--arabic-letter-spacing);
     text-align: center;
-    margin-bottom: var(--spacing-lg);
+    margin-bottom: var(--spacing-md);
 }
 
 .translation-text {
-    font-size: 1rem;
+    /* Standart çeviri stili */
+    font-size: 0.875rem;
     color: var(--text-secondary);
-    line-height: 1.8;
+    line-height: 1.6;
     text-align: center;
     margin-bottom: var(--spacing-lg);
 }
 
 .hadis-header {
+    /* Standart bilgi metni stili */
     font-size: 0.875rem;
     color: var(--text-secondary);
     font-style: italic;
     margin-bottom: var(--spacing-sm);
+    text-align: center;
 }
 
 .hadis-text {
-    font-size: 1rem;
-    color: var(--text-primary);
-    line-height: 1.8;
+    /* Standart çeviri stili */
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    text-align: center;
     margin-bottom: var(--spacing-md);
 }
 
@@ -810,46 +829,68 @@ body {
 }
 
 .audio-btn-large {
+    /* Answer option stili ile aynı ama vurgu rengi */
+    font-family: var(--answer-option-font-family);
+    font-size: var(--answer-option-font-size);
+    font-weight: var(--answer-option-font-weight);
+    line-height: var(--answer-option-line-height);
+    padding: var(--answer-option-padding);
+    min-height: var(--answer-option-min-height);
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: var(--spacing-sm);
     width: 100%;
-    padding: var(--spacing-md);
     background: var(--accent-primary);
     color: white;
-    border: none;
+    border: 2px solid var(--accent-primary);
     border-radius: var(--radius-md);
-    font-size: 1rem;
-    font-weight: 600;
     cursor: pointer;
     transition: all var(--transition-fast);
 }
 
 .audio-btn-large:hover {
     background: var(--accent-secondary);
+    border-color: var(--accent-secondary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(157, 138, 255, 0.25);
 }
 
 .navigation-btns {
-    display: flex;
-    gap: var(--spacing-md);
+    /* Grid layout - answer-options ile aynı */
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: var(--spacing-lg);
 }
 
 .nav-btn {
-    flex: 1;
-    padding: var(--spacing-md);
-    background: var(--glass-bg);
+    /* Answer option stili ile aynı */
+    font-family: var(--answer-option-font-family);
+    font-size: var(--answer-option-font-size);
+    font-weight: var(--answer-option-font-weight);
+    line-height: var(--answer-option-line-height);
+    letter-spacing: var(--answer-option-letter-spacing);
+    padding: var(--answer-option-padding);
+    min-height: var(--answer-option-min-height);
+    background: rgba(255, 255, 255, 0.95);
     backdrop-filter: var(--glass-blur);
-    border: 1px solid var(--glass-border);
+    border: 2px solid rgba(157, 138, 255, 0.3);
     border-radius: var(--radius-md);
-    font-size: 1rem;
-    font-weight: 600;
     cursor: pointer;
     transition: all var(--transition-fast);
     color: var(--text-primary);
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .nav-btn:hover {
-    background: var(--glass-bg-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(157, 138, 255, 0.25);
+    border-color: var(--accent-primary);
+    background: white;
 }
 
 /* ===================================
@@ -1407,7 +1448,8 @@ body {
     }
     
     .arabic-word,
-    .arabic-letter {
+    .arabic-letter,
+    .arabic-text {
         font-size: 2rem;
     }
     
@@ -1497,7 +1539,8 @@ body {
     }
 
     .arabic-word,
-    .arabic-letter {
+    .arabic-letter,
+    .arabic-text {
         font-size: 2.5rem;
     }
     
@@ -2580,12 +2623,8 @@ body {
     transform: scale(1.2);
 }
 
-/* Arabic Text Style */
-.arabic-text {
-    font-family: var(--font-arabic);
-    font-size: 1.2rem;
-    direction: rtl;
-}
+/* Arabic Text Style - Artık yukarıda tanımlı (satır 786) */
+/* Bu duplike tanım kaldırıldı */
 
 /* ===================================
    BOTTOM NAV 5 TABS
@@ -2641,11 +2680,16 @@ body {
 }
 
 .harf-tablo-content {
-    padding: var(--spacing-lg);
+    /* Artık game-content ile aynı stil */
+    padding: var(--spacing-md);
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
-    overflow-x: hidden; /* Sayfa dışına taşmayı önle */
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    max-height: calc(100vh - 200px);
+    padding-bottom: var(--spacing-lg);
 }
 
 /* ===================================
@@ -3614,14 +3658,22 @@ body {
 }
 
 .karma-game-content {
-    padding: var(--spacing-lg);
-    min-height: 60vh;
+    /* Artık game-content ile aynı */
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    max-height: calc(100vh - 200px);
+    padding-bottom: var(--spacing-lg);
 }
 
 .karma-question-container {
+    /* Artık question-card ile aynı stil */
+    padding: var(--spacing-xl);
+    text-align: center;
+    margin-bottom: var(--spacing-lg);
+    position: relative;
     background: var(--glass-bg);
     border-radius: var(--radius-lg);
-    padding: var(--spacing-xl);
     backdrop-filter: var(--glass-blur);
     border: 1px solid var(--glass-border);
 }
@@ -4179,7 +4231,8 @@ body {
     }
     
     .arabic-word,
-    .arabic-letter {
+    .arabic-letter,
+    .arabic-text {
         font-size: 3rem;
     }
     
@@ -4254,14 +4307,8 @@ body {
     }
     
     /* Karma oyun responsive */
-    .karma-game-content {
-        padding: var(--spacing-md);
-        min-height: auto;
-    }
-    
-    .karma-question-container {
-        padding: var(--spacing-md);
-    }
+    /* Karma oyun artık standart game-content ve question-card kullanıyor */
+    /* Bu stiller gereksiz hale geldi */
     
     .karma-arabic {
         font-size: 1.8rem;
@@ -4412,7 +4459,8 @@ body {
     }
     
     .arabic-word,
-    .arabic-letter {
+    .arabic-letter,
+    .arabic-text {
         font-size: 2.5rem;
     }
     
@@ -4441,14 +4489,7 @@ body {
         padding: var(--spacing-md);
     }
     
-    /* Karma oyun küçük ekranlar için */
-    .karma-game-content {
-        padding: var(--spacing-sm);
-    }
-    
-    .karma-question-container {
-        padding: var(--spacing-sm);
-    }
+    /* Karma oyun küçük ekranlar için - artık standart stil kullanıyor */
     
     .karma-arabic {
         font-size: 1.5rem;
@@ -4565,9 +4606,7 @@ body {
         font-size: 0.65rem;
     }
     
-    .harf-tablo-content {
-        padding: var(--spacing-md);
-    }
+    /* Harf tablosu artık standart game-content stili kullanıyor */
     
     .harf-isimler-grid {
         grid-template-columns: repeat(4, 1fr);
@@ -4654,7 +4693,8 @@ body {
     }
     
     .arabic-word,
-    .arabic-letter {
+    .arabic-letter,
+    .arabic-text {
         font-size: 2rem;
     }
     
@@ -4710,9 +4750,7 @@ body {
         font-size: 0.6rem;
     }
     
-    .harf-tablo-content {
-        padding: var(--spacing-sm);
-    }
+    /* Harf tablosu artık standart game-content stili kullanıyor */
     
     .harf-isimler-grid {
         grid-template-columns: repeat(3, 1fr);
@@ -4733,13 +4771,7 @@ body {
     }
     
     /* Karma oyun çok küçük ekranlar için */
-    .karma-game-content {
-        padding: var(--spacing-xs);
-    }
-    
-    .karma-question-container {
-        padding: var(--spacing-xs);
-    }
+    /* Karma oyun artık standart game-content ve question-card kullanıyor */
     
     .karma-arabic {
         font-size: 1.3rem;
