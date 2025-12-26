@@ -1347,6 +1347,13 @@ async function startKelimeCevirGame(submode = 'classic') {
             // Get words that need review (struggling + due for review)
             const reviewWordIds = [];
             
+            // Önce wordStats kontrolü yap - hiç oyun oynanmamışsa uyar
+            if (!wordStats || Object.keys(wordStats).length === 0) {
+                showToast('⚠️ Henüz hiç kelime çalışmadınız! Önce "Klasik Mod" ile başlayın.', 'warning', 3500);
+                goToKelimeSubmodes();
+                return;
+            }
+            
             // 1. Zorlanılan kelimeler (başarı oranı < 50%)
             const strugglingIds = Object.keys(wordStats).filter(id => {
                 const stats = wordStats[id];
@@ -1379,8 +1386,10 @@ async function startKelimeCevirGame(submode = 'classic') {
                 filtered = filtered.filter(w => uniqueReviewIds.includes(w.id));
                 showToast(`${uniqueReviewIds.length} zorlandığın kelime tekrarlanacak`, 'info');
             } else {
-                showToast('Yeterli tekrar edilecek kelime yok, akıllı seçim kullanılıyor', 'info');
-                useIntelligentSelection = true;
+                // Yeterli yanlış kelime yok
+                showToast('⚠️ Yeterli yanlış kelime yok (en az 5 gerekli). Önce daha fazla kelime çalışın!', 'warning', 3500);
+                goToKelimeSubmodes();
+                return;
             }
             break;
             
