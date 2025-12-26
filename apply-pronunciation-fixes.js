@@ -7,18 +7,38 @@ const fs = require('fs');
 const path = require('path');
 
 const UC_HARFLI_PATH = path.join(__dirname, 'data', 'uc_harfli_kelimeler.json');
-const FIXES_PATH = path.join(__dirname, 'pronunciation-fixes.json');
 const BACKUP_PATH = path.join(__dirname, 'data', 'uc_harfli_kelimeler_before_fixes.json');
+
+// Alternatif dosya isimlerini dene
+function findFixesFile() {
+    const possibleNames = [
+        'pronunciation-fixes.json',
+        'pronunciation-fixes (1).json',
+        'pronunciation-fixes(1).json'
+    ];
+    
+    for (const name of possibleNames) {
+        const filePath = path.join(__dirname, name);
+        if (fs.existsSync(filePath)) {
+            return filePath;
+        }
+    }
+    return null;
+}
 
 function applyPronunciationFixes() {
     console.log('🔧 Okunuş Düzeltmeleri Uygulama Script\'i\n');
     
     // Düzeltmeleri yükle
-    if (!fs.existsSync(FIXES_PATH)) {
+    const FIXES_PATH = findFixesFile();
+    if (!FIXES_PATH) {
         console.error('❌ pronunciation-fixes.json dosyası bulunamadı!');
         console.log('💡 Önce oyunda düzeltmeleri yapın ve exportPronunciationFixes() ile indirin.');
+        console.log('💡 Aranan dosyalar: pronunciation-fixes.json, pronunciation-fixes (1).json');
         process.exit(1);
     }
+    
+    console.log(`📁 Dosya bulundu: ${path.basename(FIXES_PATH)}\n`);
     
     const fixesContent = fs.readFileSync(FIXES_PATH, 'utf8');
     const fixes = JSON.parse(fixesContent);
