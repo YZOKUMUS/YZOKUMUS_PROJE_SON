@@ -873,7 +873,7 @@ function setupBackButtonHandler() {
         
         // Panel açıksa ana menüye dön
         if (currentOpenPanel || currentGameMode) {
-            goToMainMenu();
+            goToMainMenu(false); // false = uyarı göster
             // State'i geri ekle
             window.history.pushState({ page: 'main' }, '');
             return;
@@ -1084,6 +1084,19 @@ async function startGame(gameMode) {
  * Go to Kelime Çevir submodes
  */
 function goToKelimeSubmodes() {
+    // Eğer oyun ekranındaysa (oyun başlamışsa) uyarı göster
+    if (questionIndex > 0 && (correctCount > 0 || wrongCount > 0 || sessionScore > 0)) {
+        const confirmed = confirm(
+            '⚠️ Oyun devam ediyor!\n\n' +
+            `Şu ana kadar: ${correctCount + wrongCount} soru cevapladınız, ${sessionScore} Hasene kazandınız.\n\n` +
+            'Çıkmak istediğinizden emin misiniz? İlerlemeniz kaydedilmeyecek!'
+        );
+        
+        if (!confirmed) {
+            return; // Kullanıcı iptal etti
+        }
+    }
+    
     document.getElementById('kelime-cevir-screen').classList.add('hidden');
     document.getElementById('kelime-submode-screen').classList.remove('hidden');
 }
@@ -1092,6 +1105,19 @@ function goToKelimeSubmodes() {
  * Go to Elif Ba submodes
  */
 function goToElifBaSubmodes() {
+    // Eğer oyun ekranındaysa uyarı göster
+    if (questionIndex > 0 && (correctCount > 0 || wrongCount > 0 || sessionScore > 0)) {
+        const confirmed = confirm(
+            '⚠️ Oyun devam ediyor!\n\n' +
+            `Şu ana kadar: ${correctCount + wrongCount} soru cevapladınız, ${sessionScore} Hasene kazandınız.\n\n` +
+            'Çıkmak istediğinizden emin misiniz? İlerlemeniz kaydedilmeyecek!'
+        );
+        
+        if (!confirmed) {
+            return; // Kullanıcı iptal etti
+        }
+    }
+    
     document.getElementById('elif-ba-screen').classList.add('hidden');
     document.getElementById('elif-ba-tablo-screen').classList.add('hidden');
     document.getElementById('elif-ba-submode-screen').classList.remove('hidden');
@@ -1208,9 +1234,93 @@ function hideAllScreens() {
 }
 
 /**
+ * Handle back button click during game
+ * Shows warning if game is in progress, otherwise goes back normally
+ */
+function handleGameBackButton() {
+    // Check if we're in a submode selection screen (no warning needed)
+    const kelimeSubmodeScreen = document.getElementById('kelime-submode-screen');
+    const elifBaSubmodeScreen = document.getElementById('elif-ba-submode-screen');
+    
+    if (kelimeSubmodeScreen && !kelimeSubmodeScreen.classList.contains('hidden')) {
+        // Alt mod seçim ekranından çıkış - direkt ana menüye, uyarı yok
+        goToMainMenu(true); // skipWarning = true
+        return;
+    }
+    
+    if (elifBaSubmodeScreen && !elifBaSubmodeScreen.classList.contains('hidden')) {
+        // Alt mod seçim ekranından çıkış - direkt ana menüye, uyarı yok
+        goToMainMenu(true); // skipWarning = true
+        return;
+    }
+    
+    // Oyun ekranından çıkış - uyarı göster
+    goToMainMenu(false);
+}
+
+/**
  * Go back to main menu
  */
-function goToMainMenu() {
+function goToMainMenu(skipWarning = false) {
+    // Oyun devam ediyorsa uyarı göster (alt mod seçim ekranları hariç)
+    if (!skipWarning && currentGameMode) {
+        let hasProgress = false;
+        let warningMessage = '';
+        
+        // Oyun modları için kontrol (soru-cevap oyunları)
+        if (['kelime-cevir', 'dinle-bul', 'bosluk-doldur', 'elif-ba'].includes(currentGameMode)) {
+            if (questionIndex > 0) {
+                const answeredQuestions = correctCount + wrongCount;
+                hasProgress = sessionScore > 0 || answeredQuestions > 0;
+                
+                if (hasProgress) {
+                    warningMessage = `Şu ana kadar: ${answeredQuestions} soru cevapladınız, ${sessionScore} Hasene kazandınız.\n\n`;
+                }
+            }
+        }
+        
+        // Karma oyun için özel kontrol (karmaQuestionIndex kullanıyor)
+        if (currentGameMode === 'karma') {
+            if (karmaQuestionIndex > 0) {
+                const answeredQuestions = correctCount + wrongCount;
+                hasProgress = sessionScore > 0 || answeredQuestions > 0;
+                
+                if (hasProgress) {
+                    warningMessage = `Şu ana kadar: ${answeredQuestions} soru cevapladınız, ${sessionScore} Hasene kazandınız.\n\n`;
+                }
+            }
+        }
+        
+        // Okuma modları için kontrol (Ayet Oku, Dua Et, Hadis Oku)
+        if (currentGameMode === 'ayet-oku' && currentAyetIndex > 0) {
+            hasProgress = true;
+            warningMessage = `Şu ana kadar ${currentAyetIndex} ayet okudunuz.\n\n`;
+        }
+        
+        if (currentGameMode === 'dua-et' && currentDuaIndex > 0) {
+            hasProgress = true;
+            warningMessage = `Şu ana kadar ${currentDuaIndex} dua okudunuz.\n\n`;
+        }
+        
+        if (currentGameMode === 'hadis-oku' && currentHadisIndex > 0) {
+            hasProgress = true;
+            warningMessage = `Şu ana kadar ${currentHadisIndex} hadis okudunuz.\n\n`;
+        }
+        
+        // Eğer ilerleme varsa uyarı göster
+        if (hasProgress) {
+            const confirmed = confirm(
+                '⚠️ Oyun devam ediyor!\n\n' +
+                warningMessage +
+                'Çıkmak istediğinizden emin misiniz? İlerlemeniz kaydedilmeyecek!'
+            );
+            
+            if (!confirmed) {
+                return; // Kullanıcı iptal etti, çıkış yapma
+            }
+        }
+    }
+    
     // Sesi durdur
     stopAllAudio();
     
@@ -1228,8 +1338,11 @@ function goToMainMenu() {
     // Update displays
     updateStatsDisplay();
     
+    // Reset session state (oyun bitmediği için kaydedilmemiş)
     currentGameMode = null;
     currentOpenPanel = null;
+    // Not: sessionScore, correctCount, wrongCount sıfırlanmıyor - 
+    // Ama endGame() çağrılmadığı için zaten totalPoints'a eklenmemiş
 }
 
 /**
@@ -6117,6 +6230,7 @@ if (typeof window !== 'undefined') {
     window.showAchievementsModal = showAchievementsModal;
     window.goToKelimeSubmodes = goToKelimeSubmodes;
     window.goToElifBaSubmodes = goToElifBaSubmodes;
+    window.handleGameBackButton = handleGameBackButton;
     window.startKelimeCevirGame = startKelimeCevirGame;
     window.startElifBaGame = startElifBaGame;
     window.hideAllScreens = hideAllScreens;

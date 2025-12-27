@@ -251,7 +251,7 @@
     <!-- Kelime Çevir Screen -->
     <div id="kelime-cevir-screen" class="game-screen hidden">
         <div class="game-header">
-            <button class="back-btn" onclick="stopAllAudio(); goToKelimeSubmodes()">← Geri</button>
+            <button class="back-btn" onclick="stopAllAudio(); handleGameBackButton()">← Geri</button>
             <div class="game-progress">
                 <span id="kelime-question-number">1</span> / <span id="kelime-total-questions">10</span>
             </div>
@@ -285,7 +285,7 @@
     <!-- Dinle Bul Screen -->
     <div id="dinle-bul-screen" class="game-screen hidden">
         <div class="game-header">
-            <button class="back-btn" onclick="stopAllAudio(); goToMainMenu()">← Geri</button>
+            <button class="back-btn" onclick="stopAllAudio(); handleGameBackButton()">← Geri</button>
             <div class="game-progress">
                 <span id="dinle-question-number">1</span> / <span id="dinle-total-questions">10</span>
             </div>
@@ -314,7 +314,7 @@
     <!-- Boşluk Doldur Screen -->
     <div id="bosluk-doldur-screen" class="game-screen hidden">
         <div class="game-header">
-            <button class="back-btn" onclick="stopAllAudio(); goToMainMenu()">← Geri</button>
+            <button class="back-btn" onclick="stopAllAudio(); handleGameBackButton()">← Geri</button>
             <div class="game-progress">
                 <span id="bosluk-question-number">1</span> / <span id="bosluk-total-questions">10</span>
             </div>
@@ -346,7 +346,7 @@
     <!-- Ayet Oku Screen -->
     <div id="ayet-oku-screen" class="game-screen hidden">
         <div class="game-header">
-            <button class="back-btn" onclick="stopAllAudio(); goToMainMenu()">← Geri</button>
+            <button class="back-btn" onclick="stopAllAudio(); handleGameBackButton()">← Geri</button>
             <h2>📖 Ayet Oku</h2>
         </div>
 
@@ -370,7 +370,7 @@
     <!-- Dua Et Screen -->
     <div id="dua-et-screen" class="game-screen hidden">
         <div class="game-header">
-            <button class="back-btn" onclick="stopAllAudio(); goToMainMenu()">← Geri</button>
+            <button class="back-btn" onclick="stopAllAudio(); handleGameBackButton()">← Geri</button>
             <h2>🤲 Dua Et</h2>
         </div>
 
@@ -394,7 +394,7 @@
     <!-- Hadis Oku Screen -->
     <div id="hadis-oku-screen" class="game-screen hidden">
         <div class="game-header">
-            <button class="back-btn" onclick="stopAllAudio(); goToMainMenu()">← Geri</button>
+            <button class="back-btn" onclick="stopAllAudio(); handleGameBackButton()">← Geri</button>
             <h2>📜 Hadis Oku</h2>
         </div>
 
@@ -416,7 +416,7 @@
     <!-- Karma Game Screen -->
     <div id="karma-game-screen" class="game-screen hidden">
         <div class="game-header">
-            <button class="back-btn" onclick="stopAllAudio(); goToMainMenu()">← Geri</button>
+            <button class="back-btn" onclick="stopAllAudio(); handleGameBackButton()">← Geri</button>
             <h2>🔀 Karma Oyun</h2>
         </div>
 
@@ -529,7 +529,7 @@
     <!-- Elif Ba Screen -->
     <div id="elif-ba-screen" class="game-screen hidden">
         <div class="game-header">
-            <button class="back-btn" onclick="stopAllAudio(); goToElifBaSubmodes()">← Geri</button>
+            <button class="back-btn" onclick="stopAllAudio(); handleGameBackButton()">← Geri</button>
             <div class="game-progress">
                 <span id="elif-question-number">1</span> / <span id="elif-total-questions">10</span>
             </div>
@@ -564,7 +564,7 @@
     <!-- Elif Ba Harf Tablosu Screen -->
     <div id="elif-ba-tablo-screen" class="game-screen hidden">
         <div class="game-header">
-            <button class="back-btn" onclick="goToElifBaSubmodes()">← Geri</button>
+            <button class="back-btn" onclick="handleGameBackButton()">← Geri</button>
             <h2>📋 Harf Tablosu</h2>
         </div>
         <div class="harf-tablo-content">
@@ -577,7 +577,7 @@
     <!-- Harfler ve İsimleri Tablosu -->
     <div id="elif-ba-isimler-tablo-screen" class="game-screen hidden">
         <div class="game-header">
-            <button class="back-btn" onclick="goToElifBaSubmodes()">← Geri</button>
+            <button class="back-btn" onclick="handleGameBackButton()">← Geri</button>
             <h2>📘 Harfler ve İsimleri</h2>
         </div>
         <div class="harf-tablo-content">
