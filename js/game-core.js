@@ -291,6 +291,11 @@ let dailyProgress = 0;
 async function initApp() {
     console.log('🚀 Hasene Arapça Dersi başlatılıyor...');
     
+    // Initialize notifications
+    if (typeof window.initNotifications === 'function') {
+        await window.initNotifications();
+    }
+    
     // Load stats
     await loadStats();
     
@@ -478,6 +483,49 @@ function saveStats() {
 
 // Debounced save
 const debouncedSaveStats = debounce(saveStats, 500);
+
+/**
+ * Save daily statistics for charts
+ * @param {number} correct - Correct answers count
+ * @param {number} wrong - Wrong answers count
+ * @param {number} points - Points earned
+ * @param {number} combo - Max combo
+ */
+function saveDailyStats(correct, wrong, points, combo) {
+    const today = getLocalDateString();
+    const key = `hasene_daily_${today}`;
+    
+    try {
+        // Get existing daily stats or create new
+        const existing = localStorage.getItem(key);
+        let dailyData = existing ? JSON.parse(existing) : {
+            date: today,
+            points: 0,
+            correct: 0,
+            wrong: 0,
+            combo: 0,
+            gamesPlayed: 0,
+            perfectLessons: 0
+        };
+        
+        // Update with new stats
+        dailyData.points += points;
+        dailyData.correct += correct;
+        dailyData.wrong += wrong;
+        dailyData.combo = Math.max(dailyData.combo || 0, combo);
+        dailyData.gamesPlayed = (dailyData.gamesPlayed || 0) + 1;
+        
+        // Check if perfect lesson (no wrong answers)
+        if (wrong === 0 && correct > 0) {
+            dailyData.perfectLessons = (dailyData.perfectLessons || 0) + 1;
+        }
+        
+        // Save to localStorage
+        localStorage.setItem(key, JSON.stringify(dailyData));
+    } catch (e) {
+        console.warn('⚠️ Daily stats save failed:', e);
+    }
+}
 
 /**
  * Reset all game data (TEST function)
@@ -1239,6 +1287,9 @@ function endGame() {
             console.warn('Weekly XP update failed (non-critical):', err);
         });
     }
+    
+    // Save daily statistics for charts
+    saveDailyStats(correctCount, wrongCount, sessionScore, maxCombo);
     
     // Save stats
     debouncedSaveStats();
@@ -2026,6 +2077,141 @@ function getWordAnalysis() {
 }
 
 /**
+ * Calculate word learning speed (weekly/monthly new words)
+ * @returns {Object} Learning speed stats
+ */
+function getWordLearningSpeed() {
+    if (!wordStats || Object.keys(wordStats).length === 0) {
+        return {
+            weeklyNewWords: 0,
+            monthlyNewWords: 0,
+            weeklyTrend: 0, // Percentage change
+            monthlyTrend: 0
+        };
+    }
+    
+    const today = new Date();
+    const weekAgo = new Date(today);
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    const monthAgo = new Date(today);
+    monthAgo.setDate(monthAgo.getDate() - 30);
+    const twoWeeksAgo = new Date(today);
+    twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+    const twoMonthsAgo = new Date(today);
+    twoMonthsAgo.setDate(twoMonthsAgo.getDate() - 60);
+    
+    let weeklyNewWords = 0;
+    let monthlyNewWords = 0;
+    let previousWeeklyNewWords = 0;
+    let previousMonthlyNewWords = 0;
+    
+    Object.entries(wordStats).forEach(([wordId, stats]) => {
+        if (!stats || !stats.lastReview) return;
+        
+        try {
+            const lastReview = new Date(stats.lastReview);
+            
+            // Weekly (last 7 days)
+            if (lastReview >= weekAgo) {
+                weeklyNewWords++;
+            }
+            
+            // Previous week (7-14 days ago)
+            if (lastReview >= twoWeeksAgo && lastReview < weekAgo) {
+                previousWeeklyNewWords++;
+            }
+            
+            // Monthly (last 30 days)
+            if (lastReview >= monthAgo) {
+                monthlyNewWords++;
+            }
+            
+            // Previous month (30-60 days ago)
+            if (lastReview >= twoMonthsAgo && lastReview < monthAgo) {
+                previousMonthlyNewWords++;
+            }
+        } catch (e) {
+            // Invalid date, skip
+        }
+    });
+    
+    // Calculate trends
+    const weeklyTrend = previousWeeklyNewWords > 0 
+        ? Math.round(((weeklyNewWords - previousWeeklyNewWords) / previousWeeklyNewWords) * 100)
+        : 0;
+    const monthlyTrend = previousMonthlyNewWords > 0
+        ? Math.round(((monthlyNewWords - previousMonthlyNewWords) / previousMonthlyNewWords) * 100)
+        : 0;
+    
+    return {
+        weeklyNewWords,
+        monthlyNewWords,
+        weeklyTrend,
+        monthlyTrend
+    };
+}
+
+/**
+ * Get hardest words (lowest success rate)
+ * @param {number} limit - Maximum number of words to return
+ * @returns {Array} Hardest words array
+ */
+function getHardestWords(limit = 20) {
+    if (!wordStats || Object.keys(wordStats).length === 0) {
+        return [];
+    }
+    
+    const wordsWithStats = Object.entries(wordStats)
+        .map(([wordId, stats]) => ({
+            id: wordId,
+            ...stats,
+            successRate: stats.successRate || 0,
+            attempts: stats.attempts || 0
+        }))
+        .filter(w => w.attempts >= 2) // At least 2 attempts to be considered
+        .sort((a, b) => {
+            // Sort by success rate (lowest first), then by attempts (most attempts first)
+            if (a.successRate !== b.successRate) {
+                return a.successRate - b.successRate;
+            }
+            return b.attempts - a.attempts;
+        })
+        .slice(0, limit);
+    
+    return wordsWithStats;
+}
+
+/**
+ * Get words with most wrong answers
+ * @param {number} limit - Maximum number of words to return
+ * @returns {Array} Words with most wrong answers
+ */
+function getWordsWithMostWrongs(limit = 20) {
+    if (!wordStats || Object.keys(wordStats).length === 0) {
+        return [];
+    }
+    
+    const wordsWithStats = Object.entries(wordStats)
+        .map(([wordId, stats]) => ({
+            id: wordId,
+            ...stats,
+            wrong: stats.wrong || 0,
+            attempts: stats.attempts || 0
+        }))
+        .filter(w => w.wrong > 0) // At least 1 wrong answer
+        .sort((a, b) => {
+            // Sort by wrong count (highest first), then by success rate (lowest first)
+            if (b.wrong !== a.wrong) {
+                return b.wrong - a.wrong;
+            }
+            return a.successRate - b.successRate;
+        })
+        .slice(0, limit);
+    
+    return wordsWithStats;
+}
+
+/**
  * Show word analysis modal
  */
 async function showWordAnalysisModal() {
@@ -2033,6 +2219,9 @@ async function showWordAnalysisModal() {
     const struggling = getStrugglingWords();
     const learning = getLearningWords();
     const mastered = getMasteredWords();
+    const learningSpeed = getWordLearningSpeed();
+    const hardestWords = getHardestWords(20);
+    const mostWrongWords = getWordsWithMostWrongs(20);
     
     // Load kelime data to get word details
     const kelimeData = await loadKelimeData();
@@ -2114,6 +2303,25 @@ async function showWordAnalysisModal() {
         }).join('');
     };
     
+    // Prepare hardest and most wrong words with word details
+    const hardestWordsWithDetails = hardestWords.map(w => {
+        const wordDetail = findWordById(w.id);
+        return {
+            ...w,
+            kelime: wordDetail ? (wordDetail.kelime || wordDetail.arabic || '') : '',
+            anlam: wordDetail ? (wordDetail.anlam || wordDetail.translation || '') : ''
+        };
+    });
+    
+    const mostWrongWordsWithDetails = mostWrongWords.map(w => {
+        const wordDetail = findWordById(w.id);
+        return {
+            ...w,
+            kelime: wordDetail ? (wordDetail.kelime || wordDetail.arabic || '') : '',
+            anlam: wordDetail ? (wordDetail.anlam || wordDetail.translation || '') : ''
+        };
+    });
+    
     // Calculate percentages
     const masteredPercent = analysis.totalWords > 0 ? Math.round((analysis.mastered / analysis.totalWords) * 100) : 0;
     const learningPercent = analysis.totalWords > 0 ? Math.round((analysis.learning / analysis.totalWords) * 100) : 0;
@@ -2164,6 +2372,14 @@ async function showWordAnalysisModal() {
                     <span class="progress-label-compact">Tekrar Bekleyen</span>
                     <span class="progress-value-compact">${analysis.dueForReview}</span>
                 </div>
+                <div class="progress-item-compact">
+                    <span class="progress-label-compact">📈 Haftalık Yeni Kelime</span>
+                    <span class="progress-value-compact">${learningSpeed.weeklyNewWords} ${learningSpeed.weeklyTrend !== 0 ? (learningSpeed.weeklyTrend > 0 ? `↑${learningSpeed.weeklyTrend}%` : `↓${Math.abs(learningSpeed.weeklyTrend)}%`) : ''}</span>
+                </div>
+                <div class="progress-item-compact">
+                    <span class="progress-label-compact">📊 Aylık Yeni Kelime</span>
+                    <span class="progress-value-compact">${learningSpeed.monthlyNewWords} ${learningSpeed.monthlyTrend !== 0 ? (learningSpeed.monthlyTrend > 0 ? `↑${learningSpeed.monthlyTrend}%` : `↓${Math.abs(learningSpeed.monthlyTrend)}%`) : ''}</span>
+                </div>
             </div>
             <div class="progress-bar-container-compact">
                 <div class="progress-bar-full">
@@ -2198,6 +2414,16 @@ async function showWordAnalysisModal() {
                     <span class="tab-icon">🔴</span>
                     <span class="tab-label">Zorlanılan</span>
                     <span class="tab-count">${struggling.length}</span>
+                </button>
+                <button class="category-tab" data-category="hardest" onclick="switchWordCategory('hardest')">
+                    <span class="tab-icon">🔥</span>
+                    <span class="tab-label">En Zor</span>
+                    <span class="tab-count">${hardestWords.length}</span>
+                </button>
+                <button class="category-tab" data-category="most-wrong" onclick="switchWordCategory('most-wrong')">
+                    <span class="tab-icon">❌</span>
+                    <span class="tab-label">Çok Yanlış</span>
+                    <span class="tab-count">${mostWrongWords.length}</span>
                 </button>
             </div>
             
@@ -2237,6 +2463,123 @@ async function showWordAnalysisModal() {
                         </div>
                     ` : '<div class="empty-state">Harika! Zorlandığın kelime yok. 🎉</div>'}
                 </div>
+                
+                <div class="category-panel" id="category-hardest">
+                    ${hardestWordsWithDetails.length > 0 ? `
+                        <div class="category-header">
+                            <h4>🔥 En Zor Kelimeler (En Düşük Başarı Oranı)</h4>
+                            <span class="category-badge">${hardestWordsWithDetails.length} kelime</span>
+                        </div>
+                        <div class="word-list">
+                            ${hardestWordsWithDetails.slice(0, 20).map((w, index) => {
+                                const progressBar = `
+                                    <div class="word-progress-bar">
+                                        <div class="word-progress-fill" style="width: ${Math.round(w.successRate || 0)}%; background: #ef4444;"></div>
+                                    </div>
+                                `;
+                                return `
+                                    <div class="word-card hardest">
+                                        <div class="word-card-header">
+                                            <div class="word-number">#${index + 1}</div>
+                                            <div class="word-main-info">
+                                                <div class="word-arabic-large">${w.kelime || w.id}</div>
+                                                <div class="word-meaning-large">${w.anlam || 'Bilinmiyor'}</div>
+                                            </div>
+                                        </div>
+                                        <div class="word-card-body">
+                                            <div class="word-stats-grid">
+                                                <div class="word-stat-item">
+                                                    <span class="stat-icon">📊</span>
+                                                    <div class="stat-info">
+                                                        <span class="stat-label-small">Başarı</span>
+                                                        <span class="stat-value-small" style="color: #ef4444;">${Math.round(w.successRate || 0)}%</span>
+                                                    </div>
+                                                </div>
+                                                <div class="word-stat-item">
+                                                    <span class="stat-icon">✗</span>
+                                                    <div class="stat-info">
+                                                        <span class="stat-label-small">Yanlış</span>
+                                                        <span class="stat-value-small">${w.wrong || 0}</span>
+                                                    </div>
+                                                </div>
+                                                <div class="word-stat-item">
+                                                    <span class="stat-icon">📝</span>
+                                                    <div class="stat-info">
+                                                        <span class="stat-label-small">Deneme</span>
+                                                        <span class="stat-value-small">${w.attempts || 0}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            ${progressBar}
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    ` : '<div class="empty-state">Henüz istatistik toplanmadı. Oyun oynayarak başla! 🚀</div>'}
+                </div>
+                
+                <div class="category-panel" id="category-most-wrong">
+                    ${mostWrongWordsWithDetails.length > 0 ? `
+                        <div class="category-header">
+                            <h4>❌ En Çok Yanlış Yapılan Kelimeler</h4>
+                            <span class="category-badge">${mostWrongWordsWithDetails.length} kelime</span>
+                        </div>
+                        <div class="word-list">
+                            ${mostWrongWordsWithDetails.slice(0, 20).map((w, index) => {
+                                const progressBar = `
+                                    <div class="word-progress-bar">
+                                        <div class="word-progress-fill" style="width: ${Math.round(w.successRate || 0)}%; background: #f59e0b;"></div>
+                                    </div>
+                                `;
+                                return `
+                                    <div class="word-card most-wrong">
+                                        <div class="word-card-header">
+                                            <div class="word-number">#${index + 1}</div>
+                                            <div class="word-main-info">
+                                                <div class="word-arabic-large">${w.kelime || w.id}</div>
+                                                <div class="word-meaning-large">${w.anlam || 'Bilinmiyor'}</div>
+                                            </div>
+                                        </div>
+                                        <div class="word-card-body">
+                                            <div class="word-stats-grid">
+                                                <div class="word-stat-item">
+                                                    <span class="stat-icon">✗</span>
+                                                    <div class="stat-info">
+                                                        <span class="stat-label-small">Yanlış</span>
+                                                        <span class="stat-value-small" style="color: #ef4444; font-weight: bold;">${w.wrong || 0}</span>
+                                                    </div>
+                                                </div>
+                                                <div class="word-stat-item">
+                                                    <span class="stat-icon">✓</span>
+                                                    <div class="stat-info">
+                                                        <span class="stat-label-small">Doğru</span>
+                                                        <span class="stat-value-small">${w.correct || 0}</span>
+                                                    </div>
+                                                </div>
+                                                <div class="word-stat-item">
+                                                    <span class="stat-icon">📊</span>
+                                                    <div class="stat-info">
+                                                        <span class="stat-label-small">Başarı</span>
+                                                        <span class="stat-value-small">${Math.round(w.successRate || 0)}%</span>
+                                                    </div>
+                                                </div>
+                                                <div class="word-stat-item">
+                                                    <span class="stat-icon">📝</span>
+                                                    <div class="stat-info">
+                                                        <span class="stat-label-small">Toplam</span>
+                                                        <span class="stat-value-small">${w.attempts || 0}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            ${progressBar}
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    ` : '<div class="empty-state">Henüz yanlış cevap verilmedi. Devam et! 💪</div>'}
+                </div>
             </div>
         </div>
     `;
@@ -2269,6 +2612,8 @@ async function showWordAnalysisModal() {
  * Switch word category tab
  */
 function switchWordCategory(category) {
+    // Store category in a way that showWordAnalysisModal can access it
+    // For now, we'll just update the UI directly
     // Update tabs
     document.querySelectorAll('.category-tab').forEach(tab => {
         tab.classList.remove('active');

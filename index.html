@@ -689,8 +689,41 @@
             </div>
             <div class="modal-actions">
                 <button class="primary-btn" onclick="showWordAnalysisModal()">📈 Kelime Analizi</button>
+                <button class="primary-btn" onclick="if(typeof showChartsModal === 'function') showChartsModal(); else showToast('Grafikler yükleniyor...', 'info');">📊 Grafikler</button>
+                <button class="secondary-btn" onclick="if(typeof showNotificationSettings === 'function') showNotificationSettings(); else showToast('Bildirim ayarları yükleniyor...', 'info');">🔔 Bildirimler</button>
                 <button class="secondary-btn" onclick="closeModal('stats-modal')">Kapat</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Charts Modal -->
+    <div id="charts-modal" class="modal hidden">
+        <div class="modal-content glass-card" style="max-width: 90vw; max-height: 90vh; overflow-y: auto;">
+            <h2 style="margin-bottom: var(--spacing-lg);">📊 İstatistik Grafikleri</h2>
+            
+            <div style="display: flex; flex-direction: column; gap: var(--spacing-xl);">
+                <!-- Daily Activity Chart -->
+                <div style="background: rgba(255, 255, 255, 0.5); padding: var(--spacing-md); border-radius: var(--radius-md);">
+                    <canvas id="daily-activity-chart" style="max-height: 300px;"></canvas>
+                </div>
+                
+                <!-- Weekly Progress Chart -->
+                <div style="background: rgba(255, 255, 255, 0.5); padding: var(--spacing-md); border-radius: var(--radius-md);">
+                    <canvas id="weekly-progress-chart" style="max-height: 300px;"></canvas>
+                </div>
+                
+                <!-- Monthly Success Chart -->
+                <div style="background: rgba(255, 255, 255, 0.5); padding: var(--spacing-md); border-radius: var(--radius-md);">
+                    <canvas id="monthly-success-chart" style="max-height: 300px;"></canvas>
+                </div>
+                
+                <!-- Success Rate Trend Chart -->
+                <div style="background: rgba(255, 255, 255, 0.5); padding: var(--spacing-md); border-radius: var(--radius-md);">
+                    <canvas id="success-rate-trend-chart" style="max-height: 300px;"></canvas>
+                </div>
+            </div>
+            
+            <button class="secondary-btn" onclick="closeModal('charts-modal'); destroyAllCharts();" style="margin-top: var(--spacing-lg);">Kapat</button>
         </div>
     </div>
 
@@ -933,6 +966,78 @@
         </div>
     </div>
 
+    <!-- Notification Settings Modal -->
+    <div id="notification-settings-modal" class="modal hidden">
+        <div class="modal-content glass-card" style="max-width: 500px;">
+            <h2 style="font-size: 1.2rem; margin-bottom: var(--spacing-md);">🔔 Bildirim Ayarları</h2>
+            
+            <div style="display: flex; flex-direction: column; gap: var(--spacing-md);">
+                <!-- Enable Notifications -->
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: var(--spacing-md); background: rgba(157, 138, 255, 0.1); border-radius: var(--radius-md);">
+                    <div>
+                        <div style="font-weight: 600; margin-bottom: 4px;">Bildirimleri Aktif Et</div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary);">Push bildirimlerini almak için izin verin</div>
+                    </div>
+                    <input type="checkbox" id="notification-enabled-checkbox" style="width: 24px; height: 24px; cursor: pointer;" onchange="if(typeof toggleNotificationEnabled === 'function') toggleNotificationEnabled();">
+                </div>
+                
+                <!-- Daily Reminder -->
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: var(--spacing-md); background: rgba(157, 138, 255, 0.1); border-radius: var(--radius-md);">
+                    <div>
+                        <div style="font-weight: 600; margin-bottom: 4px;">Günlük Hatırlatma</div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary);">Her gün belirlenen saatte hatırlat</div>
+                    </div>
+                    <input type="checkbox" id="daily-reminder-checkbox">
+                </div>
+                
+                <!-- Reminder Time -->
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: var(--spacing-md); background: rgba(157, 138, 255, 0.1); border-radius: var(--radius-md);">
+                    <div>
+                        <div style="font-weight: 600; margin-bottom: 4px;">Hatırlatma Saati</div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary);">Günlük hatırlatma saati</div>
+                    </div>
+                    <input type="time" id="reminder-time-input" value="09:00" style="padding: 8px; border-radius: var(--radius-sm); border: 2px solid var(--accent-primary);">
+                </div>
+                
+                <!-- Streak Warning -->
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: var(--spacing-md); background: rgba(157, 138, 255, 0.1); border-radius: var(--radius-md);">
+                    <div>
+                        <div style="font-weight: 600; margin-bottom: 4px;">Seri Uyarısı</div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary);">Serinin kırılmaması için uyar</div>
+                    </div>
+                    <input type="checkbox" id="streak-warning-checkbox" checked>
+                </div>
+                
+                <!-- Task Reminder -->
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: var(--spacing-md); background: rgba(157, 138, 255, 0.1); border-radius: var(--radius-md);">
+                    <div>
+                        <div style="font-weight: 600; margin-bottom: 4px;">Görev Hatırlatıcısı</div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary);">Tamamlanmamış görevler için hatırlat</div>
+                    </div>
+                    <input type="checkbox" id="task-reminder-checkbox" checked>
+                </div>
+                
+                <!-- Weekly Summary -->
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: var(--spacing-md); background: rgba(157, 138, 255, 0.1); border-radius: var(--radius-md);">
+                    <div>
+                        <div style="font-weight: 600; margin-bottom: 4px;">Haftalık Özet</div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary);">Haftalık performans özeti</div>
+                    </div>
+                    <input type="checkbox" id="weekly-summary-checkbox">
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: var(--spacing-sm); margin-top: var(--spacing-lg);">
+                <button class="primary-btn" onclick="saveNotificationSettingsFromUI()" style="flex: 1;">💾 Kaydet</button>
+                <button class="secondary-btn" onclick="closeModal('notification-settings-modal')" style="flex: 1;">İptal</button>
+            </div>
+            
+            <div style="margin-top: var(--spacing-md); padding: var(--spacing-sm); background: rgba(239, 68, 68, 0.1); border-radius: var(--radius-sm); font-size: 0.85rem; color: var(--text-secondary);">
+                💡 Bildirimler sadece tarayıcı açıkken çalışır. Uygulamayı ana ekrana ekleyerek daha iyi sonuç alabilirsiniz.
+            </div>
+        </div>
+    </div>
+
     <!-- Fix Pronunciation Modal -->
     <div id="fix-pronunciation-modal" class="modal hidden">
         <div class="modal-content glass-card" style="max-width: 500px;">
@@ -998,6 +1103,9 @@
         </button>
     </nav>
 
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
     <!-- Firebase SDK (CDN) -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
@@ -1014,6 +1122,8 @@
     <script src="js/data-loader.js"></script>
     <script src="js/points-manager.js"></script>
     <script src="js/leaderboard.js"></script>
+    <script src="js/notifications.js"></script>
+    <script src="js/charts.js"></script>
     <script src="js/game-core.js"></script>
     <script src="js/pronunciation-fix.js"></script>
     <!-- Debug/Test Scripts (Only loaded in development mode) -->
