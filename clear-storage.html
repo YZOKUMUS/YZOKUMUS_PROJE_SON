@@ -60,7 +60,17 @@
         
         <div class="info">
             <strong>⚠️ Bu sayfa localStorage ve IndexedDB'yi temizler!</strong><br>
-            Kullanıcı verileriniz silinecektir. Devam etmeden önce emin olun.
+            Kullanıcı verileriniz silinecektir. Devam etmeden önce emin olun.<br><br>
+            <strong>Silinecek Veriler:</strong>
+            <ul style="margin: 10px 0; padding-left: 20px;">
+                <li>Puanlar, rozetler, başarımlar</li>
+                <li>Kelime istatistikleri</li>
+                <li>Günlük görevler ve hedefler</li>
+                <li><strong>Günlük istatistikler (grafikler için)</strong></li>
+                <li><strong>Bildirim ayarları</strong></li>
+                <li>Favori kelimeler</li>
+                <li>Firebase cache</li>
+            </ul>
         </div>
 
         <h2>Mevcut localStorage Verileri:</h2>
@@ -172,12 +182,22 @@
                 return;
             }
 
-            // 1. Clear hasene_ keys from localStorage
+            // 1. Clear hasene_ keys from localStorage (including daily stats and notification settings)
             const keysToRemove = [];
             for (let i = 0; i < localStorage.length; i++) {
                 const key = localStorage.key(i);
                 if (key.startsWith('hasene_') || key.startsWith('firebase:')) {
                     keysToRemove.push(key);
+                }
+            }
+            
+            // Also clear all daily stats (hasene_daily_YYYY-MM-DD format)
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('hasene_daily_') && key.match(/hasene_daily_\d{4}-\d{2}-\d{2}$/)) {
+                    if (!keysToRemove.includes(key)) {
+                        keysToRemove.push(key);
+                    }
                 }
             }
 

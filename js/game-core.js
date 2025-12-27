@@ -570,6 +570,16 @@ function resetAllData() {
         }
     });
     
+    // Clear all daily stats (for charts)
+    Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('hasene_daily_') && key.match(/hasene_daily_\d{4}-\d{2}-\d{2}$/)) {
+            localStorage.removeItem(key);
+        }
+    });
+    
+    // Clear notification settings
+    localStorage.removeItem('hasene_notification_settings');
+    
     // Clear all hasene_* keys from localStorage (comprehensive cleanup)
     // Ama kullanıcı bilgilerini koru
     Object.keys(localStorage).forEach(key => {
