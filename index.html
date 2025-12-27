@@ -51,20 +51,8 @@
 
         <!-- Stats Header -->
         <div class="stats-header glass-card">
-            <!-- User Status Bar with Reset Button -->
-            <div class="user-status-bar">
-                <div class="user-info">
-                    <span id="user-avatar" class="user-avatar">👤</span>
-                    <span id="current-username-display" class="username-display">Misafir</span>
-                    <span id="user-status-indicator" class="user-status-indicator">🔴 Çıkış Yapıldı</span>
-                </div>
-                <div class="user-actions">
-                    <button id="user-auth-btn" class="secondary-btn user-action-btn">Giriş Yap</button>
-                </div>
-            </div>
-            
             <!-- TEST TOOLS - REMOVE AFTER TESTING -->
-            <div class="test-tools-bar" style="display: flex; gap: 8px; justify-content: center; margin-top: 10px; padding: 10px; background: rgba(255, 200, 0, 0.1); border-radius: 8px; border: 2px dashed rgba(255, 200, 0, 0.3);">
+            <div class="test-tools-bar" style="display: flex; gap: 8px; justify-content: center; margin-bottom: 10px; padding: 10px; background: rgba(255, 200, 0, 0.1); border-radius: 8px; border: 2px dashed rgba(255, 200, 0, 0.3); flex-wrap: wrap;">
                 <span style="font-size: 12px; font-weight: 600; color: #ff8800; align-self: center;">🧪 TEST ARAÇLARI:</span>
                 <button onclick="window.open('clear-storage.html', '_blank')" class="test-tool-btn" style="padding: 6px 12px; font-size: 12px; background: rgba(255, 255, 255, 0.8); border: 2px solid #667eea; border-radius: 6px; cursor: pointer; font-weight: 600; color: #667eea;">
                     🗑️ Storage Temizle
@@ -81,6 +69,18 @@
                 <button onclick="clearPronunciationFixes()" class="test-tool-btn" style="padding: 6px 12px; font-size: 12px; background: rgba(255, 255, 255, 0.8); border: 2px solid #8b5cf6; border-radius: 6px; cursor: pointer; font-weight: 600; color: #8b5cf6;">
                     🗑️ Düzeltmeleri Sil
                 </button>
+            </div>
+            
+            <!-- User Status Bar with Reset Button -->
+            <div class="user-status-bar">
+                <div class="user-info">
+                    <span id="user-avatar" class="user-avatar">👤</span>
+                    <span id="current-username-display" class="username-display">Misafir</span>
+                    <span id="user-status-indicator" class="user-status-indicator">🔴 Çıkış Yapıldı</span>
+                </div>
+                <div class="user-actions">
+                    <button id="user-auth-btn" class="secondary-btn user-action-btn">Giriş Yap</button>
+                </div>
             </div>
             
             <!-- Compact Stats Row - Single Line -->
