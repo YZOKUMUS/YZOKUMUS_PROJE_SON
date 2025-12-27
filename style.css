@@ -44,6 +44,11 @@
     --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-bounce: 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    
+    /* Performance */
+    --will-change-transform: transform;
+    --will-change-opacity: opacity;
+    --will-change-auto: auto;
 
     /* Safe Areas */
     --safe-area-top: env(safe-area-inset-top, 0px);
@@ -84,6 +89,7 @@
     src: url('ASSETS/fonts/KFGQPC Uthmanic Script HAFS Regular.otf') format('opentype');
     font-weight: normal;
     font-style: normal;
+    font-display: swap; /* Performans: Font yüklenene kadar fallback göster */
 }
 
 /* Reset */
@@ -121,6 +127,29 @@ body {
     border-radius: var(--radius-lg);
     border: 1px solid var(--glass-border);
     box-shadow: var(--glass-shadow);
+    /* Performans: GPU acceleration için */
+    transform: translateZ(0);
+    contain: layout style paint;
+}
+
+/* Glass effect utility (backdrop-filter için) */
+.glass-effect {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+}
+
+/* GPU acceleration için utility */
+.gpu-accelerated {
+    transform: translateZ(0);
+    will-change: transform;
+}
+
+/* Smooth transitions için utility */
+.smooth-transition {
+    transition: transform var(--transition-fast), opacity var(--transition-fast);
 }
 
 /* ===================================
@@ -146,6 +175,7 @@ body {
     border-radius: 24px;
     animation: float 2s ease-in-out infinite;
     margin-bottom: var(--spacing-lg);
+    will-change: transform; /* Performans: Animasyon için GPU kullan */
 }
 
 .loading-title {
@@ -186,6 +216,7 @@ body {
     border-radius: 50%;
     animation: spin 1s linear infinite;
     margin: 0 auto;
+    will-change: transform; /* Performans: Rotasyon için GPU kullan */
 }
 
 @keyframes float {
@@ -194,7 +225,10 @@ body {
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to { 
+        transform: rotate(360deg);
+        /* GPU acceleration için translateZ ekle */
+    }
 }
 
 /* ===================================
@@ -631,6 +665,7 @@ body {
 
 .audio-btn:hover {
     transform: scale(1.1);
+    will-change: transform; /* Performans: Hover animasyonu için */
 }
 
 .big-audio-btn {
@@ -652,6 +687,7 @@ body {
 .big-audio-btn:hover {
     background: var(--accent-secondary);
     transform: scale(1.05);
+    will-change: transform; /* Performans: Hover animasyonu için */
 }
 
 .dinle-instruction {
@@ -683,13 +719,16 @@ body {
     border-radius: 16px; /* Duolingo tarzı yuvarlatılmış köşeler */
     text-align: center;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease; /* Performans: Sadece gerekli property'ler */
     color: var(--text-primary);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08); /* Hafif gölge */
     min-height: var(--answer-option-min-height);
     display: flex;
     align-items: center;
     justify-content: center;
+    /* Performans: Transform için GPU acceleration */
+    transform: translateZ(0);
+    will-change: transform;
 }
 
 /* Arapça karakter içeren cevap şıkları için özel stil */
@@ -934,8 +973,8 @@ body {
 }
 
 @keyframes slideUp {
-    from { transform: translateY(20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+    from { transform: translate3d(0, 20px, 0); opacity: 0; }
+    to { transform: translate3d(0, 0, 0); opacity: 1; }
 }
 
 /* Result Modal */
@@ -1040,8 +1079,8 @@ body {
 }
 
 @keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    50% { transform: translate3d(0, -10px, 0); }
 }
 
 /* Stats Modal */
@@ -1141,6 +1180,7 @@ body {
     border-color: var(--accent-gold);
     background: linear-gradient(135deg, rgba(251, 191, 36, 0.3), rgba(245, 158, 11, 0.4));
     animation: giftPulse 2s ease-in-out infinite;
+    will-change: transform, box-shadow; /* Performans: Animasyon için GPU kullan */
 }
 
 .reward-box.active:hover {
@@ -1156,8 +1196,8 @@ body {
 }
 
 @keyframes giftPulse {
-    0%, 100% { transform: scale(1); box-shadow: 0 4px 20px rgba(251, 191, 36, 0.3); }
-    50% { transform: scale(1.02); box-shadow: 0 6px 25px rgba(251, 191, 36, 0.5); }
+    0%, 100% { transform: scale3d(1, 1, 1); box-shadow: 0 4px 20px rgba(251, 191, 36, 0.3); }
+    50% { transform: scale3d(1.02, 1.02, 1); box-shadow: 0 6px 25px rgba(251, 191, 36, 0.5); }
 }
 
 .reward-box-icon {
@@ -1171,9 +1211,9 @@ body {
 }
 
 @keyframes wiggle {
-    0%, 100% { transform: rotate(0deg); }
-    25% { transform: rotate(-10deg); }
-    75% { transform: rotate(10deg); }
+    0%, 100% { transform: rotate(0deg) translateZ(0); }
+    25% { transform: rotate(-10deg) translateZ(0); }
+    75% { transform: rotate(10deg) translateZ(0); }
 }
 
 .reward-box-label {
@@ -1210,8 +1250,8 @@ body {
 }
 
 @keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-15px); }
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    50% { transform: translate3d(0, -15px, 0); }
 }
 
 .reward-amount {
@@ -1689,12 +1729,13 @@ body {
    =================================== */
 .shake {
     animation: shake 0.5s ease;
+    will-change: transform; /* Performans: Animasyon için GPU kullan */
 }
 
 @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    20%, 60% { transform: translateX(-10px); }
-    40%, 80% { transform: translateX(10px); }
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    20%, 60% { transform: translate3d(-10px, 0, 0); }
+    40%, 80% { transform: translate3d(10px, 0, 0); }
 }
 
 .pulse {
@@ -1702,9 +1743,9 @@ body {
 }
 
 @keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
+    0% { transform: scale3d(1, 1, 1); }
+    50% { transform: scale3d(1.05, 1.05, 1); }
+    100% { transform: scale3d(1, 1, 1); }
 }
 
 .correct-animation {
@@ -1712,9 +1753,9 @@ body {
 }
 
 @keyframes correctPop {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.1); background: var(--accent-success); }
-    100% { transform: scale(1); }
+    0% { transform: scale3d(1, 1, 1); }
+    50% { transform: scale3d(1.1, 1.1, 1); background: var(--accent-success); }
+    100% { transform: scale3d(1, 1, 1); }
 }
 
 /* Blank Word Style */
