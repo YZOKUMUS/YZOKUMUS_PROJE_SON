@@ -1455,7 +1455,19 @@ function showResultModal(perfectBonus = 0) {
  */
 function playAgain() {
     closeModal('game-result-modal');
-    startGame(currentGameMode);
+    
+    // If it's elif-ba game mode with a submode, restart the specific submode directly
+    if (currentGameMode === 'elif-ba' && currentElifBaSubmode) {
+        startElifBaGame(currentElifBaSubmode);
+    } 
+    // If it's kelime-cevir game mode with a submode, restart the specific submode directly
+    else if (currentGameMode === 'kelime-cevir' && currentKelimeSubmode) {
+        startKelimeCevirGame(currentKelimeSubmode);
+    } 
+    // For other games, use standard startGame
+    else {
+        startGame(currentGameMode);
+    }
 }
 
 /**
