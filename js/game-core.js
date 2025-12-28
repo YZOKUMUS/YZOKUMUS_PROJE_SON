@@ -20,6 +20,7 @@ let correctCount = 0;
 let wrongCount = 0;
 let comboCount = 0;
 let maxCombo = 0;
+let gameCompleted = false; // Oyun tamamlandı mı (puanlar kaydedildi)
 
 // Current Questions
 let currentQuestions = [];
@@ -1031,6 +1032,7 @@ function setupNavigationButtons() {
 async function startGame(gameMode) {
     console.log(`🎮 Starting game: ${gameMode}`);
     currentGameMode = gameMode;
+    gameCompleted = false; // Reset game completed flag
     
     // Hide main container
     document.getElementById('main-container').classList.add('hidden');
@@ -1262,6 +1264,12 @@ function handleGameBackButton() {
  * Go back to main menu
  */
 function goToMainMenu(skipWarning = false) {
+    // Oyun tamamlandıysa (endGame çağrıldıysa) uyarı gösterme
+    if (gameCompleted) {
+        skipWarning = true;
+        gameCompleted = false; // Reset flag
+    }
+    
     // Oyun devam ediyorsa uyarı göster (alt mod seçim ekranları hariç)
     if (!skipWarning && currentGameMode) {
         let hasProgress = false;
@@ -1349,6 +1357,9 @@ function goToMainMenu(skipWarning = false) {
  * End game and show results
  */
 function endGame() {
+    // Mark game as completed (puanlar kaydedildi, uyarı gösterme)
+    gameCompleted = true;
+    
     // Calculate perfect bonus
     let perfectBonus = 0;
     if (wrongCount === 0 && correctCount >= 3) {
@@ -1484,6 +1495,7 @@ function closeResultAndGoHome() {
 
 async function startKelimeCevirGame(submode = 'classic') {
     currentKelimeSubmode = submode;
+    gameCompleted = false; // Reset game completed flag
     
     // Reset session
     sessionScore = 0;
@@ -3169,6 +3181,8 @@ function navigateHadis(direction) {
  */
 async function startElifBaGame(submode = 'harfler') {
     currentElifBaSubmode = submode;
+    gameCompleted = false; // Reset game completed flag
+    
     const data = await loadHarfData();
     
     if (data.length === 0) {
@@ -4012,7 +4026,12 @@ function checkUcHarfliKelimelerAnswer(index, selectedAnswer) {
     
     setTimeout(() => {
         questionIndex++;
-        loadUcHarfliKelimelerQuestion();
+        // Check if this was the last question before loading next
+        if (questionIndex >= currentQuestions.length) {
+            endGame();
+        } else {
+            loadUcHarfliKelimelerQuestion();
+        }
     }, 1200);
 }
 
