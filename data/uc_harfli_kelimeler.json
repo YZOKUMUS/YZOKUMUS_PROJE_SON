@@ -2,7 +2,7 @@
   "kelimeler": [
     {
       "kelime": "اَكَلَ",
-      "okunus": "akele",
+      "okunus": "ekele",
       "anlam": "Yedi",
       "audioUrl": "ASSETS/audio/okuma/btn_1.mp3"
     },
@@ -339,7 +339,7 @@
     },
     {
       "kelime": "ٱثْنَا",
-      "okunus": "ٱsne",
+      "okunus": "isna",
       "anlam": "İki",
       "audioUrl": "https://audios.quranwbw.com/words/9/009_036_006.mp3?version=2",
       "kaynak": "Tevbe (9:36:6)"
@@ -829,7 +829,7 @@
     },
     {
       "kelime": "رَمَىٰ",
-      "okunus": "remeaٰ",
+      "okunus": "ramâ",
       "anlam": "Attı",
       "audioUrl": "https://audios.quranwbw.com/words/8/008_017_012.mp3?version=2",
       "kaynak": "Enfâl (8:17:12)"
@@ -1025,7 +1025,7 @@
     },
     {
       "kelime": "دُونِ",
-      "okunus": "duvni",
+      "okunus": "duni",
       "anlam": "Başka",
       "audioUrl": "https://audios.quranwbw.com/words/2/002_023_016.mp3?version=2",
       "kaynak": "Bakara (2:23:16)"
@@ -1991,7 +1991,7 @@
     },
     {
       "kelime": "جَآنٌّ",
-      "okunus": "ceٓnnun",
+      "okunus": "cannun",
       "anlam": "Bir yılan",
       "audioUrl": "https://audios.quranwbw.com/words/27/027_010_007.mp3?version=2",
       "kaynak": "Neml (27:10:7)"
@@ -2376,7 +2376,7 @@
     },
     {
       "kelime": "جَنَّٰتٍ",
-      "okunus": "cenneٰtin",
+      "okunus": "cennatin",
       "anlam": "Cennetler",
       "audioUrl": "https://audios.quranwbw.com/words/2/002_025_008.mp3?version=2",
       "kaynak": "Bakara (2:25:8)"
@@ -2698,14 +2698,14 @@
     },
     {
       "kelime": "قَلَىٰ",
-      "okunus": "galeaٰ",
+      "okunus": "galâ",
       "anlam": "Darılmadı",
       "audioUrl": "https://audios.quranwbw.com/words/93/093_003_005.mp3?version=2",
       "kaynak": "Duhâ (93:3:5)"
     },
     {
       "kelime": "ضُرَّهُۥ",
-      "okunus": "durrehuۥ",
+      "okunus": "durrahu",
       "anlam": "Darlığını",
       "audioUrl": "https://audios.quranwbw.com/words/10/010_012_014.mp3?version=2",
       "kaynak": "Yunus (10:12:14)"
@@ -3237,7 +3237,7 @@
     },
     {
       "kelime": "ٱنقُصْ",
-      "okunus": "ٱngus",
+      "okunus": "üngus",
       "anlam": "Eksilt",
       "audioUrl": "https://audios.quranwbw.com/words/73/073_003_003.mp3?version=2",
       "kaynak": "Müzzemmil (73:3:3)"
@@ -3713,7 +3713,7 @@
     },
     {
       "kelime": "بَقِىَ",
-      "okunus": "begıa",
+      "okunus": "begıye",
       "anlam": "Geri kalan",
       "audioUrl": "https://audios.quranwbw.com/words/2/002_278_008.mp3?version=2",
       "kaynak": "Bakara (2:278:8)"
@@ -3888,7 +3888,7 @@
     },
     {
       "kelime": "يَرَى",
-      "okunus": "yerea",
+      "okunus": "yera",
       "anlam": "Görselerdi",
       "audioUrl": "https://audios.quranwbw.com/words/2/002_165_018.mp3?version=2",
       "kaynak": "Bakara (2:165:18)"
@@ -4686,7 +4686,7 @@
     },
     {
       "kelime": "ٱسْمُهُۥ",
-      "okunus": "ٱsmuhuۥ",
+      "okunus": "ismuhu",
       "anlam": "Isminin",
       "audioUrl": "https://audios.quranwbw.com/words/2/002_114_010.mp3?version=2",
       "kaynak": "Bakara (2:114:10)"
@@ -4791,7 +4791,7 @@
     },
     {
       "kelime": "ٱئْذَن",
-      "okunus": "ٱzen",
+      "okunus": "izen",
       "anlam": "Izin ver",
       "audioUrl": "https://audios.quranwbw.com/words/9/009_049_004.mp3?version=2",
       "kaynak": "Tevbe (9:49:4)"
@@ -5393,7 +5393,7 @@
     },
     {
       "kelime": "وَاقٍ",
-      "okunus": "vegın",
+      "okunus": "vagin",
       "anlam": "Koruyacak",
       "audioUrl": "https://audios.quranwbw.com/words/13/013_034_014.mp3?version=2",
       "kaynak": "Ra'd (13:34:14)"
@@ -5407,7 +5407,7 @@
     },
     {
       "kelime": "وَالٍ",
-      "okunus": "velin",
+      "okunus": "valin",
       "anlam": "Koruyucuları",
       "audioUrl": "https://audios.quranwbw.com/words/13/013_011_035.mp3?version=2",
       "kaynak": "Ra'd (13:11:35)"
@@ -5988,7 +5988,7 @@
     },
     {
       "kelime": "ضُرِّهِۦٓ",
-      "okunus": "durrihiۦٓ",
+      "okunus": "durrihi",
       "anlam": "O’nun zararını",
       "audioUrl": "https://audios.quranwbw.com/words/39/039_038_023.mp3?version=2",
       "kaynak": "Zümer (39:38:23)"
@@ -6037,14 +6037,14 @@
     },
     {
       "kelime": "ٱبْنَكَ",
-      "okunus": "ٱbneke",
+      "okunus": "ibneke",
       "anlam": "Oğlun",
       "audioUrl": "https://audios.quranwbw.com/words/12/012_081_007.mp3?version=2",
       "kaynak": "Yusuf (12:81:7)"
     },
     {
       "kelime": "ٱبْنَهُۥ",
-      "okunus": "ٱbnehuۥ",
+      "okunus": "ibnehu",
       "anlam": "Oğluna",
       "audioUrl": "https://audios.quranwbw.com/words/11/011_042_009.mp3?version=2",
       "kaynak": "Hûd (11:42:9)"
@@ -6576,7 +6576,7 @@
     },
     {
       "kelime": "مَٰلِكِ",
-      "okunus": "meٰliki",
+      "okunus": "maliki",
       "anlam": "Sahibidir",
       "audioUrl": "https://audios.quranwbw.com/words/1/001_004_001.mp3?version=2",
       "kaynak": "Fâtiha (1:4:1)"
@@ -6842,7 +6842,7 @@
     },
     {
       "kelime": "فَأْتِ",
-      "okunus": "feeti",
+      "okunus": "fe'ti",
       "anlam": "Sen de getir",
       "audioUrl": "https://audios.quranwbw.com/words/2/002_258_032.mp3?version=2",
       "kaynak": "Bakara (2:258:32)"
@@ -7192,7 +7192,7 @@
     },
     {
       "kelime": "مَآءً",
-      "okunus": "meٓen",
+      "okunus": "maen",
       "anlam": "Su",
       "audioUrl": "https://audios.quranwbw.com/words/2/002_022_011.mp3?version=2",
       "kaynak": "Bakara (2:22:11)"
@@ -7269,7 +7269,7 @@
     },
     {
       "kelime": "دَعًّا",
-      "okunus": "deân",
+      "okunus": "değğa",
       "anlam": "Sürüklenerek",
       "audioUrl": "https://audios.quranwbw.com/words/52/052_013_006.mp3?version=2",
       "kaynak": "Tûr (52:13:6)"
@@ -7367,7 +7367,7 @@
     },
     {
       "kelime": "إِلَٰهٌ",
-      "okunus": "ileٰhun",
+      "okunus": "ilahun",
       "anlam": "Tanrı’dır",
       "audioUrl": "https://audios.quranwbw.com/words/2/002_163_002.mp3?version=2",
       "kaynak": "Bakara (2:163:2)"
@@ -8088,7 +8088,7 @@
     },
     {
       "kelime": "وَرَبُّ",
-      "okunus": "verebbu",
+      "okunus": "verabbu",
       "anlam": "Ve Rabbi",
       "audioUrl": "https://audios.quranwbw.com/words/23/023_086_006.mp3?version=2",
       "kaynak": "Mü'minûn (23:86:6)"
@@ -8326,7 +8326,7 @@
     },
     {
       "kelime": "وَرَقِ",
-      "okunus": "veregı",
+      "okunus": "veragi",
       "anlam": "Yaprakları-",
       "audioUrl": "https://audios.quranwbw.com/words/7/007_022_013.mp3?version=2",
       "kaynak": "A'râf (7:22:13)"
@@ -8802,7 +8802,7 @@
     },
     {
       "kelime": "ضَرًّا",
-      "okunus": "darren",
+      "okunus": "darran",
       "anlam": "Zarar vermeye",
       "audioUrl": "https://audios.quranwbw.com/words/5/005_076_010.mp3?version=2",
       "kaynak": "Mâide (5:76:10)"
