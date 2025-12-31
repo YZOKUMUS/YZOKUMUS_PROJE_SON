@@ -170,8 +170,14 @@
             resultDiv.textContent = '⏳ Temizleniyor...';
             
             try {
-                localStorage.clear();
-                sessionStorage.clear();
+                // Ana sayfadaki clearStorageData fonksiyonunu kullan (varsa)
+                if (window.opener && typeof window.opener.clearStorageData === 'function') {
+                    window.opener.clearStorageData();
+                } else {
+                    // Fallback: Direkt temizle
+                    localStorage.clear();
+                    sessionStorage.clear();
+                }
                 
                 resultDiv.className = 'result success';
                 resultDiv.innerHTML = '✅ <strong>Başarılı!</strong><br>Storage temizlendi.';

@@ -143,33 +143,33 @@
             resultDiv.textContent = '⏳ Siliniyor...';
             
             try {
-                // Tüm localStorage'ı temizle
-                localStorage.clear();
-                
-                // Tüm sessionStorage'ı temizle
-                sessionStorage.clear();
-                
-                // IndexedDB'yi temizle (eğer varsa)
-                if ('indexedDB' in window) {
-                    indexedDB.databases().then(databases => {
-                        databases.forEach(db => {
-                            indexedDB.deleteDatabase(db.name);
+                // Ana sayfadaki nuclearClear fonksiyonunu kullan (varsa)
+                if (window.opener && typeof window.opener.nuclearClear === 'function') {
+                    window.opener.nuclearClear();
+                } else {
+                    // Fallback: Direkt temizle
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    
+                    if ('indexedDB' in window) {
+                        indexedDB.databases().then(databases => {
+                            databases.forEach(db => {
+                                indexedDB.deleteDatabase(db.name);
+                            });
                         });
-                    });
-                }
-                
-                // Service Worker cache'lerini temizle
-                if ('caches' in window) {
-                    caches.keys().then(names => {
-                        names.forEach(name => caches.delete(name));
-                    });
-                }
-                
-                // Service Worker'ları kaldır
-                if ('serviceWorker' in navigator) {
-                    navigator.serviceWorker.getRegistrations().then(registrations => {
-                        registrations.forEach(reg => reg.unregister());
-                    });
+                    }
+                    
+                    if ('caches' in window) {
+                        caches.keys().then(names => {
+                            names.forEach(name => caches.delete(name));
+                        });
+                    }
+                    
+                    if ('serviceWorker' in navigator) {
+                        navigator.serviceWorker.getRegistrations().then(registrations => {
+                            registrations.forEach(reg => reg.unregister());
+                        });
+                    }
                 }
                 
                 resultDiv.className = 'result success';
@@ -177,7 +177,6 @@
                 
                 setTimeout(() => {
                     window.close();
-                    // Ana sayfayı yenile
                     if (window.opener) {
                         window.opener.location.reload();
                     }
