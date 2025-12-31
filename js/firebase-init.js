@@ -95,6 +95,23 @@ async function initFirebase() {
                 // Call original console.error for other errors
                 originalConsoleError.apply(console, args);
             };
+            
+            // Console.info override to suppress Firebase OAuth domain warnings
+            const originalConsoleInfo = console.info;
+            console.info = function(...args) {
+                // Check if this is a Firebase OAuth domain warning
+                const message = args.join(' ');
+                if (message.includes('current domain is not authorized for OAuth') ||
+                    message.includes('OAuth redirect domains') ||
+                    message.includes('signInWithPopup') ||
+                    message.includes('signInWithRedirect')) {
+                    // Suppress OAuth domain warnings - these are expected in development
+                    // OAuth is not used in this app, so these warnings are harmless
+                    return;
+                }
+                // Call original console.info for other messages
+                originalConsoleInfo.apply(console, args);
+            };
         }
         
         return true;

@@ -1,6 +1,6 @@
 // Hasene Service Worker - Offline + Cache
-const CACHE_NAME = 'hasene-v4';
-const DATA_CACHE_NAME = 'hasene-data-v4';
+const CACHE_NAME = 'hasene-v6';
+const DATA_CACHE_NAME = 'hasene-data-v6';
 
 const urlsToCache = [
     './',
@@ -16,7 +16,11 @@ const urlsToCache = [
     './js/api-service.js',
     './js/data-loader.js',
     './js/points-manager.js',
+    './js/leaderboard.js',
+    './js/notifications.js',
+    './js/charts.js',
     './js/game-core.js',
+    './js/pronunciation-fix.js',
     './ASSETS/badges/icon-512.png',
     './ASSETS/fonts/KFGQPC Uthmanic Script HAFS Regular.otf'
 ];
@@ -33,13 +37,37 @@ const dataUrlsToCache = [
 self.addEventListener('install', (event) => {
     event.waitUntil(
         Promise.all([
-            caches.open(CACHE_NAME).then((cache) => {
+            caches.open(CACHE_NAME).then(async (cache) => {
                 console.log('Caching app shell');
-                return cache.addAll(urlsToCache);
+                // Tek tek ekle - bir dosya başarısız olsa bile diğerleri cache'lensin
+                const cachePromises = urlsToCache.map(url => {
+                    return fetch(url).then(response => {
+                        if (response.ok) {
+                            return cache.put(url, response);
+                        } else {
+                            console.warn(`Failed to cache: ${url} (${response.status})`);
+                        }
+                    }).catch(err => {
+                        console.warn(`Error caching ${url}:`, err);
+                    });
+                });
+                await Promise.allSettled(cachePromises);
             }),
-            caches.open(DATA_CACHE_NAME).then((cache) => {
+            caches.open(DATA_CACHE_NAME).then(async (cache) => {
                 console.log('Caching data files');
-                return cache.addAll(dataUrlsToCache);
+                // Tek tek ekle - bir dosya başarısız olsa bile diğerleri cache'lensin
+                const cachePromises = dataUrlsToCache.map(url => {
+                    return fetch(url).then(response => {
+                        if (response.ok) {
+                            return cache.put(url, response);
+                        } else {
+                            console.warn(`Failed to cache: ${url} (${response.status})`);
+                        }
+                    }).catch(err => {
+                        console.warn(`Error caching ${url}:`, err);
+                    });
+                });
+                await Promise.allSettled(cachePromises);
             })
         ])
     );

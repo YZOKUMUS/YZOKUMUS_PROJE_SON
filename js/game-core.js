@@ -6295,4 +6295,158 @@ if (typeof window !== 'undefined') {
     window.saveStats = saveStats;
     window.loadStats = loadStats;
     window.updateStatsDisplay = updateStatsDisplay;
+    
+    // Test Tools (also exported immediately after function definitions)
+    window.clearStorageData = clearStorageData;
+    window.testPoints = testPoints;
+    window.nuclearClear = nuclearClear;
+}
+
+/**
+ * Clear storage data (TEST function)
+ */
+function clearStorageData() {
+    if (!confirm('Storage verilerini temizlemek istediğinize emin misiniz?')) {
+        return;
+    }
+    
+    try {
+        // Clear localStorage (keep user info)
+        const savedUsername = localStorage.getItem('hasene_username');
+        const savedUserId = localStorage.getItem('hasene_user_id');
+        const savedUserEmail = localStorage.getItem('hasene_user_email');
+        const savedUserGender = localStorage.getItem('hasene_user_gender');
+        const savedFirebaseUserId = localStorage.getItem('hasene_firebase_user_id');
+        const savedUserType = localStorage.getItem('hasene_user_type');
+        
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        // Restore user info
+        if (savedUsername) localStorage.setItem('hasene_username', savedUsername);
+        if (savedUserId) localStorage.setItem('hasene_user_id', savedUserId);
+        if (savedUserEmail) localStorage.setItem('hasene_user_email', savedUserEmail);
+        if (savedUserGender) localStorage.setItem('hasene_user_gender', savedUserGender);
+        if (savedFirebaseUserId) localStorage.setItem('hasene_firebase_user_id', savedFirebaseUserId);
+        if (savedUserType) localStorage.setItem('hasene_user_type', savedUserType);
+        
+        // Reload stats
+        if (typeof loadStats === 'function' && typeof updateStatsDisplay === 'function') {
+            loadStats().then(() => {
+                updateStatsDisplay();
+                if (typeof showToast === 'function') {
+                    showToast('Storage temizlendi', 'success');
+                }
+                location.reload();
+            });
+        } else {
+            location.reload();
+        }
+    } catch (error) {
+        console.error('Storage clear error:', error);
+        if (typeof showToast === 'function') {
+            showToast('Hata: ' + error.message, 'error');
+        } else {
+            alert('Hata: ' + error.message);
+        }
+    }
+}
+
+/**
+ * Test points function (TEST function)
+ */
+function testPoints() {
+    const points = prompt('Kaç puan eklemek istersiniz?', '1000');
+    if (points === null) return;
+    
+    const pointsNum = parseInt(points);
+    if (isNaN(pointsNum) || pointsNum < 0) {
+        if (typeof showToast === 'function') {
+            showToast('Geçersiz puan değeri', 'error');
+        } else {
+            alert('Geçersiz puan değeri');
+        }
+        return;
+    }
+    
+    if (typeof totalPoints !== 'undefined') {
+        totalPoints += pointsNum;
+    }
+    
+    if (typeof saveStats === 'function') {
+        saveStats();
+    }
+    if (typeof updateStatsDisplay === 'function') {
+        updateStatsDisplay();
+    }
+    if (typeof showToast === 'function') {
+        showToast(`${pointsNum} puan eklendi!`, 'success');
+    } else {
+        alert(`${pointsNum} puan eklendi!`);
+    }
+}
+
+/**
+ * Nuclear clear - Delete everything (TEST function)
+ */
+function nuclearClear() {
+    if (!confirm('⚠️ DİKKAT: TÜM VERİLER KALICI OLARAK SİLİNECEK!\n\nBu işlem:\n- Tüm puanları\n- Tüm rozetleri\n- Tüm kullanıcı verilerini\n- Tüm localStorage verilerini\n\nSİLECEK!\n\nDevam etmek istiyor musunuz?')) {
+        return;
+    }
+    
+    if (!confirm('Son bir kez onaylıyor musunuz? Bu işlem GERİ ALINAMAZ!')) {
+        return;
+    }
+    
+    try {
+        // Clear everything
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        // Clear IndexedDB
+        if ('indexedDB' in window) {
+            indexedDB.databases().then(databases => {
+                databases.forEach(db => {
+                    indexedDB.deleteDatabase(db.name);
+                });
+            });
+        }
+        
+        // Clear Service Worker caches
+        if ('caches' in window) {
+            caches.keys().then(names => {
+                names.forEach(name => caches.delete(name));
+            });
+        }
+        
+        // Unregister Service Workers
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(registrations => {
+                registrations.forEach(reg => reg.unregister());
+            });
+        }
+        
+        if (typeof showToast === 'function') {
+            showToast('Tüm veriler silindi. Sayfa yenileniyor...', 'success');
+        }
+        
+        setTimeout(() => {
+            location.reload();
+        }, 2000);
+        
+    } catch (error) {
+        console.error('Nuclear clear error:', error);
+        if (typeof showToast === 'function') {
+            showToast('Hata: ' + error.message, 'error');
+        } else {
+            alert('Hata: ' + error.message);
+        }
+    }
+}
+
+// Export functions to window immediately (before initApp is called)
+if (typeof window !== 'undefined') {
+    window.clearStorageData = clearStorageData;
+    window.testPoints = testPoints;
+    window.nuclearClear = nuclearClear;
 }

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔥 Nuclear Clear - Tüm Verileri Sil</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        h1 {
+            color: #ef4444;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+        .warning {
+            background: #fef2f2;
+            border: 2px solid #ef4444;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            color: #991b1b;
+        }
+        .warning-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        .warning-text {
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .warning-list {
+            text-align: left;
+            margin-top: 15px;
+            padding-left: 20px;
+        }
+        .warning-list li {
+            margin: 8px 0;
+        }
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        button {
+            flex: 1;
+            padding: 15px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4);
+        }
+        .btn-cancel {
+            background: #e5e7eb;
+            color: #374151;
+        }
+        .btn-cancel:hover {
+            background: #d1d5db;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+        }
+        .result.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 2px solid #10b981;
+        }
+        .result.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 2px solid #ef4444;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔥 Nuclear Clear</h1>
+        <div class="warning">
+            <div class="warning-icon">⚠️</div>
+            <div class="warning-text">DİKKAT: Bu işlem GERİ ALINAMAZ!</div>
+            <p style="margin-top: 10px;">Aşağıdaki tüm veriler kalıcı olarak silinecek:</p>
+            <ul class="warning-list">
+                <li>✅ Tüm puanlar ve istatistikler</li>
+                <li>✅ Tüm rozetler ve başarımlar</li>
+                <li>✅ Kullanıcı verileri</li>
+                <li>✅ Oyun geçmişi</li>
+                <li>✅ Favori kelimeler</li>
+                <li>✅ Tüm localStorage verileri</li>
+            </ul>
+        </div>
+        
+        <div class="button-group">
+            <button class="btn-cancel" onclick="window.close()">İptal</button>
+            <button class="btn-danger" onclick="nuclearClear()">🔥 TÜMÜNÜ SİL</button>
+        </div>
+        
+        <div id="result" class="result"></div>
+    </div>
+
+    <script>
+        function nuclearClear() {
+            if (!confirm('Son bir kez onaylıyor musunuz? Bu işlem GERİ ALINAMAZ!')) {
+                return;
+            }
+            
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result';
+            resultDiv.textContent = '⏳ Siliniyor...';
+            
+            try {
+                // Tüm localStorage'ı temizle
+                localStorage.clear();
+                
+                // Tüm sessionStorage'ı temizle
+                sessionStorage.clear();
+                
+                // IndexedDB'yi temizle (eğer varsa)
+                if ('indexedDB' in window) {
+                    indexedDB.databases().then(databases => {
+                        databases.forEach(db => {
+                            indexedDB.deleteDatabase(db.name);
+                        });
+                    });
+                }
+                
+                // Service Worker cache'lerini temizle
+                if ('caches' in window) {
+                    caches.keys().then(names => {
+                        names.forEach(name => caches.delete(name));
+                    });
+                }
+                
+                // Service Worker'ları kaldır
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.getRegistrations().then(registrations => {
+                        registrations.forEach(reg => reg.unregister());
+                    });
+                }
+                
+                resultDiv.className = 'result success';
+                resultDiv.innerHTML = '✅ <strong>Başarılı!</strong><br>Tüm veriler silindi. Sayfa 3 saniye içinde kapanacak...';
+                
+                setTimeout(() => {
+                    window.close();
+                    // Ana sayfayı yenile
+                    if (window.opener) {
+                        window.opener.location.reload();
+                    }
+                }, 3000);
+                
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ <strong>Hata:</strong><br>${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>
+
