@@ -1106,6 +1106,45 @@
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     
+    <!-- Console Override - Must be before Firebase SDK to suppress OAuth warnings -->
+    <script>
+        // Suppress Firebase OAuth domain warnings (these are harmless for anonymous auth)
+        (function() {
+            const isOAuthWarning = (message) => {
+                return message.includes('current domain is not authorized for OAuth') ||
+                       message.includes('OAuth redirect domains') ||
+                       message.includes('signInWithPopup') ||
+                       message.includes('signInWithRedirect') ||
+                       message.includes('linkWithPopup') ||
+                       message.includes('linkWithRedirect') ||
+                       (message.includes('127.0.0.1') && message.includes('OAuth'));
+            };
+            
+            // Override console methods BEFORE Firebase SDK loads
+            const originalConsoleInfo = console.info;
+            const originalConsoleLog = console.log;
+            const originalConsoleWarn = console.warn;
+            
+            console.info = function(...args) {
+                const message = args.join(' ');
+                if (isOAuthWarning(message)) return;
+                originalConsoleInfo.apply(console, args);
+            };
+            
+            console.log = function(...args) {
+                const message = args.join(' ');
+                if (isOAuthWarning(message)) return;
+                originalConsoleLog.apply(console, args);
+            };
+            
+            console.warn = function(...args) {
+                const message = args.join(' ');
+                if (isOAuthWarning(message)) return;
+                originalConsoleWarn.apply(console, args);
+            };
+        })();
+    </script>
+    
     <!-- Firebase SDK (CDN) -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>

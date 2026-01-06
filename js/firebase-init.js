@@ -63,6 +63,7 @@ async function initFirebase() {
         
         // Suppress ERR_BLOCKED_BY_CLIENT errors from Firestore WebChannel (caused by browser extensions)
         // These are non-critical connection termination errors
+        // Also suppress Firebase OAuth domain warnings
         if (typeof window.addEventListener === 'function') {
             // Global error handler
             window.addEventListener('error', (event) => {
@@ -70,6 +71,8 @@ async function initFirebase() {
                 if (event.message && (
                     event.message.includes('ERR_BLOCKED_BY_CLIENT') ||
                     event.message.includes('webchannel_connection') ||
+                    event.message.includes('current domain is not authorized for OAuth') ||
+                    event.message.includes('OAuth redirect domains') ||
                     (event.filename && event.filename.includes('webchannel_connection'))
                 )) {
                     // Suppress these errors - they're caused by browser extensions blocking Firestore connections
