@@ -1111,13 +1111,15 @@
         // Suppress Firebase OAuth domain warnings (these are harmless for anonymous auth)
         (function() {
             const isOAuthWarning = (message) => {
+                if (!message || typeof message !== 'string') return false;
                 return message.includes('current domain is not authorized for OAuth') ||
                        message.includes('OAuth redirect domains') ||
                        message.includes('signInWithPopup') ||
                        message.includes('signInWithRedirect') ||
                        message.includes('linkWithPopup') ||
                        message.includes('linkWithRedirect') ||
-                       (message.includes('127.0.0.1') && message.includes('OAuth'));
+                       (message.includes('127.0.0.1') && (message.includes('OAuth') || message.includes('authorized'))) ||
+                       (message.includes('iframe.js') && message.includes('OAuth'));
             };
             
             // Override console methods BEFORE Firebase SDK loads
@@ -1126,22 +1128,55 @@
             const originalConsoleWarn = console.warn;
             
             console.info = function(...args) {
-                const message = args.join(' ');
-                if (isOAuthWarning(message)) return;
+                try {
+                    const message = args.map(arg => {
+                        if (typeof arg === 'string') return arg;
+                        if (arg && typeof arg === 'object') {
+                            try { return JSON.stringify(arg); } catch(e) { return String(arg); }
+                        }
+                        return String(arg);
+                    }).join(' ');
+                    if (isOAuthWarning(message)) return;
+                } catch(e) {}
                 originalConsoleInfo.apply(console, args);
             };
             
             console.log = function(...args) {
-                const message = args.join(' ');
-                if (isOAuthWarning(message)) return;
+                try {
+                    const message = args.map(arg => {
+                        if (typeof arg === 'string') return arg;
+                        if (arg && typeof arg === 'object') {
+                            try { return JSON.stringify(arg); } catch(e) { return String(arg); }
+                        }
+                        return String(arg);
+                    }).join(' ');
+                    if (isOAuthWarning(message)) return;
+                } catch(e) {}
                 originalConsoleLog.apply(console, args);
             };
             
             console.warn = function(...args) {
-                const message = args.join(' ');
-                if (isOAuthWarning(message)) return;
+                try {
+                    const message = args.map(arg => {
+                        if (typeof arg === 'string') return arg;
+                        if (arg && typeof arg === 'object') {
+                            try { return JSON.stringify(arg); } catch(e) { return String(arg); }
+                        }
+                        return String(arg);
+                    }).join(' ');
+                    if (isOAuthWarning(message)) return;
+                } catch(e) {}
                 originalConsoleWarn.apply(console, args);
             };
+            
+            // Also catch errors from iframe
+            window.addEventListener('error', function(event) {
+                if (event.message && isOAuthWarning(event.message)) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return false;
+                }
+            }, true);
         })();
     </script>
     

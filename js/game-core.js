@@ -450,9 +450,12 @@ async function loadStats(skipStreakCheck = false) {
     } else {
         wordStats = loadFromStorage('hasene_word_stats', {});
         const wordStatsCount = Object.keys(wordStats).length;
-        console.log('ℹ️ Word stats localStorage\'dan yüklendi:', wordStatsCount, 'kelime');
-        if (firebaseUserStats && !firebaseUserStats.word_stats) {
-            console.warn('⚠️ Firebase\'de word_stats verisi yok, localStorage kullanılıyor');
+        if (wordStatsCount > 0) {
+            console.log('ℹ️ Word stats localStorage\'dan yüklendi:', wordStatsCount, 'kelime');
+        }
+        // Only log warning if we have word stats in localStorage but not in Firebase (for debugging)
+        if (firebaseUserStats && !firebaseUserStats.word_stats && wordStatsCount > 0) {
+            console.log('ℹ️ Firebase\'de word_stats verisi yok, localStorage kullanılıyor');
         }
     }
     
