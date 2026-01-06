@@ -1204,10 +1204,20 @@ function setupEventListeners() {
     });
     
     // Game cards
-    document.querySelectorAll('.game-card').forEach(card => {
+    const gameCards = document.querySelectorAll('.game-card');
+    console.log(`🎮 Found ${gameCards.length} game card(s)`);
+    gameCards.forEach(card => {
+        const gameMode = card.dataset.game;
+        console.log(`  - Card: ${gameMode || 'NO GAME MODE'}`);
         card.addEventListener('click', () => {
-            const gameMode = card.dataset.game;
-            startGame(gameMode);
+            const clickedMode = card.dataset.game;
+            console.log(`🖱️ Game card clicked: ${clickedMode}`);
+            if (clickedMode) {
+                startGame(clickedMode);
+            } else {
+                console.error('❌ Game mode not found in card dataset');
+                showToast('Oyun modu bulunamadı', 'error');
+            }
         });
     });
     
@@ -1367,15 +1377,37 @@ async function startGame(gameMode) {
             await startKarmaGame();
             break;
         case 'hiz-modu':
-            await startHizModuGame();
+            console.log('⏱️ Hız Modu başlatılıyor...');
+            if (typeof startHizModuGame === 'function') {
+                await startHizModuGame();
+            } else {
+                console.error('❌ startHizModuGame fonksiyonu bulunamadı!');
+                showToast('Hız Modu henüz hazır değil', 'error');
+                goToMainMenu();
+            }
             break;
         case 'eslestirme':
-            await startEslestirmeGame();
+            console.log('🃏 Eşleştirme Modu başlatılıyor...');
+            if (typeof startEslestirmeGame === 'function') {
+                await startEslestirmeGame();
+            } else {
+                console.error('❌ startEslestirmeGame fonksiyonu bulunamadı!');
+                showToast('Eşleştirme Modu henüz hazır değil', 'error');
+                goToMainMenu();
+            }
             break;
         case 'yazim-modu':
-            await startYazimModuGame();
+            console.log('⌨️ Yazım Modu başlatılıyor...');
+            if (typeof startYazimModuGame === 'function') {
+                await startYazimModuGame();
+            } else {
+                console.error('❌ startYazimModuGame fonksiyonu bulunamadı!');
+                showToast('Yazım Modu henüz hazır değil', 'error');
+                goToMainMenu();
+            }
             break;
         default:
+            console.warn(`⚠️ Bilinmeyen oyun modu: ${gameMode}`);
             showToast('Bilinmeyen oyun modu', 'error');
             goToMainMenu();
     }
