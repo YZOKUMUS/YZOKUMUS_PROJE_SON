@@ -1177,6 +1177,51 @@
                     return false;
                 }
             }, true);
+            
+            // Intercept all console calls from iframes (more aggressive approach)
+            const originalConsoleMethods = {
+                info: console.info,
+                log: console.log,
+                warn: console.warn,
+                error: console.error
+            };
+            
+            // Override console methods with better iframe detection
+            ['info', 'log', 'warn', 'error'].forEach(method => {
+                const original = console[method];
+                console[method] = function(...args) {
+                    try {
+                        const stack = new Error().stack || '';
+                        // Check if call is from iframe.js
+                        if (stack.includes('iframe.js')) {
+                            const message = args.map(arg => {
+                                if (typeof arg === 'string') return arg;
+                                if (arg && typeof arg === 'object') {
+                                    try { return JSON.stringify(arg); } catch(e) { return String(arg); }
+                                }
+                                return String(arg);
+                            }).join(' ');
+                            if (isOAuthWarning(message)) {
+                                return; // Suppress OAuth warnings from iframe.js
+                            }
+                        }
+                        // Check message content regardless of source
+                        const message = args.map(arg => {
+                            if (typeof arg === 'string') return arg;
+                            if (arg && typeof arg === 'object') {
+                                try { return JSON.stringify(arg); } catch(e) { return String(arg); }
+                            }
+                            return String(arg);
+                        }).join(' ');
+                        if (isOAuthWarning(message)) {
+                            return; // Suppress OAuth warnings
+                        }
+                    } catch(e) {
+                        // If anything fails, just call original
+                    }
+                    original.apply(console, args);
+                };
+            });
         })();
     </script>
     
