@@ -153,6 +153,9 @@ function exportPronunciationFixes() {
                 await writable.write(dataStr);
                 await writable.close();
                 
+                // Clean up URL after successful save
+                URL.revokeObjectURL(url);
+                
                 showToast(`${pronunciationFixes.length} düzeltme kaydedildi!`, 'success');
                 console.log(`📥 ${pronunciationFixes.length} düzeltme kaydedildi: pronunciation-fixes.json`);
             } catch (err) {
@@ -175,18 +178,18 @@ function exportPronunciationFixes() {
         link.style.display = 'none';
         document.body.appendChild(link);
         link.click();
-        document.body.removeChild(link);
+        
+        // Clean up after click
+        setTimeout(() => {
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }, 100);
         
         // Note: Browser may still ask for location if settings require it
         showToast(`${pronunciationFixes.length} düzeltme indirildi! Downloads klasörüne kaydedildi.`, 'success', 4000);
         console.log(`📥 ${pronunciationFixes.length} düzeltme dışa aktarıldı: pronunciation-fixes.json`);
         console.log('💡 İpucu: İndirilen dosyayı proje klasörüne (root) kopyalayın');
     }
-    
-    // Clean up URL after a delay
-    setTimeout(() => {
-        URL.revokeObjectURL(url);
-    }, 1000);
 }
 
 /**
@@ -297,13 +300,20 @@ async function applyPronunciationFixesToData() {
                     console.log(`   ✅ ${name} içinde bulundu`);
                     console.log(`   Mevcut okunuş: "${item.okunus}"`);
                     
+                    // Okunuş eşleşmesi kontrolü - hem oldOkunus hem de mevcut okunuşu kontrol et
                     if (item.okunus === fix.oldOkunus) {
                         item.okunus = fix.newOkunus;
                         appliedCount++;
                         found = true;
                         console.log(`   ✅ Düzeltme uygulandı: "${fix.oldOkunus}" → "${fix.newOkunus}"`);
+                    } else if (item.okunus === fix.newOkunus) {
+                        // Zaten yeni okunuş uygulanmış
+                        console.log(`   ℹ️ Düzeltme zaten uygulanmış: "${item.okunus}"`);
+                        found = true; // Bulundu ama zaten uygulanmış
                     } else {
                         console.log(`   ⚠️ Okunuş eşleşmedi: "${item.okunus}" ≠ "${fix.oldOkunus}"`);
+                        // Okunuş eşleşmese bile kelime bulundu
+                        found = true;
                     }
                 }
             }
