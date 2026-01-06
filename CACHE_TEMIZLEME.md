@@ -24,3 +24,5 @@
 
 Tarayıcı konsolunda (F12 → Console) hata mesajlarını kontrol edin ve bana bildirin.
 
+
+

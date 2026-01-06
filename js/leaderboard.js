@@ -50,26 +50,57 @@ function getWeekStartString() {
 
 /**
  * Get current weekly XP
- * Loads from localStorage (primary) or Firebase if available
+ * Loads from localStorage (primary)
  * @returns {number} Current weekly XP
  */
 function getCurrentWeeklyXP() {
     const weekStart = getWeekStartString();
     const key = `hasene_weekly_xp_${weekStart}`;
     
-    // First check localStorage (fastest)
+    // Check localStorage
     const localXP = localStorage.getItem(key);
     if (localXP !== null && localXP !== '') {
         const xp = parseInt(localXP || '0');
-        console.log('📊 getCurrentWeeklyXP from localStorage:', xp, '(key:', key + ')');
         return xp;
     }
     
-    // If not in localStorage, return 0 (Firebase will sync on next update)
-    // This ensures reset works correctly - after reset, localStorage is cleared
-    // and Firebase data should also be deleted, so we return 0
-    console.log('📊 getCurrentWeeklyXP: 0 (localStorage empty for key:', key + ')');
+    // If not in localStorage, return 0
     return 0;
+}
+
+/**
+ * Load weekly XP from Firebase and save to localStorage
+ * @returns {Promise<void>}
+ */
+async function loadWeeklyXPFromFirebase() {
+    if (!window.FIREBASE_ENABLED || !window.firestore) {
+        return;
+    }
+    
+    try {
+        const savedUsername = localStorage.getItem('hasene_username') || '';
+        const defaultUsernames = ['Kullanıcı', 'Misafir', 'Anonim Kullanıcı', ''];
+        const hasRealUsername = savedUsername && savedUsername.trim() !== '' && !defaultUsernames.includes(savedUsername.trim());
+        
+        if (!hasRealUsername) {
+            return;
+        }
+        
+        const weekStart = getWeekStartString();
+        const key = `hasene_weekly_xp_${weekStart}`;
+        const docId = `${savedUsername}_${weekStart}`;
+        
+        console.log('🔍 loadWeeklyXPFromFirebase - Attempting to load from Firebase with docId:', docId);
+        const firebaseData = await window.firestoreGet('weekly_leaderboard', docId);
+        if (firebaseData && firebaseData.weekly_xp !== undefined) {
+            const xp = parseInt(firebaseData.weekly_xp || '0');
+            // Save to localStorage
+            localStorage.setItem(key, xp.toString());
+            console.log('✅ Weekly XP loaded from Firebase:', xp, '(key:', key + ')');
+        }
+    } catch (error) {
+        console.warn('⚠️ Firebase weekly XP load failed:', error);
+    }
 }
 
 /**
@@ -518,6 +549,7 @@ if (typeof window !== 'undefined') {
     window.calculateLeague = calculateLeague;
     window.getUserLeague = getUserLeague;
     window.loadLeaderboard = loadLeaderboard;
+    window.loadWeeklyXPFromFirebase = loadWeeklyXPFromFirebase;
     window.getUserPosition = getUserPosition;
     window.showLeaderboardModal = showLeaderboardModal;
     window.switchLeaderboardTab = switchLeaderboardTab;
