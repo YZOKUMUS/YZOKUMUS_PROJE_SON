@@ -179,13 +179,47 @@ loadPronunciationFixes();
  * Apply pronunciation fixes to data arrays (runtime)
  * This function applies fixes to loaded data in memory
  */
-function applyPronunciationFixesToData() {
+async function applyPronunciationFixesToData() {
     if (pronunciationFixes.length === 0) {
         showToast('Henüz düzeltme yok', 'info');
         return;
     }
     
+    console.log(`🔨 ${pronunciationFixes.length} düzeltme uygulanıyor...`);
+    
+    // Önce tüm data'ları yükle (eğer yüklenmemişse)
+    if (typeof window.preloadAllData === 'function') {
+        console.log('📦 Tüm data'lar yükleniyor...');
+        await window.preloadAllData();
+        console.log('✅ Data'lar yüklendi');
+    } else {
+        // Fallback: Sadece gerekli data'ları yükle
+        const loadFunctions = [
+            { name: 'ucHarfliKelimeler', fn: window.loadUcHarfliKelimelerData },
+            { name: 'uzatmaMed', fn: window.loadUzatmaMedData },
+            { name: 'kelime', fn: window.loadKelimeData },
+            { name: 'harf', fn: window.loadHarfData },
+            { name: 'ustn', fn: window.loadUstnData },
+            { name: 'esre', fn: window.loadEsreData },
+            { name: 'otre', fn: window.loadOtreData },
+            { name: 'sedde', fn: window.loadSeddeData },
+            { name: 'cezm', fn: window.loadCezmData },
+            { name: 'tenvin', fn: window.loadTenvinData }
+        ];
+        
+        for (const { name, fn } of loadFunctions) {
+            if (typeof fn === 'function') {
+                try {
+                    await fn();
+                } catch (e) {
+                    console.warn(`⚠️ ${name} yüklenemedi:`, e);
+                }
+            }
+        }
+    }
+    
     let appliedCount = 0;
+    let notFoundCount = 0;
     const dataArrays = [
         { name: 'kelimeData', data: window.kelimeData || [] },
         { name: 'ucHarfliKelimelerData', data: window.ucHarfliKelimelerData || [] },
@@ -199,28 +233,55 @@ function applyPronunciationFixesToData() {
         { name: 'tenvinData', data: window.tenvinData || [] }
     ];
     
-    pronunciationFixes.forEach(fix => {
+    // Debug: Data array'lerinin durumunu göster
+    console.log('📊 Data array durumu:');
+    dataArrays.forEach(({ name, data }) => {
+        console.log(`  ${name}: ${Array.isArray(data) ? data.length : 'undefined'} öğe`);
+    });
+    
+    pronunciationFixes.forEach((fix, fixIndex) => {
+        let found = false;
+        console.log(`\n🔍 Düzeltme ${fixIndex + 1}: "${fix.kelime}" (${fix.submode})`);
+        console.log(`   Eski: "${fix.oldOkunus}" → Yeni: "${fix.newOkunus}"`);
+        
         dataArrays.forEach(({ name, data }) => {
-            if (Array.isArray(data)) {
-                const found = data.find(item => {
+            if (Array.isArray(data) && data.length > 0) {
+                const item = data.find(item => {
                     const itemKelime = item.kelime || item.harf || '';
                     return itemKelime === fix.kelime;
                 });
                 
-                if (found && found.okunus === fix.oldOkunus) {
-                    found.okunus = fix.newOkunus;
-                    appliedCount++;
-                    console.log(`✅ ${name}: "${fix.kelime}" düzeltmesi uygulandı: "${fix.oldOkunus}" → "${fix.newOkunus}"`);
+                if (item) {
+                    console.log(`   ✅ ${name} içinde bulundu`);
+                    console.log(`   Mevcut okunuş: "${item.okunus}"`);
+                    
+                    if (item.okunus === fix.oldOkunus) {
+                        item.okunus = fix.newOkunus;
+                        appliedCount++;
+                        found = true;
+                        console.log(`   ✅ Düzeltme uygulandı: "${fix.oldOkunus}" → "${fix.newOkunus}"`);
+                    } else {
+                        console.log(`   ⚠️ Okunuş eşleşmedi: "${item.okunus}" ≠ "${fix.oldOkunus}"`);
+                    }
                 }
             }
         });
+        
+        if (!found) {
+            notFoundCount++;
+            console.log(`   ❌ Kelime hiçbir data array'inde bulunamadı`);
+        }
     });
     
     if (appliedCount > 0) {
-        showToast(`${appliedCount} düzeltme uygulandı!`, 'success');
-        console.log(`✅ Toplam ${appliedCount} düzeltme uygulandı`);
+        showToast(`${appliedCount} düzeltme uygulandı!${notFoundCount > 0 ? ` (${notFoundCount} bulunamadı)` : ''}`, 'success');
+        console.log(`\n✅ Toplam ${appliedCount} düzeltme uygulandı`);
+        if (notFoundCount > 0) {
+            console.log(`⚠️ ${notFoundCount} düzeltme uygulanamadı (kelimeler bulunamadı)`);
+        }
     } else {
-        showToast('Hiçbir düzeltme uygulanamadı (kelimeler bulunamadı)', 'warning');
+        showToast(`Hiçbir düzeltme uygulanamadı${notFoundCount > 0 ? ` (${notFoundCount} kelime bulunamadı)` : ''}`, 'warning');
+        console.log(`\n❌ Hiçbir düzeltme uygulanamadı`);
     }
 }
 
