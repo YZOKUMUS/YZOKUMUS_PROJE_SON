@@ -137,19 +137,56 @@ function exportPronunciationFixes() {
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(dataBlob);
     
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'pronunciation-fixes.json';
-    link.style.display = 'none'; // Hide the link
-    document.body.appendChild(link);
-    link.click(); // Trigger download
-    document.body.removeChild(link); // Clean up
+    // Try to use File System Access API if available (Chrome/Edge)
+    if ('showSaveFilePicker' in window) {
+        (async () => {
+            try {
+                const fileHandle = await window.showSaveFilePicker({
+                    suggestedName: 'pronunciation-fixes.json',
+                    types: [{
+                        description: 'JSON dosyası',
+                        accept: { 'application/json': ['.json'] }
+                    }]
+                });
+                
+                const writable = await fileHandle.createWritable();
+                await writable.write(dataStr);
+                await writable.close();
+                
+                showToast(`${pronunciationFixes.length} düzeltme kaydedildi!`, 'success');
+                console.log(`📥 ${pronunciationFixes.length} düzeltme kaydedildi: pronunciation-fixes.json`);
+            } catch (err) {
+                // User cancelled or error occurred, fallback to download
+                if (err.name !== 'AbortError') {
+                    console.warn('File System Access API hatası, fallback kullanılıyor:', err);
+                }
+                downloadFile(url);
+            }
+        })();
+    } else {
+        // Fallback: Traditional download
+        downloadFile(url);
+    }
     
-    URL.revokeObjectURL(url);
+    function downloadFile(url) {
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'pronunciation-fixes.json';
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Note: Browser may still ask for location if settings require it
+        showToast(`${pronunciationFixes.length} düzeltme indirildi! Downloads klasörüne kaydedildi.`, 'success', 4000);
+        console.log(`📥 ${pronunciationFixes.length} düzeltme dışa aktarıldı: pronunciation-fixes.json`);
+        console.log('💡 İpucu: İndirilen dosyayı proje klasörüne (root) kopyalayın');
+    }
     
-    showToast(`${pronunciationFixes.length} düzeltme indirildi! Dosya proje klasörüne eklenebilir.`, 'success', 4000);
-    console.log(`📥 ${pronunciationFixes.length} düzeltme dışa aktarıldı: pronunciation-fixes.json`);
-    console.log('💡 İpucu: İndirilen dosyayı proje klasörüne (root) kopyalayın');
+    // Clean up URL after a delay
+    setTimeout(() => {
+        URL.revokeObjectURL(url);
+    }, 1000);
 }
 
 /**
