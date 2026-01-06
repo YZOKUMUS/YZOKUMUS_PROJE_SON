@@ -96,21 +96,49 @@ async function initFirebase() {
                 originalConsoleError.apply(console, args);
             };
             
+            // Helper function to check if message is OAuth warning
+            const isOAuthWarning = (message) => {
+                return message.includes('current domain is not authorized for OAuth') ||
+                       message.includes('OAuth redirect domains') ||
+                       message.includes('signInWithPopup') ||
+                       message.includes('signInWithRedirect') ||
+                       message.includes('linkWithPopup') ||
+                       message.includes('linkWithRedirect') ||
+                       message.includes('127.0.0.1') && message.includes('OAuth');
+            };
+            
             // Console.info override to suppress Firebase OAuth domain warnings
             const originalConsoleInfo = console.info;
             console.info = function(...args) {
-                // Check if this is a Firebase OAuth domain warning
                 const message = args.join(' ');
-                if (message.includes('current domain is not authorized for OAuth') ||
-                    message.includes('OAuth redirect domains') ||
-                    message.includes('signInWithPopup') ||
-                    message.includes('signInWithRedirect')) {
+                if (isOAuthWarning(message)) {
                     // Suppress OAuth domain warnings - these are expected in development
                     // OAuth is not used in this app, so these warnings are harmless
                     return;
                 }
-                // Call original console.info for other messages
                 originalConsoleInfo.apply(console, args);
+            };
+            
+            // Console.log override to suppress Firebase OAuth domain warnings
+            const originalConsoleLog = console.log;
+            console.log = function(...args) {
+                const message = args.join(' ');
+                if (isOAuthWarning(message)) {
+                    // Suppress OAuth domain warnings
+                    return;
+                }
+                originalConsoleLog.apply(console, args);
+            };
+            
+            // Console.warn override to suppress Firebase OAuth domain warnings
+            const originalConsoleWarn = console.warn;
+            console.warn = function(...args) {
+                const message = args.join(' ');
+                if (isOAuthWarning(message)) {
+                    // Suppress OAuth domain warnings
+                    return;
+                }
+                originalConsoleWarn.apply(console, args);
             };
         }
         
