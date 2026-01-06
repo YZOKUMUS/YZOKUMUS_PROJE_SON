@@ -184,31 +184,6 @@
                 <h3>Karma Oyun</h3>
                 <p>Tüm modlar bir arada! Eşleştirme dahil</p>
             </div>
-
-            <!-- TEST MODLARI -->
-            <div class="game-card" data-game="hiz-modu" style="border: 2px dashed #ff6b6b;">
-                <div class="game-icon">
-                    <span>⏱️</span>
-                </div>
-                <h3>Hız Modu (TEST)</h3>
-                <p>Zamanla yarış! 10 saniyede cevap ver</p>
-            </div>
-
-            <div class="game-card" data-game="eslestirme" style="border: 2px dashed #4ecdc4;">
-                <div class="game-icon">
-                    <span>🃏</span>
-                </div>
-                <h3>Eşleştirme (TEST)</h3>
-                <p>Kartları eşleştir, hafızanı test et</p>
-            </div>
-
-            <div class="game-card" data-game="yazim-modu" style="border: 2px dashed #95e1d3;">
-                <div class="game-icon">
-                    <span>⌨️</span>
-                </div>
-                <h3>Yazım Modu (TEST)</h3>
-                <p>Türkçe karşılığını yaz</p>
-            </div>
         </div>
     </div>
 
@@ -444,100 +419,6 @@
         <div class="game-content">
             <div id="karma-question-container" class="question-card glass-card">
                 <!-- Dynamic content will be loaded here -->
-            </div>
-        </div>
-    </div>
-
-    <!-- Hız Modu (Time Attack) Screen - TEST -->
-    <div id="hiz-modu-screen" class="game-screen hidden">
-        <div class="game-header">
-            <button class="back-btn" onclick="stopAllAudio(); handleGameBackButton()">← Geri</button>
-            <div class="game-progress">
-                <span id="hiz-question-number">1</span> / <span id="hiz-total-questions">10</span>
-            </div>
-            <div class="timer-display" style="font-size: 24px; font-weight: bold; color: #ff6b6b;">
-                ⏱️ <span id="hiz-timer">10</span>s
-            </div>
-        </div>
-
-        <div class="game-content">
-            <div class="question-card glass-card">
-                <div class="word-actions">
-                    <button class="audio-btn" id="hiz-audio-btn" title="Dinle">
-                        <img src="ASSETS/badges/hoparlor.png" alt="Dinle" class="audio-icon">
-                    </button>
-                </div>
-                <div class="arabic-word" id="hiz-arabic">بِسْمِ</div>
-                <div class="word-info" id="hiz-info"></div>
-            </div>
-
-            <div class="answer-options" id="hiz-options">
-                <!-- Options will be generated dynamically -->
-            </div>
-
-            <div class="session-score">
-                <span>Oturum Puanı: </span>
-                <span id="hiz-session-score">0</span> Hasene
-                <span style="margin-left: 20px;">🔥 <span id="hiz-combo">0</span></span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Eşleştirme Modu Screen - TEST -->
-    <div id="eslestirme-screen" class="game-screen hidden">
-        <div class="game-header">
-            <button class="back-btn" onclick="stopAllAudio(); handleGameBackButton()">← Geri</button>
-            <div class="game-progress">
-                <span id="eslestirme-pairs-found">0</span> / <span id="eslestirme-total-pairs">6</span> Eşleşme
-            </div>
-            <div class="combo-display">⏱️ <span id="eslestirme-time">0</span>s</div>
-        </div>
-
-        <div class="game-content">
-            <div class="matching-game-container">
-                <div id="eslestirme-cards-grid" class="cards-grid">
-                    <!-- Cards will be generated dynamically -->
-                </div>
-            </div>
-
-            <div class="session-score">
-                <span>Puan: </span>
-                <span id="eslestirme-session-score">0</span> Hasene
-            </div>
-        </div>
-    </div>
-
-    <!-- Yazım Modu Screen - TEST -->
-    <div id="yazim-modu-screen" class="game-screen hidden">
-        <div class="game-header">
-            <button class="back-btn" onclick="stopAllAudio(); handleGameBackButton()">← Geri</button>
-            <div class="game-progress">
-                <span id="yazim-question-number">1</span> / <span id="yazim-total-questions">10</span>
-            </div>
-            <div class="combo-display">🔥 <span id="yazim-combo">0</span></div>
-        </div>
-
-        <div class="game-content">
-            <div class="question-card glass-card">
-                <div class="word-actions">
-                    <button class="audio-btn" id="yazim-audio-btn" title="Dinle">
-                        <img src="ASSETS/badges/hoparlor.png" alt="Dinle" class="audio-icon">
-                    </button>
-                </div>
-                <div class="arabic-word" id="yazim-arabic">بِسْمِ</div>
-                <div class="word-info" id="yazim-info"></div>
-                <div class="writing-instruction" style="margin-top: 20px; font-size: 16px; color: #666;">
-                    Türkçe karşılığını yazın:
-                </div>
-                <input type="text" id="yazim-input" class="writing-input" placeholder="Türkçe anlamını yazın..." autocomplete="off" style="margin-top: 15px; padding: 15px; font-size: 18px; width: 100%; border: 2px solid #4ecdc4; border-radius: 10px; text-align: center;">
-                <button id="yazim-submit-btn" class="submit-btn" onclick="checkYazimModuAnswer()" style="margin-top: 15px; padding: 12px 30px; font-size: 16px; background: #4ecdc4; color: white; border: none; border-radius: 8px; cursor: pointer;">
-                    Gönder ✓
-                </button>
-            </div>
-
-            <div class="session-score">
-                <span>Oturum Puanı: </span>
-                <span id="yazim-session-score">0</span> Hasene
             </div>
         </div>
     </div>
