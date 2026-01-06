@@ -175,13 +175,64 @@ document.addEventListener('keypress', function(e) {
 // Sayfa yüklendiğinde düzeltmeleri yükle
 loadPronunciationFixes();
 
+/**
+ * Apply pronunciation fixes to data arrays (runtime)
+ * This function applies fixes to loaded data in memory
+ */
+function applyPronunciationFixesToData() {
+    if (pronunciationFixes.length === 0) {
+        showToast('Henüz düzeltme yok', 'info');
+        return;
+    }
+    
+    let appliedCount = 0;
+    const dataArrays = [
+        { name: 'kelimeData', data: window.kelimeData || [] },
+        { name: 'ucHarfliKelimelerData', data: window.ucHarfliKelimelerData || [] },
+        { name: 'uzatmaMedData', data: window.uzatmaMedData || [] },
+        { name: 'harfData', data: window.harfData || [] },
+        { name: 'ustnData', data: window.ustnData || [] },
+        { name: 'esreData', data: window.esreData || [] },
+        { name: 'otreData', data: window.otreData || [] },
+        { name: 'seddeData', data: window.seddeData || [] },
+        { name: 'cezmData', data: window.cezmData || [] },
+        { name: 'tenvinData', data: window.tenvinData || [] }
+    ];
+    
+    pronunciationFixes.forEach(fix => {
+        dataArrays.forEach(({ name, data }) => {
+            if (Array.isArray(data)) {
+                const found = data.find(item => {
+                    const itemKelime = item.kelime || item.harf || '';
+                    return itemKelime === fix.kelime;
+                });
+                
+                if (found && found.okunus === fix.oldOkunus) {
+                    found.okunus = fix.newOkunus;
+                    appliedCount++;
+                    console.log(`✅ ${name}: "${fix.kelime}" düzeltmesi uygulandı: "${fix.oldOkunus}" → "${fix.newOkunus}"`);
+                }
+            }
+        });
+    });
+    
+    if (appliedCount > 0) {
+        showToast(`${appliedCount} düzeltme uygulandı!`, 'success');
+        console.log(`✅ Toplam ${appliedCount} düzeltme uygulandı`);
+    } else {
+        showToast('Hiçbir düzeltme uygulanamadı (kelimeler bulunamadı)', 'warning');
+    }
+}
+
 // Console'dan erişim için
 window.exportPronunciationFixes = exportPronunciationFixes;
 window.clearPronunciationFixes = clearPronunciationFixes;
 window.showFixPronunciationModal = showFixPronunciationModal;
 window.savePronunciationFix = savePronunciationFix;
+window.applyPronunciationFixesToData = applyPronunciationFixesToData;
 
 console.log('🔧 Okunuş Düzeltme Sistemi yüklendi');
 console.log('📝 Düzeltmeleri indirmek için: exportPronunciationFixes()');
 console.log('🗑️ Düzeltmeleri silmek için: clearPronunciationFixes()');
+console.log('🔨 Düzeltmeleri uygulamak için: applyPronunciationFixesToData()');
 
