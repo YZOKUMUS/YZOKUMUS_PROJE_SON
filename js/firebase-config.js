@@ -8,6 +8,16 @@
  * 3. Firestore Database → Create database → Start in test mode (sonra rules güncellenecek)
  * 4. Project Settings → General → Your apps → Web (</>) → Config bilgilerini kopyalayın
  * 5. Aşağıdaki firebaseConfig objesini doldurun
+ * 
+ * OAuth UYARISI ÇÖZÜMÜ (isteğe bağlı):
+ * Konsolda "current domain is not authorized for OAuth" uyarısını kaldırmak için:
+ * 1. Firebase Console → Authentication → Settings → Authorized domains
+ * 2. "Add domain" butonuna tıklayın
+ * 3. "127.0.0.1" ekleyin (localhost için)
+ * 4. Kaydedin
+ * 
+ * NOT: Bu uyarı zararsızdır ve anonymous authentication için gerekli değildir.
+ * Sadece popup/redirect tabanlı OAuth için gereklidir.
  */
 
 // ========================================
