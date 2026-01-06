@@ -582,8 +582,17 @@ async function applyFixesFromArray(fixes) {
  */
 async function exportUpdatedDataFiles(updatedFiles) {
     let downloadedCount = 0;
+    const downloadedFiles = new Set(); // Aynı dosyanın birden fazla kez indirilmesini önle
+    
+    console.log(`📦 ${Object.keys(updatedFiles).length} dosya indirilecek:`, Object.keys(updatedFiles));
     
     for (const [fileName, fileData] of Object.entries(updatedFiles)) {
+        // Aynı dosya daha önce indirildiyse atla
+        if (downloadedFiles.has(fileName)) {
+            console.log(`⚠️ ${fileName} zaten indirildi, atlanıyor`);
+            continue;
+        }
+        
         try {
             let jsonData;
             
@@ -608,13 +617,16 @@ async function exportUpdatedDataFiles(updatedFiles) {
             document.body.appendChild(link);
             link.click();
             
+            // İndirilen dosyaları takip et
+            downloadedFiles.add(fileName);
+            
             setTimeout(() => {
                 document.body.removeChild(link);
                 URL.revokeObjectURL(url);
             }, 100);
             
             downloadedCount++;
-            console.log(`📥 ${fileName} indirildi`);
+            console.log(`📥 ${fileName} indirildi (${downloadedCount}/${Object.keys(updatedFiles).length})`);
             
             // Dosyalar arasında kısa bir gecikme (tarayıcı çoklu indirmeyi handle edebilsin)
             await new Promise(resolve => setTimeout(resolve, 300));
