@@ -360,16 +360,17 @@ async function loadStats(skipStreakCheck = false) {
     
     // ✅ HER ZAMAN Firebase'den kontrol et (kullanıcı giriş yaptıysa)
     // Bu sayede çıkış/giriş sonrası veriler Firebase'den gelir
+    let firebaseUserStats = null;
     if (typeof window.loadUserStats === 'function') {
         try {
             console.log('🔄 Firebase\'den kullanıcı istatistikleri yükleniyor...');
-            const userStats = await window.loadUserStats();
+            firebaseUserStats = await window.loadUserStats();
             
-            if (userStats && userStats.total_points !== undefined && userStats.total_points !== null) {
-                console.log('☁️ Firebase\'den veri geldi:', userStats.total_points, 'puan');
+            if (firebaseUserStats && firebaseUserStats.total_points !== undefined && firebaseUserStats.total_points !== null) {
+                console.log('☁️ Firebase\'den veri geldi:', firebaseUserStats.total_points, 'puan');
                 
                 // Firebase'den gelen değeri kullan
-                totalPoints = userStats.total_points;
+                totalPoints = firebaseUserStats.total_points;
                 
                 // Firebase'den yüklenen değeri localStorage'a kaydet
                 saveToStorage(CONFIG.STORAGE_KEYS.TOTAL_POINTS, totalPoints);
@@ -393,18 +394,41 @@ async function loadStats(skipStreakCheck = false) {
     // Current level
     currentLevel = calculateLevel(totalPoints);
     
-    // Streak data
-    streakData = loadFromStorage(CONFIG.STORAGE_KEYS.STREAK_DATA, streakData);
+    // Streak data - Firebase'den gelen varsa onu kullan, yoksa localStorage'dan oku
+    if (firebaseUserStats && firebaseUserStats.streak_data) {
+        streakData = firebaseUserStats.streak_data;
+        console.log('✅ Streak data Firebase\'den yüklendi:', streakData);
+    } else {
+        streakData = loadFromStorage(CONFIG.STORAGE_KEYS.STREAK_DATA, streakData);
+    }
     
-    // Game stats
-    gameStats = loadFromStorage(CONFIG.STORAGE_KEYS.GAME_STATS, gameStats);
+    // Game stats - Firebase'den gelen varsa onu kullan, yoksa localStorage'dan oku
+    if (firebaseUserStats && firebaseUserStats.game_stats) {
+        gameStats = firebaseUserStats.game_stats;
+        console.log('✅ Game stats Firebase\'den yüklendi');
+    } else {
+        gameStats = loadFromStorage(CONFIG.STORAGE_KEYS.GAME_STATS, gameStats);
+    }
     
-    // Daily goal
-    dailyGoal = loadFromStorage(CONFIG.STORAGE_KEYS.DAILY_GOAL, 2700);
+    // Daily goal - Firebase'den gelen varsa onu kullan, yoksa localStorage'dan oku
+    if (firebaseUserStats && firebaseUserStats.daily_goal !== undefined) {
+        dailyGoal = firebaseUserStats.daily_goal;
+        console.log('✅ Daily goal Firebase\'den yüklendi:', dailyGoal);
+    } else {
+        dailyGoal = loadFromStorage(CONFIG.STORAGE_KEYS.DAILY_GOAL, 2700);
+    }
     
     // Daily progress (check date)
     const today = getLocalDateString();
-    const savedProgress = loadFromStorage(CONFIG.STORAGE_KEYS.DAILY_PROGRESS, { date: '', points: 0 });
+    let savedProgress = null;
+    
+    // Firebase'den gelen varsa onu kullan
+    if (firebaseUserStats && firebaseUserStats.daily_progress !== undefined) {
+        savedProgress = { date: today, points: firebaseUserStats.daily_progress };
+        console.log('✅ Daily progress Firebase\'den yüklendi:', firebaseUserStats.daily_progress);
+    } else {
+        savedProgress = loadFromStorage(CONFIG.STORAGE_KEYS.DAILY_PROGRESS, { date: '', points: 0 });
+    }
     
     if (savedProgress.date === today) {
         dailyProgress = savedProgress.points;
@@ -413,20 +437,100 @@ async function loadStats(skipStreakCheck = false) {
         saveToStorage(CONFIG.STORAGE_KEYS.DAILY_PROGRESS, { date: today, points: 0 });
     }
     
-    // Word stats
-    wordStats = loadFromStorage('hasene_word_stats', {});
+    // Word stats - Firebase'den gelen varsa onu kullan, yoksa localStorage'dan oku
+    if (firebaseUserStats && firebaseUserStats.word_stats) {
+        wordStats = firebaseUserStats.word_stats;
+        // localStorage'a da kaydet ki sayfa yenilendiğinde kaybolmasın
+        saveToStorage('hasene_word_stats', wordStats);
+        const wordStatsCount = Object.keys(wordStats).length;
+        console.log('✅ Word stats Firebase\'den yüklendi:', wordStatsCount, 'kelime');
+        if (wordStatsCount === 0) {
+            console.warn('⚠️ Firebase\'den yüklenen word_stats boş!');
+        }
+    } else {
+        wordStats = loadFromStorage('hasene_word_stats', {});
+        const wordStatsCount = Object.keys(wordStats).length;
+        console.log('ℹ️ Word stats localStorage\'dan yüklendi:', wordStatsCount, 'kelime');
+        if (firebaseUserStats && !firebaseUserStats.word_stats) {
+            console.warn('⚠️ Firebase\'de word_stats verisi yok, localStorage kullanılıyor');
+        }
+    }
     
-    // Favorites
-    favorites = loadFromStorage('hasene_favorites', []);
+    // Favorites - Firebase'den gelen varsa onu kullan, yoksa localStorage'dan oku
+    if (firebaseUserStats && firebaseUserStats.favorites) {
+        favorites = Array.isArray(firebaseUserStats.favorites) ? firebaseUserStats.favorites : [];
+        // localStorage'a da kaydet ki sayfa yenilendiğinde kaybolmasın
+        saveToStorage('hasene_favorites', favorites);
+        console.log('✅ Favorites Firebase\'den yüklendi:', favorites.length, 'favori');
+    } else {
+        favorites = loadFromStorage('hasene_favorites', []);
+    }
     
-    // Unlocked achievements
-    unlockedAchievements = loadFromStorage('hasene_achievements', []);
+    // Unlocked achievements - Firebase'den gelen varsa onu kullan, yoksa localStorage'dan oku
+    if (firebaseUserStats && firebaseUserStats.achievements) {
+        unlockedAchievements = Array.isArray(firebaseUserStats.achievements) ? firebaseUserStats.achievements : [];
+        // localStorage'a da kaydet ki sayfa yenilendiğinde kaybolmasın
+        saveToStorage('hasene_achievements', unlockedAchievements);
+        console.log('✅ Achievements Firebase\'den yüklendi:', unlockedAchievements.length, 'adet');
+    } else {
+        unlockedAchievements = loadFromStorage('hasene_achievements', []);
+    }
     
-    // Unlocked badges
-    badgesUnlocked = loadFromStorage('hasene_badges', {});
+    // Unlocked badges - Firebase'den gelen varsa onu kullan, yoksa localStorage'dan oku
+    if (firebaseUserStats && firebaseUserStats.badges) {
+        badgesUnlocked = firebaseUserStats.badges;
+        // localStorage'a da kaydet ki sayfa yenilendiğinde kaybolmasın
+        saveToStorage('hasene_badges', badgesUnlocked);
+        console.log('✅ Badges Firebase\'den yüklendi:', Object.keys(badgesUnlocked).length, 'rozet');
+    } else {
+        badgesUnlocked = loadFromStorage('hasene_badges', {});
+    }
     
     // Daily tasks
     await checkDailyTasks();
+    
+    // Load weekly XP from Firebase
+    if (typeof window.loadWeeklyXPFromFirebase === 'function') {
+        await window.loadWeeklyXPFromFirebase();
+    }
+    
+    // Load daily stats from Firebase if available
+    if (firebaseUserStats && firebaseUserStats.daily_stats) {
+        // Daily stats are already loaded to localStorage by loadUserStats()
+        console.log('✅ Daily stats Firebase\'den yüklendi:', Object.keys(firebaseUserStats.daily_stats).length, 'gün');
+    } else {
+        // If Firebase doesn't have daily_stats but localStorage does, sync to Firebase
+        const localDailyStats = getAllDailyStats();
+        if (localDailyStats && Object.keys(localDailyStats).length > 0) {
+            console.log('🔄 Firebase\'de daily_stats yok ama localStorage\'da var, Firebase\'e kaydediliyor...');
+            if (typeof window.saveUserStats === 'function') {
+                window.saveUserStats({ 
+                    daily_stats: localDailyStats
+                }).catch(err => {
+                    console.warn('⚠️ Daily stats Firebase sync failed:', err);
+                });
+            }
+        }
+    }
+    
+    // Eğer Firebase'de word_stats yoksa ama localStorage'da varsa, Firebase'e kaydet
+    // Bu sayede mobildeki veriler masaüstünde Firebase'e kaydedilmiş olur
+    if (!firebaseUserStats || !firebaseUserStats.word_stats) {
+        const localWordStats = loadFromStorage('hasene_word_stats', {});
+        if (localWordStats && Object.keys(localWordStats).length > 0) {
+            console.log('🔄 Firebase\'de word_stats yok ama localStorage\'da var, Firebase\'e kaydediliyor...');
+            // saveStats() fonksiyonu zaten wordStats'ı Firebase'e kaydedecek
+            // Ama şimdi kaydetmek için saveStats() çağıralım
+            if (typeof window.saveUserStats === 'function') {
+                // Mevcut wordStats değişkenini kullan (yukarıda yüklenmiş olmalı)
+                window.saveUserStats({ 
+                    word_stats: wordStats || localWordStats
+                }).catch(err => {
+                    console.warn('⚠️ Word stats Firebase sync failed:', err);
+                });
+            }
+        }
+    }
     
     // DON'T check streak on page load - only when user actually plays
     // Streak will be updated when user completes a game and earns points
@@ -461,13 +565,21 @@ function saveStats() {
     
     // Sync to Firebase backend (if user has real username)
     if (typeof window.saveUserStats === 'function') {
-        window.saveUserStats({ 
-            total_points: totalPoints,
-            streak_data: streakData,
-            game_stats: gameStats,
-            daily_goal: dailyGoal,
-            daily_progress: dailyProgress
-        }).catch(err => {
+            // Get all daily stats before saving
+            const allDailyStats = getAllDailyStats();
+            
+            window.saveUserStats({ 
+                total_points: totalPoints,
+                streak_data: streakData,
+                game_stats: gameStats,
+                daily_goal: dailyGoal,
+                daily_progress: dailyProgress,
+                badges: badgesUnlocked,
+                achievements: unlockedAchievements,
+                word_stats: wordStats,
+                favorites: favorites,
+                daily_stats: allDailyStats
+            }).catch(err => {
             // Silent fail - Firebase sync is optional
             console.warn('User stats Firebase sync failed (non-critical):', err);
         });
@@ -523,9 +635,49 @@ function saveDailyStats(correct, wrong, points, combo) {
         
         // Save to localStorage
         localStorage.setItem(key, JSON.stringify(dailyData));
+        
+        // Save to Firebase
+        if (typeof window.saveUserStats === 'function') {
+            // Get all daily stats and save to Firebase
+            const allDailyStats = getAllDailyStats();
+            window.saveUserStats({ 
+                daily_stats: allDailyStats
+            }).catch(err => {
+                console.warn('⚠️ Daily stats Firebase sync failed:', err);
+            });
+        }
     } catch (e) {
         console.warn('⚠️ Daily stats save failed:', e);
     }
+}
+
+/**
+ * Get all daily stats from localStorage
+ * @returns {Object} Object with date keys and daily stats values
+ */
+function getAllDailyStats() {
+    const allDailyStats = {};
+    const today = new Date();
+    
+    // Get last 90 days of daily stats
+    for (let i = 0; i < 90; i++) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        const dateStr = date.toISOString().split('T')[0];
+        const key = `hasene_daily_${dateStr}`;
+        
+        try {
+            const dayData = localStorage.getItem(key);
+            if (dayData) {
+                const parsed = JSON.parse(dayData);
+                allDailyStats[dateStr] = parsed;
+            }
+        } catch (e) {
+            // Ignore invalid data
+        }
+    }
+    
+    return allDailyStats;
 }
 
 /**
@@ -734,9 +886,10 @@ function resetAllData() {
         ];
         
         // Delete weekly leaderboard data for current week and previous weeks
-        if (weekStart && weekStart.length > 0) {
+        // ÖNEMLİ: weekly_leaderboard docId formatı: username_weekStart (user.id değil!)
+        if (weekStart && weekStart.length > 0 && username) {
             // Delete current week
-            const leaderboardDocId = `${user.id}_${weekStart}`;
+            const leaderboardDocId = `${username}_${weekStart}`;
             console.log('🔄 Mevcut hafta lig verisi siliniyor:', leaderboardDocId);
             deletePromises.push(
                 window.firestoreDelete('weekly_leaderboard', leaderboardDocId).catch((e) => {
@@ -745,22 +898,90 @@ function resetAllData() {
                 })
             );
             
-            // Also try to delete for previous weeks (last 8 weeks to be safe)
-            for (let i = 1; i <= 8; i++) {
+            // Delete ALL weekly leaderboard entries for this user using query
+            // First, ensure Firebase auth (try anonymous auth for local users)
+            let firebaseAuthUID = null;
+            if (window.firebaseAuth && window.firebaseAuth.currentUser) {
+                firebaseAuthUID = window.firebaseAuth.currentUser.uid;
+            } else if (user.id.startsWith('local-') && typeof window.autoSignInAnonymous === 'function') {
                 try {
-                    const prevWeekDate = new Date(weekStart + 'T00:00:00');
-                    prevWeekDate.setDate(prevWeekDate.getDate() - (i * 7));
-                    const prevWeekStart = prevWeekDate.toISOString().split('T')[0];
-                    const prevLeaderboardDocId = `${user.id}_${prevWeekStart}`;
-                    console.log(`🔄 Önceki hafta (${i}) lig verisi siliniyor:`, prevLeaderboardDocId);
-                    deletePromises.push(
-                        window.firestoreDelete('weekly_leaderboard', prevLeaderboardDocId).catch((e) => {
-                            console.warn(`⚠️ weekly_leaderboard (önceki hafta ${i}) silme hatası:`, e, { docId: prevLeaderboardDocId });
-                            return false;
-                        })
-                    );
-                } catch (e) {
-                    console.warn('⚠️ Hafta hesaplama hatası:', e);
+                    await window.autoSignInAnonymous();
+                    if (window.firebaseAuth && window.firebaseAuth.currentUser) {
+                        firebaseAuthUID = window.firebaseAuth.currentUser.uid;
+                        console.log('✅ Anonymous Firebase auth for resetAllData, UID:', firebaseAuthUID);
+                    }
+                } catch (error) {
+                    console.warn('⚠️ Firebase anonymous auth failed in resetAllData:', error);
+                }
+            }
+            
+            if (window.firestore && firebaseAuthUID) {
+                try {
+                    console.log('🔄 Tüm weekly_leaderboard dokümanları sorgulanıyor...');
+                    
+                    // Query all weekly_leaderboard documents for this username
+                    const querySnapshot = await window.firestore
+                        .collection('weekly_leaderboard')
+                        .where('username', '==', username.toLowerCase())
+                        .get();
+                    
+                    console.log(`📊 ${querySnapshot.size} weekly_leaderboard dokümanı bulundu`);
+                    
+                    // Delete all found documents
+                    querySnapshot.forEach((doc) => {
+                        const docData = doc.data();
+                        // Only delete if user_id matches (security check)
+                        if (docData.user_id === firebaseAuthUID) {
+                            deletePromises.push(
+                                doc.ref.delete().then(() => {
+                                    console.log('✅ Weekly leaderboard dokümanı silindi:', doc.id);
+                                    return true;
+                                }).catch((error) => {
+                                    console.warn('⚠️ Weekly leaderboard silme hatası:', error, { docId: doc.id });
+                                    return false;
+                                })
+                            );
+                        } else {
+                            console.warn('⚠️ Doküman farklı kullanıcıya ait, atlanıyor:', { docId: doc.id });
+                        }
+                    });
+                } catch (error) {
+                    console.warn('⚠️ Weekly leaderboard query hatası:', error);
+                    // Fallback: Try to delete last 52 weeks manually
+                    console.log('🔄 Fallback: Son 52 hafta manuel olarak siliniyor...');
+                    for (let i = 1; i <= 52; i++) {
+                        try {
+                            const prevWeekDate = new Date(weekStart + 'T00:00:00');
+                            prevWeekDate.setDate(prevWeekDate.getDate() - (i * 7));
+                            const prevWeekStart = prevWeekDate.toISOString().split('T')[0];
+                            const prevLeaderboardDocId = `${username}_${prevWeekStart}`;
+                            deletePromises.push(
+                                window.firestoreDelete('weekly_leaderboard', prevLeaderboardDocId).catch((e) => {
+                                    return false;
+                                })
+                            );
+                        } catch (e) {
+                            // Ignore
+                        }
+                    }
+                }
+            } else {
+                // Fallback: Delete last 52 weeks manually if query not available
+                console.log('🔄 Query yapılamıyor, son 52 hafta manuel olarak siliniyor...');
+                for (let i = 1; i <= 52; i++) {
+                    try {
+                        const prevWeekDate = new Date(weekStart + 'T00:00:00');
+                        prevWeekDate.setDate(prevWeekDate.getDate() - (i * 7));
+                        const prevWeekStart = prevWeekDate.toISOString().split('T')[0];
+                        const prevLeaderboardDocId = `${username}_${prevWeekStart}`;
+                        deletePromises.push(
+                            window.firestoreDelete('weekly_leaderboard', prevLeaderboardDocId).catch((e) => {
+                                return false;
+                            })
+                        );
+                    } catch (e) {
+                        // Ignore
+                    }
                 }
             }
         } else {
@@ -769,7 +990,7 @@ function resetAllData() {
             console.warn('⚠️ weekStart hesaplanamadı, haftalık lig verileri manuel silinmeli');
         }
         
-        Promise.all(deletePromises).then((results) => {
+        Promise.all(deletePromises).then(async (results) => {
             const successCount = results.filter(r => r === true).length;
             const totalCount = deletePromises.length;
             const weeklyLeaderboardCount = results.slice(2).filter(r => r === true).length; // İlk 2: user_stats ve daily_tasks
@@ -778,6 +999,61 @@ function resetAllData() {
             
             console.log(`✅ Firebase verileri silindi: ${successCount}/${totalCount} başarılı (user_stats, daily_tasks, weekly_leaderboard dahil)`);
             console.log('📊 Silme sonuçları:', results);
+            
+            // Firebase'e boş veriler kaydet (temiz durum için)
+            if (typeof window.saveUserStats === 'function' && username) {
+                try {
+                    await window.saveUserStats({
+                        total_points: 0,
+                        streak_data: {
+                            currentStreak: 0,
+                            bestStreak: 0,
+                            totalPlayDays: 0,
+                            lastPlayDate: '',
+                            playDates: []
+                        },
+                        game_stats: {
+                            totalCorrect: 0,
+                            totalWrong: 0,
+                            perfectLessons: 0,
+                            gameModeCounts: {}
+                        },
+                        badges: {},
+                        achievements: [],
+                        word_stats: {},
+                        favorites: [],
+                        daily_stats: {},
+                        daily_goal: 2700,
+                        daily_progress: 0
+                    });
+                    console.log('✅ Firebase\'e boş veriler kaydedildi');
+                } catch (err) {
+                    console.warn('⚠️ Firebase boş veri kaydetme hatası:', err);
+                }
+            }
+            
+            // Firebase'e boş daily_tasks kaydet
+            if (typeof window.saveDailyTasks === 'function' && username) {
+                try {
+                    await window.saveDailyTasks({
+                        lastTaskDate: '',
+                        tasks: [],
+                        bonusTasks: [],
+                        todayStats: {
+                            toplamDogru: 0,
+                            toplamPuan: 0,
+                            comboCount: 0,
+                            allGameModes: [],
+                            ayet_oku: 0,
+                            dua_et: 0,
+                            hadis_oku: 0
+                        }
+                    });
+                    console.log('✅ Firebase\'e boş daily_tasks kaydedildi');
+                } catch (err) {
+                    console.warn('⚠️ Firebase daily_tasks kaydetme hatası:', err);
+                }
+            }
             
             // Başarısız işlemleri belirle
             const failedItems = [];
@@ -2156,11 +2432,27 @@ function getMasteredWords() {
  * Get word statistics for analysis modal
  * @returns {Object} Word analysis data
  */
-function getWordAnalysis() {
+async function getWordAnalysis() {
     // Ensure wordStats is loaded
     if (!wordStats || Object.keys(wordStats).length === 0) {
         // Try to reload from storage
         wordStats = loadFromStorage('hasene_word_stats', {});
+        
+        // If still empty, try to reload from Firebase
+        if ((!wordStats || Object.keys(wordStats).length === 0) && typeof window.loadUserStats === 'function') {
+            try {
+                console.log('🔄 Word stats boş, Firebase\'den yeniden yükleniyor...');
+                const firebaseUserStats = await window.loadUserStats();
+                if (firebaseUserStats && firebaseUserStats.word_stats) {
+                    wordStats = firebaseUserStats.word_stats;
+                    // localStorage'a da kaydet
+                    saveToStorage('hasene_word_stats', wordStats);
+                    console.log('✅ Word stats Firebase\'den yeniden yüklendi:', Object.keys(wordStats).length, 'kelime');
+                }
+            } catch (error) {
+                console.warn('⚠️ Firebase word stats reload failed:', error);
+            }
+        }
     }
     
     const allStats = Object.entries(wordStats || {});
@@ -2362,7 +2654,7 @@ function getWordsWithMostWrongs(limit = 20) {
  * Show word analysis modal
  */
 async function showWordAnalysisModal() {
-    const analysis = getWordAnalysis();
+    const analysis = await getWordAnalysis();
     const struggling = getStrugglingWords();
     const learning = getLearningWords();
     const mastered = getMasteredWords();
@@ -6294,6 +6586,7 @@ if (typeof window !== 'undefined') {
     window.resetAllData = resetAllData;
     window.saveStats = saveStats;
     window.loadStats = loadStats;
+    window.getAllDailyStats = getAllDailyStats;
     window.updateStatsDisplay = updateStatsDisplay;
     
     // Test Tools (also exported immediately after function definitions)
@@ -6389,8 +6682,8 @@ function testPoints() {
 /**
  * Nuclear clear - Delete everything (TEST function)
  */
-function nuclearClear() {
-    if (!confirm('⚠️ DİKKAT: TÜM VERİLER KALICI OLARAK SİLİNECEK!\n\nBu işlem:\n- Tüm puanları\n- Tüm rozetleri\n- Tüm kullanıcı verilerini\n- Tüm localStorage verilerini\n\nSİLECEK!\n\nDevam etmek istiyor musunuz?')) {
+async function nuclearClear() {
+    if (!confirm('⚠️ DİKKAT: TÜM VERİLER KALICI OLARAK SİLİNECEK!\n\nBu işlem:\n- Tüm puanları\n- Tüm rozetleri\n- Tüm kullanıcı verilerini\n- Tüm localStorage verilerini\n- Tüm Firebase verilerini\n\nSİLECEK!\n\nDevam etmek istiyor musunuz?')) {
         return;
     }
     
@@ -6399,6 +6692,123 @@ function nuclearClear() {
     }
     
     try {
+        // Önce Firebase'den verileri sil (kullanıcı bilgilerini kaydetmeden önce)
+        const savedUsername = localStorage.getItem('hasene_username');
+        if (savedUsername) {
+            const defaultUsernames = ['Kullanıcı', 'Misafir', 'Anonim Kullanıcı', ''];
+            const hasRealUsername = savedUsername && savedUsername.trim() !== '' && !defaultUsernames.includes(savedUsername.trim());
+            
+            if (hasRealUsername && window.FIREBASE_ENABLED && window.firestore) {
+                try {
+                    const docId = typeof window.usernameToDocId === 'function' ? window.usernameToDocId(savedUsername) : savedUsername.toLowerCase().replace(/[^a-z0-9_]/g, '_');
+                    
+                    // Delete from Firebase
+                    await Promise.all([
+                        window.firestoreDelete('user_stats', docId).catch(() => false),
+                        window.firestoreDelete('daily_tasks', docId).catch(() => false)
+                    ]);
+                    
+                    // Delete ALL weekly leaderboard entries for this user
+                    // First, ensure Firebase auth (try anonymous auth for local users)
+                    let firebaseAuthUID = null;
+                    if (window.firebaseAuth && window.firebaseAuth.currentUser) {
+                        firebaseAuthUID = window.firebaseAuth.currentUser.uid;
+                    } else if (typeof window.autoSignInAnonymous === 'function') {
+                        try {
+                            await window.autoSignInAnonymous();
+                            if (window.firebaseAuth && window.firebaseAuth.currentUser) {
+                                firebaseAuthUID = window.firebaseAuth.currentUser.uid;
+                                console.log('✅ Anonymous Firebase auth for nuclearClear, UID:', firebaseAuthUID);
+                            }
+                        } catch (error) {
+                            console.warn('⚠️ Firebase anonymous auth failed in nuclearClear:', error);
+                        }
+                    }
+                    
+                    if (window.firestore && firebaseAuthUID) {
+                        try {
+                            console.log('🔄 Tüm weekly_leaderboard dokümanları sorgulanıyor...');
+                            
+                            // Query all weekly_leaderboard documents for this username
+                            const querySnapshot = await window.firestore
+                                .collection('weekly_leaderboard')
+                                .where('username', '==', savedUsername.toLowerCase())
+                                .get();
+                            
+                            console.log(`📊 ${querySnapshot.size} weekly_leaderboard dokümanı bulundu`);
+                            
+                            // Delete all found documents
+                            const deletePromises = [];
+                            querySnapshot.forEach((doc) => {
+                                const docData = doc.data();
+                                // Only delete if user_id matches (security check)
+                                if (docData.user_id === firebaseAuthUID) {
+                                    deletePromises.push(
+                                        doc.ref.delete().then(() => {
+                                            console.log('✅ Weekly leaderboard dokümanı silindi:', doc.id);
+                                            return true;
+                                        }).catch((error) => {
+                                            console.warn('⚠️ Weekly leaderboard silme hatası:', error, { docId: doc.id });
+                                            return false;
+                                        })
+                                    );
+                                } else {
+                                    console.warn('⚠️ Doküman farklı kullanıcıya ait, atlanıyor:', { docId: doc.id, docUserId: docData.user_id, currentUID: firebaseUID });
+                                }
+                            });
+                            
+                            if (deletePromises.length > 0) {
+                                const results = await Promise.all(deletePromises);
+                                const successCount = results.filter(r => r === true).length;
+                                console.log(`✅ ${successCount}/${deletePromises.length} weekly_leaderboard dokümanı silindi`);
+                            } else {
+                                console.log('ℹ️ Silinecek weekly_leaderboard dokümanı bulunamadı');
+                            }
+                        } catch (error) {
+                            console.warn('⚠️ Weekly leaderboard query/silme hatası:', error);
+                            // Fallback: Try to delete last 52 weeks manually
+                            if (typeof window.getWeekStartString === 'function') {
+                                console.log('🔄 Fallback: Son 52 hafta manuel olarak siliniyor...');
+                                const today = new Date();
+                                for (let i = 0; i < 52; i++) {
+                                    const weekDate = new Date(today);
+                                    weekDate.setDate(weekDate.getDate() - (i * 7));
+                                    const dayOfWeek = weekDate.getDay();
+                                    const diff = weekDate.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+                                    weekDate.setDate(diff);
+                                    weekDate.setHours(0, 0, 0, 0);
+                                    const weekStart = weekDate.toISOString().split('T')[0];
+                                    const weeklyDocId = `${savedUsername}_${weekStart}`;
+                                    await window.firestoreDelete('weekly_leaderboard', weeklyDocId).catch(() => false);
+                                }
+                            }
+                        }
+                    } else {
+                        // Fallback: Delete last 52 weeks manually if query not available
+                        console.log('🔄 Query yapılamıyor, son 52 hafta manuel olarak siliniyor...');
+                        if (typeof window.getWeekStartString === 'function') {
+                            const today = new Date();
+                            for (let i = 0; i < 52; i++) {
+                                const weekDate = new Date(today);
+                                weekDate.setDate(weekDate.getDate() - (i * 7));
+                                const dayOfWeek = weekDate.getDay();
+                                const diff = weekDate.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+                                weekDate.setDate(diff);
+                                weekDate.setHours(0, 0, 0, 0);
+                                const weekStart = weekDate.toISOString().split('T')[0];
+                                const weeklyDocId = `${savedUsername}_${weekStart}`;
+                                await window.firestoreDelete('weekly_leaderboard', weeklyDocId).catch(() => false);
+                            }
+                        }
+                    }
+                    
+                    console.log('✅ Firebase verileri silindi');
+                } catch (error) {
+                    console.warn('⚠️ Firebase silme hatası:', error);
+                }
+            }
+        }
+        
         // Clear everything
         localStorage.clear();
         sessionStorage.clear();

@@ -183,14 +183,36 @@ async function firestoreDelete(collection, docId) {
         return false;
     }
     
-    if (user.id.startsWith('local-')) {
-        console.warn('⚠️ firestoreDelete: Local kullanıcı, Firebase silme yapılmıyor', { userId: user.id });
-        return false;
+    // Check Firebase auth - try anonymous auth for local users
+    let firebaseAuthUID = null;
+    if (window.firebaseAuth && window.firebaseAuth.currentUser) {
+        // Already authenticated
+        firebaseAuthUID = window.firebaseAuth.currentUser.uid;
+    } else {
+        // For local users, try anonymous auth
+        if (user.id.startsWith('local-') && typeof window.autoSignInAnonymous === 'function') {
+            try {
+                const authResult = await window.autoSignInAnonymous();
+                if (authResult && window.firebaseAuth && window.firebaseAuth.currentUser) {
+                    firebaseAuthUID = window.firebaseAuth.currentUser.uid;
+                    console.log('✅ Anonymous Firebase auth for firestoreDelete, UID:', firebaseAuthUID);
+                } else {
+                    console.warn('⚠️ Anonymous auth completed but no current user');
+                    return false;
+                }
+            } catch (error) {
+                console.warn('⚠️ Firebase anonymous auth failed in firestoreDelete:', error);
+                return false;
+            }
+        } else {
+            console.warn('⚠️ firestoreDelete: Firebase auth kullanıcısı yok');
+            return false;
+        }
     }
     
-    // Check Firebase auth
-    if (window.firebaseAuth && !window.firebaseAuth.currentUser) {
-        console.warn('⚠️ firestoreDelete: Firebase auth kullanıcısı yok');
+    // Ensure we have Firebase auth UID
+    if (!firebaseAuthUID) {
+        console.warn('⚠️ firestoreDelete: No Firebase auth UID available');
         return false;
     }
     
@@ -206,9 +228,8 @@ async function firestoreDelete(collection, docId) {
         // Doküman varsa user_id kontrolü yap (güvenlik için)
         const docData = docSnapshot.data();
         const docUserId = docData?.user_id;
-        const currentFirebaseUID = window.firebaseAuth?.currentUser?.uid;
         
-        if (docUserId && currentFirebaseUID && docUserId !== currentFirebaseUID) {
+        if (docUserId && firebaseAuthUID && docUserId !== firebaseAuthUID) {
             console.warn('⚠️ firestoreDelete: Doküman farklı bir kullanıcıya ait, silme işlemi atlanıyor:', { 
                 collection, 
                 docId, 
@@ -349,7 +370,9 @@ async function loadUserStats() {
     
     // Try Firebase first if user has a real username (works for both local and Firebase users)
     // ALWAYS use localStorage username - don't fall back to user.username
-    if (user && window.FIREBASE_ENABLED && window.firestore) {
+    // ÖNEMLİ: Kullanıcı giriş yapmamışsa bile localStorage'da kullanıcı adı varsa Firebase'den veri çekmeyi dene
+    // Bu sayede masaüstünde de mobildeki veriler görünebilir
+    if (window.FIREBASE_ENABLED && window.firestore) {
         try {
             const savedUsername = localStorage.getItem('hasene_username') || '';
             const defaultUsernames = ['Kullanıcı', 'Misafir', 'Anonim Kullanıcı', ''];
@@ -361,6 +384,14 @@ async function loadUserStats() {
                 const firebaseData = await firestoreGet('user_stats', docId);
                 if (firebaseData && firebaseData.total_points !== undefined) {
                     console.log('☁️ User stats loaded from Firebase (username:', savedUsername + ')');
+                    console.log('📦 Firebase\'den gelen veriler:', {
+                        total_points: firebaseData.total_points,
+                        has_streak_data: !!firebaseData.streak_data,
+                        has_game_stats: !!firebaseData.game_stats,
+                        has_badges: !!firebaseData.badges,
+                        has_achievements: !!firebaseData.achievements
+                    });
+                    
                     // ÖNEMLİ: Firebase'den gelen değer 0'dan büyükse veya localStorage'da değer yoksa güncelle
                     // Aksi halde localStorage'daki değeri koru (yanlışlıkla sıfırlanmasını önle)
                     const localPoints = parseInt(localStorage.getItem('hasene_totalPoints') || '0');
@@ -376,6 +407,63 @@ async function loadUserStats() {
                             window.saveUserStats({ total_points: localPoints }).catch(() => {});
                         }
                     }
+                    
+                    // Firebase'den gelen tüm verileri localStorage'a senkronize et
+                    if (firebaseData.streak_data) {
+                        localStorage.setItem('hasene_streakData', JSON.stringify(firebaseData.streak_data));
+                        console.log('✅ Streak data Firebase\'den yüklendi ve localStorage\'a kaydedildi');
+                    }
+                    
+                    if (firebaseData.game_stats) {
+                        localStorage.setItem('hasene_gameStats', JSON.stringify(firebaseData.game_stats));
+                        console.log('✅ Game stats Firebase\'den yüklendi ve localStorage\'a kaydedildi');
+                    }
+                    
+                    if (firebaseData.badges) {
+                        localStorage.setItem('hasene_badges', JSON.stringify(firebaseData.badges));
+                        console.log('✅ Badges Firebase\'den yüklendi ve localStorage\'a kaydedildi');
+                    }
+                    
+                    if (firebaseData.achievements) {
+                        localStorage.setItem('hasene_achievements', JSON.stringify(firebaseData.achievements));
+                        console.log('✅ Achievements Firebase\'den yüklendi ve localStorage\'a kaydedildi');
+                    }
+                    
+                    if (firebaseData.daily_goal !== undefined) {
+                        localStorage.setItem('hasene_dailyGoal', firebaseData.daily_goal.toString());
+                        console.log('✅ Daily goal Firebase\'den yüklendi:', firebaseData.daily_goal);
+                    }
+                    
+                    if (firebaseData.daily_progress !== undefined) {
+                        const today = typeof window.getLocalDateString === 'function' ? window.getLocalDateString() : new Date().toISOString().split('T')[0];
+                        localStorage.setItem('hasene_dailyProgress', JSON.stringify({ date: today, points: firebaseData.daily_progress }));
+                        console.log('✅ Daily progress Firebase\'den yüklendi:', firebaseData.daily_progress);
+                    }
+                    
+                    if (firebaseData.word_stats) {
+                        const wordStatsCount = Object.keys(firebaseData.word_stats).length;
+                        localStorage.setItem('hasene_word_stats', JSON.stringify(firebaseData.word_stats));
+                        console.log('✅ Word stats Firebase\'den yüklendi ve localStorage\'a kaydedildi:', wordStatsCount, 'kelime');
+                    } else {
+                        console.log('⚠️ Firebase\'de word_stats verisi yok');
+                    }
+                    
+                    if (firebaseData.favorites) {
+                        localStorage.setItem('hasene_favorites', JSON.stringify(firebaseData.favorites));
+                        console.log('✅ Favorites Firebase\'den yüklendi ve localStorage\'a kaydedildi');
+                    }
+                    
+                    if (firebaseData.daily_stats) {
+                        // Save each daily stat to localStorage
+                        let dailyStatsCount = 0;
+                        Object.keys(firebaseData.daily_stats).forEach(dateStr => {
+                            const key = `hasene_daily_${dateStr}`;
+                            localStorage.setItem(key, JSON.stringify(firebaseData.daily_stats[dateStr]));
+                            dailyStatsCount++;
+                        });
+                        console.log('✅ Daily stats Firebase\'den yüklendi ve localStorage\'a kaydedildi:', dailyStatsCount, 'gün');
+                    }
+                    
                     return firebaseData;
                 }
             }
@@ -552,7 +640,9 @@ async function loadDailyTasks() {
     
     // Try Firebase first if user has a real username (works for both local and Firebase users)
     // ALWAYS use localStorage username - don't fall back to user.username
-    if (user && window.FIREBASE_ENABLED && window.firestore) {
+    // ÖNEMLİ: Kullanıcı giriş yapmamışsa bile localStorage'da kullanıcı adı varsa Firebase'den veri çekmeyi dene
+    // Bu sayede masaüstünde de mobildeki veriler görünebilir
+    if (window.FIREBASE_ENABLED && window.firestore) {
         try {
             const savedUsername = localStorage.getItem('hasene_username') || '';
             const defaultUsernames = ['Kullanıcı', 'Misafir', 'Anonim Kullanıcı', ''];
