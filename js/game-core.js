@@ -683,7 +683,7 @@ function getAllDailyStats() {
 /**
  * Reset all game data (TEST function)
  */
-function resetAllData() {
+async function resetAllData() {
     if (!confirm('Tüm oyun verilerini sıfırlamak istediğinizden emin misiniz? Bu işlem geri alınamaz!')) {
         return;
     }
