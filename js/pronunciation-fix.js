@@ -189,9 +189,9 @@ async function applyPronunciationFixesToData() {
     
     // Önce tüm data'ları yükle (eğer yüklenmemişse)
     if (typeof window.preloadAllData === 'function') {
-        console.log('📦 Tüm data'lar yükleniyor...');
+        console.log('📦 Tüm datalar yükleniyor...');
         await window.preloadAllData();
-        console.log('✅ Data'lar yüklendi');
+        console.log('✅ Datalar yüklendi');
     } else {
         // Fallback: Sadece gerekli data'ları yükle
         const loadFunctions = [
