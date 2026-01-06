@@ -656,6 +656,7 @@ window.applyPronunciationFixesToData = applyPronunciationFixesToData;
 window.applyPronunciationFixesToDataWrapper = applyPronunciationFixesToDataWrapper;
 window.importAndApplyPronunciationFixes = importAndApplyPronunciationFixes;
 window.applyAndExportPronunciationFixes = applyAndExportPronunciationFixes;
+window.updateFixCount = updateFixCount;
 
 // Wrapper function for HTML onclick (handles async)
 function applyAndExportPronunciationFixesWrapper() {
