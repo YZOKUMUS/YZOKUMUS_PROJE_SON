@@ -125,6 +125,7 @@ function savePronunciationFix() {
 
 /**
  * Export pronunciation fixes to JSON file
+ * Automatically downloads the file (no prompt)
  */
 function exportPronunciationFixes() {
     if (pronunciationFixes.length === 0) {
@@ -139,12 +140,16 @@ function exportPronunciationFixes() {
     const link = document.createElement('a');
     link.href = url;
     link.download = 'pronunciation-fixes.json';
-    link.click();
+    link.style.display = 'none'; // Hide the link
+    document.body.appendChild(link);
+    link.click(); // Trigger download
+    document.body.removeChild(link); // Clean up
     
     URL.revokeObjectURL(url);
     
-    showToast(`${pronunciationFixes.length} düzeltme indirildi`, 'success');
-    console.log(`📥 ${pronunciationFixes.length} düzeltme dışa aktarıldı`);
+    showToast(`${pronunciationFixes.length} düzeltme indirildi! Dosya proje klasörüne eklenebilir.`, 'success', 4000);
+    console.log(`📥 ${pronunciationFixes.length} düzeltme dışa aktarıldı: pronunciation-fixes.json`);
+    console.log('💡 İpucu: İndirilen dosyayı proje klasörüne (root) kopyalayın');
 }
 
 /**
