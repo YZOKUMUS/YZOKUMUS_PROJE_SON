@@ -36,8 +36,14 @@ function savePronunciationFixesToStorage() {
  */
 function updateFixCount() {
     const countEl = document.getElementById('fix-count');
+    const countModalEl = document.getElementById('fix-count-modal');
+    const count = pronunciationFixes.length;
+    
     if (countEl) {
-        countEl.textContent = pronunciationFixes.length;
+        countEl.textContent = count;
+    }
+    if (countModalEl) {
+        countModalEl.textContent = count;
     }
 }
 

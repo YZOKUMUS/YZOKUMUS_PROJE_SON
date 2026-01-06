@@ -51,26 +51,6 @@
 
         <!-- Stats Header -->
         <div class="stats-header glass-card">
-            <!-- TEST TOOLS - REMOVE AFTER TESTING -->
-            <div class="test-tools-bar" style="display: flex; gap: 8px; justify-content: center; margin-bottom: 10px; padding: 10px; background: rgba(255, 200, 0, 0.1); border-radius: 8px; border: 2px dashed rgba(255, 200, 0, 0.3); flex-wrap: wrap;">
-                <span style="font-size: 12px; font-weight: 600; color: #ff8800; align-self: center;">🧪 TEST ARAÇLARI:</span>
-                <button onclick="clearStorageData()" class="test-tool-btn" style="padding: 6px 12px; font-size: 12px; background: rgba(255, 255, 255, 0.8); border: 2px solid #667eea; border-radius: 6px; cursor: pointer; font-weight: 600; color: #667eea;">
-                    🗑️ Storage Temizle
-                </button>
-                <button onclick="testPoints()" class="test-tool-btn" style="padding: 6px 12px; font-size: 12px; background: rgba(255, 255, 255, 0.8); border: 2px solid #10b981; border-radius: 6px; cursor: pointer; font-weight: 600; color: #10b981;">
-                    🎯 Puan Test
-                </button>
-                <button onclick="nuclearClear()" class="test-tool-btn" style="padding: 6px 12px; font-size: 12px; background: rgba(255, 255, 255, 0.8); border: 2px solid #ef4444; border-radius: 6px; cursor: pointer; font-weight: 600; color: #ef4444;">
-                    🔥 Nuclear Clear
-                </button>
-                <button onclick="exportPronunciationFixes()" class="test-tool-btn" style="padding: 6px 12px; font-size: 12px; background: rgba(255, 255, 255, 0.8); border: 2px solid #f59e0b; border-radius: 6px; cursor: pointer; font-weight: 600; color: #f59e0b;">
-                    📥 Düzeltmeleri İndir (<span id="fix-count">0</span>)
-                </button>
-                <button onclick="clearPronunciationFixes()" class="test-tool-btn" style="padding: 6px 12px; font-size: 12px; background: rgba(255, 255, 255, 0.8); border: 2px solid #8b5cf6; border-radius: 6px; cursor: pointer; font-weight: 600; color: #8b5cf6;">
-                    🗑️ Düzeltmeleri Sil
-                </button>
-            </div>
-            
             <!-- User Status Bar with Reset Button -->
             <div class="user-status-bar">
                 <div class="user-info">
@@ -80,6 +60,7 @@
                 </div>
                 <div class="user-actions">
                     <button id="user-auth-btn" class="secondary-btn user-action-btn">Giriş Yap</button>
+                    <button onclick="showTestToolsModal()" class="secondary-btn user-action-btn" title="Test Araçları" style="padding: 8px 12px; font-size: 0.9rem; background: rgba(255, 200, 0, 0.2); border: 1px solid rgba(255, 200, 0, 0.5);">🧪</button>
                 </div>
             </div>
             
@@ -836,6 +817,40 @@
             <div class="achievement-name" id="achievement-name">İlk Yıldız</div>
             <div class="achievement-desc" id="achievement-desc">1 yıldız kazandınız!</div>
             <button class="primary-btn" onclick="closeModal('achievement-modal')">Harika!</button>
+        </div>
+    </div>
+
+    <!-- Test Tools Modal -->
+    <div id="test-tools-modal" class="modal hidden">
+        <div class="modal-content glass-card">
+            <h2>🧪 Test Araçları</h2>
+            <p style="color: #666; font-size: 0.9rem; margin-bottom: 20px;">Geliştirme ve test için kullanılan araçlar</p>
+            
+            <div class="test-tools-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                <button onclick="clearStorageData(); closeModal('test-tools-modal');" class="test-tool-btn" style="padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 0.95rem; box-shadow: 0 4px 6px rgba(102, 126, 234, 0.3); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    🗑️ Storage Temizle
+                </button>
+                
+                <button onclick="testPoints(); closeModal('test-tools-modal');" class="test-tool-btn" style="padding: 15px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 0.95rem; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    🎯 Puan Test
+                </button>
+                
+                <button onclick="nuclearClear(); closeModal('test-tools-modal');" class="test-tool-btn" style="padding: 15px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 0.95rem; box-shadow: 0 4px 6px rgba(239, 68, 68, 0.3); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    🔥 Nuclear Clear
+                </button>
+                
+                <button onclick="exportPronunciationFixes();" class="test-tool-btn" style="padding: 15px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 0.95rem; box-shadow: 0 4px 6px rgba(245, 158, 11, 0.3); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    📥 Düzeltmeleri İndir (<span id="fix-count-modal">0</span>)
+                </button>
+                
+                <button onclick="clearPronunciationFixes(); closeModal('test-tools-modal');" class="test-tool-btn" style="padding: 15px; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 0.95rem; box-shadow: 0 4px 6px rgba(139, 92, 246, 0.3); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    🗑️ Düzeltmeleri Sil
+                </button>
+            </div>
+            
+            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+                <button class="secondary-btn" onclick="closeModal('test-tools-modal')" style="width: 100%;">Kapat</button>
+            </div>
         </div>
     </div>
 

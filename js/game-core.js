@@ -153,6 +153,23 @@ function openModal(modalId) {
 /**
  * Modal kapatma
  */
+function showTestToolsModal() {
+    const modal = document.getElementById('test-tools-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        // Update fix count in modal
+        if (typeof updateFixCount === 'function') {
+            updateFixCount();
+        }
+        // Also update modal's fix count
+        const fixCountModal = document.getElementById('fix-count-modal');
+        const fixCount = document.getElementById('fix-count');
+        if (fixCountModal && fixCount) {
+            fixCountModal.textContent = fixCount.textContent || '0';
+        }
+    }
+}
+
 function closeModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
