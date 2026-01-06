@@ -291,7 +291,13 @@ async function applyAndExportPronunciationFixes() {
         // Güncellenmiş data dosyalarını indir
         await exportUpdatedDataFiles(results.updatedFiles);
         
-        showToast(`✅ Tamamlandı! ${Object.keys(results.updatedFiles).length} dosya indirildi. Proje klasörüne kopyalayın.`, 'success', 6000);
+        // Düzeltmeler başarıyla uygulandı, localStorage'ı temizle
+        pronunciationFixes = [];
+        localStorage.removeItem('pronunciation_fixes');
+        updateFixCount();
+        console.log('🗑️ Düzeltmeler temizlendi (uygulandıktan sonra)');
+        
+        showToast(`✅ Tamamlandı! ${Object.keys(results.updatedFiles).length} dosya indirildi. Düzeltmeler temizlendi.`, 'success', 6000);
     } else {
         showToast(`Hiçbir düzeltme uygulanamadı (${results.notFound} kelime bulunamadı)`, 'warning');
     }
