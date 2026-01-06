@@ -60,15 +60,22 @@ Bu kılavuz, oyun içinde yanlış okunuşlu kelimeleri düzeltip projeye uygula
 
 2. **Proje klasörüne kopyalayın:**
    - İndirilen dosyaları **`data/`** klasörüne kopyalayın
-   - Mevcut dosyaların üzerine yazın (değiştir)
+   - **Eski dosyaların üzerine yazın** (değiştir/replace)
+   - Aynı isimli eski dosyalar silinir ve yeni dosyalar yerlerine geçer
 
 3. **Örnek:**
    ```
-   Downloads/uc_harfli_kelimeler.json → data/uc_harfli_kelimeler.json
-   Downloads/harf.json → data/harf.json
+   Downloads/uc_harfli_kelimeler.json 
+   → data/uc_harfli_kelimeler.json (ESKİSİ SİLİNİR, YENİSİ YERİNE GEÇER)
+   
+   Downloads/harf.json 
+   → data/harf.json (ESKİSİ SİLİNİR, YENİSİ YERİNE GEÇER)
    ```
 
-> ⚠️ **Önemli:** Dosyaları kopyalamadan önce **yedek almanız** önerilir!
+> ⚠️ **Önemli:** 
+> - Dosyaları kopyalamadan önce **yedek almanız** önerilir!
+> - Sadece **güncellenmiş dosyaları** kopyalayın (konsolda hangi dosyaların indirildiğini görebilirsiniz)
+> - Eğer bir dosya indirilmediyse, o dosyayı kopyalamayın (eski hali kalır)
 
 ---
 
