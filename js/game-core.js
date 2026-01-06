@@ -1204,18 +1204,12 @@ function setupEventListeners() {
     });
     
     // Game cards
-    const gameCards = document.querySelectorAll('.game-card');
-    console.log(`🎮 Found ${gameCards.length} game card(s)`);
-    gameCards.forEach(card => {
-        const gameMode = card.dataset.game;
-        console.log(`  - Card: ${gameMode || 'NO GAME MODE'}`);
+    document.querySelectorAll('.game-card').forEach(card => {
         card.addEventListener('click', () => {
-            const clickedMode = card.dataset.game;
-            console.log(`🖱️ Game card clicked: ${clickedMode}`);
-            if (clickedMode) {
-                startGame(clickedMode);
+            const gameMode = card.dataset.game;
+            if (gameMode) {
+                startGame(gameMode);
             } else {
-                console.error('❌ Game mode not found in card dataset');
                 showToast('Oyun modu bulunamadı', 'error');
             }
         });
@@ -1377,7 +1371,6 @@ async function startGame(gameMode) {
             await startKarmaGame();
             break;
         default:
-            console.warn(`⚠️ Bilinmeyen oyun modu: ${gameMode}`);
             showToast('Bilinmeyen oyun modu', 'error');
             goToMainMenu();
     }
