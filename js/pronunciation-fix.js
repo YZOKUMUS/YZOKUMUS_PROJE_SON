@@ -234,10 +234,52 @@ async function applyAndExportPronunciationFixes() {
     console.log(`🔨 ${pronunciationFixes.length} düzeltme otomatik olarak uygulanıyor...`);
     
     // Önce data'ları yükle
-    if (typeof window.preloadAllData === 'function') {
-        console.log('📦 Tüm datalar yükleniyor...');
-        await window.preloadAllData();
-        console.log('✅ Datalar yüklendi');
+    try {
+        if (typeof window.preloadAllData === 'function') {
+            console.log('📦 Tüm datalar yükleniyor...');
+            await window.preloadAllData();
+            console.log('✅ Datalar yüklendi');
+        } else {
+            // Fallback: Manuel olarak gerekli data'ları yükle
+            console.log('📦 Data loader fonksiyonları ile datalar yükleniyor...');
+            const loadFunctions = [
+                { name: 'kelime', fn: window.loadKelimeData },
+                { name: 'ucHarfliKelimeler', fn: window.loadUcHarfliKelimelerData },
+                { name: 'uzatmaMed', fn: window.loadUzatmaMedData },
+                { name: 'harf', fn: window.loadHarfData },
+                { name: 'ustn', fn: window.loadUstnData },
+                { name: 'esre', fn: window.loadEsreData },
+                { name: 'otre', fn: window.loadOtreData },
+                { name: 'sedde', fn: window.loadSeddeData },
+                { name: 'cezm', fn: window.loadCezmData },
+                { name: 'tenvin', fn: window.loadTenvinData }
+            ];
+            
+            for (const { name, fn } of loadFunctions) {
+                if (typeof fn === 'function') {
+                    try {
+                        await fn();
+                        console.log(`✅ ${name} yüklendi`);
+                    } catch (e) {
+                        console.warn(`⚠️ ${name} yüklenemedi:`, e);
+                    }
+                }
+            }
+            console.log('✅ Tüm datalar yüklendi');
+        }
+        
+        // Data yükleme kontrolü
+        const dataCheck = {
+            kelimeData: window.kelimeData?.length || 0,
+            ucHarfliKelimelerData: window.ucHarfliKelimelerData?.length || 0,
+            harfData: window.harfData?.length || 0
+        };
+        console.log('📊 Yüklenen data sayıları:', dataCheck);
+        
+    } catch (error) {
+        console.error('❌ Data yükleme hatası:', error);
+        showToast('Data yükleme hatası! Konsolu kontrol edin.', 'error');
+        return;
     }
     
     // Düzeltmeleri uygula ve güncellenmiş dosyaları hazırla
@@ -462,23 +504,30 @@ async function applyFixesFromArray(fixes) {
         updatedFiles: {}
     };
     
+    // Data array'lerini window'dan referans olarak al (değişiklikler otomatik yansır)
+    // Eğer data yüklenmemişse, yükle
     const dataArrays = [
-        { name: 'kelimeData', data: window.kelimeData || [], file: 'kelimebul.json' },
-        { name: 'ucHarfliKelimelerData', data: window.ucHarfliKelimelerData || [], file: 'uc_harfli_kelimeler.json' },
-        { name: 'uzatmaMedData', data: window.uzatmaMedData || [], file: 'uzatma_med.json' },
-        { name: 'harfData', data: window.harfData || [], file: 'harf.json' },
-        { name: 'ustnData', data: window.ustnData || [], file: 'ustn.json' },
-        { name: 'esreData', data: window.esreData || [], file: 'esre.json' },
-        { name: 'otreData', data: window.otreData || [], file: 'otre.json' },
-        { name: 'seddeData', data: window.seddeData || [], file: 'sedde.json' },
-        { name: 'cezmData', data: window.cezmData || [], file: 'cezm.json' },
-        { name: 'tenvinData', data: window.tenvinData || [], file: 'tenvin.json' }
+        { name: 'kelimeData', getData: () => window.kelimeData || [], file: 'kelimebul.json', format: 'array', key: null },
+        { name: 'ucHarfliKelimelerData', getData: () => window.ucHarfliKelimelerData || [], file: 'uc_harfli_kelimeler.json', format: 'object', key: 'kelimeler' },
+        { name: 'uzatmaMedData', getData: () => window.uzatmaMedData || [], file: 'uzatma_med.json', format: 'object', key: 'kelimeler' },
+        { name: 'harfData', getData: () => window.harfData || [], file: 'harf.json', format: 'object', key: 'harfler' },
+        { name: 'ustnData', getData: () => window.ustnData || [], file: 'ustn.json', format: 'object', key: 'harfler' },
+        { name: 'esreData', getData: () => window.esreData || [], file: 'esre.json', format: 'object', key: 'harfler' },
+        { name: 'otreData', getData: () => window.otreData || [], file: 'otre.json', format: 'object', key: 'harfler' },
+        { name: 'seddeData', getData: () => window.seddeData || [], file: 'sedde.json', format: 'object', key: 'harfler' },
+        { name: 'cezmData', getData: () => window.cezmData || [], file: 'cezm.json', format: 'object', key: 'harfler' },
+        { name: 'tenvinData', getData: () => window.tenvinData || [], file: 'tenvin.json', format: 'object', key: 'harfler' }
     ];
+    
+    console.log('🔍 Düzeltmeler uygulanıyor...');
+    console.log(`📊 Toplam ${fixes.length} düzeltme`);
     
     fixes.forEach((fix, fixIndex) => {
         let found = false;
         
-        dataArrays.forEach(({ name, data, file }) => {
+        dataArrays.forEach(({ name, getData, file, format, key }) => {
+            const data = getData(); // Her seferinde window'dan al (güncel referans)
+            
             if (Array.isArray(data) && data.length > 0) {
                 const item = data.find(item => {
                     const itemKelime = item.kelime || item.harf || '';
@@ -491,20 +540,23 @@ async function applyFixesFromArray(fixes) {
                         results.applied++;
                         found = true;
                         
+                        console.log(`✅ [${fixIndex + 1}/${fixes.length}] "${fix.kelime}" düzeltildi (${name}): "${fix.oldOkunus}" → "${fix.newOkunus}"`);
+                        
                         // Güncellenmiş dosyayı kaydet
                         if (!results.updatedFiles[file]) {
-                            const dataArrayInfo = dataArrays.find(d => d.file === file);
                             results.updatedFiles[file] = { 
-                                data: data, 
-                                format: dataArrayInfo?.format || 'array',
-                                key: dataArrayInfo?.key || null
+                                data: data, // Array referansı
+                                format: format,
+                                key: key
                             };
                         }
                     } else if (item.okunus === fix.newOkunus) {
                         results.alreadyApplied++;
                         found = true;
+                        console.log(`ℹ️ [${fixIndex + 1}/${fixes.length}] "${fix.kelime}" zaten düzeltilmiş (${name})`);
                     } else {
                         found = true; // Kelime bulundu ama okunuş farklı
+                        console.log(`⚠️ [${fixIndex + 1}/${fixes.length}] "${fix.kelime}" bulundu ama okunuş farklı (${name}): mevcut="${item.okunus}", beklenen="${fix.oldOkunus}"`);
                     }
                 }
             }
@@ -512,11 +564,15 @@ async function applyFixesFromArray(fixes) {
         
         if (!found) {
             results.notFound++;
+            console.log(`❌ [${fixIndex + 1}/${fixes.length}] "${fix.kelime}" hiçbir data array'inde bulunamadı`);
         }
     });
     
-    // Güncellenmiş data array'lerini window'a geri yaz (referans zaten aynı, sadece güncellendi)
-    // Not: data array'leri zaten window objesinde, sadece içerikleri güncellendi
+    console.log(`\n📊 Özet:`);
+    console.log(`   ✅ Uygulanan: ${results.applied}`);
+    console.log(`   ℹ️ Zaten uygulanmış: ${results.alreadyApplied}`);
+    console.log(`   ❌ Bulunamayan: ${results.notFound}`);
+    console.log(`   📁 Güncellenen dosyalar: ${Object.keys(results.updatedFiles).length}`);
     
     return results;
 }
@@ -582,6 +638,25 @@ window.applyPronunciationFixesToData = applyPronunciationFixesToData;
 window.applyPronunciationFixesToDataWrapper = applyPronunciationFixesToDataWrapper;
 window.importAndApplyPronunciationFixes = importAndApplyPronunciationFixes;
 window.applyAndExportPronunciationFixes = applyAndExportPronunciationFixes;
+
+// Wrapper function for HTML onclick (handles async)
+function applyAndExportPronunciationFixesWrapper() {
+    if (typeof applyAndExportPronunciationFixes === 'function') {
+        applyAndExportPronunciationFixes().catch(err => {
+            console.error('❌ Düzeltme uygulama ve indirme hatası:', err);
+            if (typeof showToast === 'function') {
+                showToast('Düzeltme uygulanırken hata oluştu: ' + err.message, 'error');
+            }
+        });
+    } else {
+        console.error('❌ applyAndExportPronunciationFixes fonksiyonu bulunamadı');
+        if (typeof showToast === 'function') {
+            showToast('Düzeltme fonksiyonu yüklenmedi. Sayfayı yenileyin.', 'error');
+        }
+    }
+}
+
+window.applyAndExportPronunciationFixesWrapper = applyAndExportPronunciationFixesWrapper;
 
 console.log('🔧 Okunuş Düzeltme Sistemi yüklendi');
 console.log('📝 Düzeltmeleri indirmek için: exportPronunciationFixes()');
