@@ -285,12 +285,30 @@ async function applyPronunciationFixesToData() {
     }
 }
 
+// Wrapper function for HTML onclick (handles async)
+function applyPronunciationFixesToDataWrapper() {
+    if (typeof applyPronunciationFixesToData === 'function') {
+        applyPronunciationFixesToData().catch(err => {
+            console.error('❌ Düzeltme uygulama hatası:', err);
+            if (typeof showToast === 'function') {
+                showToast('Düzeltme uygulanırken hata oluştu: ' + err.message, 'error');
+            }
+        });
+    } else {
+        console.error('❌ applyPronunciationFixesToData fonksiyonu bulunamadı');
+        if (typeof showToast === 'function') {
+            showToast('Düzeltme fonksiyonu yüklenmedi. Sayfayı yenileyin.', 'error');
+        }
+    }
+}
+
 // Console'dan erişim için
 window.exportPronunciationFixes = exportPronunciationFixes;
 window.clearPronunciationFixes = clearPronunciationFixes;
 window.showFixPronunciationModal = showFixPronunciationModal;
 window.savePronunciationFix = savePronunciationFix;
 window.applyPronunciationFixesToData = applyPronunciationFixesToData;
+window.applyPronunciationFixesToDataWrapper = applyPronunciationFixesToDataWrapper;
 
 console.log('🔧 Okunuş Düzeltme Sistemi yüklendi');
 console.log('📝 Düzeltmeleri indirmek için: exportPronunciationFixes()');
