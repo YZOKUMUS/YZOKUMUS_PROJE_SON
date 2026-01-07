@@ -1550,6 +1550,12 @@ function handleGameBackButton() {
         return;
     }
     
+    // Okuma modları için popup gösterme (dua-et, ayet-oku, hadis-oku)
+    if (['dua-et', 'ayet-oku', 'hadis-oku'].includes(currentGameMode)) {
+        goToMainMenu(true); // skipWarning = true
+        return;
+    }
+    
     // Oyun ekranından çıkış - uyarı göster
     goToMainMenu(false);
 }
@@ -1593,21 +1599,8 @@ function goToMainMenu(skipWarning = false) {
             }
         }
         
-        // Okuma modları için kontrol (Ayet Oku, Dua Et, Hadis Oku)
-        if (currentGameMode === 'ayet-oku' && currentAyetIndex > 0) {
-            hasProgress = true;
-            warningMessage = `Şu ana kadar ${currentAyetIndex} ayet okudunuz.\n\n`;
-        }
-        
-        if (currentGameMode === 'dua-et' && currentDuaIndex > 0) {
-            hasProgress = true;
-            warningMessage = `Şu ana kadar ${currentDuaIndex} dua okudunuz.\n\n`;
-        }
-        
-        if (currentGameMode === 'hadis-oku' && currentHadisIndex > 0) {
-            hasProgress = true;
-            warningMessage = `Şu ana kadar ${currentHadisIndex} hadis okudunuz.\n\n`;
-        }
+        // Okuma modları için kontrol (Ayet Oku, Dua Et, Hadis Oku) - popup gösterme
+        // Bu modlar için popup gösterilmiyor
         
         // Eğer ilerleme varsa uyarı göster
         if (hasProgress) {
