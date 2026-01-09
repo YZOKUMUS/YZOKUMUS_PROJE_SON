@@ -392,7 +392,7 @@ function renderLeaderboard(leaderboard, userPos) {
                             ${userPos.league.name} (${userPos.league.arabic})
                         </div>
                         <div style="font-size: 10px; color: rgba(26,26,46,0.75); margin-top: 1px; line-height: 1.2;">
-                            XP: ${formatNumber(userPos.weeklyXP)} | ${userPos.position ? `#${userPos.position}` : 'Sıralamada değil'}
+                            XP: ${formatNumber(userPos.weeklyXP, '.')} | ${userPos.position ? `#${userPos.position}` : 'Sıralamada değil'}
                             ${userPos.leaguePosition ? ` | Lig: #${userPos.leaguePosition}` : ''}
                         </div>
                     </div>
@@ -480,7 +480,7 @@ function renderLeaderboardList(leaderboard, userPos, mode = 'all') {
                         ${entry.usernameDisplay || entry.username}
                     </div>
                     <div style="font-size: 10px; color: rgba(26,26,46,0.7); margin-top: 1px; line-height: 1.2;">
-                        ${entry.league.name} • ${formatNumber(entry.weekly_xp)} XP
+                        ${entry.league.name} • ${formatNumber(entry.weekly_xp, '.')} XP
                     </div>
                 </div>
             </div>
@@ -530,12 +530,9 @@ function formatDate(date) {
 
 /**
  * Format number with thousand separator
- * @param {number} num - Number to format
- * @returns {string} Formatted number
+ * Uses utils.js formatNumber function (with comma separator)
+ * For Turkish locale with dot separator, we'll use utils version
  */
-function formatNumber(num) {
-    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-}
 
 // ========================================
 // EXPORTS

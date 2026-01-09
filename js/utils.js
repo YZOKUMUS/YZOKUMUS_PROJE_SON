@@ -15,10 +15,12 @@ function getLocalDateString(date = new Date()) {
 
 /**
  * Format number with thousand separators
+ * @param {number} num - Number to format
+ * @param {string} separator - Separator to use (default: ',', can be '.' for Turkish locale)
  */
-function formatNumber(num) {
+function formatNumber(num, separator = ',') {
     if (num === undefined || num === null) return '0';
-    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, separator);
 }
 
 /**

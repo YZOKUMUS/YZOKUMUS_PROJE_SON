@@ -5610,26 +5610,6 @@ function renderAsrSaadetBadges() {
     });
 }
 
-function renderAchievementsList() {
-    const achievementsList = document.getElementById('achievements-list');
-    if (achievementsList) {
-        const achievements = window.ACHIEVEMENTS || [];
-        achievementsList.innerHTML = achievements.map(ach => {
-            const isUnlocked = achievementsData[ach.id];
-            return `
-                <div class="achievement-item ${isUnlocked ? 'unlocked' : 'locked'}">
-                    <div class="achievement-icon">${isUnlocked ? ach.icon : '🔒'}</div>
-                    <div class="achievement-info">
-                        <div class="achievement-name">${ach.name}</div>
-                        <div class="achievement-desc">${ach.description}</div>
-                    </div>
-                    <div class="achievement-status">${isUnlocked ? '✅' : ''}</div>
-                </div>
-            `;
-        }).join('');
-    }
-}
-
 function showBadgeDetail(badgeId, type = 'normal') {
     let badge = null;
     
@@ -5830,23 +5810,6 @@ function showDailyReward() {
         streakBonus > 0 ? `+${streakBonus} seri bonusu dahil!` : '';
     
     openModal('daily-reward-modal');
-}
-
-// Eski günlük ödül fonksiyonu - artık kullanılmıyor, yeni sistem claimDailyReward() kullanıyor
-// Bu fonksiyon sadece eski modal için tutuluyor, ama artık çağrılmıyor
-function claimDailyRewardOld() {
-    const today = getLocalDateString();
-    const streakBonus = Math.min(streakData.currentStreak * 5, 50);
-    const baseReward = 20;
-    const totalReward = baseReward + streakBonus;
-    
-    totalPoints += totalReward;
-    localStorage.setItem('hasene_last_daily_reward', today);
-    
-    closeModal('daily-reward-modal');
-    showToast(`+${totalReward} Hasene kazandınız! 🎁`, 'success', 2000);
-    updateStatsDisplay();
-    debouncedSaveStats();
 }
 
 // ========================================
