@@ -2372,11 +2372,11 @@ function getStrugglingWords() {
         .filter(wordId => {
             const stats = wordStats[wordId];
             if (!stats) return false;
-            const masteryLevel = stats.masteryLevel || 0;
+            const attempts = stats.attempts || 0;
             const successRate = stats.successRate || 0;
-            // Zorlanılan kelimeler: masteryLevel < 4 VE başarı oranı < 100%
-            // Başarı oranı %100 olan kelimeler listeden çıkar
-            return masteryLevel < 4 && successRate < 100;
+            // Zorlanılan kelimeler: En az 2 deneme VE başarı oranı < 50%
+            // README ve selectIntelligentWords ile uyumlu
+            return attempts >= 2 && successRate < 50;
         })
         .map(wordId => ({
             id: wordId,
@@ -2493,16 +2493,24 @@ async function getWordAnalysis() {
         
         const successRate = stats.successRate || 0;
         const masteryLevel = stats.masteryLevel || 0;
+        const attempts = stats.attempts || 0;
         
         totalSuccessRate += successRate;
         
-        if (masteryLevel >= 8) {
-            mastered++;
-        } else if (masteryLevel >= 4) {
-            learning++;
-        } else {
+        // Kategorilere ayır (getStrugglingWords, getLearningWords, getMasteredWords ile uyumlu)
+        // Öncelik sırası: Struggling > Mastered > Learning
+        if (attempts >= 2 && successRate < 50) {
+            // Zorlanılan kelimeler: En az 2 deneme ve başarı oranı < 50%
+            // getStrugglingWords ile uyumlu (öncelikli kategori)
             struggling++;
+        } else if (masteryLevel >= 8) {
+            // Ustalaşılan kelimeler: successRate >= 80%
+            mastered++;
+        } else if (masteryLevel >= 4 && masteryLevel < 8) {
+            // Öğreniliyor kelimeler: successRate 40-79% (ve struggling değil)
+            learning++;
         }
+        // attempts < 2 olan kelimeler hiçbir kategoriye dahil edilmez (yeni kelimeler)
         
         if (stats.nextReviewDate) {
             try {
@@ -2556,28 +2564,32 @@ function getWordLearningSpeed() {
     let previousMonthlyNewWords = 0;
     
     Object.entries(wordStats).forEach(([wordId, stats]) => {
-        if (!stats || !stats.lastReview) return;
+        if (!stats) return;
+        
+        // İlk deneme tarihini bul: lastReview, lastCorrect veya lastWrong
+        const firstReviewDate = stats.lastReview || stats.lastCorrect || stats.lastWrong;
+        if (!firstReviewDate) return; // Hiç deneme yoksa atla
         
         try {
-            const lastReview = new Date(stats.lastReview);
+            const firstReview = new Date(firstReviewDate);
             
             // Weekly (last 7 days)
-            if (lastReview >= weekAgo) {
+            if (firstReview >= weekAgo) {
                 weeklyNewWords++;
             }
             
             // Previous week (7-14 days ago)
-            if (lastReview >= twoWeeksAgo && lastReview < weekAgo) {
+            if (firstReview >= twoWeeksAgo && firstReview < weekAgo) {
                 previousWeeklyNewWords++;
             }
             
             // Monthly (last 30 days)
-            if (lastReview >= monthAgo) {
+            if (firstReview >= monthAgo) {
                 monthlyNewWords++;
             }
             
             // Previous month (30-60 days ago)
-            if (lastReview >= twoMonthsAgo && lastReview < monthAgo) {
+            if (firstReview >= twoMonthsAgo && firstReview < monthAgo) {
                 previousMonthlyNewWords++;
             }
         } catch (e) {
@@ -3110,7 +3122,13 @@ async function startDinleBulGame() {
         filtered = data.filter(w => w.ses_dosyasi || w.audio);
     }
     
-    currentQuestions = getRandomItems(filtered, CONFIG.QUESTIONS_PER_GAME);
+    // Use intelligent word selection if enough words available
+    if (filtered.length > CONFIG.QUESTIONS_PER_GAME) {
+        currentQuestions = selectIntelligentWords(filtered, CONFIG.QUESTIONS_PER_GAME, false);
+        console.log('🧠 Dinle Bul: Akıllı kelime seçimi kullanıldı');
+    } else {
+        currentQuestions = getRandomItems(filtered, CONFIG.QUESTIONS_PER_GAME);
+    }
     
     document.getElementById('dinle-bul-screen').classList.remove('hidden');
     document.getElementById('dinle-total-questions').textContent = CONFIG.QUESTIONS_PER_GAME;
@@ -3228,6 +3246,51 @@ async function startBoslukDoldurGame() {
     loadBoslukQuestion();
 }
 
+/**
+ * Check if an Arabic word is a conjunction/preposition (bağlaç/edat)
+ * @param {string} word - Arabic word to check
+ * @returns {boolean} True if word is a conjunction/preposition
+ */
+function isArabicConjunction(word) {
+    if (!word || word.length <= 0) return true;
+    
+    // Remove diacritics (harekeler) for comparison
+    const cleanWord = word.replace(/[\u064B-\u065F\u0670]/g, '').trim();
+    
+    // Common Arabic conjunctions and prepositions (bağlaçlar ve edatlar)
+    // En yaygın bağlaçlar ve edatlar
+    const conjunctions = new Set([
+        'و', 'ف', 'ثم', 'لكن', 'أو', 'بل', 'إن', 'أن', 'ما',
+        'من', 'إلى', 'على', 'في', 'مع', 'عن', 'بين', 'قبل', 'بعد',
+        'حتى', 'إلا', 'إذا', 'حيث', 'كيف', 'متى', 'التي', 'الذي',
+        'اللذان', 'اللذين', 'اللاتي', 'الذين', 'هذا', 'هذه', 'ذلك',
+        'تلك', 'هؤلاء', 'أولئك', 'هنا', 'هناك', 'حين', 'أين',
+        'لم', 'لن', 'لماذا', 'كذا', 'كذلك', 'أيضا', 'إذن', 'لذلك',
+        'بسبب', 'بعدما', 'قبلما', 'حيثما', 'كيفما', 'متىما', 'أينما',
+        'مهما', 'أيما', 'كلما', 'لأن', 'لكي', 'لعل', 'عسى', 'لولا',
+        'لو', 'لما', 'إذ', 'حينئذ', 'بينما', 'فيما', 'عندما',
+        'كأن', 'كأنما', 'لكأن', 'لكأنما', 'لكنما', 'بلما'
+    ]);
+    
+    // Check exact match
+    if (conjunctions.has(cleanWord)) {
+        return true;
+    }
+    
+    // Check if word starts with common prefixes (like الـ)
+    const wordWithoutAl = cleanWord.replace(/^ال/, '');
+    if (conjunctions.has(wordWithoutAl)) {
+        return true;
+    }
+    
+    // Very short words (1-2 characters) are usually conjunctions/prepositions
+    if (cleanWord.length <= 2) {
+        return true;
+    }
+    
+    return false;
+}
+
 function loadBoslukQuestion() {
     if (questionIndex >= currentQuestions.length) {
         endGame();
@@ -3241,21 +3304,33 @@ function loadBoslukQuestion() {
     document.getElementById('bosluk-session-score').textContent = formatNumber(sessionScore);
     
     const arabicText = currentQuestion.ayet_metni || '';
-    const words = arabicText.split(' ').filter(w => w.length > 1);
+    const allWords = arabicText.split(' ').filter(w => w.length > 1);
     
-    // Pick random word to blank
-    const blankIndex = Math.floor(Math.random() * words.length);
-    const correctWord = words[blankIndex];
+    // Filter out conjunctions and prepositions (bağlaçlar ve edatlar)
+    const words = allWords.filter(w => !isArabicConjunction(w));
     
-    // Create text with blank
-    const displayWords = [...words];
-    displayWords[blankIndex] = '<span class="blank-word" id="bosluk-blank"></span>';
+    // If no words left after filtering, use all words (fallback)
+    const finalWords = words.length > 0 ? words : allWords;
+    
+    // Pick random word to blank (from filtered words)
+    const blankIndex = Math.floor(Math.random() * finalWords.length);
+    const correctWord = finalWords[blankIndex];
+    
+    // Find the index in allWords for display
+    const displayBlankIndex = allWords.indexOf(correctWord);
+    
+    // Create text with blank (use allWords for display to show full verse)
+    const displayWords = [...allWords];
+    if (displayBlankIndex >= 0) {
+        displayWords[displayBlankIndex] = '<span class="blank-word" id="bosluk-blank"></span>';
+    }
     
     document.getElementById('bosluk-arabic').innerHTML = displayWords.join(' ');
     document.getElementById('bosluk-translation').textContent = currentQuestion.meal || '';
     
     // Generate wrong options from other words in verse or other verses
-    let wrongOptions = words.filter((w, i) => i !== blankIndex && w.length > 1).slice(0, 3);
+    // Use finalWords (filtered) for wrong options, but exclude the correct word
+    let wrongOptions = finalWords.filter((w, i) => i !== blankIndex && w !== correctWord).slice(0, 3);
     
     // If not enough, get from other verses
     if (wrongOptions.length < 3) {
@@ -3272,9 +3347,29 @@ function loadBoslukQuestion() {
     
     const options = shuffleArray([correctWord, ...wrongOptions.slice(0, 3)]);
     
+    // Get the font style from the question verse to apply to answer options
+    // Use CSS class definition directly instead of computed style (which may be affected by viewport)
+    const verseElement = document.getElementById('bosluk-arabic');
+    
+    // Use the CSS-defined font-size from .arabic-verse (2rem) directly
+    // Computed style returns px values which may vary, but we want the rem value
+    const arabicFontFamily = 'var(--font-arabic)';
+    const arabicFontSize = '2rem'; // Direct from CSS .arabic-verse { font-size: 2rem; }
+    const arabicFontWeight = '400';
+    const arabicDirection = 'rtl';
+    const arabicLineHeight = 'var(--arabic-line-height-loose)';
+    const arabicLetterSpacing = 'var(--arabic-letter-spacing)';
+    
+    // Debug: Log font size to ensure it's correct
+    console.log('📏 Boşluk Doldur - Soru ayeti font-size:', arabicFontSize, 'Cevap şıklarına uygulanıyor');
+    
     const optionsContainer = document.getElementById('bosluk-options');
     optionsContainer.innerHTML = options.map((option, index) => `
-        <button class="answer-option" onclick="checkBoslukAnswer(${index}, '${option.replace(/'/g, "\\'")}')">
+        <button 
+            class="answer-option arabic-text" 
+            onclick="checkBoslukAnswer(${index}, '${option.replace(/'/g, "\\'")}')"
+            style="font-family: ${arabicFontFamily} !important; font-size: ${arabicFontSize} !important; font-weight: ${arabicFontWeight} !important; direction: ${arabicDirection} !important; line-height: ${arabicLineHeight} !important; letter-spacing: ${arabicLetterSpacing} !important;"
+        >
             ${option}
         </button>
     `).join('');
@@ -5912,8 +6007,22 @@ async function startKarmaGame() {
     // Generate mixed questions (15 total)
     const questionCount = 15;
     
-    // 1. Kelime Çevir soruları (4 adet)
-    const kelimeQuestions = getRandomItems(kelimeData, 4).map(word => ({
+    // Filter by difficulty for intelligent selection
+    let filteredKelimeData = filterByDifficulty(kelimeData, currentDifficulty);
+    if (filteredKelimeData.length < 20) {
+        filteredKelimeData = kelimeData;
+    }
+    
+    // 1. Kelime Çevir soruları (4 adet) - Akıllı seçim kullan
+    let selectedKelimeWords;
+    if (filteredKelimeData.length > 4) {
+        selectedKelimeWords = selectIntelligentWords(filteredKelimeData, 4, false);
+        console.log('🧠 Karma Oyun - Kelime Çevir: Akıllı kelime seçimi kullanıldı');
+    } else {
+        selectedKelimeWords = getRandomItems(filteredKelimeData, 4);
+    }
+    
+    const kelimeQuestions = selectedKelimeWords.map(word => ({
         type: 'kelime-cevir',
         data: word,
         question: word.kelime,
@@ -5921,21 +6030,36 @@ async function startKarmaGame() {
         options: generateOptions(word.anlam, kelimeData.map(w => w.anlam))
     }));
     
-    // 2. Dinle Bul soruları (3 adet)
-    const audioWords = kelimeData.filter(w => w.ses_dosyasi);
-    const dinleQuestions = getRandomItems(audioWords, 3).map(word => ({
+    // 2. Dinle Bul soruları (3 adet) - Akıllı seçim kullan
+    const audioWords = filteredKelimeData.filter(w => w.ses_dosyasi || w.audio);
+    let selectedAudioWords;
+    if (audioWords.length > 3) {
+        selectedAudioWords = selectIntelligentWords(audioWords, 3, false);
+        console.log('🧠 Karma Oyun - Dinle Bul: Akıllı kelime seçimi kullanıldı');
+    } else {
+        // Yeterli ses dosyası yoksa tüm kelimelerden seç
+        const allAudioWords = kelimeData.filter(w => w.ses_dosyasi || w.audio);
+        selectedAudioWords = getRandomItems(allAudioWords, 3);
+    }
+    
+    const dinleQuestions = selectedAudioWords.map(word => ({
         type: 'dinle-bul',
         data: word,
         question: '🔊 Dinle ve doğru anlamı seç',
-        audioUrl: word.ses_dosyasi,
+        audioUrl: word.ses_dosyasi || word.audio,
         correctAnswer: word.anlam,
         options: generateOptions(word.anlam, kelimeData.map(w => w.anlam))
     }));
     
-    // 3. Eşleştirme sorusu (2 adet - her biri 4 çift)
+    // 3. Eşleştirme sorusu (2 adet - her biri 4 çift) - Akıllı seçim kullan
     const matchQuestions = [];
     for (let i = 0; i < 2; i++) {
-        const matchWords = getRandomItems(kelimeData, 4);
+        let matchWords;
+        if (filteredKelimeData.length > 4) {
+            matchWords = selectIntelligentWords(filteredKelimeData, 4, false);
+        } else {
+            matchWords = getRandomItems(kelimeData, 4);
+        }
         matchQuestions.push({
             type: 'eslestirme',
             pairs: matchWords.map(w => ({
@@ -5953,11 +6077,20 @@ async function startKarmaGame() {
         return words.length >= 3;
     });
     const boslukQuestions = getRandomItems(suitableAyets, 3).map(ayet => {
-        const words = ayet.ayet_metni.split(' ').filter(w => w.length > 1);
-        const blankIndex = Math.floor(Math.random() * words.length);
-        const correctWord = words[blankIndex];
-        const displayWords = [...words];
-        displayWords[blankIndex] = '____';
+        const allWords = ayet.ayet_metni.split(' ').filter(w => w.length > 1);
+        // Filter out conjunctions
+        const words = allWords.filter(w => !isArabicConjunction(w));
+        // If no words left after filtering, use all words (fallback)
+        const finalWords = words.length > 0 ? words : allWords;
+        const blankIndex = Math.floor(Math.random() * finalWords.length);
+        const correctWord = finalWords[blankIndex];
+        
+        // Find the index in allWords for display
+        const displayBlankIndex = allWords.indexOf(correctWord);
+        const displayWords = [...allWords];
+        if (displayBlankIndex >= 0) {
+            displayWords[displayBlankIndex] = '____';
+        }
         
         return {
             type: 'bosluk-doldur',
@@ -5965,15 +6098,13 @@ async function startKarmaGame() {
             question: displayWords.join(' '),
             translation: ayet.meal,
             correctAnswer: correctWord,
-            options: generateOptions(correctWord, words.filter((w, i) => i !== blankIndex))
+            options: generateOptions(correctWord, finalWords.filter((w, i) => i !== blankIndex))
         };
     });
     
-    // 5. Harf soruları (3 adet)
-    const harfQuestions = getRandomItems(
-        harfData.filter(h => h && h.harf && h.okunus), // Sadece geçerli harfler
-        3
-    ).map(harf => ({
+    // 5. Harf soruları (3 adet) - Harfler için akıllı seçim gerekmez, rastgele yeterli
+    const validHarfler = harfData.filter(h => h && h.harf && h.okunus);
+    const harfQuestions = getRandomItems(validHarfler, 3).map(harf => ({
         type: 'harf-bul',
         data: harf,
         question: harf.harf,
@@ -6283,6 +6414,18 @@ function renderBoslukDoldurKarma(container, question) {
     
     const audioUrl = question.data?.ayet_ses_dosyasi || question.data?.audioUrl || question.audioUrl || '';
     
+    // Use CSS class definition directly instead of computed style
+    // .karma-arabic.bosluk { font-size: 1.8rem; } from CSS
+    const arabicFontFamily = 'var(--font-arabic)';
+    const arabicFontSize = '1.8rem'; // Direct from CSS .karma-arabic.bosluk { font-size: 1.8rem; }
+    const arabicFontWeight = '400';
+    const arabicDirection = 'rtl';
+    const arabicLineHeight = 'var(--arabic-line-height-loose)';
+    const arabicLetterSpacing = 'var(--arabic-letter-spacing)';
+    
+    // Debug: Log font size to ensure it's correct
+    console.log('📏 Karma Boşluk Doldur - Soru ayeti font-size:', arabicFontSize, 'Cevap şıklarına uygulanıyor');
+    
     container.innerHTML = `
         <div style="position: relative;">
             <div class="karma-type-badge">📖 Boşluk Doldur</div>
@@ -6295,7 +6438,11 @@ function renderBoslukDoldurKarma(container, question) {
         <div class="karma-translation">${question.translation || ''}</div>
         <div class="karma-options">
             ${validOptions.map((opt, i) => `
-                <button class="answer-option" onclick="checkKarmaAnswer('${String(opt || '').replace(/'/g, "\\'")}', '${String(question.correctAnswer || '').replace(/'/g, "\\'")}')">
+                <button 
+                    class="answer-option arabic-text" 
+                    onclick="checkKarmaAnswer('${String(opt || '').replace(/'/g, "\\'")}', '${String(question.correctAnswer || '').replace(/'/g, "\\'")}')"
+                    style="font-family: ${arabicFontFamily} !important; font-size: ${arabicFontSize} !important; font-weight: ${arabicFontWeight} !important; direction: ${arabicDirection} !important; line-height: ${arabicLineHeight} !important; letter-spacing: ${arabicLetterSpacing} !important;"
+                >
                     ${opt || ''}
                 </button>
             `).join('')}

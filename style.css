@@ -741,6 +741,8 @@ body {
     text-align: right;
     line-height: var(--arabic-line-height-normal);
     letter-spacing: var(--arabic-letter-spacing);
+    /* font-size inline style'dan gelecek (soru ayeti ile aynı boyut için) */
+    font-size: unset !important; /* CSS'teki font-size tanımını kaldır, inline style kullan */
 }
 
 .answer-option:hover {
