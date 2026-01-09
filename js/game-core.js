@@ -1200,8 +1200,28 @@ function setupEventListeners() {
             document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             currentDifficulty = btn.dataset.difficulty;
+            
+            // Save difficulty preference to localStorage
+            localStorage.setItem(CONFIG.STORAGE_KEYS.DIFFICULTY, currentDifficulty);
+            
+            // Debug log
+            console.log('📊 Zorluk seviyesi değiştirildi:', currentDifficulty);
         });
     });
+    
+    // Load saved difficulty preference
+    const savedDifficulty = localStorage.getItem(CONFIG.STORAGE_KEYS.DIFFICULTY);
+    if (savedDifficulty && ['easy', 'medium', 'hard'].includes(savedDifficulty)) {
+        currentDifficulty = savedDifficulty;
+        // Update active button
+        document.querySelectorAll('.difficulty-btn').forEach(b => {
+            if (b.dataset.difficulty === savedDifficulty) {
+                b.classList.add('active');
+            } else {
+                b.classList.remove('active');
+            }
+        });
+    }
     
     // Game cards
     document.querySelectorAll('.game-card').forEach(card => {
@@ -1938,6 +1958,12 @@ function loadKelimeQuestion() {
     
     // Update favorite button
     const wordId = currentQuestion.kelime_id || currentQuestion.id;
+    
+    // Show word ID for testing (sol alt köşe - çok küçük punto)
+    const wordIdElement = document.getElementById('kelime-word-id');
+    if (wordIdElement) {
+        wordIdElement.textContent = `ID: ${wordId || 'N/A'}`;
+    }
     const favBtn = document.getElementById('kelime-favorite-btn');
     if (favBtn) {
         favBtn.textContent = favorites.includes(wordId) ? '❤️' : '♡';
