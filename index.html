@@ -55,7 +55,7 @@
             <div class="user-status-bar">
                 <div class="user-info">
                     <span id="user-avatar" class="user-avatar">👤</span>
-                    <span id="current-username-display" class="username-display">Misafir</span>
+                    <span id="current-username-display" class="username-display">Giriş Yap</span>
                     <span id="user-status-indicator" class="user-status-indicator">🔴 Çıkış Yapıldı</span>
                 </div>
                 <div class="user-actions">
@@ -900,11 +900,11 @@
             />
             <!-- Cinsiyet Seçimi -->
             <div style="margin-bottom: 20px;">
-                <label class="gender-select-label">Cinsiyet (Opsiyonel)</label>
+                <label class="gender-select-label">Cinsiyet</label>
                 <div class="gender-select-buttons">
                     <button 
                         id="gender-male-btn" 
-                        class="gender-btn" 
+                        class="gender-btn active" 
                         onclick="selectGender('male')"
                         title="Erkek"
                     >👨</button>
@@ -914,12 +914,6 @@
                         onclick="selectGender('female')"
                         title="Kadın"
                     >👩</button>
-                    <button 
-                        id="gender-none-btn" 
-                        class="gender-btn active" 
-                        onclick="selectGender('none')"
-                        title="Belirtmek istemiyorum"
-                    >👤</button>
                 </div>
             </div>
             <div style="display: flex; gap: 10px;">

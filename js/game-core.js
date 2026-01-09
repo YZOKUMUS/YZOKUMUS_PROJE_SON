@@ -6816,7 +6816,7 @@ async function nuclearClear() {
         // Önce Firebase'den verileri sil (kullanıcı bilgilerini kaydetmeden önce)
         const savedUsername = localStorage.getItem('hasene_username');
         if (savedUsername) {
-            const defaultUsernames = ['Kullanıcı', 'Misafir', 'Anonim Kullanıcı', ''];
+            const defaultUsernames = ['Kullanıcı', 'Anonim Kullanıcı', ''];
             const hasRealUsername = savedUsername && savedUsername.trim() !== '' && !defaultUsernames.includes(savedUsername.trim());
             
             if (hasRealUsername && window.FIREBASE_ENABLED && window.firestore) {

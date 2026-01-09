@@ -352,15 +352,15 @@ function showUsernameLoginModal() {
         // Wait for modal to be visible before accessing DOM elements
         setTimeout(() => {
             try {
-                // Restore previously selected gender if exists
-                const savedGender = localStorage.getItem('hasene_user_gender') || 'none';
+                // Restore previously selected gender if exists, default to 'male'
+                const savedGender = localStorage.getItem('hasene_user_gender') || 'male';
                 selectGender(savedGender);
                 
                 // Pre-fill username if user exists
                 const savedUsername = localStorage.getItem('hasene_username');
                 const input = document.getElementById('username-input');
                 if (input) {
-                    if (savedUsername && savedUsername !== 'Kullanıcı' && savedUsername !== 'Misafir') {
+                    if (savedUsername && savedUsername !== 'Kullanıcı') {
                         input.value = savedUsername;
                     } else {
                         input.value = '';
@@ -387,7 +387,7 @@ function showUsernameLoginModal() {
 
 /**
  * Select gender for user
- * @param {string} gender - 'male', 'female', or 'none'
+ * @param {string} gender - 'male' or 'female'
  */
 function selectGender(gender) {
     try {
@@ -455,8 +455,8 @@ async function confirmUsername() {
             return;
         }
         
-        // Get selected gender
-        let gender = 'none';
+        // Get selected gender (default to 'male' if none selected)
+        let gender = 'male';
         try {
             const activeGenderBtn = document.querySelector('.gender-btn.active');
             if (activeGenderBtn) {
@@ -889,17 +889,18 @@ function updateUserStatusUI() {
         authBtn.textContent = 'Çıkış Yap';
         
         // Update avatar based on gender
-        const gender = localStorage.getItem('hasene_user_gender');
+        const gender = localStorage.getItem('hasene_user_gender') || 'male';
         if (gender === 'male') {
             if (userAvatar) userAvatar.textContent = '👨';
         } else if (gender === 'female') {
             if (userAvatar) userAvatar.textContent = '👩';
         } else {
-            if (userAvatar) userAvatar.textContent = '👤';
+            // Default to male if invalid gender
+            if (userAvatar) userAvatar.textContent = '👨';
         }
     } else {
         // User is not logged in
-        usernameDisplay.textContent = 'Misafir';
+        usernameDisplay.textContent = 'Giriş Yap';
         statusIndicator.textContent = '🔴 Çıkış Yapıldı';
         statusIndicator.style.color = '#ef4444';
         authBtn.textContent = 'Giriş Yap';

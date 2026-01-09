@@ -79,7 +79,7 @@ async function loadWeeklyXPFromFirebase() {
     
     try {
         const savedUsername = localStorage.getItem('hasene_username') || '';
-        const defaultUsernames = ['Kullanıcı', 'Misafir', 'Anonim Kullanıcı', ''];
+        const defaultUsernames = ['Kullanıcı', 'Anonim Kullanıcı', ''];
         const hasRealUsername = savedUsername && savedUsername.trim() !== '' && !defaultUsernames.includes(savedUsername.trim());
         
         if (!hasRealUsername) {

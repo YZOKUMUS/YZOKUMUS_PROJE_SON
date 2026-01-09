@@ -285,7 +285,7 @@ async function firestoreSet(collection, docId, data) {
     // ALWAYS use localStorage username first - this is the username user explicitly entered
     // Don't fall back to user.username (which might be Firebase displayName) unless localStorage is empty
     const savedUsername = localStorage.getItem('hasene_username') || '';
-    const defaultUsernames = ['Kullanıcı', 'Misafir', 'Anonim Kullanıcı', ''];
+    const defaultUsernames = ['Kullanıcı', 'Anonim Kullanıcı', ''];
     const hasRealUsername = savedUsername && savedUsername.trim() !== '' && !defaultUsernames.includes(savedUsername.trim());
     
     if (!hasRealUsername) {
@@ -375,7 +375,7 @@ async function loadUserStats() {
     if (window.FIREBASE_ENABLED && window.firestore) {
         try {
             const savedUsername = localStorage.getItem('hasene_username') || '';
-            const defaultUsernames = ['Kullanıcı', 'Misafir', 'Anonim Kullanıcı', ''];
+            const defaultUsernames = ['Kullanıcı', 'Anonim Kullanıcı', ''];
             const hasRealUsername = savedUsername && savedUsername.trim() !== '' && !defaultUsernames.includes(savedUsername.trim());
             
             if (hasRealUsername) {
@@ -545,7 +545,7 @@ async function saveUserStats(stats) {
     const savedUsername = localStorage.getItem('hasene_username') || '';
     console.log('🔍 saveUserStats - Checking username:', { savedUsername, localStorageHasUsername: !!localStorage.getItem('hasene_username') });
     
-    const defaultUsernames = ['Kullanıcı', 'Misafir', 'Anonim Kullanıcı', ''];
+    const defaultUsernames = ['Kullanıcı', 'Anonim Kullanıcı', ''];
     const hasRealUsername = savedUsername && savedUsername.trim() !== '' && !defaultUsernames.includes(savedUsername.trim());
     
     console.log('🔍 saveUserStats - Username check:', { savedUsername, hasRealUsername, FIREBASE_ENABLED: !!window.FIREBASE_ENABLED, firestore: !!window.firestore });
@@ -645,7 +645,7 @@ async function loadDailyTasks() {
     if (window.FIREBASE_ENABLED && window.firestore) {
         try {
             const savedUsername = localStorage.getItem('hasene_username') || '';
-            const defaultUsernames = ['Kullanıcı', 'Misafir', 'Anonim Kullanıcı', ''];
+            const defaultUsernames = ['Kullanıcı', 'Anonim Kullanıcı', ''];
             const hasRealUsername = savedUsername && savedUsername.trim() !== '' && !defaultUsernames.includes(savedUsername.trim());
             
             if (hasRealUsername) {
@@ -703,7 +703,7 @@ async function saveDailyTasks(tasks) {
     // 2. Save to Firebase if user has a real username (for both local and Firebase users)
     // ALWAYS use localStorage username - don't fall back to user.username
     const savedUsername = localStorage.getItem('hasene_username') || '';
-    const defaultUsernames = ['Kullanıcı', 'Misafir', 'Anonim Kullanıcı', ''];
+    const defaultUsernames = ['Kullanıcı', 'Anonim Kullanıcı', ''];
     const hasRealUsername = savedUsername && savedUsername.trim() !== '' && !defaultUsernames.includes(savedUsername.trim());
     
     if (hasRealUsername && window.FIREBASE_ENABLED && window.firestore) {
@@ -752,7 +752,7 @@ async function syncAllDataToBackend() {
     
         // ALWAYS use localStorage username - don't fall back to user.username
         const savedUsername = localStorage.getItem('hasene_username') || '';
-        const defaultUsernames = ['Kullanıcı', 'Misafir', 'Anonim Kullanıcı', ''];
+        const defaultUsernames = ['Kullanıcı', 'Anonim Kullanıcı', ''];
         const hasRealUsername = savedUsername && savedUsername.trim() !== '' && !defaultUsernames.includes(savedUsername.trim());
     
     if (!hasRealUsername) {
