@@ -6860,6 +6860,7 @@ if (typeof window !== 'undefined') {
     window.checkElifFethaAnswer = checkElifFethaAnswer;
     window.checkElifEsreAnswer = checkElifEsreAnswer;
     window.checkElifOtreAnswer = checkElifOtreAnswer;
+    window.checkElifTenvinAnswer = checkElifTenvinAnswer;
     window.checkUcHarfliKelimelerAnswer = checkUcHarfliKelimelerAnswer;
     window.checkSeddeAnswer = checkSeddeAnswer;
     window.checkCezmAnswer = checkCezmAnswer;
