@@ -332,8 +332,18 @@ const ONBOARDING_SLIDES = [
     },
     {
         icon: '📚',
-        title: '7 Oyun Modu',
-        description: 'Kelime Çevir, Dinle Bul, Boşluk Doldur, Ayet Oku, Dua Et, Hadis Oku ve Elif Ba modlarıyla öğrenin.'
+        title: 'Oyun Modları',
+        description: 'Talim Et: Kelime Çevir, Dinle Bul ve Boşluk Doldur modlarını karışık oynayın. Günlük Okumalar: Ayet, Dua ve Hadis okuyun. Elif Ba ile temel öğrenin.'
+    },
+    {
+        icon: '🧩',
+        title: 'Talim Et Modu',
+        description: 'Üç farklı oyun modunu bir arada deneyin! Kelime çevirme, dinleme ve boşluk doldurma soruları karışık gelir. Daha zorlu ve eğlenceli bir öğrenme deneyimi!'
+    },
+    {
+        icon: '📖',
+        title: 'Günlük Okumalar',
+        description: 'Ayet, Dua ve Hadis okuma modlarını tek bir yerden erişin. Her gün farklı içerikler okuyun ve günlük görevlerinizi tamamlayın.'
     },
     {
         icon: '💰',

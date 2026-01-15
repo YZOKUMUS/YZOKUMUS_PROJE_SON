@@ -6321,23 +6321,31 @@ async function startKarmaGame() {
     // 2. Dinle Bul soruları (3 adet) - Akıllı seçim kullan
     const audioWords = filteredKelimeData.filter(w => w.ses_dosyasi || w.audio);
     let selectedAudioWords;
-    if (audioWords.length > 3) {
+    if (audioWords.length >= 3) {
         selectedAudioWords = selectIntelligentWords(audioWords, 3, false);
         console.log('🧠 Talim Et - Dinle Bul: Akıllı kelime seçimi kullanıldı');
+    } else if (audioWords.length > 0) {
+        // Yeterli ses dosyası yoksa mevcut olanları kullan
+        selectedAudioWords = audioWords;
+        console.log(`⚠️ Talim Et - Dinle Bul: Sadece ${audioWords.length} ses dosyası bulundu`);
     } else {
-        // Yeterli ses dosyası yoksa tüm kelimelerden seç (bağlaç filtresi uygulanmış)
+        // Hiç ses dosyası yoksa tüm kelimelerden seç (bağlaç filtresi uygulanmış)
         const allAudioWords = kelimeData.filter(w => {
             const hasAudio = w.ses_dosyasi || w.audio;
             const kelime = w.kelime || w.arabic || '';
             return hasAudio && !isArabicConjunction(kelime);
         });
-        selectedAudioWords = getRandomItems(allAudioWords, 3);
+        if (allAudioWords.length > 0) {
+            selectedAudioWords = getRandomItems(allAudioWords, Math.min(3, allAudioWords.length));
+        } else {
+            selectedAudioWords = []; // Ses dosyası yoksa boş bırak
+        }
     }
     
     const dinleQuestions = selectedAudioWords.map(word => ({
         type: 'dinle-bul',
         data: word,
-        question: '🔊 Dinle ve doğru anlamı seç',
+        question: '🎧 Dinle ve doğru anlamı seç',
         audioUrl: word.ses_dosyasi || word.audio,
         correctAnswer: word.anlam,
         options: generateOptions(word.anlam, optionsWords.map(w => w.anlam))
@@ -6373,7 +6381,8 @@ async function startKarmaGame() {
         const words = (a.ayet_metni || '').split(' ').filter(w => w.length > 1);
         return words.length >= 3;
     });
-    const boslukQuestions = getRandomItems(suitableAyets, 3).map(ayet => {
+    const selectedAyetsForBosluk = getRandomItems(suitableAyets, Math.min(3, suitableAyets.length));
+    const boslukQuestions = selectedAyetsForBosluk.map(ayet => {
         const allWords = ayet.ayet_metni.split(' ').filter(w => w.length > 1);
         // Filter out conjunctions
         const words = allWords.filter(w => !isArabicConjunction(w));
@@ -6401,7 +6410,8 @@ async function startKarmaGame() {
     
     // 5. Harf soruları (3 adet) - Harfler için akıllı seçim gerekmez, rastgele yeterli
     const validHarfler = harfData.filter(h => h && h.harf && h.okunus);
-    const harfQuestions = getRandomItems(validHarfler, 3).map(harf => ({
+    const selectedHarfler = getRandomItems(validHarfler, Math.min(3, validHarfler.length));
+    const harfQuestions = selectedHarfler.map(harf => ({
         type: 'harf-bul',
         data: harf,
         question: harf.harf,
@@ -6419,7 +6429,7 @@ async function startKarmaGame() {
         return words.length >= 3 && a.meal && a.meal.length > 10;
     });
     
-    const selectedAyets = getRandomItems(suitableAyetsForBaglamsal, 3);
+    const selectedAyets = getRandomItems(suitableAyetsForBaglamsal, Math.min(3, suitableAyetsForBaglamsal.length));
     
     for (const ayet of selectedAyets) {
         const ayetWords = ayet.ayet_metni.split(' ').filter(w => w.length > 2);
@@ -6482,7 +6492,20 @@ async function startKarmaGame() {
         ...baglamsalQuestions
     ]);
     
-    console.log(`🎲 ${karmaQuestions.length} karma soru oluşturuldu`);
+    // Soru sayısı istatistikleri
+    console.log(`📊 Talim Et - Soru Dağılımı:`);
+    console.log(`   📝 Kelime Çevir: ${kelimeQuestions.length}/4`);
+    console.log(`   🎧 Dinle Bul: ${dinleQuestions.length}/3`);
+    console.log(`   🔗 Eşleştirme: ${matchQuestions.length}/2`);
+    console.log(`   ✍️ Boşluk Doldur: ${boslukQuestions.length}/3`);
+    console.log(`   🔤 Harf: ${harfQuestions.length}/3`);
+    console.log(`   📖 Bağlamsal Öğrenme: ${baglamsalQuestions.length}/3`);
+    console.log(`   🎲 Toplam: ${karmaQuestions.length}/18 soru oluşturuldu`);
+    
+    // Eğer toplam soru sayısı 15'ten azsa uyarı ver
+    if (karmaQuestions.length < 15) {
+        console.warn(`⚠️ Talim Et - Toplam soru sayısı beklenenden az: ${karmaQuestions.length}/18`);
+    }
     
     // Show karma game screen
     hideAllScreens();
@@ -6566,7 +6589,7 @@ function renderKelimeCevirKarma(container, question) {
         <div style="position: relative;">
             <div class="karma-type-badge">📝 Kelime Çevir</div>
             ${audioUrl ? `
-                <button class="karma-audio-btn-top" onclick="playSafeAudio('${audioUrl.replace(/'/g, "\\'")}')" title="Dinle">🔊</button>
+                <button class="karma-audio-btn-top" onclick="playSafeAudio('${audioUrl.replace(/'/g, "\\'")}')" title="Dinle">🎧</button>
             ` : ''}
         </div>
         <p class="karma-instruction">Arapça kelimenin Türkçe karşılığını seç</p>
@@ -6594,7 +6617,7 @@ function renderDinleBulKarma(container, question) {
         <div style="position: relative;">
             <div class="karma-type-badge">🎧 Dinle Bul</div>
             ${question.audioUrl ? `
-                <button class="karma-audio-btn-top" onclick="playSafeAudio('${(question.audioUrl || '').replace(/'/g, "\\'")}')" title="Dinle">🔊</button>
+                <button class="karma-audio-btn-top" onclick="playSafeAudio('${(question.audioUrl || '').replace(/'/g, "\\'")}')" title="Dinle">🎧</button>
             ` : ''}
         </div>
         <p class="karma-instruction">Kelimeyi dinle ve doğru çeviriyi bul</p>
@@ -6750,7 +6773,7 @@ function renderBoslukDoldurKarma(container, question) {
         <div style="position: relative;">
             <div class="karma-type-badge">📖 Boşluk Doldur</div>
             ${audioUrl ? `
-                <button class="karma-audio-btn-top" onclick="playSafeAudio('${audioUrl.replace(/'/g, "\\'")}')" title="Dinle">🔊</button>
+                <button class="karma-audio-btn-top" onclick="playSafeAudio('${audioUrl.replace(/'/g, "\\'")}')" title="Dinle">🎧</button>
             ` : ''}
         </div>
         <p class="karma-instruction">Boşluğa uygun kelimeyi seç</p>
@@ -6785,7 +6808,7 @@ function renderHarfBulKarma(container, question) {
         <div style="position: relative;">
             <div class="karma-type-badge">🔤 Harf Bul</div>
             ${audioUrl ? `
-                <button class="karma-audio-btn-top" onclick="playSafeAudio('${audioUrl.replace(/'/g, "\\'")}')" title="Dinle">🔊</button>
+                <button class="karma-audio-btn-top" onclick="playSafeAudio('${audioUrl.replace(/'/g, "\\'")}')" title="Dinle">🎧</button>
             ` : ''}
         </div>
         <p class="karma-instruction">Bu harfin okunuşunu seç</p>
@@ -6812,7 +6835,7 @@ function renderBaglamsalOgrenmeKarma(container, question) {
         <div style="position: relative;">
             <div class="karma-type-badge">📚 Bağlamsal Öğrenme</div>
             ${question.audioUrl ? `
-                <button class="karma-audio-btn-top" onclick="playSafeAudio('${(question.audioUrl || '').replace(/'/g, "\\'")}')" title="Dinle">🔊</button>
+                <button class="karma-audio-btn-top" onclick="playSafeAudio('${(question.audioUrl || '').replace(/'/g, "\\'")}')" title="Dinle">🎧</button>
             ` : ''}
         </div>
         <div class="karma-baglamsal-question">

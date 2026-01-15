@@ -475,6 +475,35 @@ body {
     align-items: center;
     justify-content: space-between;
     margin-bottom: var(--spacing-lg);
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+}
+
+.game-header h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+    flex: 1;
+    text-align: center;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.game-header .back-btn {
+    flex-shrink: 0;
+}
+
+.game-header .game-progress {
+    flex: 1;
+    text-align: center;
+    min-width: 0;
+}
+
+.game-header .combo-display {
+    flex-shrink: 0;
 }
 
 .back-btn {
@@ -1637,6 +1666,36 @@ body {
     
     .question-card {
         padding: var(--spacing-sm);
+    }
+    
+    .game-header {
+        gap: var(--spacing-xs);
+    }
+    
+    .game-header h2 {
+        font-size: 1rem;
+        order: 2;
+        width: 100%;
+        text-align: center;
+        margin-top: var(--spacing-xs);
+    }
+    
+    .game-header .back-btn {
+        order: 1;
+    }
+    
+    .game-header .game-progress {
+        order: 3;
+        width: 100%;
+        text-align: center;
+        margin-top: var(--spacing-xs);
+    }
+    
+    .game-header .combo-display {
+        order: 4;
+        width: 100%;
+        text-align: center;
+        margin-top: var(--spacing-xs);
     }
     
     .audio-btn-large {
@@ -3748,13 +3807,42 @@ body {
 /* ===================================
    KARMA GAME STYLES
    =================================== */
+/* Talim Et - Mor/Mavi tonları */
 .karma-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-    color: white;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.15)) !important;
+    border-color: rgba(102, 126, 234, 0.5) !important;
+    color: var(--text-primary);
 }
 
 .karma-card h3, .karma-card p {
-    color: white !important;
+    color: var(--text-primary) !important;
+}
+
+.karma-card:hover {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.3), rgba(118, 75, 162, 0.25)) !important;
+    border-color: rgba(102, 126, 234, 0.7) !important;
+}
+
+/* Günlük Okumalar - Yeşil tonları */
+.game-card[data-game="kuran-okuma"] {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.1)) !important;
+    border-color: rgba(16, 185, 129, 0.4) !important;
+}
+
+.game-card[data-game="kuran-okuma"]:hover {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(5, 150, 105, 0.2)) !important;
+    border-color: rgba(16, 185, 129, 0.6) !important;
+}
+
+/* Elif Ba - Turuncu/Altın tonları */
+.game-card[data-game="elif-ba"] {
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(245, 158, 11, 0.1)) !important;
+    border-color: rgba(251, 191, 36, 0.4) !important;
+}
+
+.game-card[data-game="elif-ba"]:hover {
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.25), rgba(245, 158, 11, 0.2)) !important;
+    border-color: rgba(251, 191, 36, 0.6) !important;
 }
 
 .karma-card .game-icon,
@@ -4399,6 +4487,36 @@ body {
     
     .question-card {
         padding: var(--spacing-md);
+    }
+    
+    .game-header {
+        gap: var(--spacing-xs);
+    }
+    
+    .game-header h2 {
+        font-size: 1.1rem;
+        order: 2;
+        width: 100%;
+        text-align: center;
+        margin-top: var(--spacing-xs);
+    }
+    
+    .game-header .back-btn {
+        order: 1;
+    }
+    
+    .game-header .game-progress {
+        order: 3;
+        width: 100%;
+        text-align: center;
+        margin-top: var(--spacing-xs);
+    }
+    
+    .game-header .combo-display {
+        order: 4;
+        width: 100%;
+        text-align: center;
+        margin-top: var(--spacing-xs);
     }
     
     .audio-btn-large {
