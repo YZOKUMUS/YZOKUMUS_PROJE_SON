@@ -747,6 +747,33 @@ async function resetAllData() {
     // Clear notification settings
     localStorage.removeItem('hasene_notification_settings');
     
+    // Clear new game mode related keys
+    localStorage.removeItem('hasene_last_kuran_okuma_mode');
+    localStorage.removeItem('hasene_from_kuran_okuma');
+    
+    // Clear other potential keys
+    localStorage.removeItem('hasene_last_daily_reward');
+    
+    // Clear all hasene_ prefixed keys (except user info which is restored)
+    // This ensures we don't miss any keys
+    const keysToKeep = [
+        'hasene_username',
+        'hasene_user_id',
+        'hasene_user_email',
+        'hasene_user_gender',
+        'hasene_firebase_user_id',
+        'hasene_user_type',
+        'hasene_username_display'
+    ];
+    
+    // Get all keys before clearing
+    const allKeys = Object.keys(localStorage);
+    allKeys.forEach(key => {
+        if (key.startsWith('hasene_') && !keysToKeep.includes(key)) {
+            localStorage.removeItem(key);
+        }
+    });
+    
     // Clear all hasene_* keys from localStorage (comprehensive cleanup)
     // Ama kullanıcı bilgilerini koru
     Object.keys(localStorage).forEach(key => {
@@ -1390,6 +1417,10 @@ async function startGame(gameMode) {
         case 'karma':
             await startKarmaGame();
             break;
+        case 'kuran-okuma':
+            // currentGameMode zaten 'kuran-okuma' olarak ayarlanmış (startGame'de)
+            await startKuranOkumaMode();
+            break;
         default:
             showToast('Bilinmeyen oyun modu', 'error');
             goToMainMenu();
@@ -1649,6 +1680,9 @@ function goToMainMenu(skipWarning = false) {
     
     // Show main container
     document.getElementById('main-container').classList.remove('hidden');
+    
+    // Günlük Okumalar flag'ini temizle
+    localStorage.removeItem('hasene_from_kuran_okuma');
     
     // Update displays
     updateStatsDisplay();
@@ -3459,6 +3493,11 @@ async function startAyetOkuMode() {
         return;
     }
     
+    // Eğer Günlük Okumalar modundan gelmiyorsa flag'i temizle
+    if (localStorage.getItem('hasene_from_kuran_okuma') !== 'true') {
+        localStorage.removeItem('hasene_from_kuran_okuma');
+    }
+    
     // Shuffle and set random starting point
     window.shuffledAyetData = shuffleArray(data);
     currentAyetIndex = 0;
@@ -3488,6 +3527,15 @@ function navigateAyet(direction) {
     // Önce sesi durdur
     stopAllAudio();
     
+    // Eğer Günlük Okumalar modundan geliyorsa ve "Sonraki" butonuna tıklandıysa
+    if (direction === 1 && localStorage.getItem('hasene_from_kuran_okuma') === 'true') {
+        // %40 ihtimalle başka bir moda geç (karışık olsun)
+        if (Math.random() < 0.4) {
+            switchToAnotherReadingMode();
+            return;
+        }
+    }
+    
     currentAyetIndex += direction;
     displayAyet();
 }
@@ -3510,6 +3558,11 @@ async function startDuaEtMode() {
         showToast('Dua verisi yüklenemedi', 'error');
         goToMainMenu();
         return;
+    }
+    
+    // Eğer Günlük Okumalar modundan gelmiyorsa flag'i temizle
+    if (localStorage.getItem('hasene_from_kuran_okuma') !== 'true') {
+        localStorage.removeItem('hasene_from_kuran_okuma');
     }
     
     window.shuffledDuaData = shuffleArray(data);
@@ -3539,6 +3592,15 @@ function navigateDua(direction) {
     // Önce sesi durdur
     stopAllAudio();
     
+    // Eğer Günlük Okumalar modundan geliyorsa ve "Sonraki" butonuna tıklandıysa
+    if (direction === 1 && localStorage.getItem('hasene_from_kuran_okuma') === 'true') {
+        // %40 ihtimalle başka bir moda geç (karışık olsun)
+        if (Math.random() < 0.4) {
+            switchToAnotherReadingMode();
+            return;
+        }
+    }
+    
     currentDuaIndex += direction;
     displayDua();
 }
@@ -3563,11 +3625,93 @@ async function startHadisOkuMode() {
         return;
     }
     
+    // Eğer Günlük Okumalar modundan gelmiyorsa flag'i temizle
+    if (localStorage.getItem('hasene_from_kuran_okuma') !== 'true') {
+        localStorage.removeItem('hasene_from_kuran_okuma');
+    }
+    
     window.shuffledHadisData = shuffleArray(data);
     currentHadisIndex = 0;
     
     document.getElementById('hadis-oku-screen').classList.remove('hidden');
     displayHadis();
+}
+
+/**
+ * Kuran Okuma Modu - Ayet, Dua ve Hadis modları arasında sırasıyla geçiş yapar
+ * Böylece kullanıcıya gerçekten karışık / dengeli bir deneyim sunulur.
+ */
+async function startKuranOkumaMode() {
+    const modes = ['ayet-oku', 'dua-et', 'hadis-oku'];
+    
+    // Son seçilen modu localStorage'dan al
+    const lastMode = localStorage.getItem('hasene_last_kuran_okuma_mode');
+    
+    // Eğer son mod varsa ve aynı mod tekrar seçilirse, diğer modlardan birini seç
+    let availableModes = modes;
+    if (lastMode && modes.includes(lastMode)) {
+        // Son modu listeden çıkar, böylece peş peşe aynı mod gelmez
+        availableModes = modes.filter(mode => mode !== lastMode);
+    }
+    
+    // Kalan modlardan rastgele birini seç
+    const randomIndex = Math.floor(Math.random() * availableModes.length);
+    const selectedMode = availableModes[randomIndex];
+    
+    // Seçilen modu kaydet
+    localStorage.setItem('hasene_last_kuran_okuma_mode', selectedMode);
+    
+    // Günlük Okumalar modundan geldiğini işaretle
+    localStorage.setItem('hasene_from_kuran_okuma', 'true');
+    
+    // Seçilen modu başlat
+    switch (selectedMode) {
+        case 'ayet-oku':
+            await startAyetOkuMode();
+            break;
+        case 'dua-et':
+            await startDuaEtMode();
+            break;
+        case 'hadis-oku':
+            await startHadisOkuMode();
+            break;
+    }
+}
+
+/**
+ * Günlük Okumalar modundan başka bir moda geç
+ */
+async function switchToAnotherReadingMode() {
+    const modes = ['ayet-oku', 'dua-et', 'hadis-oku'];
+    const currentMode = localStorage.getItem('hasene_last_kuran_okuma_mode');
+    
+    // Mevcut modu hariç tut
+    const availableModes = modes.filter(mode => mode !== currentMode);
+    
+    // Rastgele bir mod seç
+    const randomIndex = Math.floor(Math.random() * availableModes.length);
+    const selectedMode = availableModes[randomIndex];
+    
+    // Seçilen modu kaydet
+    localStorage.setItem('hasene_last_kuran_okuma_mode', selectedMode);
+    
+    // Ekranları gizle
+    document.getElementById('ayet-oku-screen')?.classList.add('hidden');
+    document.getElementById('dua-et-screen')?.classList.add('hidden');
+    document.getElementById('hadis-oku-screen')?.classList.add('hidden');
+    
+    // Seçilen modu başlat
+    switch (selectedMode) {
+        case 'ayet-oku':
+            await startAyetOkuMode();
+            break;
+        case 'dua-et':
+            await startDuaEtMode();
+            break;
+        case 'hadis-oku':
+            await startHadisOkuMode();
+            break;
+    }
 }
 
 function displayHadis() {
@@ -3590,6 +3734,15 @@ function displayHadis() {
 function navigateHadis(direction) {
     // Önce sesi durdur
     stopAllAudio();
+    
+    // Eğer Günlük Okumalar modundan geliyorsa ve "Sonraki" butonuna tıklandıysa
+    if (direction === 1 && localStorage.getItem('hasene_from_kuran_okuma') === 'true') {
+        // %40 ihtimalle başka bir moda geç (karışık olsun)
+        if (Math.random() < 0.4) {
+            switchToAnotherReadingMode();
+            return;
+        }
+    }
     
     currentHadisIndex += direction;
     displayHadis();
@@ -5196,8 +5349,16 @@ function claimDailyReward() {
     // Rastgele öğreti seç
     const teaching = DAILY_REWARD_TEACHINGS[Math.floor(Math.random() * DAILY_REWARD_TEACHINGS.length)];
     
-    // Hasene ekle
-    totalHasene += rewardAmount;
+    // Hasene ekle (totalPoints, dailyProgress ve lig XP'ye)
+    totalPoints += rewardAmount;
+    dailyProgress += rewardAmount;
+    
+    // Lig XP'ye ekle
+    if (typeof window.updateWeeklyXP === 'function' && rewardAmount > 0) {
+        window.updateWeeklyXP(rewardAmount).catch(err => {
+            console.warn('Weekly XP update failed (non-critical):', err);
+        });
+    }
     
     // Stats kaydet (localStorage + Firebase)
     debouncedSaveStats();
@@ -5482,6 +5643,15 @@ function claimTaskRewards() {
         // Fallback
         const reward = 250;
         totalPoints += reward;
+        dailyProgress += reward;
+        
+        // Lig XP'ye ekle
+        if (typeof window.updateWeeklyXP === 'function' && reward > 0) {
+            window.updateWeeklyXP(reward).catch(err => {
+                console.warn('Weekly XP update failed (non-critical):', err);
+            });
+        }
+        
         dailyTasks.rewardsClaimed = true;
         showToast(`+${reward} Hasene kazandınız! 🎁`, 'success', 3000);
         updateStatsDisplay();
@@ -5495,6 +5665,15 @@ function claimTaskRewards() {
     const reward = teaching.rewardAmounts[Math.floor(Math.random() * teaching.rewardAmounts.length)];
     
     totalPoints += reward;
+    dailyProgress += reward;
+    
+    // Lig XP'ye ekle
+    if (typeof window.updateWeeklyXP === 'function' && reward > 0) {
+        window.updateWeeklyXP(reward).catch(err => {
+            console.warn('Weekly XP update failed (non-critical):', err);
+        });
+    }
+    
     dailyTasks.rewardsClaimed = true;
     
     // Show teaching modal
@@ -6005,7 +6184,7 @@ let karmaMatchPairs = [];
  * Combines all game types: Kelime Çevir, Dinle Bul, Eşleştirme, Boşluk Doldur
  */
 async function startKarmaGame() {
-    console.log('🎲 Karma Oyun başlatılıyor...');
+    console.log('🎲 Talim Et başlatılıyor...');
     
     // Reset session
     sessionScore = 0;
@@ -6043,7 +6222,7 @@ async function startKarmaGame() {
     let selectedKelimeWords;
     if (filteredKelimeData.length > 4) {
         selectedKelimeWords = selectIntelligentWords(filteredKelimeData, 4, false);
-        console.log('🧠 Karma Oyun - Kelime Çevir: Akıllı kelime seçimi kullanıldı');
+        console.log('🧠 Talim Et - Kelime Çevir: Akıllı kelime seçimi kullanıldı');
     } else {
         selectedKelimeWords = getRandomItems(filteredKelimeData, 4);
     }
@@ -6061,7 +6240,7 @@ async function startKarmaGame() {
     let selectedAudioWords;
     if (audioWords.length > 3) {
         selectedAudioWords = selectIntelligentWords(audioWords, 3, false);
-        console.log('🧠 Karma Oyun - Dinle Bul: Akıllı kelime seçimi kullanıldı');
+        console.log('🧠 Talim Et - Dinle Bul: Akıllı kelime seçimi kullanıldı');
     } else {
         // Yeterli ses dosyası yoksa tüm kelimelerden seç
         const allAudioWords = kelimeData.filter(w => w.ses_dosyasi || w.audio);

@@ -114,7 +114,15 @@
         </div>
 
         <!-- Game Cards -->
-        <div class="game-cards-container">
+            <div class="game-cards-container">
+            <div class="game-card karma-card" data-game="karma">
+                <div class="game-icon">
+                    <span>🧩</span>
+                </div>
+                <h3>Talim Et</h3>
+                <p>Kelime Çevir, Dinle Bul ve Boşluk Doldur ile karışık talim yap</p>
+            </div>
+            
             <div class="game-card" data-game="kelime-cevir">
                 <div class="game-icon">
                     <img src="ASSETS/game-icons/kelime-cevir.png" alt="Kelime Çevir" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
@@ -168,6 +176,25 @@
                 <p>Hz. Peygamber'in hadislerini oku</p>
             </div>
 
+            <div class="game-card" data-game="kuran-okuma">
+                <div class="game-icon" style="display: flex; gap: 8px; justify-content: center; align-items: center;">
+                    <div style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                        <img src="ASSETS/game-icons/ayet-oku.png" alt="Ayet Oku" style="width: 100%; height: 100%; object-fit: contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                        <span style="display:none; font-size: 1.5rem;">📖</span>
+                    </div>
+                    <div style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                        <img src="ASSETS/game-icons/dua-et.png" alt="Dua Et" style="width: 100%; height: 100%; object-fit: contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                        <span style="display:none; font-size: 1.5rem;">🤲</span>
+                    </div>
+                    <div style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                        <img src="ASSETS/game-icons/hadis-oku.png" alt="Hadis Oku" style="width: 100%; height: 100%; object-fit: contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                        <span style="display:none; font-size: 1.5rem;">📜</span>
+                    </div>
+                </div>
+                <h3>Günlük Okumalar</h3>
+                <p>Ayet, dua ve hadisleri oku</p>
+            </div>
+
             <div class="game-card" data-game="elif-ba">
                 <div class="game-icon">
                     <img src="ASSETS/elifba-cover/harf-tablosu-icon.png" alt="Elif Ba" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
@@ -175,14 +202,6 @@
                 </div>
                 <h3>Elif Ba</h3>
                 <p>Arapça harfleri öğren</p>
-            </div>
-
-            <div class="game-card karma-card" data-game="karma">
-                <div class="game-icon">
-                    <span>🔀</span>
-                </div>
-                <h3>Karma Oyun</h3>
-                <p>Tüm modlar bir arada! Eşleştirme dahil</p>
             </div>
         </div>
     </div>
@@ -399,7 +418,7 @@
     <div id="karma-game-screen" class="game-screen hidden">
         <div class="game-header">
             <button class="back-btn" onclick="stopAllAudio(); handleGameBackButton()">← Geri</button>
-            <h2>🔀 Karma Oyun</h2>
+            <h2>🔀 Talim Et</h2>
         </div>
 
         <div class="game-stats-bar">

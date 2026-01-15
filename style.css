@@ -451,6 +451,16 @@ body {
     line-height: 1.4;
 }
 
+/* Geçici olarak gizlenen oyunlar */
+.game-card[data-game="kelime-cevir"],
+.game-card[data-game="dinle-bul"],
+.game-card[data-game="bosluk-doldur"],
+.game-card[data-game="ayet-oku"],
+.game-card[data-game="dua-et"],
+.game-card[data-game="hadis-oku"] {
+    display: none;
+}
+
 /* ===================================
    GAME SCREENS
    =================================== */
@@ -1610,6 +1620,53 @@ body {
     /* Tip metni (İnce, Kalın, Peltek) için mobil */
     #elif-letter > div:last-child:has(+ *) {
         font-size: clamp(0.65rem, 2vw, 0.8rem) !important;
+    }
+    
+    /* Küçük mobil için içerik sayfaları (Ayet Oku, Dua Et, Hadis Oku) */
+    .translation-text {
+        font-size: 0.75rem;
+        line-height: 1.4;
+        padding: 0 var(--spacing-xs);
+    }
+    
+    .hadis-text {
+        font-size: 0.75rem;
+        line-height: 1.4;
+        padding: 0 var(--spacing-xs);
+    }
+    
+    .question-card {
+        padding: var(--spacing-sm);
+    }
+    
+    .audio-btn-large {
+        font-size: 0.875rem;
+        padding: 0.875rem 1rem;
+        min-height: 48px;
+    }
+    
+    .navigation-btns {
+        gap: 0.5rem;
+    }
+    
+    .nav-btn {
+        font-size: 0.875rem;
+        padding: 0.875rem 1rem;
+        min-height: 48px;
+    }
+    
+    .surah-info,
+    .dua-reference,
+    .hadis-section {
+        font-size: 0.75rem;
+    }
+    
+    .hadis-header {
+        font-size: 0.75rem;
+    }
+    
+    .hadis-reference {
+        font-size: 0.7rem;
     }
     
     /* Harfler modu için orta ekranlarda büyük harfler */
@@ -3700,6 +3757,49 @@ body {
     color: white !important;
 }
 
+.karma-card .game-icon,
+.game-card[data-game="kuran-okuma"] .game-icon {
+    width: auto;
+    min-width: 180px;
+    height: 60px;
+    flex-wrap: wrap;
+}
+
+/* Mobil responsive - Günlük Okumalar iconları */
+@media (max-width: 576px) {
+    .game-card[data-game="kuran-okuma"] .game-icon {
+        min-width: 140px;
+        height: 50px;
+        gap: 6px;
+    }
+    
+    .game-card[data-game="kuran-okuma"] .game-icon > div {
+        width: 35px;
+        height: 35px;
+    }
+    
+    .game-card[data-game="kuran-okuma"] .game-icon span {
+        font-size: 1.2rem !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .game-card[data-game="kuran-okuma"] .game-icon {
+        min-width: 120px;
+        height: 45px;
+        gap: 4px;
+    }
+    
+    .game-card[data-game="kuran-okuma"] .game-icon > div {
+        width: 30px;
+        height: 30px;
+    }
+    
+    .game-card[data-game="kuran-okuma"] .game-icon span {
+        font-size: 1rem !important;
+    }
+}
+
 .karma-game-content {
     /* Artık game-content ile aynı */
     overflow-y: auto;
@@ -4282,6 +4382,39 @@ body {
     .arabic-verse {
         font-size: 1.4rem;
         line-height: 2;
+    }
+    
+    /* İçerik sayfaları için mobil responsive */
+    .translation-text {
+        font-size: 0.8rem;
+        line-height: 1.5;
+        padding: 0 var(--spacing-sm);
+    }
+    
+    .hadis-text {
+        font-size: 0.8rem;
+        line-height: 1.5;
+        padding: 0 var(--spacing-sm);
+    }
+    
+    .question-card {
+        padding: var(--spacing-md);
+    }
+    
+    .audio-btn-large {
+        font-size: 0.95rem;
+        padding: 1rem 1.25rem;
+        min-height: 50px;
+    }
+    
+    .navigation-btns {
+        gap: 0.75rem;
+    }
+    
+    .nav-btn {
+        font-size: 0.95rem;
+        padding: 1rem 1.25rem;
+        min-height: 50px;
     }
     
     .analysis-summary-compact {
