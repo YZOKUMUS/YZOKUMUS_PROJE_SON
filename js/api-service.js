@@ -511,8 +511,11 @@ async function saveUserStats(stats) {
     const userId = localStorage.getItem('hasene_user_id');
     const username = localStorage.getItem('hasene_username');
     
+    // Local kullanıcılar için Firebase'e kaydetme gerekmez, sadece localStorage yeterli
+    // Firebase'e kaydetme sadece gerçek kullanıcı (giriş yapmış) varsa yapılır
     if (!user && (!userId || !username)) {
-        console.warn('⚠️ No user found, cannot save stats');
+        // Local kullanıcı için Firebase'e kaydetme gerekmez
+        // Stats zaten localStorage'a kaydedildi (saveStats fonksiyonunda)
         return false;
     }
     

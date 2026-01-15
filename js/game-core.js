@@ -562,7 +562,15 @@ async function loadStats(skipStreakCheck = false) {
  * Save all stats
  */
 function saveStats() {
-    // Save to localStorage (always)
+    // Kullanıcı giriş yapmamışsa kayıt tutma
+    const userId = localStorage.getItem('hasene_user_id');
+    const username = localStorage.getItem('hasene_username');
+    if (!userId || !username) {
+        // Kullanıcı giriş yapmamış, kayıt tutulmayacak
+        return;
+    }
+    
+    // Save to localStorage (only if user is logged in)
     saveToStorage(CONFIG.STORAGE_KEYS.TOTAL_POINTS, totalPoints);
     saveToStorage(CONFIG.STORAGE_KEYS.STREAK_DATA, streakData);
     saveToStorage(CONFIG.STORAGE_KEYS.GAME_STATS, gameStats);
@@ -619,6 +627,13 @@ const debouncedSaveStats = debounce(saveStats, 500);
  * @param {number} combo - Max combo
  */
 function saveDailyStats(correct, wrong, points, combo) {
+    // Kullanıcı giriş yapmamışsa günlük istatistikler kaydedilmez
+    const userId = localStorage.getItem('hasene_user_id');
+    const username = localStorage.getItem('hasene_username');
+    if (!userId || !username) {
+        return;
+    }
+    
     const today = getLocalDateString();
     const key = `hasene_daily_${today}`;
     
@@ -1518,6 +1533,13 @@ function checkAchievements(stats) {
  * @param {string} achievementId - Achievement ID
  */
 function saveAchievement(achievementId) {
+    // Kullanıcı giriş yapmamışsa başarım kaydedilmez
+    const userId = localStorage.getItem('hasene_user_id');
+    const username = localStorage.getItem('hasene_username');
+    if (!userId || !username) {
+        return;
+    }
+    
     if (!unlockedAchievements.includes(achievementId)) {
         unlockedAchievements.push(achievementId);
         saveToStorage('hasene_achievements', unlockedAchievements);
@@ -1534,6 +1556,13 @@ function saveAchievement(achievementId) {
  * Check and unlock badges based on total points
  */
 function checkBadges() {
+    // Kullanıcı giriş yapmamışsa rozet kontrolü yapılmaz
+    const userId = localStorage.getItem('hasene_user_id');
+    const username = localStorage.getItem('hasene_username');
+    if (!userId || !username) {
+        return;
+    }
+    
     const badges = window.BADGE_DEFINITIONS || [];
     const asrBadges = window.ASR_I_SAADET_BADGES || {};
     const today = getLocalDateString();
@@ -2170,6 +2199,13 @@ function toggleCurrentWordFavorite() {
  */
 function updateWordStats(wordId, isCorrect) {
     if (!wordId) return;
+    
+    // Kullanıcı giriş yapmamışsa kelime istatistikleri kaydedilmez
+    const userId = localStorage.getItem('hasene_user_id');
+    const username = localStorage.getItem('hasene_username');
+    if (!userId || !username) {
+        return;
+    }
     
     const today = getLocalDateString();
     
@@ -3343,8 +3379,10 @@ function isArabicConjunction(word) {
         return true;
     }
     
-    // Very short words (1-2 characters) are usually conjunctions/prepositions
-    if (cleanWord.length <= 2) {
+    // Very short words (1 character) are usually conjunctions/prepositions
+    // 2 karakterli kelimeler bağlaç olmayabilir (örn: "أُم" = anne, "بَيْن" = arası)
+    // Bu yüzden sadece 1 karakterli kelimeleri filtrele
+    if (cleanWord.length <= 1) {
         return true;
     }
     
@@ -5201,6 +5239,13 @@ async function checkDailyTasks() {
 function updateTaskProgress(type, value) {
     if (!dailyTasks.tasks) return;
     
+    // Kullanıcı giriş yapmamışsa görev ilerlemesi kaydedilmez
+    const userId = localStorage.getItem('hasene_user_id');
+    const username = localStorage.getItem('hasene_username');
+    if (!userId || !username) {
+        return;
+    }
+    
     // Update stats
     if (type === 'correct') {
         dailyTasks.todayStats.toplamDogru += value;
@@ -6218,6 +6263,38 @@ async function startKarmaGame() {
         filteredKelimeData = kelimeData;
     }
     
+    // Bağlaçları filtrele - sadece eksiz (root) kelimeleri kullan
+    const beforeConjunctionFilter = filteredKelimeData.length;
+    const conjunctionWords = [];
+    filteredKelimeData = filteredKelimeData.filter(word => {
+        const kelime = word.kelime || word.arabic || '';
+        const isConjunction = isArabicConjunction(kelime);
+        if (isConjunction) {
+            conjunctionWords.push(kelime);
+        }
+        return !isConjunction;
+    });
+    const afterConjunctionFilter = filteredKelimeData.length;
+    
+    console.log(`📊 Talim Et - Kelime Filtreleme İstatistikleri:`);
+    console.log(`   📚 Toplam kelime (JSON'dan): ${kelimeData.length}`);
+    console.log(`   🎯 Zorluk filtresi sonrası (${currentDifficulty}): ${beforeConjunctionFilter}`);
+    console.log(`   🔗 Filtrelenen bağlaç sayısı: ${beforeConjunctionFilter - afterConjunctionFilter}`);
+    console.log(`   ✅ Bağlaç filtresi sonrası (eksiz kelimeler): ${afterConjunctionFilter}`);
+    console.log(`   📈 Kullanılabilir kelime oranı: ${((afterConjunctionFilter / kelimeData.length) * 100).toFixed(1)}%`);
+    if (conjunctionWords.length > 0 && conjunctionWords.length <= 20) {
+        console.log(`   🔗 Filtrelenen bağlaçlar: ${conjunctionWords.slice(0, 20).join(', ')}${conjunctionWords.length > 20 ? '...' : ''}`);
+    }
+    
+    // Eğer filtrelenmiş veri çok azsa, bağlaç filtresini kaldır (fallback)
+    if (filteredKelimeData.length < 10) {
+        console.warn('⚠️ Bağlaç filtresi sonrası yeterli kelime yok, filtre kaldırıldı');
+        filteredKelimeData = filterByDifficulty(kelimeData, currentDifficulty);
+        if (filteredKelimeData.length < 20) {
+            filteredKelimeData = kelimeData;
+        }
+    }
+    
     // 1. Kelime Çevir soruları (4 adet) - Akıllı seçim kullan
     let selectedKelimeWords;
     if (filteredKelimeData.length > 4) {
@@ -6227,12 +6304,18 @@ async function startKarmaGame() {
         selectedKelimeWords = getRandomItems(filteredKelimeData, 4);
     }
     
+    // Seçenekler için de bağlaç filtresi uygula
+    const optionsWords = kelimeData.filter(w => {
+        const kelime = w.kelime || w.arabic || '';
+        return !isArabicConjunction(kelime);
+    });
+    
     const kelimeQuestions = selectedKelimeWords.map(word => ({
         type: 'kelime-cevir',
         data: word,
         question: word.kelime,
         correctAnswer: word.anlam,
-        options: generateOptions(word.anlam, kelimeData.map(w => w.anlam))
+        options: generateOptions(word.anlam, optionsWords.map(w => w.anlam))
     }));
     
     // 2. Dinle Bul soruları (3 adet) - Akıllı seçim kullan
@@ -6242,8 +6325,12 @@ async function startKarmaGame() {
         selectedAudioWords = selectIntelligentWords(audioWords, 3, false);
         console.log('🧠 Talim Et - Dinle Bul: Akıllı kelime seçimi kullanıldı');
     } else {
-        // Yeterli ses dosyası yoksa tüm kelimelerden seç
-        const allAudioWords = kelimeData.filter(w => w.ses_dosyasi || w.audio);
+        // Yeterli ses dosyası yoksa tüm kelimelerden seç (bağlaç filtresi uygulanmış)
+        const allAudioWords = kelimeData.filter(w => {
+            const hasAudio = w.ses_dosyasi || w.audio;
+            const kelime = w.kelime || w.arabic || '';
+            return hasAudio && !isArabicConjunction(kelime);
+        });
         selectedAudioWords = getRandomItems(allAudioWords, 3);
     }
     
@@ -6253,7 +6340,7 @@ async function startKarmaGame() {
         question: '🔊 Dinle ve doğru anlamı seç',
         audioUrl: word.ses_dosyasi || word.audio,
         correctAnswer: word.anlam,
-        options: generateOptions(word.anlam, kelimeData.map(w => w.anlam))
+        options: generateOptions(word.anlam, optionsWords.map(w => w.anlam))
     }));
     
     // 3. Eşleştirme sorusu (2 adet - her biri 4 çift) - Akıllı seçim kullan
@@ -6263,7 +6350,12 @@ async function startKarmaGame() {
         if (filteredKelimeData.length > 4) {
             matchWords = selectIntelligentWords(filteredKelimeData, 4, false);
         } else {
-            matchWords = getRandomItems(kelimeData, 4);
+            // Fallback: Bağlaç filtresi uygulanmış kelimelerden seç
+            const fallbackWords = kelimeData.filter(w => {
+                const kelime = w.kelime || w.arabic || '';
+                return !isArabicConjunction(kelime);
+            });
+            matchWords = getRandomItems(fallbackWords.length > 0 ? fallbackWords : kelimeData, 4);
         }
         matchQuestions.push({
             type: 'eslestirme',
@@ -6332,11 +6424,11 @@ async function startKarmaGame() {
     for (const ayet of selectedAyets) {
         const ayetWords = ayet.ayet_metni.split(' ').filter(w => w.length > 2);
         
-        // Ayet içindeki kelimeleri kelimeData'da ara
+        // Ayet içindeki kelimeleri filtrelenmiş kelimeData'da ara (zorluk filtresi uygulanmış)
         const foundWords = [];
         for (const ayetWord of ayetWords) {
-            // Kelime verisinde bu kelimeyi ara (basit eşleşme)
-            const matchedWord = kelimeData.find(k => {
+            // Filtrelenmiş kelime verisinde bu kelimeyi ara (basit eşleşme)
+            const matchedWord = filteredKelimeData.find(k => {
                 // Arapça kelimelerde harekeleri temizle ve karşılaştır
                 const cleanAyetWord = ayetWord.replace(/[\u064E\u0650\u064F\u0652\u0651\u064B\u064D\u064C]/g, '').trim();
                 const cleanKelime = k.kelime.replace(/[\u064E\u0650\u064F\u0652\u0651\u064B\u064D\u064C]/g, '').trim();
@@ -6354,13 +6446,21 @@ async function startKarmaGame() {
         
         if (foundWords.length > 0) {
             const selectedWord = getRandomItems(foundWords, 1)[0];
-            const wrongAnswers = kelimeData
+            // Yanlış cevaplar için de filtrelenmiş veriyi kullan (zorluk seviyesine uygun)
+            const wrongAnswers = filteredKelimeData
                 .filter(k => k.anlam && k.anlam !== selectedWord.anlam)
                 .map(k => k.anlam);
             
+            // Kelime ID'sini bul (kelime analizi için)
+            const matchedWordData = filteredKelimeData.find(k => {
+                const cleanKelime = (k.kelime || '').replace(/[\u064E\u0650\u064F\u0652\u0651\u064B\u064D\u064C]/g, '').trim();
+                const cleanSelected = selectedWord.kelime.replace(/[\u064E\u0650\u064F\u0652\u0651\u064B\u064D\u064C]/g, '').trim();
+                return cleanKelime === cleanSelected || k.kelime === selectedWord.kelime;
+            });
+            
             baglamsalQuestions.push({
                 type: 'baglamsal-ogrenme',
-                data: ayet,
+                data: matchedWordData || ayet, // Kelime verisi varsa onu kullan, yoksa ayet verisi
                 ayetMetni: ayet.ayet_metni,
                 ayetMeal: ayet.meal,
                 sureAdi: ayet.sure_adı || ayet.sureAdi || '',
@@ -6576,6 +6676,12 @@ function selectKarmaMatch(element, type, id) {
             element.classList.add('matched', 'correct');
             karmaMatchedCount++;
             
+            // Kelime istatistiklerini güncelle (eşleştirme soruları için)
+            const question = karmaQuestions[karmaQuestionIndex];
+            if (question && question.type === 'eslestirme' && id) {
+                updateWordStats(id, true);
+            }
+            
             comboCount++;
             const points = 25 + (comboCount * 5);
             sessionScore += points;
@@ -6596,6 +6702,15 @@ function selectKarmaMatch(element, type, id) {
             karmaSelectedItem.element.classList.add('wrong');
             element.classList.remove('selected'); // Türkçe butondan da selected kaldır
             element.classList.add('wrong');
+            
+            // Kelime istatistiklerini güncelle (yanlış eşleştirme için)
+            const question = karmaQuestions[karmaQuestionIndex];
+            if (question && question.type === 'eslestirme') {
+                // Yanlış eşleştirilen kelimelerin ikisi için de yanlış kaydet
+                if (karmaSelectedItem.id) updateWordStats(karmaSelectedItem.id, false);
+                if (id) updateWordStats(id, false);
+            }
+            
             comboCount = 0;
             
             setTimeout(() => {
