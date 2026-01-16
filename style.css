@@ -1,30 +1,35 @@
 /* ===================================
    HASENE ARAPÇA DERSİ - STYLE.CSS
-   iOS 16 Liquid Glass Design
+   iOS 17/18 Modern Liquid Glass Design
    =================================== */
 
 /* CSS Variables */
 :root {
-    /* Primary Colors */
-    --bg-primary: linear-gradient(135deg, #a8b5ff 0%, #b8a5e8 100%);
-    --bg-secondary: #fff;
-    --text-primary: #1a1a2e;
-    --text-secondary: #64748b;
+    /* Primary Colors - iOS System Colors */
+    --bg-primary: #f2f2f7;
+    --bg-secondary: rgba(255, 255, 255, 0.8);
+    --text-primary: #000000;
+    --text-secondary: rgba(60, 60, 67, 0.6);
 
-    /* Accent Colors */
-    --accent-primary: #9d8aff;
-    --accent-secondary: #b8a5e8;
+    /* Accent Colors - iOS System Blue */
+    --accent-primary: #007AFF;
+    --accent-secondary: #5AC8FA;
     --accent-success: #10b981;
     --accent-warning: #f59e0b;
     --accent-error: #ef4444;
     --accent-gold: #fbbf24;
 
-    /* Glassmorphism */
+    /* Glassmorphism - iOS Liquid Glass */
     --glass-bg: rgba(255, 255, 255, 0.7);
     --glass-bg-dark: rgba(255, 255, 255, 0.85);
     --glass-border: rgba(255, 255, 255, 0.18);
-    --glass-blur: blur(20px);
-    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+    --glass-blur: blur(30px) saturate(180%);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    
+    /* iOS System Shadows */
+    --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --shadow-elevated: 0 8px 24px rgba(0, 0, 0, 0.2);
 
     /* Spacing */
     --spacing-xs: 0.25rem;
@@ -34,16 +39,16 @@
     --spacing-xl: 2rem;
     --spacing-2xl: 3rem;
 
-    /* Border Radius */
-    --radius-sm: 12px;
-    --radius-md: 16px;
-    --radius-lg: 24px;
-    --radius-xl: 30px;
+    /* Border Radius - iOS Style */
+    --radius-sm: 10px;
+    --radius-md: 14px;
+    --radius-lg: 20px;
+    --radius-xl: 28px;
 
-    /* Transitions */
-    --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-bounce: 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    /* Transitions - iOS Spring Animations */
+    --transition-fast: 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --transition-normal: 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --transition-bounce: 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
     
     /* Performance */
     --will-change-transform: transform;
@@ -113,6 +118,23 @@ body {
     overflow-x: hidden;
     padding-top: var(--safe-area-top);
     padding-bottom: calc(80px + var(--safe-area-bottom));
+    position: relative;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 20% 30%, rgba(0, 122, 255, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(90, 200, 250, 0.03) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
 }
 
 /* Utility Classes */
@@ -125,7 +147,7 @@ body {
     backdrop-filter: var(--glass-blur);
     -webkit-backdrop-filter: var(--glass-blur);
     border-radius: var(--radius-lg);
-    border: 1px solid var(--glass-border);
+    border: 0.5px solid var(--glass-border);
     box-shadow: var(--glass-shadow);
     /* Performans: GPU acceleration için */
     transform: translateZ(0);
@@ -238,12 +260,20 @@ body {
     padding: var(--spacing-md);
     max-width: 600px;
     margin: 0 auto;
+    position: relative;
+    z-index: 1;
 }
 
 /* Stats Header */
 .stats-header {
-    padding: var(--spacing-lg);
-    margin-bottom: var(--spacing-lg);
+    padding: var(--spacing-xl);
+    margin-bottom: var(--spacing-xl);
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border-radius: var(--radius-lg);
+    border: 0.5px solid var(--glass-border);
+    box-shadow: var(--shadow-medium);
 }
 
 .stats-row {
@@ -346,11 +376,14 @@ body {
 .difficulty-selector {
     display: flex;
     gap: var(--spacing-sm);
-    margin-bottom: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
     padding: var(--spacing-sm);
     background: var(--glass-bg);
     backdrop-filter: var(--glass-blur);
-    border-radius: var(--radius-lg);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border-radius: var(--radius-md);
+    border: 0.5px solid var(--glass-border);
+    box-shadow: var(--shadow-subtle);
 }
 
 .difficulty-btn {
@@ -360,29 +393,26 @@ body {
     align-items: center;
     gap: var(--spacing-xs);
     padding: var(--spacing-md);
-    background: rgba(255, 255, 255, 0.7);
-    border: 2px solid rgba(157, 138, 255, 0.3);
-    border-radius: var(--radius-md);
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-sm);
     cursor: pointer;
     transition: all var(--transition-fast);
     font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--text-primary);
+    font-weight: 500;
+    color: var(--text-secondary);
 }
 
 .difficulty-btn:hover {
-    transform: translateY(-2px);
-    background: rgba(255, 255, 255, 0.9);
-    border-color: var(--accent-primary);
-    box-shadow: 0 4px 12px rgba(157, 138, 255, 0.25);
+    background: rgba(0, 122, 255, 0.08);
+    color: var(--accent-primary);
 }
 
 .difficulty-btn.active {
-    background: white;
-    border-color: var(--accent-primary);
-    border-width: 3px;
-    color: var(--accent-primary);
-    box-shadow: 0 4px 12px rgba(157, 138, 255, 0.3);
+    background: var(--accent-primary);
+    color: white;
+    box-shadow: var(--shadow-subtle);
+    transform: scale(1.02);
 }
 
 .difficulty-icon {
@@ -393,26 +423,51 @@ body {
 .game-cards-container {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: var(--spacing-md);
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
 }
 
 .game-card {
-    padding: var(--spacing-lg);
+    padding: var(--spacing-xl);
     text-align: center;
     cursor: pointer;
     transition: all var(--transition-normal);
-    background: rgba(255, 255, 255, 0.85);
+    background: var(--glass-bg);
     backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
     border-radius: var(--radius-lg);
-    border: 2px solid rgba(99, 102, 241, 0.25);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 0.5px solid var(--glass-border);
+    box-shadow: var(--shadow-medium);
+    position: relative;
+    overflow: hidden;
+}
+
+.game-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(0, 122, 255, 0.05) 0%, rgba(90, 200, 250, 0.05) 100%);
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+    pointer-events: none;
+}
+
+.game-card:hover::after {
+    opacity: 1;
 }
 
 .game-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 40px rgba(99, 102, 241, 0.3);
-    border-color: rgba(99, 102, 241, 1);
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(67, 56, 202, 0.05));
+    transform: translateY(-2px) scale(1.01);
+    box-shadow: var(--shadow-elevated);
+    border-color: rgba(0, 122, 255, 0.2);
+}
+
+.game-card:active {
+    transform: translateY(0) scale(0.98);
+    transition: all 0.1s ease;
 }
 
 .game-card:active {
@@ -420,12 +475,22 @@ body {
 }
 
 .game-icon {
-    width: 60px;
-    height: 60px;
-    margin: 0 auto var(--spacing-md);
+    width: 64px;
+    height: 64px;
+    margin: 0 auto var(--spacing-lg);
     display: flex;
     align-items: center;
     justify-content: center;
+    background: rgba(0, 122, 255, 0.1);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-normal);
+    position: relative;
+    z-index: 1;
+}
+
+.game-card:hover .game-icon {
+    background: rgba(0, 122, 255, 0.15);
+    transform: scale(1.08);
 }
 
 .game-icon img {
@@ -439,16 +504,22 @@ body {
 }
 
 .game-card h3 {
-    font-size: 1rem;
-    font-weight: 700;
-    margin-bottom: var(--spacing-xs);
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin-bottom: var(--spacing-sm);
     color: var(--text-primary);
+    position: relative;
+    z-index: 1;
+    letter-spacing: -0.01em;
 }
 
 .game-card p {
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     color: var(--text-secondary);
-    line-height: 1.4;
+    line-height: 1.5;
+    position: relative;
+    z-index: 1;
+    font-weight: 400;
 }
 
 /* Geçici olarak gizlenen oyunlar */
@@ -3825,24 +3896,24 @@ body {
 
 /* Günlük Okumalar - Yeşil tonları */
 .game-card[data-game="kuran-okuma"] {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.1)) !important;
-    border-color: rgba(16, 185, 129, 0.4) !important;
+    background: var(--glass-bg) !important;
+    backdrop-filter: var(--glass-blur) !important;
+    -webkit-backdrop-filter: var(--glass-blur) !important;
 }
 
-.game-card[data-game="kuran-okuma"]:hover {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(5, 150, 105, 0.2)) !important;
-    border-color: rgba(16, 185, 129, 0.6) !important;
+.game-card[data-game="kuran-okuma"]::after {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.05) 100%) !important;
 }
 
-/* Elif Ba - Turuncu/Altın tonları */
+/* Elif Ba - iOS Style */
 .game-card[data-game="elif-ba"] {
-    background: linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(245, 158, 11, 0.1)) !important;
-    border-color: rgba(251, 191, 36, 0.4) !important;
+    background: var(--glass-bg) !important;
+    backdrop-filter: var(--glass-blur) !important;
+    -webkit-backdrop-filter: var(--glass-blur) !important;
 }
 
-.game-card[data-game="elif-ba"]:hover {
-    background: linear-gradient(135deg, rgba(251, 191, 36, 0.25), rgba(245, 158, 11, 0.2)) !important;
-    border-color: rgba(251, 191, 36, 0.6) !important;
+.game-card[data-game="elif-ba"]::after {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(217, 119, 6, 0.05) 100%) !important;
 }
 
 .karma-card .game-icon,
@@ -3851,10 +3922,41 @@ body {
     min-width: 180px;
     height: 60px;
     flex-wrap: wrap;
+    gap: var(--spacing-md);
+    justify-content: center;
+}
+
+.karma-card .game-icon span {
+    font-size: 2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.karma-card .game-icon img {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    display: inline-block;
 }
 
 /* Mobil responsive - Günlük Okumalar iconları */
 @media (max-width: 576px) {
+    .karma-card .game-icon {
+        min-width: 140px;
+        height: 50px;
+        gap: var(--spacing-sm);
+    }
+    
+    .karma-card .game-icon span {
+        font-size: 1.5rem !important;
+    }
+    
+    .karma-card .game-icon img {
+        width: 36px;
+        height: 36px;
+    }
+    
     .game-card[data-game="kuran-okuma"] .game-icon {
         min-width: 140px;
         height: 50px;
