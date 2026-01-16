@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oyun Butonları Renk Alternatifleri</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #a8b5ff 0%, #b8a5e8 100%);
+            padding: 2rem;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #1a1a2e;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+        }
+        
+        .color-schemes {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .scheme-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .scheme-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: #1a1a2e;
+        }
+        
+        .preview-card {
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 2px solid;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            margin-bottom: 1rem;
+        }
+        
+        .preview-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px;
+        }
+        
+        .preview-icon {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .preview-title {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+            color: #1a1a2e;
+        }
+        
+        .preview-desc {
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+        
+        .color-code {
+            background: rgba(0, 0, 0, 0.05);
+            padding: 0.5rem;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+        
+        /* MEVCUT - Mor */
+        .current {
+            border-color: rgba(157, 138, 255, 0.25);
+        }
+        .current:hover {
+            border-color: rgba(157, 138, 255, 1);
+            box-shadow: 0 12px 40px rgba(157, 138, 255, 0.3);
+            background: rgba(255, 255, 255, 0.95);
+        }
+        
+        /* ALTERNATİF 1 - Mavi */
+        .blue {
+            border-color: rgba(59, 130, 246, 0.25);
+        }
+        .blue:hover {
+            border-color: rgba(59, 130, 246, 1);
+            box-shadow: 0 12px 40px rgba(59, 130, 246, 0.3);
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.05));
+        }
+        
+        /* ALTERNATİF 2 - Yeşil */
+        .green {
+            border-color: rgba(16, 185, 129, 0.25);
+        }
+        .green:hover {
+            border-color: rgba(16, 185, 129, 1);
+            box-shadow: 0 12px 40px rgba(16, 185, 129, 0.3);
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.05));
+        }
+        
+        /* ALTERNATİF 3 - Turuncu */
+        .orange {
+            border-color: rgba(251, 146, 60, 0.25);
+        }
+        .orange:hover {
+            border-color: rgba(251, 146, 60, 1);
+            box-shadow: 0 12px 40px rgba(251, 146, 60, 0.3);
+            background: linear-gradient(135deg, rgba(251, 146, 60, 0.1), rgba(234, 88, 12, 0.05));
+        }
+        
+        /* ALTERNATİF 4 - Pembe */
+        .pink {
+            border-color: rgba(236, 72, 153, 0.25);
+        }
+        .pink:hover {
+            border-color: rgba(236, 72, 153, 1);
+            box-shadow: 0 12px 40px rgba(236, 72, 153, 0.3);
+            background: linear-gradient(135deg, rgba(236, 72, 153, 0.1), rgba(219, 39, 119, 0.05));
+        }
+        
+        /* ALTERNATİF 5 - Lacivert */
+        .indigo {
+            border-color: rgba(99, 102, 241, 0.25);
+        }
+        .indigo:hover {
+            border-color: rgba(99, 102, 241, 1);
+            box-shadow: 0 12px 40px rgba(99, 102, 241, 0.3);
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(67, 56, 202, 0.05));
+        }
+        
+        /* ALTERNATİF 6 - Turkuaz */
+        .cyan {
+            border-color: rgba(6, 182, 212, 0.25);
+        }
+        .cyan:hover {
+            border-color: rgba(6, 182, 212, 1);
+            box-shadow: 0 12px 40px rgba(6, 182, 212, 0.3);
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(8, 145, 178, 0.05));
+        }
+        
+        /* ALTERNATİF 7 - Kırmızı */
+        .red {
+            border-color: rgba(239, 68, 68, 0.25);
+        }
+        .red:hover {
+            border-color: rgba(239, 68, 68, 1);
+            box-shadow: 0 12px 40px rgba(239, 68, 68, 0.3);
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.05));
+        }
+        
+        /* ALTERNATİF 8 - Altın */
+        .gold {
+            border-color: rgba(251, 191, 36, 0.25);
+        }
+        .gold:hover {
+            border-color: rgba(251, 191, 36, 1);
+            box-shadow: 0 12px 40px rgba(251, 191, 36, 0.3);
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(245, 158, 11, 0.05));
+        }
+        
+        /* ALTERNATİF 9 - Mor-Pembe Gradient */
+        .purple-pink {
+            border-color: rgba(168, 85, 247, 0.25);
+        }
+        .purple-pink:hover {
+            border-color: rgba(168, 85, 247, 1);
+            box-shadow: 0 12px 40px rgba(168, 85, 247, 0.3);
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(236, 72, 153, 0.1));
+        }
+        
+        /* ALTERNATİF 10 - Mavi-Yeşil Gradient */
+        .teal {
+            border-color: rgba(20, 184, 166, 0.25);
+        }
+        .teal:hover {
+            border-color: rgba(20, 184, 166, 1);
+            box-shadow: 0 12px 40px rgba(20, 184, 166, 0.3);
+            background: linear-gradient(135deg, rgba(20, 184, 166, 0.1), rgba(15, 118, 110, 0.05));
+        }
+        
+        .info {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .info h2 {
+            margin-bottom: 1rem;
+            color: #1a1a2e;
+        }
+        
+        .info p {
+            color: #64748b;
+            line-height: 1.6;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Oyun Butonları Renk Alternatifleri</h1>
+        
+        <div class="color-schemes">
+            <!-- MEVCUT - Mor -->
+            <div class="scheme-card">
+                <div class="scheme-title">1. Mevcut (Mor) 💜</div>
+                <div class="preview-card current">
+                    <div class="preview-icon">📚</div>
+                    <div class="preview-title">Kelime Çevir</div>
+                    <div class="preview-desc">Arapça kelimenin Türkçe karşılığını bul</div>
+                </div>
+                <div class="color-code">
+                    Border: rgba(157, 138, 255, 0.25)<br>
+                    Hover: rgba(157, 138, 255, 1)
+                </div>
+            </div>
+            
+            <!-- ALTERNATİF 1 - Mavi -->
+            <div class="scheme-card">
+                <div class="scheme-title">2. Mavi (Sakin) 💙</div>
+                <div class="preview-card blue">
+                    <div class="preview-icon">📚</div>
+                    <div class="preview-title">Kelime Çevir</div>
+                    <div class="preview-desc">Arapça kelimenin Türkçe karşılığını bul</div>
+                </div>
+                <div class="color-code">
+                    Border: rgba(59, 130, 246, 0.25)<br>
+                    Hover: rgba(59, 130, 246, 1)
+                </div>
+            </div>
+            
+            <!-- ALTERNATİF 2 - Yeşil -->
+            <div class="scheme-card">
+                <div class="scheme-title">3. Yeşil (Doğa) 💚</div>
+                <div class="preview-card green">
+                    <div class="preview-icon">📚</div>
+                    <div class="preview-title">Kelime Çevir</div>
+                    <div class="preview-desc">Arapça kelimenin Türkçe karşılığını bul</div>
+                </div>
+                <div class="color-code">
+                    Border: rgba(16, 185, 129, 0.25)<br>
+                    Hover: rgba(16, 185, 129, 1)
+                </div>
+            </div>
+            
+            <!-- ALTERNATİF 3 - Turuncu -->
+            <div class="scheme-card">
+                <div class="scheme-title">4. Turuncu (Enerji) 🧡</div>
+                <div class="preview-card orange">
+                    <div class="preview-icon">📚</div>
+                    <div class="preview-title">Kelime Çevir</div>
+                    <div class="preview-desc">Arapça kelimenin Türkçe karşılığını bul</div>
+                </div>
+                <div class="color-code">
+                    Border: rgba(251, 146, 60, 0.25)<br>
+                    Hover: rgba(251, 146, 60, 1)
+                </div>
+            </div>
+            
+            <!-- ALTERNATİF 4 - Pembe -->
+            <div class="scheme-card">
+                <div class="scheme-title">5. Pembe (Yumuşak) 💗</div>
+                <div class="preview-card pink">
+                    <div class="preview-icon">📚</div>
+                    <div class="preview-title">Kelime Çevir</div>
+                    <div class="preview-desc">Arapça kelimenin Türkçe karşılığını bul</div>
+                </div>
+                <div class="color-code">
+                    Border: rgba(236, 72, 153, 0.25)<br>
+                    Hover: rgba(236, 72, 153, 1)
+                </div>
+            </div>
+            
+            <!-- ALTERNATİF 5 - Lacivert -->
+            <div class="scheme-card">
+                <div class="scheme-title">6. Lacivert (Profesyonel) 🔵</div>
+                <div class="preview-card indigo">
+                    <div class="preview-icon">📚</div>
+                    <div class="preview-title">Kelime Çevir</div>
+                    <div class="preview-desc">Arapça kelimenin Türkçe karşılığını bul</div>
+                </div>
+                <div class="color-code">
+                    Border: rgba(99, 102, 241, 0.25)<br>
+                    Hover: rgba(99, 102, 241, 1)
+                </div>
+            </div>
+            
+            <!-- ALTERNATİF 6 - Turkuaz -->
+            <div class="scheme-card">
+                <div class="scheme-title">7. Turkuaz (Modern) 🔷</div>
+                <div class="preview-card cyan">
+                    <div class="preview-icon">📚</div>
+                    <div class="preview-title">Kelime Çevir</div>
+                    <div class="preview-desc">Arapça kelimenin Türkçe karşılığını bul</div>
+                </div>
+                <div class="color-code">
+                    Border: rgba(6, 182, 212, 0.25)<br>
+                    Hover: rgba(6, 182, 212, 1)
+                </div>
+            </div>
+            
+            <!-- ALTERNATİF 7 - Kırmızı -->
+            <div class="scheme-card">
+                <div class="scheme-title">8. Kırmızı (Dikkat Çekici) ❤️</div>
+                <div class="preview-card red">
+                    <div class="preview-icon">📚</div>
+                    <div class="preview-title">Kelime Çevir</div>
+                    <div class="preview-desc">Arapça kelimenin Türkçe karşılığını bul</div>
+                </div>
+                <div class="color-code">
+                    Border: rgba(239, 68, 68, 0.25)<br>
+                    Hover: rgba(239, 68, 68, 1)
+                </div>
+            </div>
+            
+            <!-- ALTERNATİF 8 - Altın -->
+            <div class="scheme-card">
+                <div class="scheme-title">9. Altın (Lüks) ✨</div>
+                <div class="preview-card gold">
+                    <div class="preview-icon">📚</div>
+                    <div class="preview-title">Kelime Çevir</div>
+                    <div class="preview-desc">Arapça kelimenin Türkçe karşılığını bul</div>
+                </div>
+                <div class="color-code">
+                    Border: rgba(251, 191, 36, 0.25)<br>
+                    Hover: rgba(251, 191, 36, 1)
+                </div>
+            </div>
+            
+            <!-- ALTERNATİF 9 - Mor-Pembe Gradient -->
+            <div class="scheme-card">
+                <div class="scheme-title">10. Mor-Pembe Gradient 🌈</div>
+                <div class="preview-card purple-pink">
+                    <div class="preview-icon">📚</div>
+                    <div class="preview-title">Kelime Çevir</div>
+                    <div class="preview-desc">Arapça kelimenin Türkçe karşılığını bul</div>
+                </div>
+                <div class="color-code">
+                    Border: rgba(168, 85, 247, 0.25)<br>
+                    Hover: Gradient (Mor→Pembe)
+                </div>
+            </div>
+            
+            <!-- ALTERNATİF 10 - Mavi-Yeşil Gradient -->
+            <div class="scheme-card">
+                <div class="scheme-title">11. Mavi-Yeşil Gradient 🌊</div>
+                <div class="preview-card teal">
+                    <div class="preview-icon">📚</div>
+                    <div class="preview-title">Kelime Çevir</div>
+                    <div class="preview-desc">Arapça kelimenin Türkçe karşılığını bul</div>
+                </div>
+                <div class="color-code">
+                    Border: rgba(20, 184, 166, 0.25)<br>
+                    Hover: Gradient (Mavi→Yeşil)
+                </div>
+            </div>
+        </div>
+        
+        <div class="info">
+            <h2>📝 Kullanım</h2>
+            <p>Beğendiğiniz renk şemasını seçin ve <code>style.css</code> dosyasındaki <code>.game-card</code> stillerini güncelleyin.</p>
+            <p>Renk kodları <code>game-card-color-alternatives.css</code> dosyasında detaylı olarak bulunmaktadır.</p>
+        </div>
+    </div>
+</body>
+</html>
+

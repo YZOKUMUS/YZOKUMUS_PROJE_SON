@@ -404,15 +404,15 @@ body {
     background: rgba(255, 255, 255, 0.85);
     backdrop-filter: var(--glass-blur);
     border-radius: var(--radius-lg);
-    border: 2px solid rgba(157, 138, 255, 0.25);
+    border: 2px solid rgba(99, 102, 241, 0.25);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .game-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 40px rgba(157, 138, 255, 0.3);
-    border-color: var(--accent-primary);
-    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 12px 40px rgba(99, 102, 241, 0.3);
+    border-color: rgba(99, 102, 241, 1);
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(67, 56, 202, 0.05));
 }
 
 .game-card:active {

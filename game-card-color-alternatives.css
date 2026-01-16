@@ -1,0 +1,187 @@
+/* ===================================
+   OYUN BUTONLARI İÇİN ALTERNATİF RENK ŞEMALARI
+   =================================== */
+
+/* MEVCUT RENK (Mor Tonları) */
+.game-card-current {
+    background: rgba(255, 255, 255, 0.85);
+    border: 2px solid rgba(157, 138, 255, 0.25);
+}
+.game-card-current:hover {
+    border-color: rgba(157, 138, 255, 1);
+    box-shadow: 0 12px 40px rgba(157, 138, 255, 0.3);
+}
+
+/* ALTERNATİF 1: Mavi Tonları (Sakin ve Güvenilir) */
+.game-card-blue {
+    background: rgba(255, 255, 255, 0.85);
+    border: 2px solid rgba(59, 130, 246, 0.25);
+}
+.game-card-blue:hover {
+    border-color: rgba(59, 130, 246, 1);
+    box-shadow: 0 12px 40px rgba(59, 130, 246, 0.3);
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.05));
+}
+
+/* ALTERNATİF 2: Yeşil Tonları (Doğa ve Huzur) */
+.game-card-green {
+    background: rgba(255, 255, 255, 0.85);
+    border: 2px solid rgba(16, 185, 129, 0.25);
+}
+.game-card-green:hover {
+    border-color: rgba(16, 185, 129, 1);
+    box-shadow: 0 12px 40px rgba(16, 185, 129, 0.3);
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.05));
+}
+
+/* ALTERNATİF 3: Turuncu/Turuncu-Kırmızı Tonları (Enerji ve Canlılık) */
+.game-card-orange {
+    background: rgba(255, 255, 255, 0.85);
+    border: 2px solid rgba(251, 146, 60, 0.25);
+}
+.game-card-orange:hover {
+    border-color: rgba(251, 146, 60, 1);
+    box-shadow: 0 12px 40px rgba(251, 146, 60, 0.3);
+    background: linear-gradient(135deg, rgba(251, 146, 60, 0.1), rgba(234, 88, 12, 0.05));
+}
+
+/* ALTERNATİF 4: Pembe/Mor-Pembe Tonları (Yumuşak ve Şık) */
+.game-card-pink {
+    background: rgba(255, 255, 255, 0.85);
+    border: 2px solid rgba(236, 72, 153, 0.25);
+}
+.game-card-pink:hover {
+    border-color: rgba(236, 72, 153, 1);
+    box-shadow: 0 12px 40px rgba(236, 72, 153, 0.3);
+    background: linear-gradient(135deg, rgba(236, 72, 153, 0.1), rgba(219, 39, 119, 0.05));
+}
+
+/* ALTERNATİF 5: Koyu Mavi/Lacivert Tonları (Profesyonel) */
+.game-card-indigo {
+    background: rgba(255, 255, 255, 0.85);
+    border: 2px solid rgba(99, 102, 241, 0.25);
+}
+.game-card-indigo:hover {
+    border-color: rgba(99, 102, 241, 1);
+    box-shadow: 0 12px 40px rgba(99, 102, 241, 0.3);
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(67, 56, 202, 0.05));
+}
+
+/* ALTERNATİF 6: Turkuaz/Cyan Tonları (Taze ve Modern) */
+.game-card-cyan {
+    background: rgba(255, 255, 255, 0.85);
+    border: 2px solid rgba(6, 182, 212, 0.25);
+}
+.game-card-cyan:hover {
+    border-color: rgba(6, 182, 212, 1);
+    box-shadow: 0 12px 40px rgba(6, 182, 212, 0.3);
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(8, 145, 178, 0.05));
+}
+
+/* ALTERNATİF 7: Kırmızı Tonları (Dikkat Çekici) */
+.game-card-red {
+    background: rgba(255, 255, 255, 0.85);
+    border: 2px solid rgba(239, 68, 68, 0.25);
+}
+.game-card-red:hover {
+    border-color: rgba(239, 68, 68, 1);
+    box-shadow: 0 12px 40px rgba(239, 68, 68, 0.3);
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.05));
+}
+
+/* ALTERNATİF 8: Altın/Sarı Tonları (Lüks ve Parlak) */
+.game-card-gold {
+    background: rgba(255, 255, 255, 0.85);
+    border: 2px solid rgba(251, 191, 36, 0.25);
+}
+.game-card-gold:hover {
+    border-color: rgba(251, 191, 36, 1);
+    box-shadow: 0 12px 40px rgba(251, 191, 36, 0.3);
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(245, 158, 11, 0.05));
+}
+
+/* ALTERNATİF 9: Mor-Pembe Gradient (Modern ve Canlı) */
+.game-card-purple-pink {
+    background: rgba(255, 255, 255, 0.85);
+    border: 2px solid rgba(168, 85, 247, 0.25);
+}
+.game-card-purple-pink:hover {
+    border-color: rgba(168, 85, 247, 1);
+    box-shadow: 0 12px 40px rgba(168, 85, 247, 0.3);
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(236, 72, 153, 0.1));
+}
+
+/* ALTERNATİF 10: Mavi-Yeşil Gradient (Okyanus Teması) */
+.game-card-teal {
+    background: rgba(255, 255, 255, 0.85);
+    border: 2px solid rgba(20, 184, 166, 0.25);
+}
+.game-card-teal:hover {
+    border-color: rgba(20, 184, 166, 1);
+    box-shadow: 0 12px 40px rgba(20, 184, 166, 0.3);
+    background: linear-gradient(135deg, rgba(20, 184, 166, 0.1), rgba(15, 118, 110, 0.05));
+}
+
+/* ===================================
+   RENK KODLARI ÖZET
+   =================================== */
+
+/*
+MEVCUT (Mor):
+- Border: rgba(157, 138, 255, 0.25)
+- Hover Border: rgba(157, 138, 255, 1)
+- Hover Shadow: rgba(157, 138, 255, 0.3)
+
+ALTERNATİF 1 (Mavi):
+- Border: rgba(59, 130, 246, 0.25) - #3b82f6
+- Hover Border: rgba(59, 130, 246, 1)
+- Hover Shadow: rgba(59, 130, 246, 0.3)
+
+ALTERNATİF 2 (Yeşil):
+- Border: rgba(16, 185, 129, 0.25) - #10b981
+- Hover Border: rgba(16, 185, 129, 1)
+- Hover Shadow: rgba(16, 185, 129, 0.3)
+
+ALTERNATİF 3 (Turuncu):
+- Border: rgba(251, 146, 60, 0.25) - #fb923c
+- Hover Border: rgba(251, 146, 60, 1)
+- Hover Shadow: rgba(251, 146, 60, 0.3)
+
+ALTERNATİF 4 (Pembe):
+- Border: rgba(236, 72, 153, 0.25) - #ec4899
+- Hover Border: rgba(236, 72, 153, 1)
+- Hover Shadow: rgba(236, 72, 153, 0.3)
+
+ALTERNATİF 5 (Lacivert):
+- Border: rgba(99, 102, 241, 0.25) - #6366f1
+- Hover Border: rgba(99, 102, 241, 1)
+- Hover Shadow: rgba(99, 102, 241, 0.3)
+
+ALTERNATİF 6 (Turkuaz):
+- Border: rgba(6, 182, 212, 0.25) - #06b6d4
+- Hover Border: rgba(6, 182, 212, 1)
+- Hover Shadow: rgba(6, 182, 212, 0.3)
+
+ALTERNATİF 7 (Kırmızı):
+- Border: rgba(239, 68, 68, 0.25) - #ef4444
+- Hover Border: rgba(239, 68, 68, 1)
+- Hover Shadow: rgba(239, 68, 68, 0.3)
+
+ALTERNATİF 8 (Altın):
+- Border: rgba(251, 191, 36, 0.25) - #fbbf24
+- Hover Border: rgba(251, 191, 36, 1)
+- Hover Shadow: rgba(251, 191, 36, 0.3)
+
+ALTERNATİF 9 (Mor-Pembe Gradient):
+- Border: rgba(168, 85, 247, 0.25) - #a855f7
+- Hover Border: rgba(168, 85, 247, 1)
+- Hover Shadow: rgba(168, 85, 247, 0.3)
+- Background Gradient: rgba(168, 85, 247, 0.15) → rgba(236, 72, 153, 0.1)
+
+ALTERNATİF 10 (Mavi-Yeşil Gradient):
+- Border: rgba(20, 184, 166, 0.25) - #14b8a6
+- Hover Border: rgba(20, 184, 166, 1)
+- Hover Shadow: rgba(20, 184, 166, 0.3)
+- Background Gradient: rgba(20, 184, 166, 0.1) → rgba(15, 118, 110, 0.05)
+*/
+
