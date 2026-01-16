@@ -257,7 +257,7 @@ body::before {
    MAIN CONTAINER
    =================================== */
 .main-container {
-    padding: var(--spacing-md);
+    padding: var(--spacing-sm) var(--spacing-md);
     max-width: 600px;
     margin: 0 auto;
     position: relative;
@@ -266,14 +266,14 @@ body::before {
 
 /* Stats Header */
 .stats-header {
-    padding: var(--spacing-xl);
-    margin-bottom: var(--spacing-xl);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
     background: var(--glass-bg);
     backdrop-filter: var(--glass-blur);
     -webkit-backdrop-filter: var(--glass-blur);
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-md);
     border: 0.5px solid var(--glass-border);
-    box-shadow: var(--shadow-medium);
+    box-shadow: var(--shadow-subtle);
 }
 
 .stats-row {
@@ -339,21 +339,21 @@ body::before {
 
 /* Daily Goal */
 .daily-goal-container {
-    margin-top: var(--spacing-md);
+    margin-top: var(--spacing-sm);
 }
 
 .daily-goal-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: var(--spacing-sm);
-    font-size: 0.875rem;
+    margin-bottom: 4px;
+    font-size: 0.75rem;
 }
 
 .daily-goal-bar {
-    height: 8px;
+    height: 6px;
     background: rgba(0, 0, 0, 0.1);
-    border-radius: 4px;
+    border-radius: 3px;
     overflow: hidden;
 }
 
@@ -376,7 +376,7 @@ body::before {
 .difficulty-selector {
     display: flex;
     gap: var(--spacing-sm);
-    margin-bottom: var(--spacing-xl);
+    margin-bottom: var(--spacing-lg);
     padding: var(--spacing-sm);
     background: var(--glass-bg);
     backdrop-filter: var(--glass-blur);
@@ -425,10 +425,11 @@ body::before {
     grid-template-columns: repeat(2, 1fr);
     gap: var(--spacing-lg);
     margin-bottom: var(--spacing-xl);
+    margin-top: var(--spacing-sm);
 }
 
 .game-card {
-    padding: var(--spacing-xl);
+    padding: var(--spacing-lg);
     text-align: center;
     cursor: pointer;
     transition: all var(--transition-normal);
@@ -5338,10 +5339,10 @@ body::before {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 8px;
-    padding: 6px 10px;
+    margin-bottom: 6px;
+    padding: 4px 8px;
     background: rgba(255,255,255,0.05);
-    border-radius: 8px;
+    border-radius: 6px;
 }
 
 .user-info {
@@ -5394,8 +5395,8 @@ body::before {
     display: flex;
     justify-content: space-around;
     align-items: center;
-    margin-bottom: 12px;
-    padding: 8px 4px;
+    margin-bottom: 8px;
+    padding: 4px 2px;
 }
 
 .stat-item-compact {
@@ -5404,16 +5405,16 @@ body::before {
 }
 
 .stat-value-compact {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 700;
     color: #1a1a2e;
     line-height: 1.2;
 }
 
 .stat-label-compact {
-    font-size: 11px;
+    font-size: 10px;
     color: #64748b;
-    margin-top: 2px;
+    margin-top: 1px;
 }
 
 /* Username Input Styles */
