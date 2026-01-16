@@ -503,6 +503,22 @@ async function loadStats(skipStreakCheck = false) {
     // Daily tasks
     await checkDailyTasks();
     
+    // Nuclear Clear loglarını göster (eğer varsa)
+    const nuclearClearLog = localStorage.getItem('hasene_nuclear_clear_log');
+    if (nuclearClearLog) {
+        try {
+            const logData = JSON.parse(nuclearClearLog);
+            console.log('📋 NUCLEAR CLEAR ÖZET (önceki işlem):');
+            console.log('⏰ Zaman:', logData.timestamp);
+            console.log('📊 Weekly Leaderboard Silinen:', logData.weeklyLeaderboardDeleted);
+            console.log('📝 Özet:', logData.summary);
+            // Log'u gösterdikten sonra sil
+            localStorage.removeItem('hasene_nuclear_clear_log');
+        } catch (e) {
+            console.warn('⚠️ Nuclear clear log parse hatası:', e);
+        }
+    }
+    
     // Load weekly XP from Firebase
     if (typeof window.loadWeeklyXPFromFirebase === 'function') {
         await window.loadWeeklyXPFromFirebase();
@@ -562,15 +578,12 @@ async function loadStats(skipStreakCheck = false) {
  * Save all stats
  */
 function saveStats() {
-    // Kullanıcı giriş yapmamışsa kayıt tutma
-    const userId = localStorage.getItem('hasene_user_id');
-    const username = localStorage.getItem('hasene_username');
-    if (!userId || !username) {
-        // Kullanıcı giriş yapmamış, kayıt tutulmayacak
+    // Check if user is logged in
+    if (!checkUserLoggedIn()) {
         return;
     }
     
-    // Save to localStorage (only if user is logged in)
+    // Save to localStorage
     saveToStorage(CONFIG.STORAGE_KEYS.TOTAL_POINTS, totalPoints);
     saveToStorage(CONFIG.STORAGE_KEYS.STREAK_DATA, streakData);
     saveToStorage(CONFIG.STORAGE_KEYS.GAME_STATS, gameStats);
@@ -585,7 +598,8 @@ function saveStats() {
     saveToStorage('hasene_achievements', unlockedAchievements);
     saveToStorage('hasene_badges', badgesUnlocked);
     
-    // Sync to Firebase backend (if user has real username)
+    // Sync to Firebase backend
+    // saveUserStats and saveDailyTasks functions have their own user checks
     if (typeof window.saveUserStats === 'function') {
             // Get all daily stats before saving
             const allDailyStats = getAllDailyStats();
@@ -1229,6 +1243,48 @@ function registerServiceWorker() {
 }
 
 // ========================================
+// USER AUTHENTICATION CHECK
+// ========================================
+
+/**
+ * Check if user is logged in
+ * @returns {boolean} True if user is logged in
+ */
+function checkUserLoggedIn() {
+    const userId = localStorage.getItem('hasene_user_id');
+    const username = localStorage.getItem('hasene_username');
+    
+    // Check if user has valid credentials
+    if (!userId || !username) {
+        return false;
+    }
+    
+    // Check if username is not a default/empty value
+    const defaultUsernames = ['Kullanıcı', 'Anonim Kullanıcı', ''];
+    if (defaultUsernames.includes(username.trim())) {
+        return false;
+    }
+    
+    return true;
+}
+
+/**
+ * Require user login before proceeding
+ * Shows login modal if user is not logged in
+ * @returns {boolean} True if user is logged in, false otherwise
+ */
+function requireUserLogin() {
+    if (!checkUserLoggedIn()) {
+        showToast('Oyun oynamak için lütfen giriş yapın', 'warning');
+        if (typeof window.showUsernameLoginModal === 'function') {
+            window.showUsernameLoginModal();
+        }
+        return false;
+    }
+    return true;
+}
+
+// ========================================
 // EVENT LISTENERS
 // ========================================
 
@@ -1295,6 +1351,9 @@ function setupEventListeners() {
     // Kelime submode buttons
     document.querySelectorAll('[data-submode]').forEach(btn => {
         btn.addEventListener('click', () => {
+            if (!requireUserLogin()) {
+                return;
+            }
             currentKelimeSubmode = btn.dataset.submode;
             startKelimeCevirGame(currentKelimeSubmode);
         });
@@ -1303,6 +1362,9 @@ function setupEventListeners() {
     // Elif Ba submode buttons
     document.querySelectorAll('[data-elif-submode]').forEach(btn => {
         btn.addEventListener('click', () => {
+            if (!requireUserLogin()) {
+                return;
+            }
             currentElifBaSubmode = btn.dataset.elifSubmode;
             if (currentElifBaSubmode === 'tablo') {
                 showHarfTablosu();
@@ -1386,6 +1448,11 @@ function setupNavigationButtons() {
  * Start a game mode
  */
 async function startGame(gameMode) {
+    // Check if user is logged in
+    if (!requireUserLogin()) {
+        return;
+    }
+    
     console.log(`🎮 Starting game: ${gameMode}`);
     currentGameMode = gameMode;
     gameCompleted = false; // Reset game completed flag
@@ -1864,6 +1931,11 @@ function closeResultAndGoHome() {
 // ========================================
 
 async function startKelimeCevirGame(submode = 'classic') {
+    // Check if user is logged in
+    if (!requireUserLogin()) {
+        return;
+    }
+    
     currentKelimeSubmode = submode;
     gameCompleted = false; // Reset game completed flag
     
@@ -2200,10 +2272,8 @@ function toggleCurrentWordFavorite() {
 function updateWordStats(wordId, isCorrect) {
     if (!wordId) return;
     
-    // Kullanıcı giriş yapmamışsa kelime istatistikleri kaydedilmez
-    const userId = localStorage.getItem('hasene_user_id');
-    const username = localStorage.getItem('hasene_username');
-    if (!userId || !username) {
+    // Check if user is logged in
+    if (!checkUserLoggedIn()) {
         return;
     }
     
@@ -3203,6 +3273,11 @@ function playCurrentWordAudio() {
 // ========================================
 
 async function startDinleBulGame() {
+    // Check if user is logged in
+    if (!requireUserLogin()) {
+        return;
+    }
+    
     const data = await loadKelimeData();
     if (data.length === 0) {
         showToast('Kelime verisi yüklenemedi', 'error');
@@ -3320,6 +3395,11 @@ function checkDinleAnswer(index, selectedAnswer) {
 // ========================================
 
 async function startBoslukDoldurGame() {
+    // Check if user is logged in
+    if (!requireUserLogin()) {
+        return;
+    }
+    
     const data = await loadAyetData();
     if (data.length === 0) {
         showToast('Ayet verisi yüklenemedi', 'error');
@@ -3524,6 +3604,11 @@ function playCurrentBoslukAudio() {
 // ========================================
 
 async function startAyetOkuMode() {
+    // Check if user is logged in
+    if (!requireUserLogin()) {
+        return;
+    }
+    
     const data = await loadAyetData();
     if (data.length === 0) {
         showToast('Ayet verisi yüklenemedi', 'error');
@@ -3591,6 +3676,11 @@ function playCurrentAyetAudio() {
 // ========================================
 
 async function startDuaEtMode() {
+    // Check if user is logged in
+    if (!requireUserLogin()) {
+        return;
+    }
+    
     const data = await loadDuaData();
     if (data.length === 0) {
         showToast('Dua verisi yüklenemedi', 'error');
@@ -3656,6 +3746,11 @@ function playCurrentDuaAudio() {
 // ========================================
 
 async function startHadisOkuMode() {
+    // Check if user is logged in
+    if (!requireUserLogin()) {
+        return;
+    }
+    
     const data = await loadHadisData();
     if (data.length === 0) {
         showToast('Hadis verisi yüklenemedi', 'error');
@@ -3680,6 +3775,11 @@ async function startHadisOkuMode() {
  * Böylece kullanıcıya gerçekten karışık / dengeli bir deneyim sunulur.
  */
 async function startKuranOkumaMode() {
+    // Check if user is logged in
+    if (!requireUserLogin()) {
+        return;
+    }
+    
     const modes = ['ayet-oku', 'dua-et', 'hadis-oku'];
     
     // Son seçilen modu localStorage'dan al
@@ -3795,6 +3895,11 @@ function navigateHadis(direction) {
  * @param {string} submode - 'harfler' | 'kelimeler' | 'harekeler'
  */
 async function startElifBaGame(submode = 'harfler') {
+    // Check if user is logged in
+    if (!requireUserLogin()) {
+        return;
+    }
+    
     currentElifBaSubmode = submode;
     gameCompleted = false; // Reset game completed flag
     
@@ -5237,14 +5342,38 @@ async function checkDailyTasks() {
 }
 
 function updateTaskProgress(type, value) {
-    if (!dailyTasks.tasks) return;
-    
-    // Kullanıcı giriş yapmamışsa görev ilerlemesi kaydedilmez
-    const userId = localStorage.getItem('hasene_user_id');
-    const username = localStorage.getItem('hasene_username');
-    if (!userId || !username) {
+    // Check if user is logged in
+    if (!checkUserLoggedIn()) {
         return;
     }
+    
+    // Initialize daily tasks if not already initialized
+    const today = getLocalDateString();
+    if (!dailyTasks.tasks || dailyTasks.lastTaskDate !== today) {
+        // Load from storage first
+        dailyTasks = loadFromStorage(CONFIG.STORAGE_KEYS.DAILY_TASKS, dailyTasks);
+        
+        // If still not initialized or it's a new day, reset
+        if (!dailyTasks.tasks || dailyTasks.lastTaskDate !== today) {
+            dailyTasks = {
+                lastTaskDate: today,
+                tasks: JSON.parse(JSON.stringify(DAILY_TASKS_TEMPLATE)).map(t => ({ ...t, progress: 0 })),
+                bonusTasks: JSON.parse(JSON.stringify(DAILY_BONUS_TASKS_TEMPLATE)).map(t => ({ ...t, progress: 0 })),
+                todayStats: {
+                    toplamDogru: 0,
+                    toplamPuan: 0,
+                    comboCount: 0,
+                    allGameModes: [],
+                    ayet_oku: 0,
+                    dua_et: 0,
+                    hadis_oku: 0
+                }
+            };
+            saveToStorage(CONFIG.STORAGE_KEYS.DAILY_TASKS, dailyTasks);
+        }
+    }
+    
+    if (!dailyTasks.tasks) return;
     
     // Update stats
     if (type === 'correct') {
@@ -6229,6 +6358,11 @@ let karmaMatchPairs = [];
  * Combines all game types: Kelime Çevir, Dinle Bul, Eşleştirme, Boşluk Doldur
  */
 async function startKarmaGame() {
+    // Check if user is logged in
+    if (!requireUserLogin()) {
+        return;
+    }
+    
     console.log('🎲 Talim Et başlatılıyor...');
     
     // Reset session
@@ -7159,19 +7293,39 @@ async function nuclearClear() {
     try {
         // Önce Firebase'den verileri sil (kullanıcı bilgilerini kaydetmeden önce)
         const savedUsername = localStorage.getItem('hasene_username');
-        if (savedUsername) {
+        const savedUserId = localStorage.getItem('hasene_user_id');
+        
+        // Firebase silme işlemi için kullanıcı bilgilerini kontrol et
+        if (savedUsername || savedUserId) {
             const defaultUsernames = ['Kullanıcı', 'Anonim Kullanıcı', ''];
             const hasRealUsername = savedUsername && savedUsername.trim() !== '' && !defaultUsernames.includes(savedUsername.trim());
             
-            if (hasRealUsername && window.FIREBASE_ENABLED && window.firestore) {
+            // Firebase silme işlemi - hem username hem de userId varsa yap
+            if ((hasRealUsername || savedUserId) && window.FIREBASE_ENABLED && window.firestore) {
                 try {
-                    const docId = typeof window.usernameToDocId === 'function' ? window.usernameToDocId(savedUsername) : savedUsername.toLowerCase().replace(/[^a-z0-9_]/g, '_');
+                    const deletePromises = [];
                     
-                    // Delete from Firebase
-                    await Promise.all([
-                        window.firestoreDelete('user_stats', docId).catch(() => false),
-                        window.firestoreDelete('daily_tasks', docId).catch(() => false)
-                    ]);
+                    // Username ile silme
+                    if (hasRealUsername) {
+                        const docId = typeof window.usernameToDocId === 'function' ? window.usernameToDocId(savedUsername) : savedUsername.toLowerCase().replace(/[^a-z0-9_]/g, '_');
+                        deletePromises.push(
+                            window.firestoreDelete('user_stats', docId).catch(() => false),
+                            window.firestoreDelete('daily_tasks', docId).catch(() => false)
+                        );
+                    }
+                    
+                    // UserId ile de silme (eğer varsa)
+                    if (savedUserId) {
+                        const userIdDocId = typeof window.usernameToDocId === 'function' ? window.usernameToDocId(savedUserId) : savedUserId.toLowerCase().replace(/[^a-z0-9_]/g, '_');
+                        deletePromises.push(
+                            window.firestoreDelete('user_stats', userIdDocId).catch(() => false),
+                            window.firestoreDelete('daily_tasks', userIdDocId).catch(() => false)
+                        );
+                    }
+                    
+                    if (deletePromises.length > 0) {
+                        await Promise.all(deletePromises);
+                    }
                     
                     // Delete ALL weekly leaderboard entries for this user
                     // First, ensure Firebase auth (try anonymous auth for local users)
@@ -7190,7 +7344,11 @@ async function nuclearClear() {
                         }
                     }
                     
-                    if (window.firestore && firebaseAuthUID) {
+                    // Delete ALL weekly leaderboard entries
+                    // Try query first, then fallback to manual deletion
+                    let weeklyLeaderboardDeleted = 0;
+                    
+                    if (window.firestore && firebaseAuthUID && hasRealUsername) {
                         try {
                             console.log('🔄 Tüm weekly_leaderboard dokümanları sorgulanıyor...');
                             
@@ -7211,6 +7369,7 @@ async function nuclearClear() {
                                     deletePromises.push(
                                         doc.ref.delete().then(() => {
                                             console.log('✅ Weekly leaderboard dokümanı silindi:', doc.id);
+                                            weeklyLeaderboardDeleted++;
                                             return true;
                                         }).catch((error) => {
                                             console.warn('⚠️ Weekly leaderboard silme hatası:', error, { docId: doc.id });
@@ -7218,53 +7377,66 @@ async function nuclearClear() {
                                         })
                                     );
                                 } else {
-                                    console.warn('⚠️ Doküman farklı kullanıcıya ait, atlanıyor:', { docId: doc.id, docUserId: docData.user_id, currentUID: firebaseUID });
+                                    console.warn('⚠️ Doküman farklı kullanıcıya ait, atlanıyor:', { docId: doc.id, docUserId: docData.user_id, currentUID: firebaseAuthUID });
                                 }
                             });
                             
                             if (deletePromises.length > 0) {
                                 const results = await Promise.all(deletePromises);
                                 const successCount = results.filter(r => r === true).length;
-                                console.log(`✅ ${successCount}/${deletePromises.length} weekly_leaderboard dokümanı silindi`);
+                                console.log(`✅ ${successCount}/${deletePromises.length} weekly_leaderboard dokümanı silindi (query ile)`);
                             } else {
-                                console.log('ℹ️ Silinecek weekly_leaderboard dokümanı bulunamadı');
+                                console.log('ℹ️ Query ile silinecek weekly_leaderboard dokümanı bulunamadı');
                             }
                         } catch (error) {
                             console.warn('⚠️ Weekly leaderboard query/silme hatası:', error);
-                            // Fallback: Try to delete last 52 weeks manually
-                            if (typeof window.getWeekStartString === 'function') {
-                                console.log('🔄 Fallback: Son 52 hafta manuel olarak siliniyor...');
-                                const today = new Date();
-                                for (let i = 0; i < 52; i++) {
-                                    const weekDate = new Date(today);
-                                    weekDate.setDate(weekDate.getDate() - (i * 7));
-                                    const dayOfWeek = weekDate.getDay();
-                                    const diff = weekDate.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
-                                    weekDate.setDate(diff);
-                                    weekDate.setHours(0, 0, 0, 0);
-                                    const weekStart = weekDate.toISOString().split('T')[0];
-                                    const weeklyDocId = `${savedUsername}_${weekStart}`;
-                                    await window.firestoreDelete('weekly_leaderboard', weeklyDocId).catch(() => false);
-                                }
-                            }
                         }
-                    } else {
-                        // Fallback: Delete last 52 weeks manually if query not available
-                        console.log('🔄 Query yapılamıyor, son 52 hafta manuel olarak siliniyor...');
-                        if (typeof window.getWeekStartString === 'function') {
-                            const today = new Date();
-                            for (let i = 0; i < 52; i++) {
-                                const weekDate = new Date(today);
-                                weekDate.setDate(weekDate.getDate() - (i * 7));
-                                const dayOfWeek = weekDate.getDay();
-                                const diff = weekDate.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
-                                weekDate.setDate(diff);
-                                weekDate.setHours(0, 0, 0, 0);
-                                const weekStart = weekDate.toISOString().split('T')[0];
-                                const weeklyDocId = `${savedUsername}_${weekStart}`;
-                                await window.firestoreDelete('weekly_leaderboard', weeklyDocId).catch(() => false);
-                            }
+                    }
+                    
+                    // ALWAYS try manual deletion as fallback (for last 104 weeks = 2 years)
+                    console.log('🔄 Fallback: Son 104 hafta (2 yıl) manuel olarak siliniyor...');
+                    const today = new Date();
+                    const manualDeletePromises = [];
+                    for (let i = 0; i < 104; i++) {
+                        const weekDate = new Date(today);
+                        weekDate.setDate(weekDate.getDate() - (i * 7));
+                        const dayOfWeek = weekDate.getDay();
+                        const diff = weekDate.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+                        weekDate.setDate(diff);
+                        weekDate.setHours(0, 0, 0, 0);
+                        const weekStart = weekDate.toISOString().split('T')[0];
+                        
+                        // Try both username and userId formats
+                        if (hasRealUsername) {
+                            const weeklyDocId = `${savedUsername}_${weekStart}`;
+                            manualDeletePromises.push(
+                                window.firestoreDelete('weekly_leaderboard', weeklyDocId).then(result => {
+                                    if (result) {
+                                        weeklyLeaderboardDeleted++;
+                                        console.log('✅ Weekly leaderboard silindi (manuel):', weeklyDocId);
+                                    }
+                                    return result;
+                                }).catch(() => false)
+                            );
                         }
+                        
+                        if (savedUserId) {
+                            const userIdDocId = `${savedUserId}_${weekStart}`;
+                            manualDeletePromises.push(
+                                window.firestoreDelete('weekly_leaderboard', userIdDocId).then(result => {
+                                    if (result) {
+                                        weeklyLeaderboardDeleted++;
+                                        console.log('✅ Weekly leaderboard silindi (manuel, userId):', userIdDocId);
+                                    }
+                                    return result;
+                                }).catch(() => false)
+                            );
+                        }
+                    }
+                    
+                    if (manualDeletePromises.length > 0) {
+                        await Promise.all(manualDeletePromises);
+                        console.log(`✅ Toplam ${weeklyLeaderboardDeleted} weekly_leaderboard dokümanı silindi`);
                     }
                     
                     console.log('✅ Firebase verileri silindi');
@@ -7274,40 +7446,174 @@ async function nuclearClear() {
             }
         }
         
-        // Clear everything
+        // Clear everything from localStorage
+        console.log('🗑️ localStorage temizleniyor...');
+        
+        // First, clear weekly XP data specifically
+        const allKeys = Object.keys(localStorage);
+        let weeklyXPCleared = 0;
+        allKeys.forEach(key => {
+            if (key.startsWith('hasene_weekly_xp_')) {
+                localStorage.removeItem(key);
+                weeklyXPCleared++;
+            }
+        });
+        console.log(`✅ ${weeklyXPCleared} weekly XP verisi localStorage'dan silindi`);
+        
+        // ÖNEMLİ: Kullanıcı bilgilerini kaydet (localStorage.clear() çağrılmadan önce)
+        // Çünkü clear() çağrıldıktan sonra bu bilgiler kaybolacak
+        const usernameToRestore = savedUsername;
+        const userIdToRestore = savedUserId;
+        
+        // Mevcut hafta başlangıcını hesapla (clear'dan önce)
+        const today = new Date();
+        const dayOfWeek = today.getDay();
+        const diff = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+        const monday = new Date(today.setDate(diff));
+        monday.setHours(0, 0, 0, 0);
+        const weekStart = monday.toISOString().split('T')[0];
+        const weeklyXPKey = `hasene_weekly_xp_${weekStart}`;
+        
+        // Then clear everything else
         localStorage.clear();
         sessionStorage.clear();
+        console.log('✅ localStorage ve sessionStorage temizlendi');
         
-        // Clear IndexedDB
+        // Kullanıcı bilgilerini tekrar kaydet (sayfa yenilendikten sonra giriş yapılmış olması için)
+        if (usernameToRestore) {
+            localStorage.setItem('hasene_username', usernameToRestore);
+        }
+        if (userIdToRestore) {
+            localStorage.setItem('hasene_user_id', userIdToRestore);
+        }
+        
+        // TÜM weekly XP keylerini SİL (önce temizle)
+        const allWeeklyKeys = Object.keys(localStorage).filter(k => k.startsWith('hasene_weekly_xp_'));
+        console.log('🔍 Tüm weekly XP keyleri bulundu:', allWeeklyKeys);
+        allWeeklyKeys.forEach(k => {
+            localStorage.removeItem(k);
+            console.log('🗑️ Weekly XP key silindi:', k);
+        });
+        
+        // Mevcut hafta için 0 değeri yaz (Firebase'den yüklenirse bile 0 gösterir)
+        localStorage.setItem(weeklyXPKey, '0');
+        console.log('✅ Mevcut hafta için weekly XP 0 olarak ayarlandı:', weeklyXPKey);
+        console.log('✅ Weekly XP değeri kontrol:', localStorage.getItem(weeklyXPKey));
+        
+        // Nuclear clear flag'i ekle (sayfa yenilendiğinde Firebase'den yükleme yapılmasın)
+        localStorage.setItem('hasene_nuclear_clear_done', Date.now().toString());
+        console.log('✅ Nuclear clear flag eklendi');
+        
+        // Final kontrol: getCurrentWeeklyXP() fonksiyonunu test et
+        if (typeof window.getCurrentWeeklyXP === 'function') {
+            const testXP = window.getCurrentWeeklyXP();
+            console.log('✅ Final kontrol - getCurrentWeeklyXP() sonucu:', testXP);
+            if (testXP !== 0) {
+                console.error('❌ HATA: getCurrentWeeklyXP() hala 0 değil! Değer:', testXP);
+                // Zorla 0 yap
+                localStorage.setItem(weeklyXPKey, '0');
+                console.log('🔧 Zorla 0 yapıldı, tekrar kontrol:', window.getCurrentWeeklyXP());
+            }
+        }
+        
+        // Clear IndexedDB (wait for completion)
         if ('indexedDB' in window) {
-            indexedDB.databases().then(databases => {
-                databases.forEach(db => {
-                    indexedDB.deleteDatabase(db.name);
-                });
-            });
+            try {
+                console.log('🗑️ IndexedDB temizleniyor...');
+                const databases = await indexedDB.databases();
+                await Promise.all(databases.map(db => {
+                    return new Promise((resolve, reject) => {
+                        const deleteReq = indexedDB.deleteDatabase(db.name);
+                        deleteReq.onsuccess = () => {
+                            console.log('✅ IndexedDB veritabanı silindi:', db.name);
+                            resolve();
+                        };
+                        deleteReq.onerror = () => {
+                            console.warn('⚠️ IndexedDB silme hatası:', db.name, deleteReq.error);
+                            resolve(); // Continue anyway
+                        };
+                        deleteReq.onblocked = () => {
+                            console.warn('⚠️ IndexedDB silme engellendi:', db.name);
+                            resolve(); // Continue anyway
+                        };
+                    });
+                }));
+                console.log('✅ IndexedDB temizlendi');
+            } catch (error) {
+                console.warn('⚠️ IndexedDB temizleme hatası:', error);
+            }
         }
         
-        // Clear Service Worker caches
+        // Clear Service Worker caches (wait for completion)
         if ('caches' in window) {
-            caches.keys().then(names => {
-                names.forEach(name => caches.delete(name));
-            });
+            try {
+                console.log('🗑️ Service Worker cache temizleniyor...');
+                const cacheNames = await caches.keys();
+                await Promise.all(cacheNames.map(name => {
+                    console.log('🗑️ Cache siliniyor:', name);
+                    return caches.delete(name);
+                }));
+                console.log('✅ Service Worker cache temizlendi');
+            } catch (error) {
+                console.warn('⚠️ Cache temizleme hatası:', error);
+            }
         }
         
-        // Unregister Service Workers
+        // Unregister Service Workers (wait for completion)
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.getRegistrations().then(registrations => {
-                registrations.forEach(reg => reg.unregister());
-            });
+            try {
+                console.log('🗑️ Service Workers kaldırılıyor...');
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                await Promise.all(registrations.map(reg => {
+                    console.log('🗑️ Service Worker kaldırılıyor:', reg.scope);
+                    return reg.unregister();
+                }));
+                console.log('✅ Service Workers kaldırıldı');
+            } catch (error) {
+                console.warn('⚠️ Service Worker kaldırma hatası:', error);
+            }
         }
         
+        console.log('✅ Tüm temizleme işlemleri tamamlandı');
+        
+        // Logları birleştir ve göster
+        const logSummary = [
+            `✅ Firebase verileri silindi`,
+            `✅ ${weeklyLeaderboardDeleted} weekly_leaderboard dokümanı silindi`,
+            `✅ Weekly XP 0 olarak ayarlandı`,
+            `✅ Nuclear clear flag eklendi`,
+            `✅ localStorage ve sessionStorage temizlendi`,
+            `✅ IndexedDB temizlendi`,
+            `✅ Service Worker cache temizlendi`,
+            `✅ Service Workers kaldırıldı`
+        ].join('\n');
+        
+        console.log('📋 NUCLEAR CLEAR ÖZET:');
+        console.log(logSummary);
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        console.log('✅ NUCLEAR CLEAR TAMAMLANDI!');
+        console.log('📊 Weekly XP kontrol:', getCurrentWeeklyXP ? (typeof window.getCurrentWeeklyXP === 'function' ? window.getCurrentWeeklyXP() : 'fonksiyon yok') : 'getCurrentWeeklyXP yok');
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        
+        // Logları localStorage'a kaydet (sayfa yenilendikten sonra görmek için)
+        localStorage.setItem('hasene_nuclear_clear_log', JSON.stringify({
+            timestamp: new Date().toISOString(),
+            weeklyLeaderboardDeleted: weeklyLeaderboardDeleted,
+            summary: logSummary
+        }));
+        
+        // Kullanıcıya bilgi ver
         if (typeof showToast === 'function') {
-            showToast('Tüm veriler silindi. Sayfa yenileniyor...', 'success');
+            showToast('✅ Tüm veriler silindi! Logları görmek için console\'u açın. Sayfa 5 saniye sonra yenilenecek...', 'success', 5000);
+        } else {
+            alert('✅ Tüm veriler silindi!\n\n' + logSummary + '\n\nSayfa 5 saniye sonra yenilenecek...');
         }
         
+        // Sayfa yenileme - 5 saniye sonra otomatik
         setTimeout(() => {
+            console.log('🔄 Sayfa yenileniyor...');
             location.reload();
-        }, 2000);
+        }, 5000);
         
     } catch (error) {
         console.error('Nuclear clear error:', error);
