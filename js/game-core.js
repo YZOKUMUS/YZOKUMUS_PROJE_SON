@@ -1611,10 +1611,25 @@ function saveAchievement(achievementId) {
         unlockedAchievements.push(achievementId);
         saveToStorage('hasene_achievements', unlockedAchievements);
         
-        // Award achievement points
+        // Başarım puanlarını her yere yansıt
         const ach = (window.ACHIEVEMENTS || []).find(a => a.id === achievementId);
         if (ach && ach.points) {
-            totalPoints += ach.points;
+            const points = ach.points;
+            
+            // Toplam puan
+            totalPoints += points;
+            
+            // Günlük ilerleme
+            if (typeof dailyProgress !== 'undefined') {
+                dailyProgress += points;
+            }
+            
+            // Lig (haftalık XP)
+            if (typeof window.updateWeeklyXP === 'function') {
+                window.updateWeeklyXP(points).catch(err => {
+                    console.warn('Weekly XP update failed for achievement (non-critical):', err);
+                });
+            }
         }
     }
 }
@@ -1823,7 +1838,16 @@ function endGame() {
     // Update task progress
     updateTaskProgress('correct', correctCount);
     updateTaskProgress('hasene', sessionScore);
-    updateTaskProgress('game_modes', currentGameMode);
+    
+    // Daily "Talim Et Oyna" görevi için:
+    // - Talim Et (karma) modu oynayınca görev tamamlanır (progress = 1, target = 1)
+    // - Normal modlar oynayınca da ilerleme kaydedilir ama Talim Et oynanmışsa zaten tamamlanmış
+    if (currentGameMode === 'karma') {
+        // Talim Et oynandığında görevi tamamla
+        updateTaskProgress('game_modes', 'karma');
+    } else {
+        updateTaskProgress('game_modes', currentGameMode);
+    }
     
     // Check level up
     const newLevel = calculateLevel(totalPoints);
@@ -5381,8 +5405,17 @@ function updateTaskProgress(type, value) {
     } else if (type === 'hasene') {
         dailyTasks.todayStats.toplamPuan += value;
     } else if (type === 'game_modes') {
-        if (!dailyTasks.todayStats.allGameModes.includes(value)) {
-            dailyTasks.todayStats.allGameModes.push(value);
+        // Talim Et (karma) oynandığında görev tamamlanır
+        if (value === 'karma') {
+            // Karma modunu ekle (eğer yoksa)
+            if (!dailyTasks.todayStats.allGameModes.includes('karma')) {
+                dailyTasks.todayStats.allGameModes.push('karma');
+            }
+        } else {
+            // Normal modları ekle (eğer yoksa)
+            if (!dailyTasks.todayStats.allGameModes.includes(value)) {
+                dailyTasks.todayStats.allGameModes.push(value);
+            }
         }
     } else if (type === 'ayet_oku') {
         dailyTasks.todayStats.ayet_oku += value;
@@ -5396,7 +5429,13 @@ function updateTaskProgress(type, value) {
     dailyTasks.tasks.forEach(task => {
         if (task.type === type) {
             if (type === 'game_modes') {
-                task.progress = dailyTasks.todayStats.allGameModes.length;
+                // Talim Et (karma) oynandıysa görev tamamlanır (progress = 1)
+                if (dailyTasks.todayStats.allGameModes.includes('karma')) {
+                    task.progress = 1;
+                } else {
+                    // Normal modlar için mod sayısını say
+                    task.progress = dailyTasks.todayStats.allGameModes.length;
+                }
             } else if (type === 'ayet_oku') {
                 task.progress = dailyTasks.todayStats.ayet_oku;
             } else if (type === 'dua_et') {
@@ -5711,6 +5750,13 @@ function checkDailyGoal() {
         showToast(`🎯 Günlük hedef tamamlandı! +${CONFIG.DAILY_GOAL_BONUS} Hasene`, 'success', 3000);
         totalPoints += CONFIG.DAILY_GOAL_BONUS;
         dailyProgress += CONFIG.DAILY_GOAL_BONUS;
+        
+        // Lig XP'ye ekle
+        if (typeof window.updateWeeklyXP === 'function' && CONFIG.DAILY_GOAL_BONUS > 0) {
+            window.updateWeeklyXP(CONFIG.DAILY_GOAL_BONUS).catch(err => {
+                console.warn('Weekly XP update failed (non-critical):', err);
+            });
+        }
     }
 }
 

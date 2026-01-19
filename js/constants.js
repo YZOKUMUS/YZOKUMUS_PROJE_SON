@@ -36,9 +36,9 @@ const LEVELS = {
 const DAILY_TASKS_TEMPLATE = [
     {
         id: 'daily_3_modes',
-        name: '3 Oyun Modu',
-        description: '🎮 3 farklı oyun modu oyna',
-        target: 3,
+        name: 'Talim Et Oyna',
+        description: '🎮 Talim Et oyununu tamamla',
+        target: 1,
         type: 'game_modes',
         reward: 50,
         icon: '🎮'
