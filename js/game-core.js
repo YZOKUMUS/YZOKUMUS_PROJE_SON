@@ -1409,6 +1409,52 @@ function setupEventListeners() {
             }
         });
     });
+    
+    // Keyboard Navigation
+    setupKeyboardNavigation();
+}
+
+/**
+ * Setup keyboard navigation for accessibility
+ */
+function setupKeyboardNavigation() {
+    // Escape key: Close modals
+    document.addEventListener('keydown', (e) => {
+        // Escape: Close all modals
+        if (e.key === 'Escape') {
+            const openModal = document.querySelector('.modal:not(.hidden)');
+            if (openModal) {
+                closeAllModals();
+                e.preventDefault();
+            }
+        }
+        
+        // Enter/Space: Activate focused button
+        if ((e.key === 'Enter' || e.key === ' ') && 
+            document.activeElement.classList.contains('answer-option')) {
+            e.preventDefault();
+            document.activeElement.click();
+        }
+        
+        // Arrow keys: Navigate between answer options
+        if ((e.key === 'ArrowUp' || e.key === 'ArrowDown') && 
+            document.activeElement.classList.contains('answer-option')) {
+            e.preventDefault();
+            const options = Array.from(document.querySelectorAll('.answer-option'));
+            const currentIndex = options.indexOf(document.activeElement);
+            let nextIndex;
+            
+            if (e.key === 'ArrowDown') {
+                nextIndex = currentIndex < options.length - 1 ? currentIndex + 1 : 0;
+            } else {
+                nextIndex = currentIndex > 0 ? currentIndex - 1 : options.length - 1;
+            }
+            
+            if (options[nextIndex]) {
+                options[nextIndex].focus();
+            }
+        }
+    });
 }
 
 /**

@@ -8,6 +8,24 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="description" content="Hasene Arapça Dersi - Kuran kelimeleri ile eğlenceli öğrenme oyunu">
     
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://yzokumus.github.io/YZOKUMUS_PROJE_SON/">
+    <meta property="og:title" content="Hasene Arapça Dersi">
+    <meta property="og:description" content="Kuran kelimeleri ile eğlenceli öğrenme oyunu - Hasene puan sistemi, rozetler ve günlük görevler ile Arapça öğrenin">
+    <meta property="og:image" content="https://yzokumus.github.io/YZOKUMUS_PROJE_SON/ASSETS/badges/icon-512.png">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://yzokumus.github.io/YZOKUMUS_PROJE_SON/">
+    <meta name="twitter:title" content="Hasene Arapça Dersi">
+    <meta name="twitter:description" content="Kuran kelimeleri ile eğlenceli öğrenme oyunu">
+    <meta name="twitter:image" content="https://yzokumus.github.io/YZOKUMUS_PROJE_SON/ASSETS/badges/icon-512.png">
+    
+    <!-- Additional Meta -->
+    <meta name="author" content="YZOKUMUS">
+    <meta name="keywords" content="Arapça, Kuran, kelime öğrenme, eğitim, oyun, Hasene, İslam, dini eğitim">
+    
     <title>Hasene Arapça Dersi</title>
     
     <!-- PWA -->
@@ -43,8 +61,8 @@
                     </div>
                 </div>
                 <div class="install-banner-actions">
-                    <button id="install-btn" class="install-btn-primary">Ekle</button>
-                    <button id="install-dismiss" class="install-btn-dismiss" title="Kapat">✕</button>
+                    <button id="install-btn" class="install-btn-primary" aria-label="Uygulamayı ana ekrana ekle">Ekle</button>
+                    <button id="install-dismiss" class="install-btn-dismiss" title="Kapat" aria-label="Banner'ı kapat">✕</button>
                 </div>
             </div>
         </div>
@@ -59,7 +77,7 @@
                     <span id="user-status-indicator" class="user-status-indicator">🔴 Çıkış Yapıldı</span>
                 </div>
                 <div class="user-actions">
-                    <button id="user-auth-btn" class="secondary-btn user-action-btn">Giriş Yap</button>
+                    <button id="user-auth-btn" class="secondary-btn user-action-btn" aria-label="Kullanıcı girişi yap">Giriş Yap</button>
                     <button onclick="showTestToolsModal()" class="secondary-btn user-action-btn" title="Test Araçları" style="padding: 8px 12px; font-size: 0.9rem; background: rgba(255, 200, 0, 0.2); border: 1px solid rgba(255, 200, 0, 0.5);">🧪</button>
                 </div>
             </div>
@@ -255,7 +273,7 @@
     <!-- Kelime Çevir Screen -->
     <div id="kelime-cevir-screen" class="game-screen hidden">
         <div class="game-header">
-            <button class="back-btn" onclick="stopAllAudio(); handleGameBackButton()">← Geri</button>
+            <button class="back-btn" onclick="stopAllAudio(); handleGameBackButton()" aria-label="Geri dön">← Geri</button>
             <div class="game-progress">
                 <span id="kelime-question-number">1</span> / <span id="kelime-total-questions">10</span>
             </div>
@@ -267,7 +285,7 @@
                 <div class="word-actions">
                     <button class="hint-btn" id="kelime-hint-btn" onclick="useHint()" title="İpucu (1 şıkkı ele)">💡</button>
                     <button class="favorite-btn" id="kelime-favorite-btn" title="Favorilere Ekle">♡</button>
-                    <button class="audio-btn" id="kelime-audio-btn" title="Dinle">
+                    <button class="audio-btn" id="kelime-audio-btn" title="Dinle" aria-label="Kelimeyi dinle">
                         <span style="font-size: 1.5rem;">🎧</span>
                     </button>
                 </div>
@@ -290,7 +308,7 @@
     <!-- Dinle Bul Screen -->
     <div id="dinle-bul-screen" class="game-screen hidden">
         <div class="game-header">
-            <button class="back-btn" onclick="stopAllAudio(); handleGameBackButton()">← Geri</button>
+            <button class="back-btn" onclick="stopAllAudio(); handleGameBackButton()" aria-label="Geri dön">← Geri</button>
             <div class="game-progress">
                 <span id="dinle-question-number">1</span> / <span id="dinle-total-questions">10</span>
             </div>
@@ -300,7 +318,7 @@
         <div class="game-content">
             <div class="question-card glass-card">
                 <p class="dinle-instruction">Kelimeyi dinle ve doğru çeviriyi bul</p>
-                <button class="big-audio-btn" id="dinle-audio-btn" title="Dinle">
+                <button class="big-audio-btn" id="dinle-audio-btn" title="Dinle" aria-label="Ses dosyasını dinle">
                     <span style="font-size: 1.5rem; margin-right: 0.5rem;">🎧</span> Dinle
                 </button>
             </div>
@@ -319,7 +337,7 @@
     <!-- Boşluk Doldur Screen -->
     <div id="bosluk-doldur-screen" class="game-screen hidden">
         <div class="game-header">
-            <button class="back-btn" onclick="stopAllAudio(); handleGameBackButton()">← Geri</button>
+            <button class="back-btn" onclick="stopAllAudio(); handleGameBackButton()" aria-label="Geri dön">← Geri</button>
             <div class="game-progress">
                 <span id="bosluk-question-number">1</span> / <span id="bosluk-total-questions">10</span>
             </div>
@@ -329,7 +347,7 @@
         <div class="game-content">
             <div class="question-card glass-card">
                 <div class="word-actions">
-                    <button class="audio-btn" id="bosluk-audio-btn" title="Ayeti Dinle">
+                    <button class="audio-btn" id="bosluk-audio-btn" title="Ayeti Dinle" aria-label="Ayeti dinle">
                         <span style="font-size: 1.5rem;">🎧</span>
                     </button>
                 </div>
@@ -351,7 +369,7 @@
     <!-- Ayet Oku Screen -->
     <div id="ayet-oku-screen" class="game-screen hidden">
         <div class="game-header">
-            <button class="back-btn" onclick="stopAllAudio(); handleGameBackButton()">← Geri</button>
+            <button class="back-btn" onclick="stopAllAudio(); handleGameBackButton()" aria-label="Geri dön">← Geri</button>
             <h2>📖 Ayet Oku</h2>
         </div>
 
@@ -360,14 +378,14 @@
                 <div class="surah-info" id="ayet-surah-info">Fâtiha Suresi</div>
                 <div class="arabic-text" id="ayet-arabic"></div>
                 <div class="translation-text" id="ayet-translation"></div>
-                <button class="audio-btn-large" id="ayet-audio-btn">
+                <button class="audio-btn-large" id="ayet-audio-btn" aria-label="Ayeti dinle">
                     <span style="font-size: 1.5rem; margin-right: 0.5rem;">🎧</span> Dinle
                 </button>
             </div>
 
             <div class="navigation-btns">
-                <button class="nav-btn" id="ayet-prev-btn">← Önceki</button>
-                <button class="nav-btn" id="ayet-next-btn">Sonraki →</button>
+                <button class="nav-btn" id="ayet-prev-btn" aria-label="Önceki ayet">← Önceki</button>
+                <button class="nav-btn" id="ayet-next-btn" aria-label="Sonraki ayet">Sonraki →</button>
             </div>
         </div>
     </div>
@@ -375,7 +393,7 @@
     <!-- Dua Et Screen -->
     <div id="dua-et-screen" class="game-screen hidden">
         <div class="game-header">
-            <button class="back-btn" onclick="stopAllAudio(); handleGameBackButton()">← Geri</button>
+            <button class="back-btn" onclick="stopAllAudio(); handleGameBackButton()" aria-label="Geri dön">← Geri</button>
             <h2>🤲 Dua Et</h2>
         </div>
 
@@ -384,14 +402,14 @@
                 <div class="dua-reference" id="dua-reference">2:127</div>
                 <div class="arabic-text" id="dua-arabic"></div>
                 <div class="translation-text" id="dua-translation"></div>
-                <button class="audio-btn-large" id="dua-audio-btn">
+                <button class="audio-btn-large" id="dua-audio-btn" aria-label="Duayı dinle">
                     <span style="font-size: 1.5rem; margin-right: 0.5rem;">🎧</span> Dinle
                 </button>
             </div>
 
             <div class="navigation-btns">
-                <button class="nav-btn" id="dua-prev-btn">← Önceki</button>
-                <button class="nav-btn" id="dua-next-btn">Sonraki →</button>
+                <button class="nav-btn" id="dua-prev-btn" aria-label="Önceki dua">← Önceki</button>
+                <button class="nav-btn" id="dua-next-btn" aria-label="Sonraki dua">Sonraki →</button>
             </div>
         </div>
     </div>
@@ -399,7 +417,7 @@
     <!-- Hadis Oku Screen -->
     <div id="hadis-oku-screen" class="game-screen hidden">
         <div class="game-header">
-            <button class="back-btn" onclick="stopAllAudio(); handleGameBackButton()">← Geri</button>
+            <button class="back-btn" onclick="stopAllAudio(); handleGameBackButton()" aria-label="Geri dön">← Geri</button>
             <h2>📜 Hadis Oku</h2>
         </div>
 
@@ -412,8 +430,8 @@
             </div>
 
             <div class="navigation-btns">
-                <button class="nav-btn" id="hadis-prev-btn">← Önceki</button>
-                <button class="nav-btn" id="hadis-next-btn">Sonraki →</button>
+                <button class="nav-btn" id="hadis-prev-btn" aria-label="Önceki hadis">← Önceki</button>
+                <button class="nav-btn" id="hadis-next-btn" aria-label="Sonraki hadis">Sonraki →</button>
             </div>
         </div>
     </div>
@@ -421,7 +439,7 @@
     <!-- Karma Game Screen -->
     <div id="karma-game-screen" class="game-screen hidden">
         <div class="game-header">
-            <button class="back-btn" onclick="stopAllAudio(); handleGameBackButton()">← Geri</button>
+            <button class="back-btn" onclick="stopAllAudio(); handleGameBackButton()" aria-label="Geri dön">← Geri</button>
             <h2>🔀 Talim Et</h2>
         </div>
 
@@ -534,7 +552,7 @@
     <!-- Elif Ba Screen -->
     <div id="elif-ba-screen" class="game-screen hidden">
         <div class="game-header">
-            <button class="back-btn" onclick="stopAllAudio(); handleGameBackButton()">← Geri</button>
+            <button class="back-btn" onclick="stopAllAudio(); handleGameBackButton()" aria-label="Geri dön">← Geri</button>
             <div class="game-progress">
                 <span id="elif-question-number">1</span> / <span id="elif-total-questions">10</span>
             </div>
@@ -544,10 +562,10 @@
         <div class="game-content">
             <div class="question-card glass-card">
                 <div class="word-actions">
-                    <button class="fix-pronunciation-btn" id="elif-fix-btn" onclick="showFixPronunciationModal()" title="Okunuşu Düzelt" style="background: #f59e0b; color: white;">🔧</button>
+                    <button class="fix-pronunciation-btn" id="elif-fix-btn" onclick="showFixPronunciationModal()" title="Okunuşu Düzelt" aria-label="Okunuşu düzelt" style="background: #f59e0b; color: white;">🔧</button>
                     <div style="flex: 1;"></div>
                     <button class="info-btn" id="elif-info-btn-header" onclick="showElifBaInfo()" title="Bilgi" style="display: none;">ℹ️</button>
-                    <button class="audio-btn" id="elif-audio-btn" title="Dinle">
+                    <button class="audio-btn" id="elif-audio-btn" title="Dinle" aria-label="Harfi dinle">
                         <span style="font-size: 1.5rem;">🎧</span>
                     </button>
                 </div>
