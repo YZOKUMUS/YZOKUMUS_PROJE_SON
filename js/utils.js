@@ -4,6 +4,27 @@
  */
 
 /**
+ * Production-safe logging
+ * Only logs if DEBUG is enabled
+ */
+function debugLog(...args) {
+    if (window.CONFIG && window.CONFIG.DEBUG) {
+        console.log(...args);
+    }
+}
+
+function debugWarn(...args) {
+    if (window.CONFIG && window.CONFIG.DEBUG) {
+        console.warn(...args);
+    }
+}
+
+function debugError(...args) {
+    // Errors are always logged, even in production
+    console.error(...args);
+}
+
+/**
  * Get current date as YYYY-MM-DD string
  */
 function getLocalDateString(date = new Date()) {
@@ -245,4 +266,8 @@ if (typeof window !== 'undefined') {
     window.saveToStorage = saveToStorage;
     window.loadFromStorage = loadFromStorage;
     window.generateId = generateId;
+    // Production-safe logging functions
+    window.debugLog = debugLog;
+    window.debugWarn = debugWarn;
+    window.debugError = debugError;
 }
