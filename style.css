@@ -523,15 +523,7 @@ body::before {
     font-weight: 400;
 }
 
-/* Geçici olarak gizlenen oyunlar */
-.game-card[data-game="kelime-cevir"],
-.game-card[data-game="dinle-bul"],
-.game-card[data-game="bosluk-doldur"],
-.game-card[data-game="ayet-oku"],
-.game-card[data-game="dua-et"],
-.game-card[data-game="hadis-oku"] {
-    display: none;
-}
+/* Oyun kartları artık görünür - tüm oyunlar aktif */
 
 /* ===================================
    GAME SCREENS
