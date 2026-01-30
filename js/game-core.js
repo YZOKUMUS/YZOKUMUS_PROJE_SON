@@ -503,6 +503,22 @@ async function loadStats(skipStreakCheck = false) {
     // Daily tasks
     await checkDailyTasks();
     
+    // Nuclear Clear loglarını göster (eğer varsa)
+    const nuclearClearLog = localStorage.getItem('hasene_nuclear_clear_log');
+    if (nuclearClearLog) {
+        try {
+            const logData = JSON.parse(nuclearClearLog);
+            console.log('📋 NUCLEAR CLEAR ÖZET (önceki işlem):');
+            console.log('⏰ Zaman:', logData.timestamp);
+            console.log('📊 Weekly Leaderboard Silinen:', logData.weeklyLeaderboardDeleted);
+            console.log('📝 Özet:', logData.summary);
+            // Log'u gösterdikten sonra sil
+            localStorage.removeItem('hasene_nuclear_clear_log');
+        } catch (e) {
+            console.warn('⚠️ Nuclear clear log parse hatası:', e);
+        }
+    }
+    
     // Load weekly XP from Firebase
     if (typeof window.loadWeeklyXPFromFirebase === 'function') {
         await window.loadWeeklyXPFromFirebase();
@@ -562,7 +578,12 @@ async function loadStats(skipStreakCheck = false) {
  * Save all stats
  */
 function saveStats() {
-    // Save to localStorage (always)
+    // Check if user is logged in
+    if (!checkUserLoggedIn()) {
+        return;
+    }
+    
+    // Save to localStorage
     saveToStorage(CONFIG.STORAGE_KEYS.TOTAL_POINTS, totalPoints);
     saveToStorage(CONFIG.STORAGE_KEYS.STREAK_DATA, streakData);
     saveToStorage(CONFIG.STORAGE_KEYS.GAME_STATS, gameStats);
@@ -577,7 +598,8 @@ function saveStats() {
     saveToStorage('hasene_achievements', unlockedAchievements);
     saveToStorage('hasene_badges', badgesUnlocked);
     
-    // Sync to Firebase backend (if user has real username)
+    // Sync to Firebase backend
+    // saveUserStats and saveDailyTasks functions have their own user checks
     if (typeof window.saveUserStats === 'function') {
             // Get all daily stats before saving
             const allDailyStats = getAllDailyStats();
@@ -619,6 +641,13 @@ const debouncedSaveStats = debounce(saveStats, 500);
  * @param {number} combo - Max combo
  */
 function saveDailyStats(correct, wrong, points, combo) {
+    // Kullanıcı giriş yapmamışsa günlük istatistikler kaydedilmez
+    const userId = localStorage.getItem('hasene_user_id');
+    const username = localStorage.getItem('hasene_username');
+    if (!userId || !username) {
+        return;
+    }
+    
     const today = getLocalDateString();
     const key = `hasene_daily_${today}`;
     
@@ -746,6 +775,33 @@ async function resetAllData() {
     
     // Clear notification settings
     localStorage.removeItem('hasene_notification_settings');
+    
+    // Clear new game mode related keys
+    localStorage.removeItem('hasene_last_kuran_okuma_mode');
+    localStorage.removeItem('hasene_from_kuran_okuma');
+    
+    // Clear other potential keys
+    localStorage.removeItem('hasene_last_daily_reward');
+    
+    // Clear all hasene_ prefixed keys (except user info which is restored)
+    // This ensures we don't miss any keys
+    const keysToKeep = [
+        'hasene_username',
+        'hasene_user_id',
+        'hasene_user_email',
+        'hasene_user_gender',
+        'hasene_firebase_user_id',
+        'hasene_user_type',
+        'hasene_username_display'
+    ];
+    
+    // Get all keys before clearing
+    const allKeys = Object.keys(localStorage);
+    allKeys.forEach(key => {
+        if (key.startsWith('hasene_') && !keysToKeep.includes(key)) {
+            localStorage.removeItem(key);
+        }
+    });
     
     // Clear all hasene_* keys from localStorage (comprehensive cleanup)
     // Ama kullanıcı bilgilerini koru
@@ -1187,6 +1243,48 @@ function registerServiceWorker() {
 }
 
 // ========================================
+// USER AUTHENTICATION CHECK
+// ========================================
+
+/**
+ * Check if user is logged in
+ * @returns {boolean} True if user is logged in
+ */
+function checkUserLoggedIn() {
+    const userId = localStorage.getItem('hasene_user_id');
+    const username = localStorage.getItem('hasene_username');
+    
+    // Check if user has valid credentials
+    if (!userId || !username) {
+        return false;
+    }
+    
+    // Check if username is not a default/empty value
+    const defaultUsernames = ['Kullanıcı', 'Anonim Kullanıcı', ''];
+    if (defaultUsernames.includes(username.trim())) {
+        return false;
+    }
+    
+    return true;
+}
+
+/**
+ * Require user login before proceeding
+ * Shows login modal if user is not logged in
+ * @returns {boolean} True if user is logged in, false otherwise
+ */
+function requireUserLogin() {
+    if (!checkUserLoggedIn()) {
+        showToast('Oyun oynamak için lütfen giriş yapın', 'warning');
+        if (typeof window.showUsernameLoginModal === 'function') {
+            window.showUsernameLoginModal();
+        }
+        return false;
+    }
+    return true;
+}
+
+// ========================================
 // EVENT LISTENERS
 // ========================================
 
@@ -1253,6 +1351,9 @@ function setupEventListeners() {
     // Kelime submode buttons
     document.querySelectorAll('[data-submode]').forEach(btn => {
         btn.addEventListener('click', () => {
+            if (!requireUserLogin()) {
+                return;
+            }
             currentKelimeSubmode = btn.dataset.submode;
             startKelimeCevirGame(currentKelimeSubmode);
         });
@@ -1261,6 +1362,9 @@ function setupEventListeners() {
     // Elif Ba submode buttons
     document.querySelectorAll('[data-elif-submode]').forEach(btn => {
         btn.addEventListener('click', () => {
+            if (!requireUserLogin()) {
+                return;
+            }
             currentElifBaSubmode = btn.dataset.elifSubmode;
             if (currentElifBaSubmode === 'tablo') {
                 showHarfTablosu();
@@ -1344,6 +1448,11 @@ function setupNavigationButtons() {
  * Start a game mode
  */
 async function startGame(gameMode) {
+    // Check if user is logged in
+    if (!requireUserLogin()) {
+        return;
+    }
+    
     console.log(`🎮 Starting game: ${gameMode}`);
     currentGameMode = gameMode;
     gameCompleted = false; // Reset game completed flag
@@ -1389,6 +1498,10 @@ async function startGame(gameMode) {
             break;
         case 'karma':
             await startKarmaGame();
+            break;
+        case 'kuran-okuma':
+            // currentGameMode zaten 'kuran-okuma' olarak ayarlanmış (startGame'de)
+            await startKuranOkumaMode();
             break;
         default:
             showToast('Bilinmeyen oyun modu', 'error');
@@ -1487,14 +1600,36 @@ function checkAchievements(stats) {
  * @param {string} achievementId - Achievement ID
  */
 function saveAchievement(achievementId) {
+    // Kullanıcı giriş yapmamışsa başarım kaydedilmez
+    const userId = localStorage.getItem('hasene_user_id');
+    const username = localStorage.getItem('hasene_username');
+    if (!userId || !username) {
+        return;
+    }
+    
     if (!unlockedAchievements.includes(achievementId)) {
         unlockedAchievements.push(achievementId);
         saveToStorage('hasene_achievements', unlockedAchievements);
         
-        // Award achievement points
+        // Başarım puanlarını her yere yansıt
         const ach = (window.ACHIEVEMENTS || []).find(a => a.id === achievementId);
         if (ach && ach.points) {
-            totalPoints += ach.points;
+            const points = ach.points;
+            
+            // Toplam puan
+            totalPoints += points;
+            
+            // Günlük ilerleme
+            if (typeof dailyProgress !== 'undefined') {
+                dailyProgress += points;
+            }
+            
+            // Lig (haftalık XP)
+            if (typeof window.updateWeeklyXP === 'function') {
+                window.updateWeeklyXP(points).catch(err => {
+                    console.warn('Weekly XP update failed for achievement (non-critical):', err);
+                });
+            }
         }
     }
 }
@@ -1503,6 +1638,13 @@ function saveAchievement(achievementId) {
  * Check and unlock badges based on total points
  */
 function checkBadges() {
+    // Kullanıcı giriş yapmamışsa rozet kontrolü yapılmaz
+    const userId = localStorage.getItem('hasene_user_id');
+    const username = localStorage.getItem('hasene_username');
+    if (!userId || !username) {
+        return;
+    }
+    
     const badges = window.BADGE_DEFINITIONS || [];
     const asrBadges = window.ASR_I_SAADET_BADGES || {};
     const today = getLocalDateString();
@@ -1650,6 +1792,9 @@ function goToMainMenu(skipWarning = false) {
     // Show main container
     document.getElementById('main-container').classList.remove('hidden');
     
+    // Günlük Okumalar flag'ini temizle
+    localStorage.removeItem('hasene_from_kuran_okuma');
+    
     // Update displays
     updateStatsDisplay();
     
@@ -1693,7 +1838,16 @@ function endGame() {
     // Update task progress
     updateTaskProgress('correct', correctCount);
     updateTaskProgress('hasene', sessionScore);
-    updateTaskProgress('game_modes', currentGameMode);
+    
+    // Daily "Talim Et Oyna" görevi için:
+    // - Talim Et (karma) modu oynayınca görev tamamlanır (progress = 1, target = 1)
+    // - Normal modlar oynayınca da ilerleme kaydedilir ama Talim Et oynanmışsa zaten tamamlanmış
+    if (currentGameMode === 'karma') {
+        // Talim Et oynandığında görevi tamamla
+        updateTaskProgress('game_modes', 'karma');
+    } else {
+        updateTaskProgress('game_modes', currentGameMode);
+    }
     
     // Check level up
     const newLevel = calculateLevel(totalPoints);
@@ -1801,6 +1955,11 @@ function closeResultAndGoHome() {
 // ========================================
 
 async function startKelimeCevirGame(submode = 'classic') {
+    // Check if user is logged in
+    if (!requireUserLogin()) {
+        return;
+    }
+    
     currentKelimeSubmode = submode;
     gameCompleted = false; // Reset game completed flag
     
@@ -2136,6 +2295,11 @@ function toggleCurrentWordFavorite() {
  */
 function updateWordStats(wordId, isCorrect) {
     if (!wordId) return;
+    
+    // Check if user is logged in
+    if (!checkUserLoggedIn()) {
+        return;
+    }
     
     const today = getLocalDateString();
     
@@ -3133,6 +3297,11 @@ function playCurrentWordAudio() {
 // ========================================
 
 async function startDinleBulGame() {
+    // Check if user is logged in
+    if (!requireUserLogin()) {
+        return;
+    }
+    
     const data = await loadKelimeData();
     if (data.length === 0) {
         showToast('Kelime verisi yüklenemedi', 'error');
@@ -3250,6 +3419,11 @@ function checkDinleAnswer(index, selectedAnswer) {
 // ========================================
 
 async function startBoslukDoldurGame() {
+    // Check if user is logged in
+    if (!requireUserLogin()) {
+        return;
+    }
+    
     const data = await loadAyetData();
     if (data.length === 0) {
         showToast('Ayet verisi yüklenemedi', 'error');
@@ -3309,8 +3483,10 @@ function isArabicConjunction(word) {
         return true;
     }
     
-    // Very short words (1-2 characters) are usually conjunctions/prepositions
-    if (cleanWord.length <= 2) {
+    // Very short words (1 character) are usually conjunctions/prepositions
+    // 2 karakterli kelimeler bağlaç olmayabilir (örn: "أُم" = anne, "بَيْن" = arası)
+    // Bu yüzden sadece 1 karakterli kelimeleri filtrele
+    if (cleanWord.length <= 1) {
         return true;
     }
     
@@ -3452,11 +3628,21 @@ function playCurrentBoslukAudio() {
 // ========================================
 
 async function startAyetOkuMode() {
+    // Check if user is logged in
+    if (!requireUserLogin()) {
+        return;
+    }
+    
     const data = await loadAyetData();
     if (data.length === 0) {
         showToast('Ayet verisi yüklenemedi', 'error');
         goToMainMenu();
         return;
+    }
+    
+    // Eğer Günlük Okumalar modundan gelmiyorsa flag'i temizle
+    if (localStorage.getItem('hasene_from_kuran_okuma') !== 'true') {
+        localStorage.removeItem('hasene_from_kuran_okuma');
     }
     
     // Shuffle and set random starting point
@@ -3488,6 +3674,15 @@ function navigateAyet(direction) {
     // Önce sesi durdur
     stopAllAudio();
     
+    // Eğer Günlük Okumalar modundan geliyorsa ve "Sonraki" butonuna tıklandıysa
+    if (direction === 1 && localStorage.getItem('hasene_from_kuran_okuma') === 'true') {
+        // %40 ihtimalle başka bir moda geç (karışık olsun)
+        if (Math.random() < 0.4) {
+            switchToAnotherReadingMode();
+            return;
+        }
+    }
+    
     currentAyetIndex += direction;
     displayAyet();
 }
@@ -3505,11 +3700,21 @@ function playCurrentAyetAudio() {
 // ========================================
 
 async function startDuaEtMode() {
+    // Check if user is logged in
+    if (!requireUserLogin()) {
+        return;
+    }
+    
     const data = await loadDuaData();
     if (data.length === 0) {
         showToast('Dua verisi yüklenemedi', 'error');
         goToMainMenu();
         return;
+    }
+    
+    // Eğer Günlük Okumalar modundan gelmiyorsa flag'i temizle
+    if (localStorage.getItem('hasene_from_kuran_okuma') !== 'true') {
+        localStorage.removeItem('hasene_from_kuran_okuma');
     }
     
     window.shuffledDuaData = shuffleArray(data);
@@ -3539,6 +3744,15 @@ function navigateDua(direction) {
     // Önce sesi durdur
     stopAllAudio();
     
+    // Eğer Günlük Okumalar modundan geliyorsa ve "Sonraki" butonuna tıklandıysa
+    if (direction === 1 && localStorage.getItem('hasene_from_kuran_okuma') === 'true') {
+        // %40 ihtimalle başka bir moda geç (karışık olsun)
+        if (Math.random() < 0.4) {
+            switchToAnotherReadingMode();
+            return;
+        }
+    }
+    
     currentDuaIndex += direction;
     displayDua();
 }
@@ -3556,6 +3770,11 @@ function playCurrentDuaAudio() {
 // ========================================
 
 async function startHadisOkuMode() {
+    // Check if user is logged in
+    if (!requireUserLogin()) {
+        return;
+    }
+    
     const data = await loadHadisData();
     if (data.length === 0) {
         showToast('Hadis verisi yüklenemedi', 'error');
@@ -3563,11 +3782,98 @@ async function startHadisOkuMode() {
         return;
     }
     
+    // Eğer Günlük Okumalar modundan gelmiyorsa flag'i temizle
+    if (localStorage.getItem('hasene_from_kuran_okuma') !== 'true') {
+        localStorage.removeItem('hasene_from_kuran_okuma');
+    }
+    
     window.shuffledHadisData = shuffleArray(data);
     currentHadisIndex = 0;
     
     document.getElementById('hadis-oku-screen').classList.remove('hidden');
     displayHadis();
+}
+
+/**
+ * Kuran Okuma Modu - Ayet, Dua ve Hadis modları arasında sırasıyla geçiş yapar
+ * Böylece kullanıcıya gerçekten karışık / dengeli bir deneyim sunulur.
+ */
+async function startKuranOkumaMode() {
+    // Check if user is logged in
+    if (!requireUserLogin()) {
+        return;
+    }
+    
+    const modes = ['ayet-oku', 'dua-et', 'hadis-oku'];
+    
+    // Son seçilen modu localStorage'dan al
+    const lastMode = localStorage.getItem('hasene_last_kuran_okuma_mode');
+    
+    // Eğer son mod varsa ve aynı mod tekrar seçilirse, diğer modlardan birini seç
+    let availableModes = modes;
+    if (lastMode && modes.includes(lastMode)) {
+        // Son modu listeden çıkar, böylece peş peşe aynı mod gelmez
+        availableModes = modes.filter(mode => mode !== lastMode);
+    }
+    
+    // Kalan modlardan rastgele birini seç
+    const randomIndex = Math.floor(Math.random() * availableModes.length);
+    const selectedMode = availableModes[randomIndex];
+    
+    // Seçilen modu kaydet
+    localStorage.setItem('hasene_last_kuran_okuma_mode', selectedMode);
+    
+    // Günlük Okumalar modundan geldiğini işaretle
+    localStorage.setItem('hasene_from_kuran_okuma', 'true');
+    
+    // Seçilen modu başlat
+    switch (selectedMode) {
+        case 'ayet-oku':
+            await startAyetOkuMode();
+            break;
+        case 'dua-et':
+            await startDuaEtMode();
+            break;
+        case 'hadis-oku':
+            await startHadisOkuMode();
+            break;
+    }
+}
+
+/**
+ * Günlük Okumalar modundan başka bir moda geç
+ */
+async function switchToAnotherReadingMode() {
+    const modes = ['ayet-oku', 'dua-et', 'hadis-oku'];
+    const currentMode = localStorage.getItem('hasene_last_kuran_okuma_mode');
+    
+    // Mevcut modu hariç tut
+    const availableModes = modes.filter(mode => mode !== currentMode);
+    
+    // Rastgele bir mod seç
+    const randomIndex = Math.floor(Math.random() * availableModes.length);
+    const selectedMode = availableModes[randomIndex];
+    
+    // Seçilen modu kaydet
+    localStorage.setItem('hasene_last_kuran_okuma_mode', selectedMode);
+    
+    // Ekranları gizle
+    document.getElementById('ayet-oku-screen')?.classList.add('hidden');
+    document.getElementById('dua-et-screen')?.classList.add('hidden');
+    document.getElementById('hadis-oku-screen')?.classList.add('hidden');
+    
+    // Seçilen modu başlat
+    switch (selectedMode) {
+        case 'ayet-oku':
+            await startAyetOkuMode();
+            break;
+        case 'dua-et':
+            await startDuaEtMode();
+            break;
+        case 'hadis-oku':
+            await startHadisOkuMode();
+            break;
+    }
 }
 
 function displayHadis() {
@@ -3591,6 +3897,15 @@ function navigateHadis(direction) {
     // Önce sesi durdur
     stopAllAudio();
     
+    // Eğer Günlük Okumalar modundan geliyorsa ve "Sonraki" butonuna tıklandıysa
+    if (direction === 1 && localStorage.getItem('hasene_from_kuran_okuma') === 'true') {
+        // %40 ihtimalle başka bir moda geç (karışık olsun)
+        if (Math.random() < 0.4) {
+            switchToAnotherReadingMode();
+            return;
+        }
+    }
+    
     currentHadisIndex += direction;
     displayHadis();
 }
@@ -3604,6 +3919,11 @@ function navigateHadis(direction) {
  * @param {string} submode - 'harfler' | 'kelimeler' | 'harekeler'
  */
 async function startElifBaGame(submode = 'harfler') {
+    // Check if user is logged in
+    if (!requireUserLogin()) {
+        return;
+    }
+    
     currentElifBaSubmode = submode;
     gameCompleted = false; // Reset game completed flag
     
@@ -5046,6 +5366,37 @@ async function checkDailyTasks() {
 }
 
 function updateTaskProgress(type, value) {
+    // Check if user is logged in
+    if (!checkUserLoggedIn()) {
+        return;
+    }
+    
+    // Initialize daily tasks if not already initialized
+    const today = getLocalDateString();
+    if (!dailyTasks.tasks || dailyTasks.lastTaskDate !== today) {
+        // Load from storage first
+        dailyTasks = loadFromStorage(CONFIG.STORAGE_KEYS.DAILY_TASKS, dailyTasks);
+        
+        // If still not initialized or it's a new day, reset
+        if (!dailyTasks.tasks || dailyTasks.lastTaskDate !== today) {
+            dailyTasks = {
+                lastTaskDate: today,
+                tasks: JSON.parse(JSON.stringify(DAILY_TASKS_TEMPLATE)).map(t => ({ ...t, progress: 0 })),
+                bonusTasks: JSON.parse(JSON.stringify(DAILY_BONUS_TASKS_TEMPLATE)).map(t => ({ ...t, progress: 0 })),
+                todayStats: {
+                    toplamDogru: 0,
+                    toplamPuan: 0,
+                    comboCount: 0,
+                    allGameModes: [],
+                    ayet_oku: 0,
+                    dua_et: 0,
+                    hadis_oku: 0
+                }
+            };
+            saveToStorage(CONFIG.STORAGE_KEYS.DAILY_TASKS, dailyTasks);
+        }
+    }
+    
     if (!dailyTasks.tasks) return;
     
     // Update stats
@@ -5054,8 +5405,17 @@ function updateTaskProgress(type, value) {
     } else if (type === 'hasene') {
         dailyTasks.todayStats.toplamPuan += value;
     } else if (type === 'game_modes') {
-        if (!dailyTasks.todayStats.allGameModes.includes(value)) {
-            dailyTasks.todayStats.allGameModes.push(value);
+        // Talim Et (karma) oynandığında görev tamamlanır
+        if (value === 'karma') {
+            // Karma modunu ekle (eğer yoksa)
+            if (!dailyTasks.todayStats.allGameModes.includes('karma')) {
+                dailyTasks.todayStats.allGameModes.push('karma');
+            }
+        } else {
+            // Normal modları ekle (eğer yoksa)
+            if (!dailyTasks.todayStats.allGameModes.includes(value)) {
+                dailyTasks.todayStats.allGameModes.push(value);
+            }
         }
     } else if (type === 'ayet_oku') {
         dailyTasks.todayStats.ayet_oku += value;
@@ -5069,7 +5429,13 @@ function updateTaskProgress(type, value) {
     dailyTasks.tasks.forEach(task => {
         if (task.type === type) {
             if (type === 'game_modes') {
-                task.progress = dailyTasks.todayStats.allGameModes.length;
+                // Talim Et (karma) oynandıysa görev tamamlanır (progress = 1)
+                if (dailyTasks.todayStats.allGameModes.includes('karma')) {
+                    task.progress = 1;
+                } else {
+                    // Normal modlar için mod sayısını say
+                    task.progress = dailyTasks.todayStats.allGameModes.length;
+                }
             } else if (type === 'ayet_oku') {
                 task.progress = dailyTasks.todayStats.ayet_oku;
             } else if (type === 'dua_et') {
@@ -5196,8 +5562,16 @@ function claimDailyReward() {
     // Rastgele öğreti seç
     const teaching = DAILY_REWARD_TEACHINGS[Math.floor(Math.random() * DAILY_REWARD_TEACHINGS.length)];
     
-    // Hasene ekle
-    totalHasene += rewardAmount;
+    // Hasene ekle (totalPoints, dailyProgress ve lig XP'ye)
+    totalPoints += rewardAmount;
+    dailyProgress += rewardAmount;
+    
+    // Lig XP'ye ekle
+    if (typeof window.updateWeeklyXP === 'function' && rewardAmount > 0) {
+        window.updateWeeklyXP(rewardAmount).catch(err => {
+            console.warn('Weekly XP update failed (non-critical):', err);
+        });
+    }
     
     // Stats kaydet (localStorage + Firebase)
     debouncedSaveStats();
@@ -5376,6 +5750,13 @@ function checkDailyGoal() {
         showToast(`🎯 Günlük hedef tamamlandı! +${CONFIG.DAILY_GOAL_BONUS} Hasene`, 'success', 3000);
         totalPoints += CONFIG.DAILY_GOAL_BONUS;
         dailyProgress += CONFIG.DAILY_GOAL_BONUS;
+        
+        // Lig XP'ye ekle
+        if (typeof window.updateWeeklyXP === 'function' && CONFIG.DAILY_GOAL_BONUS > 0) {
+            window.updateWeeklyXP(CONFIG.DAILY_GOAL_BONUS).catch(err => {
+                console.warn('Weekly XP update failed (non-critical):', err);
+            });
+        }
     }
 }
 
@@ -5482,6 +5863,15 @@ function claimTaskRewards() {
         // Fallback
         const reward = 250;
         totalPoints += reward;
+        dailyProgress += reward;
+        
+        // Lig XP'ye ekle
+        if (typeof window.updateWeeklyXP === 'function' && reward > 0) {
+            window.updateWeeklyXP(reward).catch(err => {
+                console.warn('Weekly XP update failed (non-critical):', err);
+            });
+        }
+        
         dailyTasks.rewardsClaimed = true;
         showToast(`+${reward} Hasene kazandınız! 🎁`, 'success', 3000);
         updateStatsDisplay();
@@ -5495,6 +5885,15 @@ function claimTaskRewards() {
     const reward = teaching.rewardAmounts[Math.floor(Math.random() * teaching.rewardAmounts.length)];
     
     totalPoints += reward;
+    dailyProgress += reward;
+    
+    // Lig XP'ye ekle
+    if (typeof window.updateWeeklyXP === 'function' && reward > 0) {
+        window.updateWeeklyXP(reward).catch(err => {
+            console.warn('Weekly XP update failed (non-critical):', err);
+        });
+    }
+    
     dailyTasks.rewardsClaimed = true;
     
     // Show teaching modal
@@ -6005,7 +6404,12 @@ let karmaMatchPairs = [];
  * Combines all game types: Kelime Çevir, Dinle Bul, Eşleştirme, Boşluk Doldur
  */
 async function startKarmaGame() {
-    console.log('🎲 Karma Oyun başlatılıyor...');
+    // Check if user is logged in
+    if (!requireUserLogin()) {
+        return;
+    }
+    
+    console.log('🎲 Talim Et başlatılıyor...');
     
     // Reset session
     sessionScore = 0;
@@ -6039,42 +6443,92 @@ async function startKarmaGame() {
         filteredKelimeData = kelimeData;
     }
     
+    // Bağlaçları filtrele - sadece eksiz (root) kelimeleri kullan
+    const beforeConjunctionFilter = filteredKelimeData.length;
+    const conjunctionWords = [];
+    filteredKelimeData = filteredKelimeData.filter(word => {
+        const kelime = word.kelime || word.arabic || '';
+        const isConjunction = isArabicConjunction(kelime);
+        if (isConjunction) {
+            conjunctionWords.push(kelime);
+        }
+        return !isConjunction;
+    });
+    const afterConjunctionFilter = filteredKelimeData.length;
+    
+    console.log(`📊 Talim Et - Kelime Filtreleme İstatistikleri:`);
+    console.log(`   📚 Toplam kelime (JSON'dan): ${kelimeData.length}`);
+    console.log(`   🎯 Zorluk filtresi sonrası (${currentDifficulty}): ${beforeConjunctionFilter}`);
+    console.log(`   🔗 Filtrelenen bağlaç sayısı: ${beforeConjunctionFilter - afterConjunctionFilter}`);
+    console.log(`   ✅ Bağlaç filtresi sonrası (eksiz kelimeler): ${afterConjunctionFilter}`);
+    console.log(`   📈 Kullanılabilir kelime oranı: ${((afterConjunctionFilter / kelimeData.length) * 100).toFixed(1)}%`);
+    if (conjunctionWords.length > 0 && conjunctionWords.length <= 20) {
+        console.log(`   🔗 Filtrelenen bağlaçlar: ${conjunctionWords.slice(0, 20).join(', ')}${conjunctionWords.length > 20 ? '...' : ''}`);
+    }
+    
+    // Eğer filtrelenmiş veri çok azsa, bağlaç filtresini kaldır (fallback)
+    if (filteredKelimeData.length < 10) {
+        console.warn('⚠️ Bağlaç filtresi sonrası yeterli kelime yok, filtre kaldırıldı');
+        filteredKelimeData = filterByDifficulty(kelimeData, currentDifficulty);
+        if (filteredKelimeData.length < 20) {
+            filteredKelimeData = kelimeData;
+        }
+    }
+    
     // 1. Kelime Çevir soruları (4 adet) - Akıllı seçim kullan
     let selectedKelimeWords;
     if (filteredKelimeData.length > 4) {
         selectedKelimeWords = selectIntelligentWords(filteredKelimeData, 4, false);
-        console.log('🧠 Karma Oyun - Kelime Çevir: Akıllı kelime seçimi kullanıldı');
+        console.log('🧠 Talim Et - Kelime Çevir: Akıllı kelime seçimi kullanıldı');
     } else {
         selectedKelimeWords = getRandomItems(filteredKelimeData, 4);
     }
+    
+    // Seçenekler için de bağlaç filtresi uygula
+    const optionsWords = kelimeData.filter(w => {
+        const kelime = w.kelime || w.arabic || '';
+        return !isArabicConjunction(kelime);
+    });
     
     const kelimeQuestions = selectedKelimeWords.map(word => ({
         type: 'kelime-cevir',
         data: word,
         question: word.kelime,
         correctAnswer: word.anlam,
-        options: generateOptions(word.anlam, kelimeData.map(w => w.anlam))
+        options: generateOptions(word.anlam, optionsWords.map(w => w.anlam))
     }));
     
     // 2. Dinle Bul soruları (3 adet) - Akıllı seçim kullan
     const audioWords = filteredKelimeData.filter(w => w.ses_dosyasi || w.audio);
     let selectedAudioWords;
-    if (audioWords.length > 3) {
+    if (audioWords.length >= 3) {
         selectedAudioWords = selectIntelligentWords(audioWords, 3, false);
-        console.log('🧠 Karma Oyun - Dinle Bul: Akıllı kelime seçimi kullanıldı');
+        console.log('🧠 Talim Et - Dinle Bul: Akıllı kelime seçimi kullanıldı');
+    } else if (audioWords.length > 0) {
+        // Yeterli ses dosyası yoksa mevcut olanları kullan
+        selectedAudioWords = audioWords;
+        console.log(`⚠️ Talim Et - Dinle Bul: Sadece ${audioWords.length} ses dosyası bulundu`);
     } else {
-        // Yeterli ses dosyası yoksa tüm kelimelerden seç
-        const allAudioWords = kelimeData.filter(w => w.ses_dosyasi || w.audio);
-        selectedAudioWords = getRandomItems(allAudioWords, 3);
+        // Hiç ses dosyası yoksa tüm kelimelerden seç (bağlaç filtresi uygulanmış)
+        const allAudioWords = kelimeData.filter(w => {
+            const hasAudio = w.ses_dosyasi || w.audio;
+            const kelime = w.kelime || w.arabic || '';
+            return hasAudio && !isArabicConjunction(kelime);
+        });
+        if (allAudioWords.length > 0) {
+            selectedAudioWords = getRandomItems(allAudioWords, Math.min(3, allAudioWords.length));
+        } else {
+            selectedAudioWords = []; // Ses dosyası yoksa boş bırak
+        }
     }
     
     const dinleQuestions = selectedAudioWords.map(word => ({
         type: 'dinle-bul',
         data: word,
-        question: '🔊 Dinle ve doğru anlamı seç',
+        question: '🎧 Dinle ve doğru anlamı seç',
         audioUrl: word.ses_dosyasi || word.audio,
         correctAnswer: word.anlam,
-        options: generateOptions(word.anlam, kelimeData.map(w => w.anlam))
+        options: generateOptions(word.anlam, optionsWords.map(w => w.anlam))
     }));
     
     // 3. Eşleştirme sorusu (2 adet - her biri 4 çift) - Akıllı seçim kullan
@@ -6084,7 +6538,12 @@ async function startKarmaGame() {
         if (filteredKelimeData.length > 4) {
             matchWords = selectIntelligentWords(filteredKelimeData, 4, false);
         } else {
-            matchWords = getRandomItems(kelimeData, 4);
+            // Fallback: Bağlaç filtresi uygulanmış kelimelerden seç
+            const fallbackWords = kelimeData.filter(w => {
+                const kelime = w.kelime || w.arabic || '';
+                return !isArabicConjunction(kelime);
+            });
+            matchWords = getRandomItems(fallbackWords.length > 0 ? fallbackWords : kelimeData, 4);
         }
         matchQuestions.push({
             type: 'eslestirme',
@@ -6102,7 +6561,8 @@ async function startKarmaGame() {
         const words = (a.ayet_metni || '').split(' ').filter(w => w.length > 1);
         return words.length >= 3;
     });
-    const boslukQuestions = getRandomItems(suitableAyets, 3).map(ayet => {
+    const selectedAyetsForBosluk = getRandomItems(suitableAyets, Math.min(3, suitableAyets.length));
+    const boslukQuestions = selectedAyetsForBosluk.map(ayet => {
         const allWords = ayet.ayet_metni.split(' ').filter(w => w.length > 1);
         // Filter out conjunctions
         const words = allWords.filter(w => !isArabicConjunction(w));
@@ -6130,7 +6590,8 @@ async function startKarmaGame() {
     
     // 5. Harf soruları (3 adet) - Harfler için akıllı seçim gerekmez, rastgele yeterli
     const validHarfler = harfData.filter(h => h && h.harf && h.okunus);
-    const harfQuestions = getRandomItems(validHarfler, 3).map(harf => ({
+    const selectedHarfler = getRandomItems(validHarfler, Math.min(3, validHarfler.length));
+    const harfQuestions = selectedHarfler.map(harf => ({
         type: 'harf-bul',
         data: harf,
         question: harf.harf,
@@ -6148,16 +6609,16 @@ async function startKarmaGame() {
         return words.length >= 3 && a.meal && a.meal.length > 10;
     });
     
-    const selectedAyets = getRandomItems(suitableAyetsForBaglamsal, 3);
+    const selectedAyets = getRandomItems(suitableAyetsForBaglamsal, Math.min(3, suitableAyetsForBaglamsal.length));
     
     for (const ayet of selectedAyets) {
         const ayetWords = ayet.ayet_metni.split(' ').filter(w => w.length > 2);
         
-        // Ayet içindeki kelimeleri kelimeData'da ara
+        // Ayet içindeki kelimeleri filtrelenmiş kelimeData'da ara (zorluk filtresi uygulanmış)
         const foundWords = [];
         for (const ayetWord of ayetWords) {
-            // Kelime verisinde bu kelimeyi ara (basit eşleşme)
-            const matchedWord = kelimeData.find(k => {
+            // Filtrelenmiş kelime verisinde bu kelimeyi ara (basit eşleşme)
+            const matchedWord = filteredKelimeData.find(k => {
                 // Arapça kelimelerde harekeleri temizle ve karşılaştır
                 const cleanAyetWord = ayetWord.replace(/[\u064E\u0650\u064F\u0652\u0651\u064B\u064D\u064C]/g, '').trim();
                 const cleanKelime = k.kelime.replace(/[\u064E\u0650\u064F\u0652\u0651\u064B\u064D\u064C]/g, '').trim();
@@ -6175,13 +6636,21 @@ async function startKarmaGame() {
         
         if (foundWords.length > 0) {
             const selectedWord = getRandomItems(foundWords, 1)[0];
-            const wrongAnswers = kelimeData
+            // Yanlış cevaplar için de filtrelenmiş veriyi kullan (zorluk seviyesine uygun)
+            const wrongAnswers = filteredKelimeData
                 .filter(k => k.anlam && k.anlam !== selectedWord.anlam)
                 .map(k => k.anlam);
             
+            // Kelime ID'sini bul (kelime analizi için)
+            const matchedWordData = filteredKelimeData.find(k => {
+                const cleanKelime = (k.kelime || '').replace(/[\u064E\u0650\u064F\u0652\u0651\u064B\u064D\u064C]/g, '').trim();
+                const cleanSelected = selectedWord.kelime.replace(/[\u064E\u0650\u064F\u0652\u0651\u064B\u064D\u064C]/g, '').trim();
+                return cleanKelime === cleanSelected || k.kelime === selectedWord.kelime;
+            });
+            
             baglamsalQuestions.push({
                 type: 'baglamsal-ogrenme',
-                data: ayet,
+                data: matchedWordData || ayet, // Kelime verisi varsa onu kullan, yoksa ayet verisi
                 ayetMetni: ayet.ayet_metni,
                 ayetMeal: ayet.meal,
                 sureAdi: ayet.sure_adı || ayet.sureAdi || '',
@@ -6203,7 +6672,20 @@ async function startKarmaGame() {
         ...baglamsalQuestions
     ]);
     
-    console.log(`🎲 ${karmaQuestions.length} karma soru oluşturuldu`);
+    // Soru sayısı istatistikleri
+    console.log(`📊 Talim Et - Soru Dağılımı:`);
+    console.log(`   📝 Kelime Çevir: ${kelimeQuestions.length}/4`);
+    console.log(`   🎧 Dinle Bul: ${dinleQuestions.length}/3`);
+    console.log(`   🔗 Eşleştirme: ${matchQuestions.length}/2`);
+    console.log(`   ✍️ Boşluk Doldur: ${boslukQuestions.length}/3`);
+    console.log(`   🔤 Harf: ${harfQuestions.length}/3`);
+    console.log(`   📖 Bağlamsal Öğrenme: ${baglamsalQuestions.length}/3`);
+    console.log(`   🎲 Toplam: ${karmaQuestions.length}/18 soru oluşturuldu`);
+    
+    // Eğer toplam soru sayısı 15'ten azsa uyarı ver
+    if (karmaQuestions.length < 15) {
+        console.warn(`⚠️ Talim Et - Toplam soru sayısı beklenenden az: ${karmaQuestions.length}/18`);
+    }
     
     // Show karma game screen
     hideAllScreens();
@@ -6287,7 +6769,7 @@ function renderKelimeCevirKarma(container, question) {
         <div style="position: relative;">
             <div class="karma-type-badge">📝 Kelime Çevir</div>
             ${audioUrl ? `
-                <button class="karma-audio-btn-top" onclick="playSafeAudio('${audioUrl.replace(/'/g, "\\'")}')" title="Dinle">🔊</button>
+                <button class="karma-audio-btn-top" onclick="playSafeAudio('${audioUrl.replace(/'/g, "\\'")}')" title="Dinle">🎧</button>
             ` : ''}
         </div>
         <p class="karma-instruction">Arapça kelimenin Türkçe karşılığını seç</p>
@@ -6315,7 +6797,7 @@ function renderDinleBulKarma(container, question) {
         <div style="position: relative;">
             <div class="karma-type-badge">🎧 Dinle Bul</div>
             ${question.audioUrl ? `
-                <button class="karma-audio-btn-top" onclick="playSafeAudio('${(question.audioUrl || '').replace(/'/g, "\\'")}')" title="Dinle">🔊</button>
+                <button class="karma-audio-btn-top" onclick="playSafeAudio('${(question.audioUrl || '').replace(/'/g, "\\'")}')" title="Dinle">🎧</button>
             ` : ''}
         </div>
         <p class="karma-instruction">Kelimeyi dinle ve doğru çeviriyi bul</p>
@@ -6397,6 +6879,12 @@ function selectKarmaMatch(element, type, id) {
             element.classList.add('matched', 'correct');
             karmaMatchedCount++;
             
+            // Kelime istatistiklerini güncelle (eşleştirme soruları için)
+            const question = karmaQuestions[karmaQuestionIndex];
+            if (question && question.type === 'eslestirme' && id) {
+                updateWordStats(id, true);
+            }
+            
             comboCount++;
             const points = 25 + (comboCount * 5);
             sessionScore += points;
@@ -6417,6 +6905,15 @@ function selectKarmaMatch(element, type, id) {
             karmaSelectedItem.element.classList.add('wrong');
             element.classList.remove('selected'); // Türkçe butondan da selected kaldır
             element.classList.add('wrong');
+            
+            // Kelime istatistiklerini güncelle (yanlış eşleştirme için)
+            const question = karmaQuestions[karmaQuestionIndex];
+            if (question && question.type === 'eslestirme') {
+                // Yanlış eşleştirilen kelimelerin ikisi için de yanlış kaydet
+                if (karmaSelectedItem.id) updateWordStats(karmaSelectedItem.id, false);
+                if (id) updateWordStats(id, false);
+            }
+            
             comboCount = 0;
             
             setTimeout(() => {
@@ -6456,7 +6953,7 @@ function renderBoslukDoldurKarma(container, question) {
         <div style="position: relative;">
             <div class="karma-type-badge">📖 Boşluk Doldur</div>
             ${audioUrl ? `
-                <button class="karma-audio-btn-top" onclick="playSafeAudio('${audioUrl.replace(/'/g, "\\'")}')" title="Dinle">🔊</button>
+                <button class="karma-audio-btn-top" onclick="playSafeAudio('${audioUrl.replace(/'/g, "\\'")}')" title="Dinle">🎧</button>
             ` : ''}
         </div>
         <p class="karma-instruction">Boşluğa uygun kelimeyi seç</p>
@@ -6491,7 +6988,7 @@ function renderHarfBulKarma(container, question) {
         <div style="position: relative;">
             <div class="karma-type-badge">🔤 Harf Bul</div>
             ${audioUrl ? `
-                <button class="karma-audio-btn-top" onclick="playSafeAudio('${audioUrl.replace(/'/g, "\\'")}')" title="Dinle">🔊</button>
+                <button class="karma-audio-btn-top" onclick="playSafeAudio('${audioUrl.replace(/'/g, "\\'")}')" title="Dinle">🎧</button>
             ` : ''}
         </div>
         <p class="karma-instruction">Bu harfin okunuşunu seç</p>
@@ -6518,7 +7015,7 @@ function renderBaglamsalOgrenmeKarma(container, question) {
         <div style="position: relative;">
             <div class="karma-type-badge">📚 Bağlamsal Öğrenme</div>
             ${question.audioUrl ? `
-                <button class="karma-audio-btn-top" onclick="playSafeAudio('${(question.audioUrl || '').replace(/'/g, "\\'")}')" title="Dinle">🔊</button>
+                <button class="karma-audio-btn-top" onclick="playSafeAudio('${(question.audioUrl || '').replace(/'/g, "\\'")}')" title="Dinle">🎧</button>
             ` : ''}
         </div>
         <div class="karma-baglamsal-question">
@@ -6681,6 +7178,7 @@ if (typeof window !== 'undefined') {
     window.checkElifFethaAnswer = checkElifFethaAnswer;
     window.checkElifEsreAnswer = checkElifEsreAnswer;
     window.checkElifOtreAnswer = checkElifOtreAnswer;
+    window.checkElifTenvinAnswer = checkElifTenvinAnswer;
     window.checkUcHarfliKelimelerAnswer = checkUcHarfliKelimelerAnswer;
     window.checkSeddeAnswer = checkSeddeAnswer;
     window.checkCezmAnswer = checkCezmAnswer;
@@ -6841,19 +7339,39 @@ async function nuclearClear() {
     try {
         // Önce Firebase'den verileri sil (kullanıcı bilgilerini kaydetmeden önce)
         const savedUsername = localStorage.getItem('hasene_username');
-        if (savedUsername) {
+        const savedUserId = localStorage.getItem('hasene_user_id');
+        
+        // Firebase silme işlemi için kullanıcı bilgilerini kontrol et
+        if (savedUsername || savedUserId) {
             const defaultUsernames = ['Kullanıcı', 'Anonim Kullanıcı', ''];
             const hasRealUsername = savedUsername && savedUsername.trim() !== '' && !defaultUsernames.includes(savedUsername.trim());
             
-            if (hasRealUsername && window.FIREBASE_ENABLED && window.firestore) {
+            // Firebase silme işlemi - hem username hem de userId varsa yap
+            if ((hasRealUsername || savedUserId) && window.FIREBASE_ENABLED && window.firestore) {
                 try {
-                    const docId = typeof window.usernameToDocId === 'function' ? window.usernameToDocId(savedUsername) : savedUsername.toLowerCase().replace(/[^a-z0-9_]/g, '_');
+                    const deletePromises = [];
                     
-                    // Delete from Firebase
-                    await Promise.all([
-                        window.firestoreDelete('user_stats', docId).catch(() => false),
-                        window.firestoreDelete('daily_tasks', docId).catch(() => false)
-                    ]);
+                    // Username ile silme
+                    if (hasRealUsername) {
+                        const docId = typeof window.usernameToDocId === 'function' ? window.usernameToDocId(savedUsername) : savedUsername.toLowerCase().replace(/[^a-z0-9_]/g, '_');
+                        deletePromises.push(
+                            window.firestoreDelete('user_stats', docId).catch(() => false),
+                            window.firestoreDelete('daily_tasks', docId).catch(() => false)
+                        );
+                    }
+                    
+                    // UserId ile de silme (eğer varsa)
+                    if (savedUserId) {
+                        const userIdDocId = typeof window.usernameToDocId === 'function' ? window.usernameToDocId(savedUserId) : savedUserId.toLowerCase().replace(/[^a-z0-9_]/g, '_');
+                        deletePromises.push(
+                            window.firestoreDelete('user_stats', userIdDocId).catch(() => false),
+                            window.firestoreDelete('daily_tasks', userIdDocId).catch(() => false)
+                        );
+                    }
+                    
+                    if (deletePromises.length > 0) {
+                        await Promise.all(deletePromises);
+                    }
                     
                     // Delete ALL weekly leaderboard entries for this user
                     // First, ensure Firebase auth (try anonymous auth for local users)
@@ -6872,7 +7390,11 @@ async function nuclearClear() {
                         }
                     }
                     
-                    if (window.firestore && firebaseAuthUID) {
+                    // Delete ALL weekly leaderboard entries
+                    // Try query first, then fallback to manual deletion
+                    let weeklyLeaderboardDeleted = 0;
+                    
+                    if (window.firestore && firebaseAuthUID && hasRealUsername) {
                         try {
                             console.log('🔄 Tüm weekly_leaderboard dokümanları sorgulanıyor...');
                             
@@ -6893,6 +7415,7 @@ async function nuclearClear() {
                                     deletePromises.push(
                                         doc.ref.delete().then(() => {
                                             console.log('✅ Weekly leaderboard dokümanı silindi:', doc.id);
+                                            weeklyLeaderboardDeleted++;
                                             return true;
                                         }).catch((error) => {
                                             console.warn('⚠️ Weekly leaderboard silme hatası:', error, { docId: doc.id });
@@ -6900,53 +7423,66 @@ async function nuclearClear() {
                                         })
                                     );
                                 } else {
-                                    console.warn('⚠️ Doküman farklı kullanıcıya ait, atlanıyor:', { docId: doc.id, docUserId: docData.user_id, currentUID: firebaseUID });
+                                    console.warn('⚠️ Doküman farklı kullanıcıya ait, atlanıyor:', { docId: doc.id, docUserId: docData.user_id, currentUID: firebaseAuthUID });
                                 }
                             });
                             
                             if (deletePromises.length > 0) {
                                 const results = await Promise.all(deletePromises);
                                 const successCount = results.filter(r => r === true).length;
-                                console.log(`✅ ${successCount}/${deletePromises.length} weekly_leaderboard dokümanı silindi`);
+                                console.log(`✅ ${successCount}/${deletePromises.length} weekly_leaderboard dokümanı silindi (query ile)`);
                             } else {
-                                console.log('ℹ️ Silinecek weekly_leaderboard dokümanı bulunamadı');
+                                console.log('ℹ️ Query ile silinecek weekly_leaderboard dokümanı bulunamadı');
                             }
                         } catch (error) {
                             console.warn('⚠️ Weekly leaderboard query/silme hatası:', error);
-                            // Fallback: Try to delete last 52 weeks manually
-                            if (typeof window.getWeekStartString === 'function') {
-                                console.log('🔄 Fallback: Son 52 hafta manuel olarak siliniyor...');
-                                const today = new Date();
-                                for (let i = 0; i < 52; i++) {
-                                    const weekDate = new Date(today);
-                                    weekDate.setDate(weekDate.getDate() - (i * 7));
-                                    const dayOfWeek = weekDate.getDay();
-                                    const diff = weekDate.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
-                                    weekDate.setDate(diff);
-                                    weekDate.setHours(0, 0, 0, 0);
-                                    const weekStart = weekDate.toISOString().split('T')[0];
-                                    const weeklyDocId = `${savedUsername}_${weekStart}`;
-                                    await window.firestoreDelete('weekly_leaderboard', weeklyDocId).catch(() => false);
-                                }
-                            }
                         }
-                    } else {
-                        // Fallback: Delete last 52 weeks manually if query not available
-                        console.log('🔄 Query yapılamıyor, son 52 hafta manuel olarak siliniyor...');
-                        if (typeof window.getWeekStartString === 'function') {
-                            const today = new Date();
-                            for (let i = 0; i < 52; i++) {
-                                const weekDate = new Date(today);
-                                weekDate.setDate(weekDate.getDate() - (i * 7));
-                                const dayOfWeek = weekDate.getDay();
-                                const diff = weekDate.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
-                                weekDate.setDate(diff);
-                                weekDate.setHours(0, 0, 0, 0);
-                                const weekStart = weekDate.toISOString().split('T')[0];
-                                const weeklyDocId = `${savedUsername}_${weekStart}`;
-                                await window.firestoreDelete('weekly_leaderboard', weeklyDocId).catch(() => false);
-                            }
+                    }
+                    
+                    // ALWAYS try manual deletion as fallback (for last 104 weeks = 2 years)
+                    console.log('🔄 Fallback: Son 104 hafta (2 yıl) manuel olarak siliniyor...');
+                    const today = new Date();
+                    const manualDeletePromises = [];
+                    for (let i = 0; i < 104; i++) {
+                        const weekDate = new Date(today);
+                        weekDate.setDate(weekDate.getDate() - (i * 7));
+                        const dayOfWeek = weekDate.getDay();
+                        const diff = weekDate.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+                        weekDate.setDate(diff);
+                        weekDate.setHours(0, 0, 0, 0);
+                        const weekStart = weekDate.toISOString().split('T')[0];
+                        
+                        // Try both username and userId formats
+                        if (hasRealUsername) {
+                            const weeklyDocId = `${savedUsername}_${weekStart}`;
+                            manualDeletePromises.push(
+                                window.firestoreDelete('weekly_leaderboard', weeklyDocId).then(result => {
+                                    if (result) {
+                                        weeklyLeaderboardDeleted++;
+                                        console.log('✅ Weekly leaderboard silindi (manuel):', weeklyDocId);
+                                    }
+                                    return result;
+                                }).catch(() => false)
+                            );
                         }
+                        
+                        if (savedUserId) {
+                            const userIdDocId = `${savedUserId}_${weekStart}`;
+                            manualDeletePromises.push(
+                                window.firestoreDelete('weekly_leaderboard', userIdDocId).then(result => {
+                                    if (result) {
+                                        weeklyLeaderboardDeleted++;
+                                        console.log('✅ Weekly leaderboard silindi (manuel, userId):', userIdDocId);
+                                    }
+                                    return result;
+                                }).catch(() => false)
+                            );
+                        }
+                    }
+                    
+                    if (manualDeletePromises.length > 0) {
+                        await Promise.all(manualDeletePromises);
+                        console.log(`✅ Toplam ${weeklyLeaderboardDeleted} weekly_leaderboard dokümanı silindi`);
                     }
                     
                     console.log('✅ Firebase verileri silindi');
@@ -6956,40 +7492,174 @@ async function nuclearClear() {
             }
         }
         
-        // Clear everything
+        // Clear everything from localStorage
+        console.log('🗑️ localStorage temizleniyor...');
+        
+        // First, clear weekly XP data specifically
+        const allKeys = Object.keys(localStorage);
+        let weeklyXPCleared = 0;
+        allKeys.forEach(key => {
+            if (key.startsWith('hasene_weekly_xp_')) {
+                localStorage.removeItem(key);
+                weeklyXPCleared++;
+            }
+        });
+        console.log(`✅ ${weeklyXPCleared} weekly XP verisi localStorage'dan silindi`);
+        
+        // ÖNEMLİ: Kullanıcı bilgilerini kaydet (localStorage.clear() çağrılmadan önce)
+        // Çünkü clear() çağrıldıktan sonra bu bilgiler kaybolacak
+        const usernameToRestore = savedUsername;
+        const userIdToRestore = savedUserId;
+        
+        // Mevcut hafta başlangıcını hesapla (clear'dan önce)
+        const today = new Date();
+        const dayOfWeek = today.getDay();
+        const diff = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+        const monday = new Date(today.setDate(diff));
+        monday.setHours(0, 0, 0, 0);
+        const weekStart = monday.toISOString().split('T')[0];
+        const weeklyXPKey = `hasene_weekly_xp_${weekStart}`;
+        
+        // Then clear everything else
         localStorage.clear();
         sessionStorage.clear();
+        console.log('✅ localStorage ve sessionStorage temizlendi');
         
-        // Clear IndexedDB
+        // Kullanıcı bilgilerini tekrar kaydet (sayfa yenilendikten sonra giriş yapılmış olması için)
+        if (usernameToRestore) {
+            localStorage.setItem('hasene_username', usernameToRestore);
+        }
+        if (userIdToRestore) {
+            localStorage.setItem('hasene_user_id', userIdToRestore);
+        }
+        
+        // TÜM weekly XP keylerini SİL (önce temizle)
+        const allWeeklyKeys = Object.keys(localStorage).filter(k => k.startsWith('hasene_weekly_xp_'));
+        console.log('🔍 Tüm weekly XP keyleri bulundu:', allWeeklyKeys);
+        allWeeklyKeys.forEach(k => {
+            localStorage.removeItem(k);
+            console.log('🗑️ Weekly XP key silindi:', k);
+        });
+        
+        // Mevcut hafta için 0 değeri yaz (Firebase'den yüklenirse bile 0 gösterir)
+        localStorage.setItem(weeklyXPKey, '0');
+        console.log('✅ Mevcut hafta için weekly XP 0 olarak ayarlandı:', weeklyXPKey);
+        console.log('✅ Weekly XP değeri kontrol:', localStorage.getItem(weeklyXPKey));
+        
+        // Nuclear clear flag'i ekle (sayfa yenilendiğinde Firebase'den yükleme yapılmasın)
+        localStorage.setItem('hasene_nuclear_clear_done', Date.now().toString());
+        console.log('✅ Nuclear clear flag eklendi');
+        
+        // Final kontrol: getCurrentWeeklyXP() fonksiyonunu test et
+        if (typeof window.getCurrentWeeklyXP === 'function') {
+            const testXP = window.getCurrentWeeklyXP();
+            console.log('✅ Final kontrol - getCurrentWeeklyXP() sonucu:', testXP);
+            if (testXP !== 0) {
+                console.error('❌ HATA: getCurrentWeeklyXP() hala 0 değil! Değer:', testXP);
+                // Zorla 0 yap
+                localStorage.setItem(weeklyXPKey, '0');
+                console.log('🔧 Zorla 0 yapıldı, tekrar kontrol:', window.getCurrentWeeklyXP());
+            }
+        }
+        
+        // Clear IndexedDB (wait for completion)
         if ('indexedDB' in window) {
-            indexedDB.databases().then(databases => {
-                databases.forEach(db => {
-                    indexedDB.deleteDatabase(db.name);
-                });
-            });
+            try {
+                console.log('🗑️ IndexedDB temizleniyor...');
+                const databases = await indexedDB.databases();
+                await Promise.all(databases.map(db => {
+                    return new Promise((resolve, reject) => {
+                        const deleteReq = indexedDB.deleteDatabase(db.name);
+                        deleteReq.onsuccess = () => {
+                            console.log('✅ IndexedDB veritabanı silindi:', db.name);
+                            resolve();
+                        };
+                        deleteReq.onerror = () => {
+                            console.warn('⚠️ IndexedDB silme hatası:', db.name, deleteReq.error);
+                            resolve(); // Continue anyway
+                        };
+                        deleteReq.onblocked = () => {
+                            console.warn('⚠️ IndexedDB silme engellendi:', db.name);
+                            resolve(); // Continue anyway
+                        };
+                    });
+                }));
+                console.log('✅ IndexedDB temizlendi');
+            } catch (error) {
+                console.warn('⚠️ IndexedDB temizleme hatası:', error);
+            }
         }
         
-        // Clear Service Worker caches
+        // Clear Service Worker caches (wait for completion)
         if ('caches' in window) {
-            caches.keys().then(names => {
-                names.forEach(name => caches.delete(name));
-            });
+            try {
+                console.log('🗑️ Service Worker cache temizleniyor...');
+                const cacheNames = await caches.keys();
+                await Promise.all(cacheNames.map(name => {
+                    console.log('🗑️ Cache siliniyor:', name);
+                    return caches.delete(name);
+                }));
+                console.log('✅ Service Worker cache temizlendi');
+            } catch (error) {
+                console.warn('⚠️ Cache temizleme hatası:', error);
+            }
         }
         
-        // Unregister Service Workers
+        // Unregister Service Workers (wait for completion)
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.getRegistrations().then(registrations => {
-                registrations.forEach(reg => reg.unregister());
-            });
+            try {
+                console.log('🗑️ Service Workers kaldırılıyor...');
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                await Promise.all(registrations.map(reg => {
+                    console.log('🗑️ Service Worker kaldırılıyor:', reg.scope);
+                    return reg.unregister();
+                }));
+                console.log('✅ Service Workers kaldırıldı');
+            } catch (error) {
+                console.warn('⚠️ Service Worker kaldırma hatası:', error);
+            }
         }
         
+        console.log('✅ Tüm temizleme işlemleri tamamlandı');
+        
+        // Logları birleştir ve göster
+        const logSummary = [
+            `✅ Firebase verileri silindi`,
+            `✅ ${weeklyLeaderboardDeleted} weekly_leaderboard dokümanı silindi`,
+            `✅ Weekly XP 0 olarak ayarlandı`,
+            `✅ Nuclear clear flag eklendi`,
+            `✅ localStorage ve sessionStorage temizlendi`,
+            `✅ IndexedDB temizlendi`,
+            `✅ Service Worker cache temizlendi`,
+            `✅ Service Workers kaldırıldı`
+        ].join('\n');
+        
+        console.log('📋 NUCLEAR CLEAR ÖZET:');
+        console.log(logSummary);
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        console.log('✅ NUCLEAR CLEAR TAMAMLANDI!');
+        console.log('📊 Weekly XP kontrol:', getCurrentWeeklyXP ? (typeof window.getCurrentWeeklyXP === 'function' ? window.getCurrentWeeklyXP() : 'fonksiyon yok') : 'getCurrentWeeklyXP yok');
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        
+        // Logları localStorage'a kaydet (sayfa yenilendikten sonra görmek için)
+        localStorage.setItem('hasene_nuclear_clear_log', JSON.stringify({
+            timestamp: new Date().toISOString(),
+            weeklyLeaderboardDeleted: weeklyLeaderboardDeleted,
+            summary: logSummary
+        }));
+        
+        // Kullanıcıya bilgi ver
         if (typeof showToast === 'function') {
-            showToast('Tüm veriler silindi. Sayfa yenileniyor...', 'success');
+            showToast('✅ Tüm veriler silindi! Logları görmek için console\'u açın. Sayfa 5 saniye sonra yenilenecek...', 'success', 5000);
+        } else {
+            alert('✅ Tüm veriler silindi!\n\n' + logSummary + '\n\nSayfa 5 saniye sonra yenilenecek...');
         }
         
+        // Sayfa yenileme - 5 saniye sonra otomatik
         setTimeout(() => {
+            console.log('🔄 Sayfa yenileniyor...');
             location.reload();
-        }, 2000);
+        }, 5000);
         
     } catch (error) {
         console.error('Nuclear clear error:', error);

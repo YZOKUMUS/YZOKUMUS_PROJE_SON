@@ -61,10 +61,12 @@ function getCurrentWeeklyXP() {
     const localXP = localStorage.getItem(key);
     if (localXP !== null && localXP !== '') {
         const xp = parseInt(localXP || '0');
+        console.log('📊 getCurrentWeeklyXP() - localStorage\'dan:', xp, '(key:', key + ')');
         return xp;
     }
     
     // If not in localStorage, return 0
+    console.log('📊 getCurrentWeeklyXP() - localStorage\'da yok, 0 döndürülüyor (key:', key + ')');
     return 0;
 }
 
@@ -78,6 +80,43 @@ async function loadWeeklyXPFromFirebase() {
     }
     
     try {
+        // Nuclear clear yapıldıysa Firebase'den yükleme yapma
+        const nuclearClearFlag = localStorage.getItem('hasene_nuclear_clear_done');
+        if (nuclearClearFlag) {
+            // Flag'i kaldır (bir kez kullanıldı)
+            localStorage.removeItem('hasene_nuclear_clear_done');
+            console.log('ℹ️ Nuclear clear flag bulundu, Firebase\'den weekly XP yüklenmeyecek');
+            
+            // Mevcut hafta için 0 değerini garanti et (MUTLAKA 0 yap)
+            const weekStart = getWeekStartString();
+            const key = `hasene_weekly_xp_${weekStart}`;
+            
+            // ÖNCE TÜM weekly XP keylerini temizle
+            const allWeeklyKeys = Object.keys(localStorage).filter(k => k.startsWith('hasene_weekly_xp_'));
+            console.log('🔍 Nuclear clear sonrası - Tüm weekly XP keyleri:', allWeeklyKeys);
+            allWeeklyKeys.forEach(k => {
+                localStorage.removeItem(k);
+                console.log('🗑️ Weekly XP key silindi:', k);
+            });
+            
+            // Sonra 0 yaz
+            localStorage.setItem(key, '0'); // Her zaman 0 yap
+            console.log('✅ Weekly XP 0 olarak ayarlandı (nuclear clear sonrası), key:', key);
+            console.log('✅ localStorage kontrol:', localStorage.getItem(key));
+            console.log('✅ getCurrentWeeklyXP() sonucu:', getCurrentWeeklyXP());
+            
+            // Final kontrol
+            const finalXP = getCurrentWeeklyXP();
+            if (finalXP !== 0) {
+                console.error('❌ HATA: getCurrentWeeklyXP() hala 0 değil! Değer:', finalXP);
+                // Zorla 0 yap
+                localStorage.setItem(key, '0');
+                console.log('🔧 Zorla 0 yapıldı, tekrar kontrol:', getCurrentWeeklyXP());
+            }
+            
+            return;
+        }
+        
         const savedUsername = localStorage.getItem('hasene_username') || '';
         const defaultUsernames = ['Kullanıcı', 'Anonim Kullanıcı', ''];
         const hasRealUsername = savedUsername && savedUsername.trim() !== '' && !defaultUsernames.includes(savedUsername.trim());
@@ -295,6 +334,20 @@ async function getUserPosition() {
     // ALWAYS use getCurrentWeeklyXP() - this reads from localStorage which is the source of truth
     // Firebase leaderboard is for ranking only, not for user's own XP value
     const weeklyXP = getCurrentWeeklyXP();
+    console.log('📊 getUserPosition() - getCurrentWeeklyXP() sonucu:', weeklyXP);
+    
+    // Nuclear clear flag kontrolü - eğer flag varsa kesinlikle 0 kullan
+    const nuclearClearFlag = localStorage.getItem('hasene_nuclear_clear_done');
+    const finalWeeklyXP = nuclearClearFlag ? 0 : weeklyXP;
+    
+    if (nuclearClearFlag && weeklyXP !== 0) {
+        console.warn('⚠️ Nuclear clear flag var ama weeklyXP 0 değil! Zorla 0 yapılıyor.');
+        const weekStart = getWeekStartString();
+        const key = `hasene_weekly_xp_${weekStart}`;
+        localStorage.setItem(key, '0');
+        console.log('🔧 Weekly XP zorla 0 yapıldı');
+    }
+    
     const league = getUserLeague();
     const leaderboard = await loadLeaderboard();
     
@@ -308,14 +361,17 @@ async function getUserPosition() {
     const leaguePosition = leagueUsers.findIndex(u => u.user_id === user.id);
     
     // Return user position with weeklyXP from localStorage (source of truth)
-    return {
+    const result = {
         position: position,
         leaguePosition: leaguePosition >= 0 ? leaguePosition + 1 : null,
-        weeklyXP: weeklyXP, // Always from localStorage via getCurrentWeeklyXP()
-        league: league, // Calculated from weeklyXP (from localStorage)
+        weeklyXP: finalWeeklyXP, // Always from localStorage via getCurrentWeeklyXP()
+        league: calculateLeague(finalWeeklyXP), // Recalculate league with final XP
         totalUsers: leaderboard.length,
         totalInLeague: leagueUsers.length
     };
+    
+    console.log('📊 getUserPosition() - Döndürülen değer:', result);
+    return result;
 }
 
 // ========================================
