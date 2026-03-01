@@ -102,10 +102,11 @@ body[data-theme="dark"] {
     --accent-error: #f97373;
     --accent-gold: #eab308;
 
-    --glass-bg: rgba(15, 23, 42, 0.9);
-    --glass-bg-dark: rgba(15, 23, 42, 0.98);
-    --glass-border: rgba(148, 163, 184, 0.25);
-    --glass-shadow: 0 12px 40px rgba(15, 23, 42, 0.8);
+    /* Dark mode cam kartlar: arka plandan bir ton daha açık olsun ki rozetler ve kartlar belirginleşsin */
+    --glass-bg: rgba(15, 23, 42, 0.8);
+    --glass-bg-dark: rgba(15, 23, 42, 0.94);
+    --glass-border: rgba(148, 163, 184, 0.35);
+    --glass-shadow: 0 12px 40px rgba(15, 23, 42, 0.85);
 }
 
 /* Font Face */
