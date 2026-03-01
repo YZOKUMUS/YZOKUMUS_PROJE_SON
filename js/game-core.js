@@ -6486,8 +6486,8 @@ async function startKarmaGame() {
         return;
     }
     
-    // Generate mixed questions (15 total)
-    const questionCount = 15;
+    // Generate mixed questions (10 total)
+    const questionCount = 10;
     
     // Filter by difficulty for intelligent selection
     let filteredKelimeData = filterByDifficulty(kelimeData, currentDifficulty);
@@ -6714,7 +6714,7 @@ async function startKarmaGame() {
         }
     }
     
-    // Combine and shuffle all questions
+    // Combine and shuffle all questions, then limit to desired count
     karmaQuestions = shuffleArray([
         ...kelimeQuestions,
         ...dinleQuestions,
@@ -6724,6 +6724,10 @@ async function startKarmaGame() {
         ...baglamsalQuestions
     ]);
     
+    if (karmaQuestions.length > questionCount) {
+        karmaQuestions = karmaQuestions.slice(0, questionCount);
+    }
+    
     // Soru sayısı istatistikleri
     console.log(`📊 Talim Et - Soru Dağılımı:`);
     console.log(`   📝 Kelime Çevir: ${kelimeQuestions.length}/4`);
@@ -6732,11 +6736,11 @@ async function startKarmaGame() {
     console.log(`   ✍️ Boşluk Doldur: ${boslukQuestions.length}/3`);
     console.log(`   🔤 Harf: ${harfQuestions.length}/3`);
     console.log(`   📖 Bağlamsal Öğrenme: ${baglamsalQuestions.length}/3`);
-    console.log(`   🎲 Toplam: ${karmaQuestions.length}/18 soru oluşturuldu`);
+    console.log(`   🎲 Toplam: ${karmaQuestions.length}/${questionCount} soru oynanacak (maksimum 18 üretildi)`);
     
-    // Eğer toplam soru sayısı 15'ten azsa uyarı ver
-    if (karmaQuestions.length < 15) {
-        console.warn(`⚠️ Talim Et - Toplam soru sayısı beklenenden az: ${karmaQuestions.length}/18`);
+    // Eğer toplam soru sayısı beklenenden azsa uyarı ver
+    if (karmaQuestions.length < questionCount) {
+        console.warn(`⚠️ Talim Et - Toplam soru sayısı beklenenden az: ${karmaQuestions.length}/${questionCount}`);
     }
     
     // Show karma game screen
@@ -7001,6 +7005,10 @@ function renderBoslukDoldurKarma(container, question) {
     // Debug: Log font size to ensure it's correct
     console.log('📏 Karma Boşluk Doldur - Soru ayeti font-size:', arabicFontSize, 'Cevap şıklarına uygulanıyor');
     
+    // Replace plain blank with a span so we can fill it on correct answer
+    let questionHtml = question.question || '';
+    questionHtml = questionHtml.replace('____', '<span class="blank-word" id="karma-bosluk-blank">____</span>');
+    
     container.innerHTML = `
         <div style="position: relative;">
             <div class="karma-type-badge">📖 Boşluk Doldur</div>
@@ -7009,7 +7017,7 @@ function renderBoslukDoldurKarma(container, question) {
             ` : ''}
         </div>
         <p class="karma-instruction">Boşluğa uygun kelimeyi seç</p>
-        <div class="karma-arabic bosluk">${question.question || ''}</div>
+        <div class="karma-arabic bosluk">${questionHtml}</div>
         <div class="karma-translation">${question.translation || ''}</div>
         <div class="karma-options">
             ${validOptions.map((opt, i) => `
@@ -7183,6 +7191,15 @@ function checkKarmaAnswer(selected, correct) {
         const basePoints = getBasePoints(currentDifficulty);
         const gained = basePoints + (comboCount * CONFIG.COMBO_BONUS_PER_CORRECT);
         sessionScore += gained;
+        
+        // If this is a karma boşluk doldur question, fill the blank in the verse
+        if (question.type === 'bosluk-doldur') {
+            const blankSpan = document.getElementById('karma-bosluk-blank');
+            if (blankSpan) {
+                blankSpan.textContent = correct;
+                blankSpan.classList.add('filled');
+            }
+        }
         
         if (wordId) updateWordStats(wordId, true);
     } else {
