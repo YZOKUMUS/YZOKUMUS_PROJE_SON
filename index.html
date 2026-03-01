@@ -74,7 +74,7 @@
                 <div class="user-info">
                     <span id="user-avatar" class="user-avatar">👤</span>
                     <span id="current-username-display" class="username-display">Giriş Yap</span>
-                    <span id="user-status-indicator" class="user-status-indicator">🔴 Çıkış Yapıldı</span>
+                    <span id="user-status-indicator" class="user-status-indicator">🔴 Giriş yapılmadı</span>
                 </div>
                 <div class="user-actions">
                     <button id="user-auth-btn" class="secondary-btn user-action-btn" aria-label="Kullanıcı girişi yap">Giriş Yap</button>
@@ -117,15 +117,15 @@
 
         <!-- Difficulty Selector -->
         <div class="difficulty-selector">
-            <button class="difficulty-btn active" data-difficulty="easy">
+            <button class="difficulty-btn active" data-difficulty="easy" title="Yeni başlayanlar için. Öneri: günde 1-2 oyun (~5-10 dakika).">
                 <span class="difficulty-icon">🐛</span>
                 <span>Kolay</span>
             </button>
-            <button class="difficulty-btn" data-difficulty="medium">
+            <button class="difficulty-btn" data-difficulty="medium" title="Düzenli çalışanlar için. Öneri: günde 2-3 oyun (~15-20 dakika).">
                 <span class="difficulty-icon">🦋</span>
                 <span>Orta</span>
             </button>
-            <button class="difficulty-btn" data-difficulty="hard">
+            <button class="difficulty-btn" data-difficulty="hard" title="Yoğun çalışma için. Öneri: günde 3+ oyun (20+ dakika).">
                 <span class="difficulty-icon">🦅</span>
                 <span>Zor</span>
             </button>
@@ -142,7 +142,7 @@
                     <span>✍️</span>
                 </div>
                 <h3>Talim Et</h3>
-                <p>Kelime Çevir, Dinle Bul ve Boşluk Doldur ile karışık talim yap</p>
+                <p>Kelime Çevir, Dinle Bul ve Boşluk Doldur ile karışık alıştırma yap</p>
             </div>
             
             <div class="game-card" data-game="kelime-cevir">
@@ -236,7 +236,7 @@
         </div>
         <div class="submode-content">
             <h3 class="submode-title">Alt Mod Seçin</h3>
-            <p class="submode-subtitle">Nasıl oynamak istediğinizi seçin</p>
+            <p class="submode-subtitle">Oyun şeklini seçin</p>
             <div class="submode-options">
                 <button class="submode-btn" data-submode="classic">
                     <div class="icon">🎯</div>
@@ -493,7 +493,7 @@
                     <div class="icon"><img src="ASSETS/elifba-cover/üstün-icon.png" alt="Üstün" style="width: 2rem; height: 2rem; object-fit: contain; display: block;"></div>
                     <div class="info">
                         <div class="name">Üstün</div>
-                        <div class="desc">Harfin üzerine gelen işaret</div>
+                        <div class="desc">Harflerin üzerine gelen sesli işaret</div>
                     </div>
                 </button>
                 <button class="submode-btn" data-elif-submode="esre">
@@ -713,6 +713,7 @@
             <div class="modal-actions">
                 <button class="primary-btn" onclick="showWordAnalysisModal()">📈 Kelime Analizi</button>
                 <button class="primary-btn" onclick="if(typeof showChartsModal === 'function') showChartsModal(); else showToast('Grafikler yükleniyor...', 'info');">📊 Grafikler</button>
+                <button class="secondary-btn" onclick="showAppSettingsModal()">⚙️ Ayarlar</button>
                 <button class="secondary-btn" onclick="if(typeof showNotificationSettings === 'function') showNotificationSettings(); else showToast('Bildirim ayarları yükleniyor...', 'info');">🔔 Bildirimler</button>
                 <button class="secondary-btn" onclick="closeModal('stats-modal')">Kapat</button>
             </div>
@@ -774,7 +775,7 @@
                 <div class="reward-box" id="reward-box" onclick="claimDailyReward()">
                     <div class="reward-box-icon">🎁</div>
                     <div class="reward-box-label">Günlük Ödül Kutusu</div>
-                    <div class="reward-box-status" id="reward-box-status">Görevleri tamamla!</div>
+                    <div class="reward-box-status" id="reward-box-status">Görevleri tamamla</div>
                 </div>
             </div>
             
@@ -928,7 +929,7 @@
     <div id="username-login-modal" class="modal hidden">
         <div class="modal-content glass-card">
             <h2>👤 Kullanıcı Adı Girişi</h2>
-            <p class="modal-description">Oyunu oynamak için bir kullanıcı adı girin</p>
+            <p class="modal-description">Oyunu oynamak için bir kullanıcı adı girin. Girişleriniz anonimdir; verileriniz bu cihazda saklanır ve Firebase etkinse isteğe bağlı olarak bulut ile senkronize edilir.</p>
             <input 
                 type="text" 
                 id="username-input" 
@@ -984,7 +985,7 @@
     <div id="daily-reward-modal" class="modal hidden">
         <div class="modal-content glass-card daily-reward-content">
             <div class="daily-reward-icon">🎁</div>
-            <h2 class="daily-reward-title">Günlük Ödül!</h2>
+            <h2 class="daily-reward-title">Günlük ödülünüz</h2>
             <div class="daily-reward-amount">+<span id="daily-reward-amount">20</span></div>
             <p class="daily-reward-streak" id="daily-reward-streak"></p>
             <button class="claim-reward-btn" onclick="if(typeof claimDailyReward === 'function') claimDailyReward(); else showToast('Bu özellik artık kullanılmıyor', 'info');">Ödülü Al 🎁</button>
@@ -1087,7 +1088,52 @@
             </div>
             
             <div style="margin-top: var(--spacing-md); padding: var(--spacing-sm); background: rgba(239, 68, 68, 0.1); border-radius: var(--radius-sm); font-size: 0.85rem; color: var(--text-secondary);">
-                💡 Bildirimler sadece tarayıcı açıkken çalışır. Uygulamayı ana ekrana ekleyerek daha iyi sonuç alabilirsiniz.
+                💡 Bildirimler yalnızca tarayıcı açıkken çalışır. Uygulamayı ana ekrana ekleyerek daha iyi sonuç alabilirsiniz.
+            </div>
+        </div>
+    </div>
+
+    <!-- App Settings Modal -->
+    <div id="app-settings-modal" class="modal hidden">
+        <div class="modal-content glass-card" style="max-width: 500px;">
+            <h2 style="font-size: 1.2rem; margin-bottom: var(--spacing-md);">⚙️ Uygulama Ayarları</h2>
+            
+            <div style="display: flex; flex-direction: column; gap: var(--spacing-md);">
+                <!-- Sound -->
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: var(--spacing-md); background: rgba(157, 138, 255, 0.1); border-radius: var(--radius-md);">
+                    <div>
+                        <div style="font-weight: 600; margin-bottom: 4px;">Ses Efektleri</div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary);">Doğru/yanlış cevap ve bildirim seslerini aç/kapat</div>
+                    </div>
+                    <input type="checkbox" id="settings-sound-checkbox" style="width: 24px; height: 24px; cursor: pointer;">
+                </div>
+                
+                <!-- Animations -->
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: var(--spacing-md); background: rgba(157, 138, 255, 0.1); border-radius: var(--radius-md);">
+                    <div>
+                        <div style="font-weight: 600; margin-bottom: 4px;">Animasyonlar</div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary);">Geçiş ve hareketli efektleri aç/kapat</div>
+                    </div>
+                    <input type="checkbox" id="settings-animations-checkbox" style="width: 24px; height: 24px; cursor: pointer;" checked>
+                </div>
+                
+                <!-- Theme -->
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: var(--spacing-md); background: rgba(157, 138, 255, 0.1); border-radius: var(--radius-md);">
+                    <div>
+                        <div style="font-weight: 600; margin-bottom: 4px;">Koyu Mod</div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary);">Arayüzü koyu veya açık tema olarak kullan</div>
+                    </div>
+                    <input type="checkbox" id="settings-theme-dark-checkbox" style="width: 24px; height: 24px; cursor: pointer;">
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: var(--spacing-sm); margin-top: var(--spacing-lg);">
+                <button class="primary-btn" onclick="saveAppSettingsFromUI()" style="flex: 1;">💾 Kaydet</button>
+                <button class="secondary-btn" onclick="closeModal('app-settings-modal')" style="flex: 1;">İptal</button>
+            </div>
+            
+            <div style="margin-top: var(--spacing-md); padding: var(--spacing-sm); background: rgba(148, 163, 184, 0.15); border-radius: var(--radius-sm); font-size: 0.85rem; color: var(--text-secondary);">
+                💡 Tercihleriniz bu cihazda saklanır ve tekrar giriş yaptığınızda otomatik uygulanır.
             </div>
         </div>
     </div>

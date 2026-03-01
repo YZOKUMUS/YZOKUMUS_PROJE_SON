@@ -881,10 +881,13 @@ function updateUserStatusUI() {
     authBtn.onclick = handleUserAuth;
     authBtn.setAttribute('onclick', 'handleUserAuth()');
     
+    const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+    const isFirebaseUser = currentUser && currentUser.type === 'firebase';
+    
     if (isLoggedIn) {
         // User is logged in
         usernameDisplay.textContent = usernameDisplayText; // Use display version (original case)
-        statusIndicator.textContent = '🟢 Giriş Yapıldı';
+        statusIndicator.textContent = isFirebaseUser ? '🟢 Giriş Yapıldı (Bulut)' : '🟢 Giriş Yapıldı (Yerel)';
         statusIndicator.style.color = '#10b981';
         authBtn.textContent = 'Çıkış Yap';
         
@@ -901,7 +904,7 @@ function updateUserStatusUI() {
     } else {
         // User is not logged in
         usernameDisplay.textContent = 'Giriş Yap';
-        statusIndicator.textContent = '🔴 Çıkış Yapıldı';
+        statusIndicator.textContent = '🔴 Giriş yapılmadı';
         statusIndicator.style.color = '#ef4444';
         authBtn.textContent = 'Giriş Yap';
         if (userAvatar) userAvatar.textContent = '👤';

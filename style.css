@@ -88,6 +88,26 @@
     --answer-option-min-height: 56px;                  /* Minimum yükseklik */
 }
 
+/* Dark Theme Overrides */
+body[data-theme="dark"] {
+    --bg-primary: #020617;
+    --bg-secondary: rgba(15, 23, 42, 0.95);
+    --text-primary: #f9fafb;
+    --text-secondary: rgba(148, 163, 184, 0.9);
+
+    --accent-primary: #38bdf8;
+    --accent-secondary: #0ea5e9;
+    --accent-success: #22c55e;
+    --accent-warning: #eab308;
+    --accent-error: #f97373;
+    --accent-gold: #eab308;
+
+    --glass-bg: rgba(15, 23, 42, 0.9);
+    --glass-bg-dark: rgba(15, 23, 42, 0.98);
+    --glass-border: rgba(148, 163, 184, 0.25);
+    --glass-shadow: 0 12px 40px rgba(15, 23, 42, 0.8);
+}
+
 /* Font Face */
 @font-face {
     font-family: 'KFGQPC Uthmanic Script HAFS';
@@ -121,6 +141,13 @@ body {
     position: relative;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+}
+
+/* Global animation/transition disable switch */
+body.animations-disabled * {
+    animation-duration: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition: none !important;
 }
 
 body::before {

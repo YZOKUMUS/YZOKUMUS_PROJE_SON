@@ -41,13 +41,20 @@ const CONFIG = {
         DAILY_GOAL: 'hasene_dailyGoal',
         DAILY_PROGRESS: 'hasene_dailyProgress',
         ACHIEVEMENTS: 'hasene_achievements',
-        DIFFICULTY: 'hasene_difficulty'
+        DIFFICULTY: 'hasene_difficulty',
+        SETTINGS: 'hasene_user_settings'
     },
 
     // Audio Settings
     AUDIO: {
         enabled: true,
         volume: 0.8
+    },
+
+    // UI Defaults
+    UI: {
+        animationsEnabled: true,
+        theme: 'light' // 'light' | 'dark'
     }
 };
 

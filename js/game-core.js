@@ -51,6 +51,62 @@ let badgesUnlocked = {};
 // Onboarding
 let onboardingSlideIndex = 0;
 
+// User Settings (UI)
+let userSettings = {
+    soundEnabled: typeof CONFIG !== 'undefined' ? CONFIG.AUDIO.enabled : true,
+    animationsEnabled: typeof CONFIG !== 'undefined' ? (CONFIG.UI?.animationsEnabled ?? true) : true,
+    theme: typeof CONFIG !== 'undefined' ? (CONFIG.UI?.theme || 'light') : 'light'
+};
+
+function applyUserSettings() {
+    try {
+        // Ses
+        if (typeof CONFIG !== 'undefined' && CONFIG.AUDIO) {
+            CONFIG.AUDIO.enabled = !!userSettings.soundEnabled;
+        }
+        
+        // Animasyonlar
+        const body = document.body;
+        if (body) {
+            body.classList.toggle('animations-disabled', !userSettings.animationsEnabled);
+            // Tema
+            body.setAttribute('data-theme', userSettings.theme === 'dark' ? 'dark' : 'light');
+        }
+    } catch (e) {
+        console.warn('applyUserSettings error:', e);
+    }
+}
+
+function loadUserSettings() {
+    try {
+        if (typeof loadFromStorage === 'function' && typeof CONFIG !== 'undefined' && CONFIG.STORAGE_KEYS?.SETTINGS) {
+            const stored = loadFromStorage(CONFIG.STORAGE_KEYS.SETTINGS, null);
+            if (stored && typeof stored === 'object') {
+                userSettings = {
+                    soundEnabled: userSettings.soundEnabled,
+                    animationsEnabled: userSettings.animationsEnabled,
+                    theme: userSettings.theme,
+                    ...stored
+                };
+            }
+        }
+    } catch (e) {
+        console.warn('loadUserSettings error:', e);
+    }
+    
+    applyUserSettings();
+}
+
+function saveUserSettings() {
+    try {
+        if (typeof saveToStorage === 'function' && typeof CONFIG !== 'undefined' && CONFIG.STORAGE_KEYS?.SETTINGS) {
+            saveToStorage(CONFIG.STORAGE_KEYS.SETTINGS, userSettings);
+        }
+    } catch (e) {
+        console.warn('saveUserSettings error:', e);
+    }
+}
+
 // ========================================
 // MODAL, PANEL & AUDIO YÖNETİMİ
 // ========================================
@@ -302,6 +358,9 @@ let dailyProgress = 0;
  */
 async function initApp() {
     console.log('🚀 Hasene Arapça Dersi başlatılıyor...');
+    
+    // Load user interface settings (sound, animations, theme)
+    loadUserSettings();
     
     // Initialize notifications
     if (typeof window.initNotifications === 'function') {
@@ -1412,6 +1471,62 @@ function setupEventListeners() {
     
     // Keyboard Navigation
     setupKeyboardNavigation();
+}
+
+/**
+ * App settings modal helpers
+ */
+function showAppSettingsModal() {
+    try {
+        // Ensure settings are loaded
+        loadUserSettings();
+        
+        const soundCheckbox = document.getElementById('settings-sound-checkbox');
+        const animationsCheckbox = document.getElementById('settings-animations-checkbox');
+        const themeDarkCheckbox = document.getElementById('settings-theme-dark-checkbox');
+        
+        if (soundCheckbox) {
+            soundCheckbox.checked = !!userSettings.soundEnabled;
+        }
+        if (animationsCheckbox) {
+            animationsCheckbox.checked = !!userSettings.animationsEnabled;
+        }
+        if (themeDarkCheckbox) {
+            themeDarkCheckbox.checked = userSettings.theme === 'dark';
+        }
+        
+        openModal('app-settings-modal');
+    } catch (e) {
+        console.error('showAppSettingsModal error:', e);
+    }
+}
+
+function saveAppSettingsFromUI() {
+    try {
+        const soundCheckbox = document.getElementById('settings-sound-checkbox');
+        const animationsCheckbox = document.getElementById('settings-animations-checkbox');
+        const themeDarkCheckbox = document.getElementById('settings-theme-dark-checkbox');
+        
+        if (soundCheckbox) {
+            userSettings.soundEnabled = !!soundCheckbox.checked;
+        }
+        if (animationsCheckbox) {
+            userSettings.animationsEnabled = !!animationsCheckbox.checked;
+        }
+        if (themeDarkCheckbox) {
+            userSettings.theme = themeDarkCheckbox.checked ? 'dark' : 'light';
+        }
+        
+        saveUserSettings();
+        applyUserSettings();
+        closeModal('app-settings-modal');
+        
+        if (typeof showToast === 'function') {
+            showToast('Ayarlar kaydedildi', 'success');
+        }
+    } catch (e) {
+        console.error('saveAppSettingsFromUI error:', e);
+    }
 }
 
 /**
@@ -7302,6 +7417,8 @@ if (typeof window !== 'undefined') {
     window.loadStats = loadStats;
     window.getAllDailyStats = getAllDailyStats;
     window.updateStatsDisplay = updateStatsDisplay;
+    window.showAppSettingsModal = showAppSettingsModal;
+    window.saveAppSettingsFromUI = saveAppSettingsFromUI;
     
     // Test Tools (also exported immediately after function definitions)
     window.clearStorageData = clearStorageData;
