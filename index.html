@@ -134,7 +134,37 @@
         </div>
 
         <!-- Game Cards -->
-            <div class="game-cards-container">
+        <div class="game-cards-container">
+            <!-- 1. Kelime Çevir -->
+            <div class="game-card" data-game="kelime-cevir">
+                <div class="game-icon">
+                    <img src="ASSETS/game-icons/kelime-cevir.png" alt="Kelime Çevir" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <span style="display:none;">📚</span>
+                </div>
+                <h3>Kelime Çevir</h3>
+                <p>Arapça kelimenin Türkçe karşılığını bul</p>
+            </div>
+            
+            <!-- 2. Dinle Bul -->
+            <div class="game-card" data-game="dinle-bul">
+                <div class="game-icon">
+                    <img src="ASSETS/game-icons/dinle-bul.png" alt="Dinle Bul" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <span style="display:none;">🎧</span>
+                </div>
+                <h3>Dinle Bul</h3>
+                <p>Kelimeyi dinle, doğru çeviriyi seç</p>
+            </div>
+            
+            <!-- 3. Boşluk Doldur -->
+            <div class="game-card" data-game="bosluk-doldur">
+                <div class="game-icon">
+                    <span>✍️</span>
+                </div>
+                <h3>Boşluk Doldur</h3>
+                <p>Ayette eksik kelimeyi tamamla</p>
+            </div>
+            
+            <!-- 4. Talim Et (karma alıştırma) -->
             <div class="game-card karma-card" data-game="karma">
                 <div class="game-icon">
                     <img src="ASSETS/game-icons/kelime-cevir.png" alt="Kelime Çevir" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
@@ -147,59 +177,17 @@
                 <p>Kelime Çevir, Dinle Bul ve Boşluk Doldur ile karışık alıştırma yap</p>
             </div>
             
-            <div class="game-card" data-game="kelime-cevir">
+            <!-- 5. Elif Ba -->
+            <div class="game-card" data-game="elif-ba">
                 <div class="game-icon">
-                    <img src="ASSETS/game-icons/kelime-cevir.png" alt="Kelime Çevir" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                    <span style="display:none;">📚</span>
+                    <img src="ASSETS/elifba-cover/harf-tablosu-icon.png" alt="Elif Ba" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <span style="display:none;">📘</span>
                 </div>
-                <h3>Kelime Çevir</h3>
-                <p>Arapça kelimenin Türkçe karşılığını bul</p>
+                <h3>Elif Ba</h3>
+                <p>Arapça harfleri öğren</p>
             </div>
             
-            <div class="game-card" data-game="dinle-bul">
-                <div class="game-icon">
-                    <img src="ASSETS/game-icons/dinle-bul.png" alt="Dinle Bul" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                    <span style="display:none;">🎧</span>
-                </div>
-                <h3>Dinle Bul</h3>
-                <p>Kelimeyi dinle, doğru çeviriyi seç</p>
-            </div>
-            
-            <div class="game-card" data-game="bosluk-doldur">
-                <div class="game-icon">
-                    <span>✍️</span>
-                </div>
-                <h3>Boşluk Doldur</h3>
-                <p>Ayette eksik kelimeyi tamamla</p>
-            </div>
-            
-            <div class="game-card" data-game="ayet-oku">
-                <div class="game-icon">
-                    <img src="ASSETS/game-icons/ayet-oku.png" alt="Ayet Oku" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                    <span style="display:none;">📖</span>
-                </div>
-                <h3>Ayet Oku</h3>
-                <p>Kuran ayetlerini oku ve meâlini öğren</p>
-            </div>
-            
-            <div class="game-card" data-game="dua-et">
-                <div class="game-icon">
-                    <img src="ASSETS/game-icons/dua-et.png" alt="Dua Et" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                    <span style="display:none;">🤲</span>
-                </div>
-                <h3>Dua Et</h3>
-                <p>Kuran'dan duaları öğren</p>
-            </div>
-            
-            <div class="game-card" data-game="hadis-oku">
-                <div class="game-icon">
-                    <img src="ASSETS/game-icons/hadis-oku.png" alt="Hadis Oku" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                    <span style="display:none;">📜</span>
-                </div>
-                <h3>Hadis Oku</h3>
-                <p>Hz. Peygamber'in hadislerini oku</p>
-            </div>
-
+            <!-- 6. Günlük Okumalar (ayet+dua+hadis) -->
             <div class="game-card" data-game="kuran-okuma">
                 <div class="game-icon" style="display: flex; gap: 8px; justify-content: center; align-items: center;">
                     <div style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
@@ -218,14 +206,35 @@
                 <h3>Günlük Okumalar</h3>
                 <p>Ayet, dua ve hadisleri oku</p>
             </div>
-
-            <div class="game-card" data-game="elif-ba">
+            
+            <!-- 7. Ayet Oku -->
+            <div class="game-card" data-game="ayet-oku">
                 <div class="game-icon">
-                    <img src="ASSETS/elifba-cover/harf-tablosu-icon.png" alt="Elif Ba" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                    <span style="display:none;">📘</span>
+                    <img src="ASSETS/game-icons/ayet-oku.png" alt="Ayet Oku" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <span style="display:none;">📖</span>
                 </div>
-                <h3>Elif Ba</h3>
-                <p>Arapça harfleri öğren</p>
+                <h3>Ayet Oku</h3>
+                <p>Kuran ayetlerini oku ve meâlini öğren</p>
+            </div>
+            
+            <!-- 8. Dua Et -->
+            <div class="game-card" data-game="dua-et">
+                <div class="game-icon">
+                    <img src="ASSETS/game-icons/dua-et.png" alt="Dua Et" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <span style="display:none;">🤲</span>
+                </div>
+                <h3>Dua Et</h3>
+                <p>Kuran'dan duaları öğren</p>
+            </div>
+            
+            <!-- 9. Hadis Oku -->
+            <div class="game-card" data-game="hadis-oku">
+                <div class="game-icon">
+                    <img src="ASSETS/game-icons/hadis-oku.png" alt="Hadis Oku" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <span style="display:none;">📜</span>
+                </div>
+                <h3>Hadis Oku</h3>
+                <p>Hz. Peygamber'in hadislerini oku</p>
             </div>
         </div>
     </div>
