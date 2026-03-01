@@ -4746,6 +4746,8 @@ function loadUcHarfliKelimelerQuestion() {
     currentQuestion = currentQuestions[questionIndex];
     
     document.getElementById('elif-question-number').textContent = questionIndex + 1;
+    document.getElementById('elif-combo').textContent = comboCount;
+    document.getElementById('elif-session-score').textContent = formatNumber(sessionScore);
     
     // Set word display - use arabic-word class styling
     const letterElement = document.getElementById('elif-letter');
@@ -4813,6 +4815,10 @@ function checkUcHarfliKelimelerAnswer(index, selectedAnswer) {
         comboCount = 0;
         buttons[index].classList.add('wrong');
     }
+    
+    // Update combo and session score display after answer
+    document.getElementById('elif-combo').textContent = comboCount;
+    document.getElementById('elif-session-score').textContent = formatNumber(sessionScore);
     
     setTimeout(() => {
         questionIndex++;
