@@ -7525,6 +7525,7 @@ async function nuclearClear() {
     try {
         // Önce Firebase'den verileri sil (kullanıcı bilgilerini kaydetmeden önce)
         const savedUsername = localStorage.getItem('hasene_username');
+        const savedUsernameDisplay = localStorage.getItem('hasene_username_display') || '';
         const savedUserId = localStorage.getItem('hasene_user_id');
         
         // Firebase silme işlemi için kullanıcı bilgilerini kontrol et
@@ -7584,7 +7585,7 @@ async function nuclearClear() {
                         try {
                             console.log('🔄 Tüm weekly_leaderboard dokümanları sorgulanıyor...');
                             
-                            // Query all weekly_leaderboard documents for this username
+                            // Query all weekly_leaderboard documents for this username (lowercase)
                             const querySnapshot = await window.firestore
                                 .collection('weekly_leaderboard')
                                 .where('username', '==', savedUsername.toLowerCase())
@@ -7592,25 +7593,20 @@ async function nuclearClear() {
                             
                             console.log(`📊 ${querySnapshot.size} weekly_leaderboard dokümanı bulundu`);
                             
-                            // Delete all found documents
+                            // Delete all found documents (kullanıcı adı bazlı, user_id eşleşmesini zorunlu tutma)
                             const deletePromises = [];
                             querySnapshot.forEach((doc) => {
                                 const docData = doc.data();
-                                // Only delete if user_id matches (security check)
-                                if (docData.user_id === firebaseAuthUID) {
-                                    deletePromises.push(
-                                        doc.ref.delete().then(() => {
-                                            console.log('✅ Weekly leaderboard dokümanı silindi:', doc.id);
-                                            weeklyLeaderboardDeleted++;
-                                            return true;
-                                        }).catch((error) => {
-                                            console.warn('⚠️ Weekly leaderboard silme hatası:', error, { docId: doc.id });
-                                            return false;
-                                        })
-                                    );
-                                } else {
-                                    console.warn('⚠️ Doküman farklı kullanıcıya ait, atlanıyor:', { docId: doc.id, docUserId: docData.user_id, currentUID: firebaseAuthUID });
-                                }
+                                deletePromises.push(
+                                    doc.ref.delete().then(() => {
+                                        console.log('✅ Weekly leaderboard dokümanı silindi:', doc.id, 'user_id:', docData.user_id);
+                                        weeklyLeaderboardDeleted++;
+                                        return true;
+                                    }).catch((error) => {
+                                        console.warn('⚠️ Weekly leaderboard silme hatası:', error, { docId: doc.id });
+                                        return false;
+                                    })
+                                );
                             });
                             
                             if (deletePromises.length > 0) {
@@ -7640,16 +7636,28 @@ async function nuclearClear() {
                         
                         // Try both username and userId formats
                         if (hasRealUsername) {
-                            const weeklyDocId = `${savedUsername}_${weekStart}`;
-                            manualDeletePromises.push(
-                                window.firestoreDelete('weekly_leaderboard', weeklyDocId).then(result => {
-                                    if (result) {
-                                        weeklyLeaderboardDeleted++;
-                                        console.log('✅ Weekly leaderboard silindi (manuel):', weeklyDocId);
-                                    }
-                                    return result;
-                                }).catch(() => false)
-                            );
+                            // Birden fazla kullanıcı adı varyantını dene (lowercase, display, UPPERCASE)
+                            const usernameVariants = new Set();
+                            usernameVariants.add(savedUsername);
+                            if (savedUsernameDisplay) {
+                                usernameVariants.add(savedUsernameDisplay);
+                            }
+                            if (savedUsername) {
+                                usernameVariants.add(savedUsername.toUpperCase());
+                            }
+
+                            usernameVariants.forEach((nameVariant) => {
+                                const weeklyDocId = `${nameVariant}_${weekStart}`;
+                                manualDeletePromises.push(
+                                    window.firestoreDelete('weekly_leaderboard', weeklyDocId).then(result => {
+                                        if (result) {
+                                            weeklyLeaderboardDeleted++;
+                                            console.log('✅ Weekly leaderboard silindi (manuel):', weeklyDocId);
+                                        }
+                                        return result;
+                                    }).catch(() => false)
+                                );
+                            });
                         }
                         
                         if (savedUserId) {
