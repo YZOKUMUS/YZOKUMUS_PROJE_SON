@@ -35,6 +35,8 @@
     
     <!-- Styles -->
     <link rel="stylesheet" href="style.css?v=4.0">
+    <!-- Font preload - Arapça font kritik, erken yükle -->
+    <link rel="preload" href="ASSETS/fonts/KFGQPC Uthmanic Script HAFS Regular.otf" as="font" type="font/otf" crossorigin>
 </head>
 <body>
     <!-- Loading Screen -->
@@ -135,9 +137,9 @@
             <div class="game-cards-container">
             <div class="game-card karma-card" data-game="karma">
                 <div class="game-icon">
-                    <img src="ASSETS/game-icons/kelime-cevir.png" alt="Kelime Çevir" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <img src="ASSETS/game-icons/kelime-cevir.png" alt="Kelime Çevir" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                     <span style="display:none;">📚</span>
-                    <img src="ASSETS/game-icons/dinle-bul.png" alt="Dinle Bul" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <img src="ASSETS/game-icons/dinle-bul.png" alt="Dinle Bul" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                     <span style="display:none;">🎧</span>
                     <span>✍️</span>
                 </div>
@@ -147,7 +149,7 @@
             
             <div class="game-card" data-game="kelime-cevir">
                 <div class="game-icon">
-                    <img src="ASSETS/game-icons/kelime-cevir.png" alt="Kelime Çevir" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <img src="ASSETS/game-icons/kelime-cevir.png" alt="Kelime Çevir" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                     <span style="display:none;">📚</span>
                 </div>
                 <h3>Kelime Çevir</h3>
@@ -156,7 +158,7 @@
             
             <div class="game-card" data-game="dinle-bul">
                 <div class="game-icon">
-                    <img src="ASSETS/game-icons/dinle-bul.png" alt="Dinle Bul" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <img src="ASSETS/game-icons/dinle-bul.png" alt="Dinle Bul" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                     <span style="display:none;">🎧</span>
                 </div>
                 <h3>Dinle Bul</h3>
@@ -173,7 +175,7 @@
             
             <div class="game-card" data-game="ayet-oku">
                 <div class="game-icon">
-                    <img src="ASSETS/game-icons/ayet-oku.png" alt="Ayet Oku" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <img src="ASSETS/game-icons/ayet-oku.png" alt="Ayet Oku" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                     <span style="display:none;">📖</span>
                 </div>
                 <h3>Ayet Oku</h3>
@@ -182,7 +184,7 @@
             
             <div class="game-card" data-game="dua-et">
                 <div class="game-icon">
-                    <img src="ASSETS/game-icons/dua-et.png" alt="Dua Et" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <img src="ASSETS/game-icons/dua-et.png" alt="Dua Et" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                     <span style="display:none;">🤲</span>
                 </div>
                 <h3>Dua Et</h3>
@@ -191,7 +193,7 @@
             
             <div class="game-card" data-game="hadis-oku">
                 <div class="game-icon">
-                    <img src="ASSETS/game-icons/hadis-oku.png" alt="Hadis Oku" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <img src="ASSETS/game-icons/hadis-oku.png" alt="Hadis Oku" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                     <span style="display:none;">📜</span>
                 </div>
                 <h3>Hadis Oku</h3>
@@ -201,15 +203,15 @@
             <div class="game-card" data-game="kuran-okuma">
                 <div class="game-icon" style="display: flex; gap: 8px; justify-content: center; align-items: center;">
                     <div style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-                        <img src="ASSETS/game-icons/ayet-oku.png" alt="Ayet Oku" style="width: 100%; height: 100%; object-fit: contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                        <img src="ASSETS/game-icons/ayet-oku.png" alt="Ayet Oku" loading="lazy" style="width: 100%; height: 100%; object-fit: contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                         <span style="display:none; font-size: 1.5rem;">📖</span>
                     </div>
                     <div style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-                        <img src="ASSETS/game-icons/dua-et.png" alt="Dua Et" style="width: 100%; height: 100%; object-fit: contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                        <img src="ASSETS/game-icons/dua-et.png" alt="Dua Et" loading="lazy" style="width: 100%; height: 100%; object-fit: contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                         <span style="display:none; font-size: 1.5rem;">🤲</span>
                     </div>
                     <div style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-                        <img src="ASSETS/game-icons/hadis-oku.png" alt="Hadis Oku" style="width: 100%; height: 100%; object-fit: contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                        <img src="ASSETS/game-icons/hadis-oku.png" alt="Hadis Oku" loading="lazy" style="width: 100%; height: 100%; object-fit: contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                         <span style="display:none; font-size: 1.5rem;">📜</span>
                     </div>
                 </div>
@@ -219,7 +221,7 @@
 
             <div class="game-card" data-game="elif-ba">
                 <div class="game-icon">
-                    <img src="ASSETS/elifba-cover/harf-tablosu-icon.png" alt="Elif Ba" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <img src="ASSETS/elifba-cover/harf-tablosu-icon.png" alt="Elif Ba" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                     <span style="display:none;">📘</span>
                 </div>
                 <h3>Elif Ba</h3>
@@ -476,7 +478,7 @@
             <p class="submode-subtitle">Nasıl öğrenmek istediğinizi seçin</p>
             <div class="submode-options">
                 <button class="submode-btn" data-elif-submode="tablo">
-                    <div class="icon"><img src="ASSETS/elifba-cover/harf-tablosu-icon.png" alt="Harf Tablosu" style="width: 2rem; height: 2rem; object-fit: contain; display: block;"></div>
+                    <div class="icon"><img src="ASSETS/elifba-cover/harf-tablosu-icon.png" alt="Harf Tablosu" loading="lazy" style="width: 2rem; height: 2rem; object-fit: contain; display: block;"></div>
                     <div class="info">
                         <div class="name">Harf Tablosu</div>
                         <div class="desc">Arapça harflerin yazılışı ve okunuşu</div>
@@ -490,42 +492,42 @@
                     </div>
                 </button>
                 <button class="submode-btn" data-elif-submode="fetha">
-                    <div class="icon"><img src="ASSETS/elifba-cover/üstün-icon.png" alt="Üstün" style="width: 2rem; height: 2rem; object-fit: contain; display: block;"></div>
+                    <div class="icon"><img src="ASSETS/elifba-cover/üstün-icon.png" alt="Üstün" loading="lazy" style="width: 2rem; height: 2rem; object-fit: contain; display: block;"></div>
                     <div class="info">
                         <div class="name">Üstün</div>
                         <div class="desc">Harflerin üzerine gelen sesli işaret</div>
                     </div>
                 </button>
                 <button class="submode-btn" data-elif-submode="esre">
-                    <div class="icon"><img src="ASSETS/elifba-cover/esre-icon.png" alt="Esre" style="width: 2rem; height: 2rem; object-fit: contain; display: block;"></div>
+                    <div class="icon"><img src="ASSETS/elifba-cover/esre-icon.png" alt="Esre" loading="lazy" style="width: 2rem; height: 2rem; object-fit: contain; display: block;"></div>
                     <div class="info">
                         <div class="name">Esre</div>
                         <div class="desc">Harfin altına gelen işaret</div>
                     </div>
                 </button>
                 <button class="submode-btn" data-elif-submode="otre">
-                    <div class="icon"><img src="ASSETS/elifba-cover/otre-icon.png" alt="Ötre" style="width: 2rem; height: 2rem; object-fit: contain; display: block;"></div>
+                    <div class="icon"><img src="ASSETS/elifba-cover/otre-icon.png" alt="Ötre" loading="lazy" style="width: 2rem; height: 2rem; object-fit: contain; display: block;"></div>
                     <div class="info">
                         <div class="name">Ötre</div>
                         <div class="desc">Harfin üstüne gelen işaret</div>
                     </div>
                 </button>
                 <button class="submode-btn" data-elif-submode="sedde">
-                    <div class="icon"><img src="ASSETS/elifba-cover/sedde-icon.png" alt="Şedde" style="width: 2rem; height: 2rem; object-fit: contain; display: block;"></div>
+                    <div class="icon"><img src="ASSETS/elifba-cover/sedde-icon.png" alt="Şedde" loading="lazy" style="width: 2rem; height: 2rem; object-fit: contain; display: block;"></div>
                     <div class="info">
                         <div class="name">Şedde</div>
                         <div class="desc">Harfin iki defa okunmasını sağlar</div>
                     </div>
                 </button>
                 <button class="submode-btn" data-elif-submode="cezm">
-                    <div class="icon"><img src="ASSETS/elifba-cover/cezm-icon.png" alt="Cezm" style="width: 2rem; height: 2rem; object-fit: contain; display: block;"></div>
+                    <div class="icon"><img src="ASSETS/elifba-cover/cezm-icon.png" alt="Cezm" loading="lazy" style="width: 2rem; height: 2rem; object-fit: contain; display: block;"></div>
                     <div class="info">
                         <div class="name">Cezm</div>
                         <div class="desc">Harfi önceki harfe bağlar</div>
                     </div>
                 </button>
                 <button class="submode-btn" data-elif-submode="tenvin">
-                    <div class="icon"><img src="ASSETS/elifba-cover/tenvin.png" alt="Tenvin" style="width: 2rem; height: 2rem; object-fit: contain; display: block;"></div>
+                    <div class="icon"><img src="ASSETS/elifba-cover/tenvin.png" alt="Tenvin" loading="lazy" style="width: 2rem; height: 2rem; object-fit: contain; display: block;"></div>
                     <div class="info">
                         <div class="name">Tenvin</div>
                         <div class="desc">Harfe "n" sesi ilave eder</div>
@@ -1204,7 +1206,7 @@
     </nav>
 
     <!-- Chart.js CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
     
     <!-- Console Override - Must be before Firebase SDK to suppress OAuth warnings -->
     <script>
@@ -1326,25 +1328,25 @@
     </script>
     
     <!-- Firebase SDK (CDN) -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js" defer></script>
     
     <!-- Scripts -->
-    <script src="js/config.js"></script>
-    <script src="js/constants.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="js/firebase-config.js"></script>
-    <script src="js/firebase-init.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/api-service.js"></script>
-    <script src="js/data-loader.js"></script>
-    <script src="js/points-manager.js"></script>
-    <script src="js/leaderboard.js"></script>
-    <script src="js/notifications.js"></script>
-    <script src="js/charts.js"></script>
-    <script src="js/game-core.js"></script>
-    <script src="js/pronunciation-fix.js"></script>
+    <script src="js/config.js" defer></script>
+    <script src="js/constants.js" defer></script>
+    <script src="js/utils.js" defer></script>
+    <script src="js/firebase-config.js" defer></script>
+    <script src="js/firebase-init.js" defer></script>
+    <script src="js/auth.js" defer></script>
+    <script src="js/api-service.js" defer></script>
+    <script src="js/data-loader.js" defer></script>
+    <script src="js/points-manager.js" defer></script>
+    <script src="js/leaderboard.js" defer></script>
+    <script src="js/notifications.js" defer></script>
+    <script src="js/charts.js" defer></script>
+    <script src="js/game-core.js" defer></script>
+    <script src="js/pronunciation-fix.js" defer></script>
     <!-- Debug/Test Scripts (Only loaded in development mode) -->
 </body>
 </html>
