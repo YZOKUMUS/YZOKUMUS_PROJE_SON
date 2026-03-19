@@ -1610,7 +1610,7 @@ function setupNavigationButtons() {
  */
 async function startGame(gameMode) {
     // Check if user is logged in
-    if (!requireUserLogin()) {
+    if (gameMode !== 'flashcards' && !requireUserLogin()) {
         return;
     }
     
@@ -1664,10 +1664,27 @@ async function startGame(gameMode) {
             // currentGameMode zaten 'kuran-okuma' olarak ayarlanmış (startGame'de)
             await startKuranOkumaMode();
             break;
+        case 'flashcards':
+            startFlashcardMode();
+            break;
         default:
             showToast('Bilinmeyen oyun modu', 'error');
             goToMainMenu();
     }
+}
+
+/**
+ * Start flashcard mode (no scoring integration)
+ */
+function startFlashcardMode() {
+    const screen = document.getElementById('flashcard-screen');
+    if (!screen) {
+        showToast('Kart modu ekranı bulunamadı', 'error');
+        goToMainMenu(true);
+        return;
+    }
+
+    screen.classList.remove('hidden');
 }
 
 /**

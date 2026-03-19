@@ -236,6 +236,15 @@
                 <h3>Hadis Oku</h3>
                 <p>Hz. Peygamber'in hadislerini oku</p>
             </div>
+
+            <!-- 10. Kart Modu -->
+            <div class="game-card" data-game="flashcards">
+                <div class="game-icon">
+                    <span>🃏</span>
+                </div>
+                <h3>Kart Modu</h3>
+                <p>Tam ekran kartlarla kelime ezberi yap</p>
+            </div>
         </div>
     </div>
 
@@ -474,6 +483,16 @@
                 <!-- Dynamic content will be loaded here -->
             </div>
         </div>
+    </div>
+
+    <!-- Kart Modu Screen -->
+    <div id="flashcard-screen" class="game-screen hidden">
+        <div class="game-header">
+            <button class="back-btn" onclick="goToMainMenu(true)" aria-label="Geri dön">← Geri</button>
+            <h2>🃏 Kart Modu</h2>
+            <div style="width: 40px;"></div>
+        </div>
+        <iframe id="flashcard-iframe" src="test-kart.html" title="Kelime Kart Modu"></iframe>
     </div>
 
     <!-- Elif Ba Submode Selection -->
