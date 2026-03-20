@@ -6371,44 +6371,58 @@ function showBadgeDetail(badgeId, type = 'normal') {
 // ========================================
 // TAKVIM (CALENDAR) MODAL
 // ========================================
+let calendarView = null; // { year, month } where month is 0-11
 
 function showCalendarModal() {
     const calendarGrid = document.getElementById('calendar-grid');
     const today = new Date();
-    const currentMonth = today.getMonth();
-    const currentYear = today.getFullYear();
-    
-    // Get first day of month
-    const firstDay = new Date(currentYear, currentMonth, 1);
-    const lastDay = new Date(currentYear, currentMonth + 1, 0);
-    
+    const todayYear = today.getFullYear();
+    const todayMonth = today.getMonth();
+
+    // Always start at current month when opening the modal
+    calendarView = { year: todayYear, month: todayMonth };
+
+    renderCalendarView(calendarGrid, calendarView.year, calendarView.month);
+
+    openModal('calendar-modal');
+}
+
+function renderCalendarView(calendarGrid, year, month) {
+    if (!calendarGrid) return;
+
+    const today = new Date();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+
     // Day names
     const dayNames = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
-    
-    // Generate calendar
-    let html = '<div class="calendar-header">';
-    html += `<span>${today.toLocaleDateString('tr-TR', { month: 'long', year: 'numeric' })}</span>`;
+
+    const viewDate = new Date(year, month, 1);
+    let html = '<div class="calendar-month-nav">';
+    html += `<button class="calendar-nav-btn" type="button" onclick="navigateCalendarMonth(-1)" aria-label="Önceki ay">←</button>`;
+    html += `<span>${viewDate.toLocaleDateString('tr-TR', { month: 'long', year: 'numeric' })}</span>`;
+    html += `<button class="calendar-nav-btn" type="button" onclick="navigateCalendarMonth(1)" aria-label="Sonraki ay">→</button>`;
     html += '</div>';
-    
+
     html += '<div class="calendar-days">';
     dayNames.forEach(day => {
         html += `<div class="calendar-day-name">${day}</div>`;
     });
     html += '</div>';
-    
+
     html += '<div class="calendar-dates">';
-    
+
     // Empty cells for days before first day
     for (let i = 0; i < firstDay.getDay(); i++) {
         html += '<div class="calendar-date empty"></div>';
     }
-    
+
     // Days of month
     for (let day = 1; day <= lastDay.getDate(); day++) {
-        const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
         const isPlayed = streakData.playDates && streakData.playDates.includes(dateStr);
-        const isToday = day === today.getDate();
-        
+        const isToday = year === today.getFullYear() && month === today.getMonth() && day === today.getDate();
+
         html += `
             <div class="calendar-date ${isPlayed ? 'played' : ''} ${isToday ? 'today' : ''}">
                 ${day}
@@ -6416,23 +6430,31 @@ function showCalendarModal() {
             </div>
         `;
     }
-    
+
     html += '</div>';
-    
-    if (calendarGrid) {
-        calendarGrid.innerHTML = html;
-    }
-    
-    // Update streak info
+    calendarGrid.innerHTML = html;
+
+    // Update streak info (overall, not per-month)
     const currentStreakEl = document.getElementById('calendar-current-streak');
     const bestStreakEl = document.getElementById('calendar-best-streak');
     const totalDaysEl = document.getElementById('calendar-total-days');
-    
+
     if (currentStreakEl) currentStreakEl.textContent = streakData.currentStreak || 0;
     if (bestStreakEl) bestStreakEl.textContent = streakData.bestStreak || 0;
     if (totalDaysEl) totalDaysEl.textContent = streakData.totalPlayDays || 0;
-    
-    openModal('calendar-modal');
+}
+
+function navigateCalendarMonth(offset) {
+    if (!calendarView) {
+        showCalendarModal();
+        return;
+    }
+
+    const newDate = new Date(calendarView.year, calendarView.month + offset, 1);
+    calendarView = { year: newDate.getFullYear(), month: newDate.getMonth() };
+
+    const calendarGrid = document.getElementById('calendar-grid');
+    renderCalendarView(calendarGrid, calendarView.year, calendarView.month);
 }
 
 // ========================================
@@ -7390,6 +7412,7 @@ if (typeof window !== 'undefined') {
     window.showBadgesModal = showBadgesModal;
     window.showBadgeDetail = showBadgeDetail;
     window.showCalendarModal = showCalendarModal;
+    window.navigateCalendarMonth = navigateCalendarMonth;
     window.showOnboarding = showOnboarding;
     window.nextOnboardingSlide = nextOnboardingSlide;
     window.prevOnboardingSlide = prevOnboardingSlide;

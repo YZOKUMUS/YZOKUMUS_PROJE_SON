@@ -2580,6 +2580,30 @@ body::before {
     color: var(--text-primary);
 }
 
+.calendar-month-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+}
+
+.calendar-nav-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(212, 180, 109, 0.35);
+    color: var(--text-primary);
+    border-radius: var(--radius-sm);
+    padding: 6px 10px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.calendar-nav-btn:hover {
+    transform: scale(1.03);
+    background: rgba(255, 255, 255, 0.12);
+}
+
 .calendar-days {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
