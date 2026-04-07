@@ -279,6 +279,13 @@
                         <div class="desc">Zorlandığın kelimeleri çalış</div>
                     </div>
                 </button>
+                <button type="button" class="submode-btn" id="open-review-queue-btn">
+                    <div class="icon">📋</div>
+                    <div class="info">
+                        <div class="name">Bugün tekrar listesi</div>
+                        <div class="desc">SM-2 ile vadesi gelen kelimeler</div>
+                    </div>
+                </button>
                 <button class="submode-btn" data-submode="favorites">
                     <div class="icon">⭐</div>
                     <div class="info">
@@ -341,6 +348,12 @@
                 <button class="big-audio-btn" id="dinle-audio-btn" title="Dinle" aria-label="Ses dosyasını dinle">
                     <span style="font-size: 1.5rem; margin-right: 0.5rem;">🎧</span> Dinle
                 </button>
+                <p class="dinle-practice-hint">Kendi telaffuzunu dene (-skor):</p>
+                <div class="dinle-practice-row">
+                    <button type="button" class="secondary-btn dinle-practice-btn" id="dinle-practice-record-btn" title="Mikrofon izni gerekebilir">🎙️ Kayda başla</button>
+                    <button type="button" class="secondary-btn dinle-practice-btn hidden" id="dinle-practice-play-btn" title="Son kaydı dinle">▶️ Kaydımı dinle</button>
+                </div>
+                <p class="dinle-practice-note" id="dinle-practice-status"></p>
             </div>
 
             <div class="answer-options" id="dinle-options">
@@ -741,11 +754,25 @@
                 </div>
             </div>
             <div class="modal-actions">
+                <button class="primary-btn" onclick="if(typeof showReviewQueueModal === 'function') showReviewQueueModal(); else showToast('Liste yükleniyor...', 'info');">📋 Bugün tekrar listesi</button>
                 <button class="primary-btn" onclick="showWordAnalysisModal()">📈 Kelime Analizi</button>
                 <button class="primary-btn" onclick="if(typeof showChartsModal === 'function') showChartsModal(); else showToast('Grafikler yükleniyor...', 'info');">📊 Grafikler</button>
                 <button class="secondary-btn" onclick="showAppSettingsModal()">⚙️ Ayarlar</button>
                 <button class="secondary-btn" onclick="if(typeof showNotificationSettings === 'function') showNotificationSettings(); else showToast('Bildirim ayarları yükleniyor...', 'info');">🔔 Bildirimler</button>
                 <button class="secondary-btn" onclick="closeModal('stats-modal')">Kapat</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bugün tekrar listesi (SM-2) -->
+    <div id="review-queue-modal" class="modal hidden">
+        <div class="modal-content glass-card review-queue-modal-content">
+            <h2>📋 Bugün tekrar listesi</h2>
+            <p class="review-queue-subtitle" id="review-queue-summary">Yükleniyor…</p>
+            <div class="review-queue-scroll" id="review-queue-list"></div>
+            <div class="modal-actions review-queue-actions">
+                <button type="button" class="primary-btn" id="review-queue-start-btn" onclick="if(typeof startKelimeReviewFromQueue === 'function') startKelimeReviewFromQueue();">🔄 Kelime Çevir — Tekrar modu</button>
+                <button type="button" class="secondary-btn" onclick="closeModal('review-queue-modal')">Kapat</button>
             </div>
         </div>
     </div>

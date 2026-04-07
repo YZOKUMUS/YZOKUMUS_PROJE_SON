@@ -34,18 +34,25 @@ function getWeekStart() {
     const now = new Date();
     const day = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
     const diff = now.getDate() - day + (day === 0 ? -6 : 1); // Adjust to Monday
-    const monday = new Date(now.setDate(diff));
+    const monday = new Date(now);
+    monday.setDate(diff);
     monday.setHours(0, 0, 0, 0);
     return monday;
 }
 
 /**
- * Get week start string (YYYY-MM-DD)
+ * Get week start string (YYYY-MM-DD, yerel takvim — günlük streak ile aynı mantık)
  * @returns {string} Week start date string
  */
 function getWeekStartString() {
     const weekStart = getWeekStart();
-    return weekStart.toISOString().split('T')[0];
+    if (typeof window !== 'undefined' && typeof window.getLocalDateString === 'function') {
+        return window.getLocalDateString(weekStart);
+    }
+    const year = weekStart.getFullYear();
+    const month = String(weekStart.getMonth() + 1).padStart(2, '0');
+    const day = String(weekStart.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
 }
 
 /**

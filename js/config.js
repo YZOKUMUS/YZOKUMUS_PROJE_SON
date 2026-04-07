@@ -36,7 +36,7 @@ const CONFIG = {
         TOTAL_POINTS: 'hasene_totalPoints',
         STREAK_DATA: 'hasene_streakData',
         DAILY_TASKS: 'hasene_dailyTasks',
-        WORD_STATS: 'hasene_wordStats',
+        WORD_STATS: 'hasene_word_stats',
         GAME_STATS: 'hasene_gameStats',
         DAILY_GOAL: 'hasene_dailyGoal',
         DAILY_PROGRESS: 'hasene_dailyProgress',

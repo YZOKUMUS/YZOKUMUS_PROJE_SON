@@ -851,6 +851,110 @@ body::before {
     margin-bottom: var(--spacing-lg);
 }
 
+.dinle-practice-hint {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin: var(--spacing-md) 0 var(--spacing-xs);
+}
+
+.dinle-practice-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    justify-content: center;
+    margin-bottom: var(--spacing-sm);
+}
+
+.dinle-practice-btn {
+    flex: 1 1 auto;
+    min-width: 140px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+}
+
+.dinle-practice-btn.recording-active {
+    border-color: var(--accent-error);
+    background: rgba(239, 68, 68, 0.12);
+}
+
+.dinle-practice-note {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-align: center;
+    margin: 0;
+    min-height: 1.25em;
+}
+
+.review-queue-modal-content {
+    max-width: 92vw;
+    width: 420px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.review-queue-subtitle {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin: 0 0 var(--spacing-md);
+}
+
+.review-queue-scroll {
+    overflow-y: auto;
+    flex: 1;
+    min-height: 120px;
+    max-height: 48vh;
+    margin-bottom: var(--spacing-md);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    padding: var(--spacing-sm);
+    background: rgba(255, 255, 255, 0.45);
+}
+
+.review-queue-item {
+    padding: var(--spacing-sm) var(--spacing-md);
+    margin-bottom: var(--spacing-xs);
+    border-radius: var(--radius-sm);
+    background: var(--glass-bg);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    font-size: 0.9rem;
+}
+
+.review-queue-item-ar {
+    font-size: 1.35rem;
+    line-height: 1.4;
+    margin-bottom: 2px;
+}
+
+.review-queue-item-meta {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.review-queue-badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 6px;
+    margin-left: 6px;
+    vertical-align: middle;
+}
+
+.review-queue-badge.due {
+    background: rgba(0, 122, 255, 0.15);
+    color: var(--accent-primary);
+}
+
+.review-queue-badge.struggling {
+    background: rgba(245, 158, 11, 0.2);
+    color: #b45309;
+}
+
+.review-queue-actions {
+    flex-direction: column;
+    align-items: stretch;
+}
+
 /* Answer Options */
 .answer-options {
     display: grid;

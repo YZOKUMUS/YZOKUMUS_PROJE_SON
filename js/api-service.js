@@ -15,7 +15,9 @@
  * @returns {string} Safe document ID
  */
 function usernameToDocId(username) {
-    console.log('🔍 usernameToDocId called with:', username);
+    if (typeof window !== 'undefined' && window.CONFIG && window.CONFIG.DEBUG) {
+        console.log('🔍 usernameToDocId called with:', username);
+    }
     
     if (!username || typeof username !== 'string') {
         console.warn('⚠️ usernameToDocId: Invalid username, returning user_unknown');
@@ -41,7 +43,9 @@ function usernameToDocId(username) {
         safeId = safeId.substring(0, 100);
     }
     
-    console.log('✅ usernameToDocId result:', safeId, '(from input:', username + ')');
+    if (typeof window !== 'undefined' && window.CONFIG && window.CONFIG.DEBUG) {
+        console.log('✅ usernameToDocId result:', safeId, '(from input:', username + ')');
+    }
     return safeId;
 }
 
@@ -234,7 +238,7 @@ async function firestoreDelete(collection, docId) {
                 collection, 
                 docId, 
                 docUserId, 
-                currentFirebaseUID 
+                firebaseAuthUID 
             });
             // Farklı kullanıcıya aitse de başarılı say (bizim sorumluluğumuz değil)
             return true;
@@ -567,8 +571,8 @@ async function saveUserStats(stats) {
             ...stats,
             username: savedUsername, // Lowercase for consistency
             usernameDisplay: savedUsernameDisplay, // Original case for display
-            user_id: user.id, // Keep original user ID for reference
-            user_type: user.type || 'local'
+            user_id: user?.id ?? userId,
+            user_type: user?.type || 'local'
         };
         console.log('📝 Saving username to Firestore (docId:', docId + ', username:', savedUsername + ')');
         promises.push(
@@ -717,8 +721,8 @@ async function saveDailyTasks(tasks) {
         const tasksWithUserInfo = {
             ...tasks,
             username: savedUsername,
-            user_id: user.id, // Keep original user ID for reference
-            user_type: user.type || 'local'
+            user_id: user?.id,
+            user_type: user?.type || 'local'
         };
         
         try {
@@ -743,7 +747,7 @@ async function saveDailyTasks(tasks) {
 // ========================================
 
 /**
- * Sync all user data to Firebase (if Firebase user)
+ * Sync all user data to Firebase (saveUserStats ile aynı koşullar: gerçek kullanıcı adı + Firestore)
  * @returns {Promise<boolean>} Success status
  */
 async function syncAllDataToBackend() {
@@ -753,18 +757,17 @@ async function syncAllDataToBackend() {
         return true;
     }
     
-        // ALWAYS use localStorage username - don't fall back to user.username
-        const savedUsername = localStorage.getItem('hasene_username') || '';
-        const defaultUsernames = ['Kullanıcı', 'Anonim Kullanıcı', ''];
-        const hasRealUsername = savedUsername && savedUsername.trim() !== '' && !defaultUsernames.includes(savedUsername.trim());
+    const savedUsername = localStorage.getItem('hasene_username') || '';
+    const defaultUsernames = ['Kullanıcı', 'Anonim Kullanıcı', ''];
+    const hasRealUsername = savedUsername && savedUsername.trim() !== '' && !defaultUsernames.includes(savedUsername.trim());
     
     if (!hasRealUsername) {
         console.log('ℹ️ User has no real username, no sync needed');
         return true;
     }
     
-    if (getBackendTypeFromAuth() !== 'firebase') {
-        console.log('ℹ️ Firebase not configured, no sync needed');
+    if (!window.FIREBASE_ENABLED || !window.firestore) {
+        console.log('ℹ️ Firebase not available, no sync needed');
         return true;
     }
     
@@ -793,15 +796,15 @@ async function syncAllDataToBackend() {
             daily_progress: dailyProgress.points || 0,
             daily_goal: dailyGoal,
             username: savedUsername,
-            user_id: user.id,
-            user_type: user.type || 'local'
+            user_id: user?.id,
+            user_type: user?.type || 'local'
         });
         
         await firestoreSet('daily_tasks', docId, {
             ...dailyTasks,
             username: savedUsername,
-            user_id: user.id,
-            user_type: user.type || 'local'
+            user_id: user?.id,
+            user_type: user?.type || 'local'
         });
         
         console.log('✅ All data synced to Firebase (docId:', docId + ', username:', savedUsername + ')');

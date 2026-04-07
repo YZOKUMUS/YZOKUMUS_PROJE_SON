@@ -117,6 +117,13 @@ let currentOpenPanel = null;
 let currentPlayingAudio = null;
 let isAudioPlaying = false;
 
+// Dinle Bul — telaffuz pratiği (kayıt / dinle, skor yok)
+let dinlePracticeRecorder = null;
+let dinlePracticeStream = null;
+let dinlePracticeChunks = [];
+let dinlePracticeBlobUrl = null;
+let dinlePracticeRecording = false;
+
 /**
  * Tüm sesleri durdur
  */
@@ -167,6 +174,190 @@ function playSafeAudio(url) {
     } catch (err) {
         console.warn('Audio creation failed:', err);
         return null;
+    }
+}
+
+function cleanupDinlePracticeRecording() {
+    dinlePracticeRecording = false;
+    try {
+        if (dinlePracticeStream) {
+            dinlePracticeStream.getTracks().forEach(t => t.stop());
+        }
+    } catch (e) {}
+    dinlePracticeStream = null;
+    try {
+        if (dinlePracticeRecorder && dinlePracticeRecorder.state === 'recording') {
+            dinlePracticeRecorder.stop();
+        }
+    } catch (e) {}
+    dinlePracticeRecorder = null;
+    dinlePracticeChunks = [];
+    if (dinlePracticeBlobUrl) {
+        try {
+            URL.revokeObjectURL(dinlePracticeBlobUrl);
+        } catch (e) {}
+        dinlePracticeBlobUrl = null;
+    }
+    const recBtn = document.getElementById('dinle-practice-record-btn');
+    const playBtn = document.getElementById('dinle-practice-play-btn');
+    const statusEl = document.getElementById('dinle-practice-status');
+    if (recBtn) {
+        recBtn.textContent = '🎙️ Kayda başla';
+        recBtn.classList.remove('recording-active');
+    }
+    if (playBtn) {
+        playBtn.classList.add('hidden');
+    }
+    if (statusEl) {
+        statusEl.textContent = '';
+    }
+}
+
+function initDinlePracticeControls() {
+    const recBtn = document.getElementById('dinle-practice-record-btn');
+    const playBtn = document.getElementById('dinle-practice-play-btn');
+    if (!recBtn || recBtn.dataset.bound === '1') {
+        return;
+    }
+    recBtn.dataset.bound = '1';
+    recBtn.addEventListener('click', toggleDinlePracticeRecord);
+    if (playBtn && playBtn.dataset.bound !== '1') {
+        playBtn.dataset.bound = '1';
+        playBtn.addEventListener('click', playDinlePracticeRecording);
+    }
+}
+
+async function toggleDinlePracticeRecord() {
+    const recBtn = document.getElementById('dinle-practice-record-btn');
+    const playBtn = document.getElementById('dinle-practice-play-btn');
+    const statusEl = document.getElementById('dinle-practice-status');
+
+    if (dinlePracticeRecording && dinlePracticeRecorder && dinlePracticeRecorder.state === 'recording') {
+        dinlePracticeRecorder.stop();
+        return;
+    }
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showToast('Bu cihazda mikrofon desteği yok', 'error');
+        return;
+    }
+    if (typeof MediaRecorder === 'undefined') {
+        showToast('Bu tarayıcıda ses kaydı desteklenmiyor', 'info');
+        return;
+    }
+
+    cleanupDinlePracticeRecording();
+
+    try {
+        dinlePracticeStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (e) {
+        showToast('Mikrofon izni gerekli', 'warning');
+        return;
+    }
+
+    let recorderOptions = null;
+    if (MediaRecorder.isTypeSupported('audio/webm')) {
+        recorderOptions = { mimeType: 'audio/webm' };
+    } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+        recorderOptions = { mimeType: 'audio/mp4' };
+    }
+
+    try {
+        dinlePracticeRecorder = recorderOptions
+            ? new MediaRecorder(dinlePracticeStream, recorderOptions)
+            : new MediaRecorder(dinlePracticeStream);
+    } catch (e) {
+        showToast('Kayıt başlatılamadı', 'error');
+        cleanupDinlePracticeRecording();
+        return;
+    }
+
+    dinlePracticeChunks = [];
+    const recorderMime = dinlePracticeRecorder.mimeType || 'audio/webm';
+
+    dinlePracticeRecorder.ondataavailable = (e) => {
+        if (e.data && e.data.size) {
+            dinlePracticeChunks.push(e.data);
+        }
+    };
+
+    dinlePracticeRecorder.onstop = () => {
+        dinlePracticeRecording = false;
+        const rb = document.getElementById('dinle-practice-record-btn');
+        const pb = document.getElementById('dinle-practice-play-btn');
+        const st = document.getElementById('dinle-practice-status');
+        if (rb) {
+            rb.textContent = '🎙️ Kayda başla';
+            rb.classList.remove('recording-active');
+        }
+        if (dinlePracticeChunks.length && pb) {
+            const blob = new Blob(dinlePracticeChunks, { type: recorderMime });
+            if (dinlePracticeBlobUrl) {
+                try {
+                    URL.revokeObjectURL(dinlePracticeBlobUrl);
+                } catch (x) {}
+            }
+            dinlePracticeBlobUrl = URL.createObjectURL(blob);
+            pb.classList.remove('hidden');
+        }
+        if (st) {
+            st.textContent = dinlePracticeChunks.length ? 'Kayıt hazır. Dinleyebilirsiniz.' : '';
+        }
+        try {
+            if (dinlePracticeStream) {
+                dinlePracticeStream.getTracks().forEach(t => t.stop());
+            }
+        } catch (x) {}
+        dinlePracticeStream = null;
+        dinlePracticeRecorder = null;
+    };
+
+    try {
+        dinlePracticeRecorder.start();
+    } catch (e) {
+        showToast('Kayıt başlatılamadı', 'error');
+        cleanupDinlePracticeRecording();
+        return;
+    }
+
+    dinlePracticeRecording = true;
+    if (recBtn) {
+        recBtn.textContent = '⏹️ Durdur';
+        recBtn.classList.add('recording-active');
+    }
+    if (playBtn) {
+        playBtn.classList.add('hidden');
+    }
+    if (statusEl) {
+        statusEl.textContent = 'Kayıt alınıyor…';
+    }
+}
+
+function playDinlePracticeRecording() {
+    if (!dinlePracticeBlobUrl) {
+        return;
+    }
+    stopAllAudio();
+    try {
+        const audio = new Audio(dinlePracticeBlobUrl);
+        audio.volume = typeof CONFIG !== 'undefined' ? CONFIG.AUDIO.volume : 0.8;
+        currentPlayingAudio = audio;
+        isAudioPlaying = true;
+        audio.onended = () => {
+            currentPlayingAudio = null;
+            isAudioPlaying = false;
+        };
+        audio.onerror = () => {
+            currentPlayingAudio = null;
+            isAudioPlaying = false;
+        };
+        audio.play().catch(() => {
+            showToast('Kayıt oynatılamadı', 'warning');
+            currentPlayingAudio = null;
+            isAudioPlaying = false;
+        });
+    } catch (e) {
+        showToast('Kayıt oynatılamadı', 'warning');
     }
 }
 
@@ -1417,6 +1608,12 @@ function setupEventListeners() {
             startKelimeCevirGame(currentKelimeSubmode);
         });
     });
+
+    document.getElementById('open-review-queue-btn')?.addEventListener('click', () => {
+        showReviewQueueModal();
+    });
+
+    initDinlePracticeControls();
     
     // Elif Ba submode buttons
     document.querySelectorAll('[data-elif-submode]').forEach(btn => {
@@ -1904,6 +2101,8 @@ function handleGameBackButton() {
  * Go back to main menu
  */
 function goToMainMenu(skipWarning = false) {
+    cleanupDinlePracticeRecording();
+
     // Oyun tamamlandıysa (endGame çağrıldıysa) uyarı gösterme
     if (gameCompleted) {
         skipWarning = true;
@@ -2808,6 +3007,140 @@ function getMasteredWords() {
 }
 
 /**
+ * Tekrar kuyruğu: SM-2 vadesi gelen + zorlanılan kelimeler (Kelime Çevir istatistikleriyle uyumlu)
+ */
+function getReviewQueueEntries(limit = 40) {
+    if (!wordStats || typeof wordStats !== 'object') {
+        return [];
+    }
+    const today = new Date(getLocalDateString());
+    today.setHours(0, 0, 0, 0);
+    const rows = [];
+    for (const id of Object.keys(wordStats)) {
+        const stats = wordStats[id];
+        if (!stats) {
+            continue;
+        }
+        const isStruggling = (stats.attempts || 0) >= 2 && (stats.successRate || 0) < 50;
+        let isDue = false;
+        let overdueDays = 0;
+        if (stats.nextReviewDate) {
+            const rd = new Date(stats.nextReviewDate);
+            rd.setHours(0, 0, 0, 0);
+            if (rd <= today) {
+                isDue = true;
+                overdueDays = Math.floor((today - rd) / 86400000);
+            }
+        }
+        if (!isStruggling && !isDue) {
+            continue;
+        }
+        let priority = 0;
+        if (isStruggling) {
+            priority += 200;
+        }
+        if (isDue) {
+            priority += 100 + Math.min(overdueDays, 30);
+        }
+        priority += (100 - (stats.successRate || 0)) * 0.5;
+        rows.push({ id, stats, isStruggling, isDue, overdueDays, priority });
+    }
+    rows.sort((a, b) => b.priority - a.priority);
+    return rows.slice(0, limit);
+}
+
+function escapeHtmlReviewQueue(str) {
+    if (str == null) {
+        return '';
+    }
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
+async function showReviewQueueModal() {
+    if (!requireUserLogin()) {
+        return;
+    }
+    if (!wordStats || Object.keys(wordStats).length === 0) {
+        wordStats = loadFromStorage('hasene_word_stats', {});
+    }
+
+    const summary = document.getElementById('review-queue-summary');
+    const list = document.getElementById('review-queue-list');
+    const startBtn = document.getElementById('review-queue-start-btn');
+    if (!list || !summary) {
+        return;
+    }
+
+    const entries = getReviewQueueEntries(50);
+    if (entries.length === 0) {
+        summary.textContent = 'Bugün tekrar zamanı gelen veya zorlandığın kelime yok. Kelime Çevir oynayarak liste dolar.';
+        list.innerHTML = '<p class="review-queue-item-meta" style="padding:var(--spacing-md)">Henüz kayıt yok.</p>';
+        if (startBtn) {
+            startBtn.disabled = true;
+        }
+        openModal('review-queue-modal');
+        return;
+    }
+
+    const data = await loadKelimeData();
+    const byId = new Map();
+    (data || []).forEach((w) => {
+        const wid = w.kelime_id || w.id;
+        if (wid) {
+            byId.set(wid, w);
+        }
+    });
+
+    summary.textContent = `${entries.length} kelime — 「Tekrar modu」 oynamak için en az 5 kelime gerekir.`;
+    if (startBtn) {
+        startBtn.disabled = entries.length < 5;
+    }
+
+    list.innerHTML = entries
+        .map((e) => {
+            const w = byId.get(e.id);
+            const ar = w ? (w.kelime || w.arabic || '—') : '—';
+            const tr = w ? (w.anlam || w.translation || '') : '(Veri yok — eski kelime)';
+            const badges = [];
+            if (e.isStruggling) {
+                badges.push('<span class="review-queue-badge struggling">Zorlanıyor</span>');
+            }
+            if (e.isDue) {
+                badges.push('<span class="review-queue-badge due">Tekrar</span>');
+            }
+            const next = e.stats.nextReviewDate ? `Sonraki tekrar: ${escapeHtmlReviewQueue(e.stats.nextReviewDate)}` : '';
+            const sr = e.stats.successRate != null ? `%${e.stats.successRate} başarı` : '';
+            return `
+            <div class="review-queue-item">
+                <div class="review-queue-item-ar" dir="rtl">${escapeHtmlReviewQueue(ar)}</div>
+                <div>${escapeHtmlReviewQueue(tr)} ${badges.join('')}</div>
+                <div class="review-queue-item-meta">${escapeHtmlReviewQueue(sr)}${next ? ` · ${next}` : ''}</div>
+            </div>`;
+        })
+        .join('');
+
+    openModal('review-queue-modal');
+}
+
+function startKelimeReviewFromQueue() {
+    closeModal('review-queue-modal');
+    if (!requireUserLogin()) {
+        return;
+    }
+    const entries = getReviewQueueEntries(200);
+    if (entries.length < 5) {
+        showToast('Tekrar modu için en az 5 kelime gerekli. Önce pratik yapın!', 'warning', 3500);
+        return;
+    }
+    currentKelimeSubmode = 'review';
+    startKelimeCevirGame('review');
+}
+
+/**
  * Get word statistics for analysis modal
  * @returns {Object} Word analysis data
  */
@@ -3514,6 +3847,9 @@ function loadDinleQuestion() {
         endGame();
         return;
     }
+
+    initDinlePracticeControls();
+    cleanupDinlePracticeRecording();
     
     currentQuestion = currentQuestions[questionIndex];
     
@@ -7432,6 +7768,9 @@ if (typeof window !== 'undefined') {
     window.getStrugglingWords = getStrugglingWords;
     window.getLearningWords = getLearningWords;
     window.getMasteredWords = getMasteredWords;
+    window.getReviewQueueEntries = getReviewQueueEntries;
+    window.showReviewQueueModal = showReviewQueueModal;
+    window.startKelimeReviewFromQueue = startKelimeReviewFromQueue;
     window.switchWordCategory = switchWordCategory;
     window.selectIntelligentWords = selectIntelligentWords;
     window.renderAchievementsList = renderAchievementsList;
