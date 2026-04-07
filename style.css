@@ -5629,3 +5629,141 @@ body::before {
         transform: translateY(0);
     }
 }
+
+/* ===================================
+   STİL DENEYLERİ (Ayarlar → test seçenekleri)
+   =================================== */
+
+.daily-goal-detail {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    margin-top: 6px;
+    padding: 0 2px;
+    line-height: 1.35;
+}
+
+/* Hafif geometrik doku — yıldız ızgarası */
+body.style-exp-pattern::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Cpath fill='none' stroke='%23000000' stroke-width='0.75' d='M48 4l4.5 26L76 48l-23.5 18L48 92l-4.5-26L20 48l23.5-18z'/%3E%3C/svg%3E");
+    background-size: 96px 96px;
+}
+
+body[data-theme="dark"].style-exp-pattern::after {
+    opacity: 0.065;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Cpath fill='none' stroke='%23ffffff' stroke-width='0.75' d='M48 4l4.5 26L76 48l-23.5 18L48 92l-4.5-26L20 48l23.5-18z'/%3E%3C/svg%3E");
+}
+
+/* Okuma / odak: daha ferah içerik, alt nav üzerine gelince netleşir */
+body.style-exp-focus .main-container {
+    max-width: 540px;
+    padding-left: var(--spacing-lg);
+    padding-right: var(--spacing-lg);
+}
+
+body.style-exp-focus .bottom-nav {
+    opacity: 0.42;
+    filter: saturate(0.88);
+    transition: opacity 0.25s ease, filter 0.25s ease;
+}
+
+body.style-exp-focus .bottom-nav:hover,
+body.style-exp-focus .bottom-nav:focus-within {
+    opacity: 1;
+    filter: none;
+}
+
+body.style-exp-focus .game-content {
+    max-height: calc(100vh - 150px);
+}
+
+/* Arapça kart: metin zemini + gevşek satır */
+body.style-exp-type .question-card .arabic-word,
+body.style-exp-type .question-card .arabic-verse {
+    line-height: var(--arabic-line-height-loose);
+    letter-spacing: 0.035em;
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-radius: var(--radius-md);
+    background: linear-gradient(160deg, rgba(255, 251, 235, 0.92) 0%, rgba(255, 255, 255, 0.72) 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+    display: inline-block;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+body[data-theme="dark"].style-exp-type .question-card .arabic-word,
+body[data-theme="dark"].style-exp-type .question-card .arabic-verse {
+    background: linear-gradient(160deg, rgba(30, 41, 59, 0.92) 0%, rgba(15, 23, 42, 0.88) 100%);
+    color: #f1f5f9 !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+body.style-exp-type .question-card .word-info,
+body.style-exp-type .question-card .verse-translation {
+    font-family: var(--font-system);
+    font-size: 0.92rem;
+    color: var(--text-secondary);
+    margin-top: var(--spacing-sm);
+}
+
+/* Doğru: yeşil “nur” darbesi; yanlış: amber + hafif sallanma */
+@keyframes styleExpCorrectGlow {
+    0% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5);
+    }
+    70% {
+        box-shadow: 0 0 0 14px rgba(16, 185, 129, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    }
+}
+
+@keyframes styleExpWrongNudge {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    25% {
+        transform: translateX(-5px);
+    }
+    50% {
+        transform: translateX(5px);
+    }
+    75% {
+        transform: translateX(-3px);
+    }
+}
+
+body.style-exp-micro:not(.animations-disabled) .answer-option.correct {
+    animation: styleExpCorrectGlow 0.85s ease-out 1;
+}
+
+body.style-exp-micro:not(.animations-disabled) .answer-option.wrong {
+    animation: styleExpWrongNudge 0.48s ease-out 1;
+    border-color: rgba(245, 158, 11, 0.9) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.style-exp-micro .answer-option.correct,
+    body.style-exp-micro .answer-option.wrong {
+        animation: none !important;
+    }
+}
+
+/* Koyu tema: daha az blur, sıcak çerçeve, ikincil metin biraz güçlü */
+body[data-theme="dark"].style-exp-dark-refine {
+    --glass-blur: blur(18px) saturate(165%);
+    --glass-bg: rgba(32, 28, 58, 0.82);
+    --glass-bg-dark: rgba(30, 26, 54, 0.92);
+    --glass-border: rgba(232, 213, 255, 0.28);
+    --text-secondary: rgba(203, 213, 225, 0.94);
+}
+
+body[data-theme="dark"].style-exp-dark-refine .bottom-nav {
+    background: rgba(30, 26, 54, 0.9);
+}

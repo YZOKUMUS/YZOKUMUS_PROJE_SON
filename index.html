@@ -34,7 +34,7 @@
     <link rel="apple-touch-icon" href="ASSETS/badges/icon-512.png">
     
     <!-- Styles -->
-    <link rel="stylesheet" href="style.css?v=4.0">
+    <link rel="stylesheet" href="style.css?v=4.1">
     <!-- Font preload - Arapça font kritik, erken yükle -->
     <link rel="preload" href="ASSETS/fonts/KFGQPC Uthmanic Script HAFS Regular.otf" as="font" type="font/otf" crossorigin>
 </head>
@@ -114,6 +114,7 @@
                 <div class="daily-goal-bar">
                     <div class="daily-goal-progress" id="daily-goal-progress" style="width: 0%"></div>
                 </div>
+                <div id="daily-goal-detail" class="daily-goal-detail hidden" aria-live="polite"></div>
             </div>
         </div>
 
@@ -1181,6 +1182,37 @@
                         <div style="font-size: 0.85rem; color: var(--text-secondary);">Arayüzü koyu veya açık tema olarak kullan</div>
                     </div>
                     <input type="checkbox" id="settings-theme-dark-checkbox" style="width: 24px; height: 24px; cursor: pointer;">
+                </div>
+
+                <div style="margin-top: var(--spacing-md); padding: var(--spacing-sm) 0; border-top: 1px solid rgba(0,0,0,0.08);">
+                    <div style="font-weight: 700; margin-bottom: var(--spacing-sm); font-size: 0.95rem;">🎨 Stil denemeleri (test)</div>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: var(--spacing-md);">Önerilen görünümleri açıp kapatabilirsiniz; tercihler cihazda saklanır.</p>
+                    <div style="display: flex; flex-direction: column; gap: var(--spacing-sm);">
+                        <label style="display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:0.9rem; cursor:pointer;">
+                            <span>Hafif geometrik arka plan</span>
+                            <input type="checkbox" id="settings-style-pattern-checkbox" style="width:22px;height:22px;cursor:pointer;">
+                        </label>
+                        <label style="display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:0.9rem; cursor:pointer;">
+                            <span>Okuma / odak modu</span>
+                            <input type="checkbox" id="settings-style-focus-checkbox" style="width:22px;height:22px;cursor:pointer;">
+                        </label>
+                        <label style="display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:0.9rem; cursor:pointer;">
+                            <span>Arapça kart &amp; tipografi</span>
+                            <input type="checkbox" id="settings-style-type-checkbox" style="width:22px;height:22px;cursor:pointer;">
+                        </label>
+                        <label style="display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:0.9rem; cursor:pointer;">
+                            <span>Doğru/yanlış mikro animasyon</span>
+                            <input type="checkbox" id="settings-style-micro-checkbox" style="width:22px;height:22px;cursor:pointer;">
+                        </label>
+                        <label style="display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:0.9rem; cursor:pointer;">
+                            <span>Günlük hedefte % ve kalan hasene</span>
+                            <input type="checkbox" id="settings-style-goal-checkbox" style="width:22px;height:22px;cursor:pointer;">
+                        </label>
+                        <label style="display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:0.9rem; cursor:pointer;">
+                            <span>Koyu tema: sıcak cam (deneme)</span>
+                            <input type="checkbox" id="settings-style-dark-refine-checkbox" style="width:22px;height:22px;cursor:pointer;">
+                        </label>
+                    </div>
                 </div>
             </div>
             

@@ -55,7 +55,13 @@ let onboardingSlideIndex = 0;
 let userSettings = {
     soundEnabled: typeof CONFIG !== 'undefined' ? CONFIG.AUDIO.enabled : true,
     animationsEnabled: typeof CONFIG !== 'undefined' ? (CONFIG.UI?.animationsEnabled ?? true) : true,
-    theme: typeof CONFIG !== 'undefined' ? (CONFIG.UI?.theme || 'light') : 'light'
+    theme: typeof CONFIG !== 'undefined' ? (CONFIG.UI?.theme || 'light') : 'light',
+    styleExpPattern: false,
+    styleExpFocus: false,
+    styleExpTypography: false,
+    styleExpMicro: false,
+    styleExpGoalDetail: false,
+    styleExpDarkRefine: false
 };
 
 function applyUserSettings() {
@@ -71,6 +77,14 @@ function applyUserSettings() {
             body.classList.toggle('animations-disabled', !userSettings.animationsEnabled);
             // Tema
             body.setAttribute('data-theme', userSettings.theme === 'dark' ? 'dark' : 'light');
+            body.classList.toggle('style-exp-pattern', !!userSettings.styleExpPattern);
+            body.classList.toggle('style-exp-focus', !!userSettings.styleExpFocus);
+            body.classList.toggle('style-exp-type', !!userSettings.styleExpTypography);
+            body.classList.toggle('style-exp-micro', !!userSettings.styleExpMicro);
+            body.classList.toggle('style-exp-dark-refine', !!userSettings.styleExpDarkRefine && userSettings.theme === 'dark');
+        }
+        if (typeof updateDailyGoalDisplay === 'function') {
+            updateDailyGoalDisplay();
         }
     } catch (e) {
         console.warn('applyUserSettings error:', e);
@@ -83,9 +97,7 @@ function loadUserSettings() {
             const stored = loadFromStorage(CONFIG.STORAGE_KEYS.SETTINGS, null);
             if (stored && typeof stored === 'object') {
                 userSettings = {
-                    soundEnabled: userSettings.soundEnabled,
-                    animationsEnabled: userSettings.animationsEnabled,
-                    theme: userSettings.theme,
+                    ...userSettings,
                     ...stored
                 };
             }
@@ -1691,6 +1703,31 @@ function showAppSettingsModal() {
         if (themeDarkCheckbox) {
             themeDarkCheckbox.checked = userSettings.theme === 'dark';
         }
+
+        const sp = document.getElementById('settings-style-pattern-checkbox');
+        const sf = document.getElementById('settings-style-focus-checkbox');
+        const st = document.getElementById('settings-style-type-checkbox');
+        const sm = document.getElementById('settings-style-micro-checkbox');
+        const sg = document.getElementById('settings-style-goal-checkbox');
+        const sd = document.getElementById('settings-style-dark-refine-checkbox');
+        if (sp) {
+            sp.checked = !!userSettings.styleExpPattern;
+        }
+        if (sf) {
+            sf.checked = !!userSettings.styleExpFocus;
+        }
+        if (st) {
+            st.checked = !!userSettings.styleExpTypography;
+        }
+        if (sm) {
+            sm.checked = !!userSettings.styleExpMicro;
+        }
+        if (sg) {
+            sg.checked = !!userSettings.styleExpGoalDetail;
+        }
+        if (sd) {
+            sd.checked = !!userSettings.styleExpDarkRefine;
+        }
         
         openModal('app-settings-modal');
     } catch (e) {
@@ -1712,6 +1749,31 @@ function saveAppSettingsFromUI() {
         }
         if (themeDarkCheckbox) {
             userSettings.theme = themeDarkCheckbox.checked ? 'dark' : 'light';
+        }
+
+        const sp = document.getElementById('settings-style-pattern-checkbox');
+        const sf = document.getElementById('settings-style-focus-checkbox');
+        const st = document.getElementById('settings-style-type-checkbox');
+        const sm = document.getElementById('settings-style-micro-checkbox');
+        const sg = document.getElementById('settings-style-goal-checkbox');
+        const sd = document.getElementById('settings-style-dark-refine-checkbox');
+        if (sp) {
+            userSettings.styleExpPattern = !!sp.checked;
+        }
+        if (sf) {
+            userSettings.styleExpFocus = !!sf.checked;
+        }
+        if (st) {
+            userSettings.styleExpTypography = !!st.checked;
+        }
+        if (sm) {
+            userSettings.styleExpMicro = !!sm.checked;
+        }
+        if (sg) {
+            userSettings.styleExpGoalDetail = !!sg.checked;
+        }
+        if (sd) {
+            userSettings.styleExpDarkRefine = !!sd.checked;
         }
         
         saveUserSettings();
@@ -6294,11 +6356,29 @@ function updateStatsDisplay() {
 }
 
 function updateDailyGoalDisplay() {
-    document.getElementById('daily-goal-text').textContent = 
-        `${formatNumber(dailyProgress)} / ${formatNumber(dailyGoal)}`;
+    const textEl = document.getElementById('daily-goal-text');
+    if (textEl) {
+        textEl.textContent = `${formatNumber(dailyProgress)} / ${formatNumber(dailyGoal)}`;
+    }
+
+    const detailEl = document.getElementById('daily-goal-detail');
+    if (detailEl) {
+        if (userSettings.styleExpGoalDetail && dailyGoal > 0) {
+            const pct = Math.min(100, Math.round((dailyProgress / dailyGoal) * 100));
+            const left = Math.max(0, dailyGoal - dailyProgress);
+            detailEl.textContent = `%${pct} tamamlandı · ${formatNumber(left)} hasene kaldı`;
+            detailEl.classList.remove('hidden');
+        } else {
+            detailEl.textContent = '';
+            detailEl.classList.add('hidden');
+        }
+    }
     
-    const progress = Math.min(100, (dailyProgress / dailyGoal) * 100);
-    document.getElementById('daily-goal-progress').style.width = `${progress}%`;
+    const progress = Math.min(100, dailyGoal > 0 ? (dailyProgress / dailyGoal) * 100 : 0);
+    const barEl = document.getElementById('daily-goal-progress');
+    if (barEl) {
+        barEl.style.width = `${progress}%`;
+    }
 }
 
 function showGoalSettings() {
