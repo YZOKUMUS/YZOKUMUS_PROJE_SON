@@ -2749,12 +2749,7 @@ function loadKelimeQuestion() {
     
     // Update favorite button
     const wordId = currentQuestion.kelime_id || currentQuestion.id;
-    
-    // Show word ID for testing (sol alt köşe - çok küçük punto)
-    const wordIdElement = document.getElementById('kelime-word-id');
-    if (wordIdElement) {
-        wordIdElement.textContent = `ID: ${wordId || 'N/A'}`;
-    }
+
     const favBtn = document.getElementById('kelime-favorite-btn');
     if (favBtn) {
         favBtn.textContent = favorites.includes(wordId) ? '❤️' : '♡';
