@@ -122,36 +122,6 @@ function checkEarnedBadges(totalPoints) {
 }
 
 /**
- * Check unlocked achievements
- */
-function checkAchievements(stats) {
-    const unlocked = [];
-    
-    if (!ACHIEVEMENTS) return unlocked;
-    
-    const savedAchievements = loadFromStorage(CONFIG.STORAGE_KEYS.ACHIEVEMENTS, []);
-    
-    for (const achievement of ACHIEVEMENTS) {
-        if (!savedAchievements.includes(achievement.id) && achievement.check(stats)) {
-            unlocked.push(achievement);
-        }
-    }
-    
-    return unlocked;
-}
-
-/**
- * Save achievement
- */
-function saveAchievement(achievementId) {
-    const saved = loadFromStorage(CONFIG.STORAGE_KEYS.ACHIEVEMENTS, []);
-    if (!saved.includes(achievementId)) {
-        saved.push(achievementId);
-        saveToStorage(CONFIG.STORAGE_KEYS.ACHIEVEMENTS, saved);
-    }
-}
-
-/**
  * Get all saved achievements
  */
 function getSavedAchievements() {
@@ -176,8 +146,6 @@ if (typeof window !== 'undefined') {
     window.getCurrentLevelThreshold = getCurrentLevelThreshold;
     window.calculateLevelProgress = calculateLevelProgress;
     window.checkEarnedBadges = checkEarnedBadges;
-    window.checkAchievements = checkAchievements;
-    window.saveAchievement = saveAchievement;
     window.getSavedAchievements = getSavedAchievements;
     window.getBasePoints = getBasePoints;
 }
