@@ -813,8 +813,8 @@ function updateUserStatusUI() {
             
             // Count auth buttons
             if (btnId === 'user-auth-btn' || 
-                btnText === 'Giriş Yap' || 
-                btnText === 'Çıkış Yap' ||
+                btnText === 'Giriş yap' || btnText === 'Giriş Yap' || 
+                btnText === 'Çıkış yap' || btnText === 'Çıkış Yap' ||
                 onclickAttr.includes('handleUserAuth') ||
                 onclickAttr.includes('showUsernameLoginModal') ||
                 onclickAttr.includes('handleUserLogout')) {
@@ -829,7 +829,7 @@ function updateUserStatusUI() {
             }
             
             // Remove duplicate auth buttons (keep only the first one with id="user-auth-btn")
-            if ((btnText === 'Giriş Yap' || btnText === 'Çıkış Yap') && btnId !== 'user-auth-btn') {
+            if ((btnText === 'Giriş yap' || btnText === 'Giriş Yap' || btnText === 'Çıkış yap' || btnText === 'Çıkış Yap') && btnId !== 'user-auth-btn') {
                 console.log('🗑️ Removing duplicate auth button:', btnId, btnText);
                 btn.remove();
                 return;
@@ -868,7 +868,7 @@ function updateUserStatusUI() {
             newBtn.id = 'user-auth-btn';
             newBtn.className = 'secondary-btn user-action-btn';
             newBtn.onclick = handleUserAuth;
-            newBtn.textContent = isLoggedIn ? 'Çıkış Yap' : 'Giriş Yap';
+            newBtn.textContent = isLoggedIn ? 'Çıkış yap' : 'Giriş yap';
             userActions.appendChild(newBtn);
             console.log('Created user-auth-btn');
         }
@@ -889,7 +889,7 @@ function updateUserStatusUI() {
         usernameDisplay.textContent = usernameDisplayText; // Use display version (original case)
         statusIndicator.textContent = isFirebaseUser ? '🟢 Giriş Yapıldı (Bulut)' : '🟢 Giriş Yapıldı (Yerel)';
         statusIndicator.style.color = '#10b981';
-        authBtn.textContent = 'Çıkış Yap';
+        authBtn.textContent = 'Çıkış yap';
         
         // Update avatar based on gender
         const gender = localStorage.getItem('hasene_user_gender') || 'male';
@@ -903,10 +903,10 @@ function updateUserStatusUI() {
         }
     } else {
         // User is not logged in
-        usernameDisplay.textContent = 'Giriş Yap';
+        usernameDisplay.textContent = 'Misafir';
         statusIndicator.textContent = '🔴 Giriş yapılmadı';
         statusIndicator.style.color = '#ef4444';
-        authBtn.textContent = 'Giriş Yap';
+        authBtn.textContent = 'Giriş yap';
         if (userAvatar) userAvatar.textContent = '👤';
     }
     
