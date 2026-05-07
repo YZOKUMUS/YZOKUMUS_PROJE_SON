@@ -6650,13 +6650,12 @@ function updateRecommendedStudyCard() {
         return;
     }
 
-    // Giriş yoksa: yine göster ama CTA girişe yönlensin
     const isLoggedIn = checkUserLoggedIn();
     if (!isLoggedIn) {
-        badge.textContent = '👤 Giriş';
-        desc.textContent = 'Önerilen çalışma için giriş yapın (10 dk plan + tekrar listesi).';
+        badge.textContent = '⏱️ 10 dk';
+        desc.textContent = 'Kısa çalışma paketi: kelime + dinleme + boşluk pratiği.';
         card.onclick = () => {
-            requireUserLogin();
+            startGame('daily-plan-10');
         };
         return;
     }

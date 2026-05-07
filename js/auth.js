@@ -865,35 +865,29 @@ function updateUserStatusUI() {
     }
     
     if (!authBtn) {
-        console.error('user-auth-btn not found! Check HTML.');
-        // Try to create it if it doesn't exist
-        if (userActions) {
+        if (userActions && isLoggedIn) {
             const newBtn = document.createElement('button');
+            newBtn.type = 'button';
             newBtn.id = 'user-auth-btn';
             newBtn.className = 'secondary-btn user-action-btn';
             newBtn.onclick = handleUserAuth;
-            newBtn.textContent = isLoggedIn ? 'Çıkış yap' : 'Giriş yap';
-            userActions.appendChild(newBtn);
+            newBtn.textContent = 'Çıkış yap';
+            newBtn.setAttribute('aria-label', 'Çıkış yap');
+            userActions.insertBefore(newBtn, userActions.firstChild);
             console.log('Created user-auth-btn');
         }
-        return;
     }
     
-    // Ensure the auth button is visible and has correct onclick
-    authBtn.style.display = 'inline-block';
-    authBtn.style.visibility = 'visible';
-    authBtn.onclick = handleUserAuth;
-    authBtn.setAttribute('onclick', 'handleUserAuth()');
-    
+    const authBtnEl = document.getElementById('user-auth-btn');
     const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
     const isFirebaseUser = currentUser && currentUser.type === 'firebase';
     
     if (isLoggedIn) {
-        // User is logged in
-        usernameDisplay.textContent = usernameDisplayText; // Use display version (original case)
-        statusIndicator.textContent = isFirebaseUser ? '🟢 Giriş Yapıldı (Bulut)' : '🟢 Giriş Yapıldı (Yerel)';
+        usernameDisplay.textContent = usernameDisplayText;
+        statusIndicator.textContent = isFirebaseUser ? '🟢 Bulut' : '🟢 Yerel';
         statusIndicator.style.color = '#10b981';
-        authBtn.textContent = 'Çıkış yap';
+        statusIndicator.classList.remove('hidden');
+        statusIndicator.setAttribute('aria-hidden', 'false');
         
         // Update avatar based on gender
         const gender = localStorage.getItem('hasene_user_gender') || 'male';
@@ -902,19 +896,32 @@ function updateUserStatusUI() {
         } else if (gender === 'female') {
             if (userAvatar) userAvatar.textContent = '👩';
         } else {
-            // Default to male if invalid gender
             if (userAvatar) userAvatar.textContent = '👨';
         }
     } else {
-        // User is not logged in
         usernameDisplay.textContent = 'Misafir';
-        statusIndicator.textContent = '🔴 Giriş yapılmadı';
-        statusIndicator.style.color = '#ef4444';
-        authBtn.textContent = 'Giriş yap';
+        statusIndicator.textContent = '';
+        statusIndicator.classList.add('hidden');
+        statusIndicator.setAttribute('aria-hidden', 'true');
         if (userAvatar) userAvatar.textContent = '👤';
     }
+
+    if (authBtnEl) {
+        authBtnEl.onclick = handleUserAuth;
+        authBtnEl.setAttribute('onclick', 'handleUserAuth()');
+        if (isLoggedIn) {
+            authBtnEl.textContent = 'Çıkış yap';
+            authBtnEl.setAttribute('aria-label', 'Çıkış yap');
+            authBtnEl.classList.remove('hidden');
+        } else {
+            authBtnEl.classList.add('hidden');
+            authBtnEl.setAttribute('aria-label', 'Çıkış yap');
+        }
+    } else if (isLoggedIn) {
+        console.warn('user-auth-btn bulunamadı (giriş yapılmış)');
+    }
     
-    console.log('✅ User status UI updated. Auth button:', authBtn.textContent);
+    console.log('✅ User status UI updated.');
 }
 
 // Make functions globally available
