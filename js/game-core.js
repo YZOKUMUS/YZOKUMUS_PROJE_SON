@@ -2741,7 +2741,21 @@ function loadKelimeQuestion() {
     // Update UI
     document.getElementById('kelime-question-number').textContent = questionIndex + 1;
     document.getElementById('kelime-arabic').textContent = currentQuestion.kelime || currentQuestion.arabic;
-    document.getElementById('kelime-info').textContent = currentQuestion.sure_adi || '';
+    const kelimeInfoEl = document.getElementById('kelime-info');
+    const microPreview = getMicroContextTextFromQuestion(currentQuestion);
+    if (kelimeInfoEl) {
+        if (microPreview && microPreview.trim()) {
+            kelimeInfoEl.textContent = '';
+            kelimeInfoEl.classList.add('hidden');
+        } else {
+            kelimeInfoEl.textContent = currentQuestion.sure_adi || '';
+            if (kelimeInfoEl.textContent.trim()) {
+                kelimeInfoEl.classList.remove('hidden');
+            } else {
+                kelimeInfoEl.classList.add('hidden');
+            }
+        }
+    }
     updateMicroContextUI('kelime-context', currentQuestion);
     updateWordChipsUI(currentQuestion);
     document.getElementById('kelime-combo').textContent = comboCount;
@@ -7807,7 +7821,7 @@ function renderKelimeCevirKarma(container, question) {
         </div>
         <p class="karma-instruction">Arapça kelimenin Türkçe karşılığını seç</p>
         <div class="karma-arabic">${question.question || ''}</div>
-        <div class="karma-info">${question.data?.sure_adi || ''}</div>
+        <div class="karma-info">${question.data ? (getMicroContextTextFromQuestion(question.data) || question.data.sure_adi || '') : ''}</div>
         <div class="karma-options">
             ${validOptions.map((opt, i) => `
                 <button class="answer-option" onclick="checkKarmaAnswer('${String(opt || '').replace(/'/g, "\\'")}', '${String(question.correctAnswer || '').replace(/'/g, "\\'")}')">
