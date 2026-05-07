@@ -8324,10 +8324,3 @@ async function nuclearClear() {
     }
 }
 
-
-// Export functions to window immediately (before initApp is called)
-if (typeof window !== 'undefined') {
-    window.clearStorageData = clearStorageData;
-    window.testPoints = testPoints;
-    window.nuclearClear = nuclearClear;
-}
