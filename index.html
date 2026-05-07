@@ -1005,11 +1005,11 @@
         </div>
     </div>
 
-    <!-- Username Login Modal -->
-    <div id="username-login-modal" class="modal hidden">
-        <div class="modal-content glass-card">
-            <h2>👤 Kullanıcı Adı Girişi</h2>
-            <p class="modal-description">Oyunu oynamak için bir kullanıcı adı girin. Girişleriniz anonimdir; verileriniz bu cihazda saklanır ve Firebase etkinse isteğe bağlı olarak bulut ile senkronize edilir.</p>
+    <!-- Username Login Modal (kompakt giriş penceresi) -->
+    <div id="username-login-modal" class="modal modal-login-popup hidden">
+        <div class="modal-content glass-card login-popup-card">
+            <h2>👤 Kullanıcı adın</h2>
+            <p class="modal-description login-popup-hint">Adını yaz ve giriş yap. Veriler bu cihazda saklanır.</p>
             <input 
                 type="text" 
                 id="username-input" 
@@ -1019,7 +1019,7 @@
                 onkeypress="if(event.key === 'Enter') confirmUsername();"
             />
             <!-- Cinsiyet Seçimi -->
-            <div style="margin-bottom: 20px;">
+            <div class="login-popup-gender-block">
                 <label class="gender-select-label">Cinsiyet</label>
                 <div class="gender-select-buttons">
                     <button 

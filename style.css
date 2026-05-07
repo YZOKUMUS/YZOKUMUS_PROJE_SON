@@ -1357,6 +1357,44 @@ body[data-theme="dark"] .word-chip {
     color: var(--text-primary);
 }
 
+/* Kompakt kullanıcı adı giriş penceresi (ilk açılış) */
+.modal-login-popup {
+    padding: var(--spacing-md);
+    align-items: center;
+}
+
+#username-login-modal .login-popup-card {
+    max-width: min(92vw, 340px);
+    padding: 1.15rem 1.25rem 1rem;
+    margin: auto;
+}
+
+#username-login-modal .login-popup-card h2 {
+    font-size: 1.15rem;
+    margin-bottom: 0.35rem;
+}
+
+#username-login-modal .login-popup-card .login-popup-hint {
+    font-size: 0.8rem;
+    margin-bottom: 12px;
+    line-height: 1.35;
+    color: rgba(26, 26, 46, 0.78);
+}
+
+#username-login-modal .login-popup-card .username-input {
+    margin-bottom: 12px;
+    padding: 10px 12px;
+    font-size: 1rem;
+}
+
+#username-login-modal .login-popup-card .gender-select-label {
+    font-size: 0.8rem;
+}
+
+#username-login-modal .login-popup-card .login-popup-gender-block {
+    margin-bottom: 12px;
+}
+
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }

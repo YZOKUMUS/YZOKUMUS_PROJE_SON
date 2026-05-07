@@ -646,6 +646,10 @@ async function confirmUsername() {
         }
         
         console.log('✅ Kullanıcı giriş yaptı:', username);
+
+        if (!localStorage.getItem('hasene_onboarding_complete') && typeof window.scheduleOnboardingIfNeeded === 'function') {
+            window.scheduleOnboardingIfNeeded(650);
+        }
     } catch (error) {
         console.error('Error in confirmUsername:', error);
         alert('Giriş yapılırken bir hata oluştu. Lütfen tekrar deneyin.');

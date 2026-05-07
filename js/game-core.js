@@ -439,6 +439,9 @@ function closeModal(modalId) {
     if (currentOpenModal === modalId) {
         currentOpenModal = null;
     }
+    if (modalId === 'username-login-modal' && typeof scheduleOnboardingIfNeeded === 'function') {
+        scheduleOnboardingIfNeeded(450);
+    }
 }
 
 /**
@@ -604,10 +607,13 @@ async function initApp() {
     setTimeout(() => {
         document.getElementById('loadingScreen').classList.add('hidden');
         document.getElementById('main-container').classList.remove('hidden');
-        
-        // Check if first time (show onboarding)
+
         const onboardingComplete = localStorage.getItem('hasene_onboarding_complete');
-        if (!onboardingComplete) {
+        const loggedIn = typeof checkUserLoggedIn === 'function' && checkUserLoggedIn();
+
+        if (!loggedIn && typeof window.showUsernameLoginModal === 'function') {
+            window.showUsernameLoginModal();
+        } else if (!onboardingComplete) {
             setTimeout(() => showOnboarding(), 500);
         }
         // Günlük ödül artık otomatik gösterilmiyor
@@ -7196,6 +7202,14 @@ function navigateCalendarMonth(offset) {
 // ONBOARDING
 // ========================================
 
+function scheduleOnboardingIfNeeded(delayMs = 450) {
+    if (localStorage.getItem('hasene_onboarding_complete')) return;
+    setTimeout(() => {
+        if (localStorage.getItem('hasene_onboarding_complete')) return;
+        showOnboarding();
+    }, delayMs);
+}
+
 function showOnboarding() {
     onboardingSlideIndex = 0;
     updateOnboardingSlide();
@@ -8150,6 +8164,7 @@ if (typeof window !== 'undefined') {
     window.showCalendarModal = showCalendarModal;
     window.navigateCalendarMonth = navigateCalendarMonth;
     window.showOnboarding = showOnboarding;
+    window.scheduleOnboardingIfNeeded = scheduleOnboardingIfNeeded;
     window.nextOnboardingSlide = nextOnboardingSlide;
     window.prevOnboardingSlide = prevOnboardingSlide;
     window.showDailyReward = showDailyReward;
