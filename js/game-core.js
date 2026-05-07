@@ -1914,17 +1914,18 @@ async function startGame(gameMode) {
     currentGameMode = gameMode;
     gameCompleted = false; // Reset game completed flag
     
-    // Hide main container
-    document.getElementById('main-container').classList.add('hidden');
+    // Ekran geçişi: önce tüm ekranları kapat (altta açık kalmasın)
+    hideAllScreens();
+    resetViewportScroll();
     
     // For kelime-cevir and elif-ba, show submode selection first
     if (gameMode === 'kelime-cevir') {
-        document.getElementById('kelime-submode-screen').classList.remove('hidden');
+        showOnlyScreen('kelime-submode-screen');
         return;
     }
     
     if (gameMode === 'elif-ba') {
-        document.getElementById('elif-ba-submode-screen').classList.remove('hidden');
+        showOnlyScreen('elif-ba-submode-screen');
         return;
     }
     
@@ -2101,8 +2102,7 @@ function goToKelimeSubmodes() {
         }
     }
     
-    document.getElementById('kelime-cevir-screen').classList.add('hidden');
-    document.getElementById('kelime-submode-screen').classList.remove('hidden');
+    showOnlyScreen('kelime-submode-screen');
 }
 
 /**
@@ -2122,9 +2122,7 @@ function goToElifBaSubmodes() {
         }
     }
     
-    document.getElementById('elif-ba-screen').classList.add('hidden');
-    document.getElementById('elif-ba-tablo-screen').classList.add('hidden');
-    document.getElementById('elif-ba-submode-screen').classList.remove('hidden');
+    showOnlyScreen('elif-ba-submode-screen');
 }
 
 // ========================================
@@ -2264,6 +2262,26 @@ function hideAllScreens() {
     document.getElementById('main-container')?.classList.add('hidden');
     
     currentOpenPanel = null;
+}
+
+function resetViewportScroll() {
+    try {
+        window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+    } catch (e) {}
+}
+
+function showOnlyScreen(screenId) {
+    hideAllScreens();
+    resetViewportScroll();
+    const screen = document.getElementById(screenId);
+    if (screen) {
+        screen.classList.remove('hidden');
+        try {
+            screen.scrollTop = 0;
+        } catch (e) {}
+    }
 }
 
 /**
