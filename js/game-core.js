@@ -2377,6 +2377,8 @@ function goToMainMenu(skipWarning = false) {
             }
         }
     }
+
+    flushKelimeSm2PendingQuality();
     
     // Sesi durdur
     stopAllAudio();
@@ -2719,6 +2721,8 @@ async function startKelimeCevirGame(submode = 'classic', questionCountOverride =
 }
 
 function loadKelimeQuestion() {
+    clearKelimeSm2QualityUi();
+
     if (questionIndex >= currentQuestions.length) {
         endGame();
         return;
@@ -2905,11 +2909,7 @@ function checkKelimeAnswer(index, selectedAnswer) {
         }
     });
     
-    // Update word stats
-    updateWordStats(wordId, selectedAnswer === correctAnswer);
-    
     if (selectedAnswer === correctAnswer) {
-        // Correct answer
         correctCount++;
         comboCount++;
         maxCombo = Math.max(maxCombo, comboCount);
@@ -2919,15 +2919,36 @@ function checkKelimeAnswer(index, selectedAnswer) {
         const gained = basePoints + comboBonus;
         
         sessionScore += gained;
+
+        if (checkUserLoggedIn()) {
+            const wrap = document.getElementById('kelime-sm2-quality');
+            if (wrap) {
+                kelimeSm2PendingWordId = wordId;
+                wrap.querySelectorAll('.sm2-q-btn').forEach((b) => {
+                    b.disabled = false;
+                });
+                wrap.classList.remove('hidden');
+                kelimeSm2QualityFallbackTimer = setTimeout(() => submitKelimeQuality(4), 10000);
+            } else {
+                updateWordStats(wordId, 4);
+                setTimeout(() => {
+                    questionIndex++;
+                    loadKelimeQuestion();
+                }, 1200);
+            }
+            return;
+        }
     } else {
-        // Wrong answer
         wrongCount++;
         comboCount = 0;
         
         buttons[index].classList.add('wrong');
+
+        if (checkUserLoggedIn()) {
+            updateWordStats(wordId, 2);
+        }
     }
-    
-    // Next question after delay
+
     setTimeout(() => {
         questionIndex++;
         loadKelimeQuestion();
@@ -2940,6 +2961,66 @@ function checkKelimeAnswer(index, selectedAnswer) {
 let hintUsedThisQuestion = false;
 let hintsUsedToday = 0;
 const MAX_HINTS_PER_DAY = 10;
+
+/** SM-2: doğru cevaptan sonra kalite seçimi beklenirken kelime id */
+let kelimeSm2PendingWordId = null;
+let kelimeSm2QualityFallbackTimer = null;
+
+function clearKelimeSm2QualityUi() {
+    const wrap = document.getElementById('kelime-sm2-quality');
+    if (wrap) {
+        wrap.classList.add('hidden');
+        wrap.querySelectorAll('.sm2-q-btn').forEach((b) => {
+            b.disabled = false;
+        });
+    }
+    if (kelimeSm2QualityFallbackTimer) {
+        clearTimeout(kelimeSm2QualityFallbackTimer);
+        kelimeSm2QualityFallbackTimer = null;
+    }
+    kelimeSm2PendingWordId = null;
+}
+
+/** Çıkışta veya ekran değişiminde bekleyen doğru cevap için SM-2 kaydı (varsayılan: İyi) */
+function flushKelimeSm2PendingQuality() {
+    if (kelimeSm2PendingWordId == null || !checkUserLoggedIn()) {
+        clearKelimeSm2QualityUi();
+        return;
+    }
+    const wid = kelimeSm2PendingWordId;
+    if (kelimeSm2QualityFallbackTimer) {
+        clearTimeout(kelimeSm2QualityFallbackTimer);
+        kelimeSm2QualityFallbackTimer = null;
+    }
+    kelimeSm2PendingWordId = null;
+    document.getElementById('kelime-sm2-quality')?.classList.add('hidden');
+    updateWordStats(wid, 4);
+}
+
+/**
+ * Kelime doğru cevabından sonra SM-2 kalitesi (3=zor, 4=iyi, 5=kolay)
+ */
+function submitKelimeQuality(quality) {
+    if (kelimeSm2PendingWordId == null) return;
+    if (kelimeSm2QualityFallbackTimer) {
+        clearTimeout(kelimeSm2QualityFallbackTimer);
+        kelimeSm2QualityFallbackTimer = null;
+    }
+    const wordId = kelimeSm2PendingWordId;
+    kelimeSm2PendingWordId = null;
+    const wrap = document.getElementById('kelime-sm2-quality');
+    if (wrap) {
+        wrap.classList.add('hidden');
+        wrap.querySelectorAll('.sm2-q-btn').forEach((b) => {
+            b.disabled = true;
+        });
+    }
+    updateWordStats(wordId, quality);
+    setTimeout(() => {
+        questionIndex++;
+        loadKelimeQuestion();
+    }, 420);
+}
 
 function useHint() {
     if (hintUsedThisQuestion) {
@@ -3011,20 +3092,53 @@ function toggleCurrentWordFavorite() {
 }
 
 /**
- * Update word statistics with SM-2 Algorithm
- * @param {string} wordId - Word ID
- * @param {boolean} isCorrect - Whether answer was correct
+ * SM-2 kalite: 0–5. Eski çağrılar: true→4 (iyi), false→2 (yanlış şık).
  */
-function updateWordStats(wordId, isCorrect) {
+function normalizeSm2Quality(payload) {
+    if (typeof payload === 'boolean') {
+        return payload ? 4 : 2;
+    }
+    if (typeof payload === 'number' && !Number.isNaN(payload)) {
+        return Math.max(0, Math.min(5, Math.round(payload)));
+    }
+    return 4;
+}
+
+/** Legacy kelime kayıtlarında sm2Repetitions yoksa tahmin et (bir kez). */
+function ensureSm2Repetitions(stats) {
+    if (stats.sm2Repetitions !== undefined && stats.sm2Repetitions !== null) {
+        return;
+    }
+    const iv = stats.interval || 0;
+    const att = stats.attempts || 0;
+    if (!att || iv <= 0) {
+        stats.sm2Repetitions = 0;
+        return;
+    }
+    if (iv <= 1) {
+        stats.sm2Repetitions = 1;
+    } else if (iv <= 6) {
+        stats.sm2Repetitions = 2;
+    } else {
+        stats.sm2Repetitions = 3;
+    }
+}
+
+/**
+ * Kelime istatistiği — SM-2 (SuperMemo 2) aralık ve ease factor; kalite kart bazında.
+ * @param {string} wordId
+ * @param {boolean|number} payload — doğru/yanlış veya 0–5 kalite
+ */
+function updateWordStats(wordId, payload) {
     if (!wordId) return;
-    
-    // Check if user is logged in
+
     if (!checkUserLoggedIn()) {
         return;
     }
-    
+
+    const q = normalizeSm2Quality(payload);
     const today = getLocalDateString();
-    
+
     if (!wordStats[wordId]) {
         wordStats[wordId] = {
             attempts: 0,
@@ -3034,89 +3148,55 @@ function updateWordStats(wordId, isCorrect) {
             masteryLevel: 0,
             lastCorrect: null,
             lastWrong: null,
-            easeFactor: 2.5,       // SM-2: başlangıç kolaylık faktörü
-            interval: 0,           // SM-2: tekrar aralığı (gün)
-            nextReviewDate: null,  // SM-2: sonraki tekrar tarihi
-            lastReview: null       // Son tekrar tarihi
+            easeFactor: 2.5,
+            interval: 0,
+            nextReviewDate: null,
+            lastReview: null,
+            sm2Repetitions: 0
         };
     }
-    
+
     const stats = wordStats[wordId];
-    const previousAttempts = stats.attempts;
+    ensureSm2Repetitions(stats);
+
+    const prevInterval = Math.max(0, stats.interval || 0);
+    let ef = stats.easeFactor != null ? stats.easeFactor : 2.5;
+    ef = ef + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02));
+    ef = Math.max(1.3, ef);
+
     stats.attempts++;
     stats.lastReview = today;
-    
-    if (isCorrect) {
-        stats.correct++;
-        stats.lastCorrect = today;
-        
-        // SM-2 Interval Hesaplama (SuperMemo 2 Algorithm)
-        if (stats.interval === 0) {
-            // İlk öğrenme: 1 gün sonra tekrar
-            stats.interval = 1;
-        } else if (stats.interval === 1) {
-            // İkinci tekrar: 6 gün sonra
-            stats.interval = 6;
-        } else {
-            // Sonraki tekrarlar: interval * easeFactor
-            stats.interval = Math.max(1, Math.floor(stats.interval * stats.easeFactor));
-        }
-        
-        // SM-2 Ease Factor Güncellemesi (Quality-based, success rate'e göre)
-        // Quality 5 = Mükemmel (>=95%), Quality 4 = Kolay (>=85%), Quality 3 = Normal (>=70%)
-        const currentSuccessRate = (stats.correct / stats.attempts) * 100;
-        let quality = 3; // Varsayılan normal
-        
-        if (currentSuccessRate >= 95) {
-            quality = 5; // Mükemmel
-        } else if (currentSuccessRate >= 85) {
-            quality = 4; // Kolay
-        } else if (currentSuccessRate >= 70) {
-            quality = 3; // Normal
-        } else if (currentSuccessRate >= 50) {
-            quality = 2; // Zor
-        } else {
-            quality = 1; // Çok zor
-        }
-        
-        // SM-2 Ease Factor formülü: EF' = EF + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02))
-        // Basitleştirilmiş versiyon: Quality'ye göre ease factor güncelle
-        if (quality >= 4) {
-            // Kolay/Mükemmel: Ease factor artır
-            stats.easeFactor = Math.min(2.5, stats.easeFactor + (quality === 5 ? 0.15 : 0.10));
-        } else if (quality === 3) {
-            // Normal: Ease factor sabit kalır (çok küçük artış)
-            stats.easeFactor = Math.min(2.5, stats.easeFactor + 0.02);
-        } else {
-            // Zor/Çok zor: Ease factor azalt
-            stats.easeFactor = Math.max(1.3, stats.easeFactor - (quality === 1 ? 0.20 : 0.15));
-        }
-        
-    } else {
+
+    let reps = stats.sm2Repetitions;
+
+    if (q < 3) {
         stats.wrong++;
         stats.lastWrong = today;
-        
-        // Yanlış cevap: interval sıfırla, ease factor azalt
+        stats.sm2Repetitions = 0;
         stats.interval = 1;
-        stats.easeFactor = Math.max(1.3, stats.easeFactor - 0.20);
-        
-        // Review listesine ekle
         addToReviewList(wordId);
+    } else {
+        stats.correct++;
+        stats.lastCorrect = today;
+        if (reps === 0) {
+            stats.interval = 1;
+        } else if (reps === 1) {
+            stats.interval = 6;
+        } else {
+            stats.interval = Math.max(1, Math.round(prevInterval * ef));
+        }
+        stats.sm2Repetitions = reps + 1;
     }
-    
-    // Başarı oranı ve ustalık seviyesi (önce hesapla, interval için kullanılacak)
+
+    stats.easeFactor = ef;
+
     stats.successRate = Math.round((stats.correct / stats.attempts) * 100);
-    const oldMasteryLevel = stats.masteryLevel || 0;
     stats.masteryLevel = Math.min(10, Math.floor(stats.successRate / 10));
-    
-    // Sonraki tekrar tarihini hesapla
-    // Ustalaşılan kelimeler için maksimum interval: 365 gün (1 yıl)
-    // Bu, kelimenin tamamen unutulmasını önler ama çok nadiren sorar
-    const currentMasteryLevel = stats.masteryLevel;
-    const maxInterval = currentMasteryLevel >= 8 ? 365 : Infinity;
+
+    const maxInterval = stats.masteryLevel >= 8 ? 365 : Infinity;
     stats.interval = Math.min(stats.interval, maxInterval);
     stats.nextReviewDate = addDaysToDate(today, stats.interval);
-    
+
     debouncedSaveStats();
 }
 
@@ -8142,6 +8222,7 @@ if (typeof window !== 'undefined') {
     window.showGoalSettings = showGoalSettings;
     window.startGame = startGame;
     window.checkKelimeAnswer = checkKelimeAnswer;
+    window.submitKelimeQuality = submitKelimeQuality;
     window.checkDinleAnswer = checkDinleAnswer;
     window.checkBoslukAnswer = checkBoslukAnswer;
     window.checkElifAnswer = checkElifAnswer;
