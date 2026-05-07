@@ -442,11 +442,16 @@ function renderLeaderboard(leaderboard, userPos) {
     
     const groupCode = (localStorage.getItem('hasene_group_code') || '').trim();
     let html = `
-        <div class="leaderboard-header" style="margin-bottom: 8px;">
-            <h2 style="font-size: 1rem; margin: 0 0 2px 0;">🏆 Haftalık Liderlik Tablosu</h2>
-            <p class="leaderboard-week-info" style="font-size: 0.7rem; color: rgba(26,26,46,0.7); margin: 0;">
-                ${formatDate(weekStartDate)} - ${formatDate(weekEndDate)}
-            </p>
+        <div class="leaderboard-header" style="margin-bottom: 8px; display:flex; align-items:flex-start; justify-content:space-between; gap: 10px;">
+            <div style="min-width:0;">
+                <h2 style="font-size: 1rem; margin: 0 0 2px 0;">🏆 Haftalık Liderlik Tablosu</h2>
+                <p class="leaderboard-week-info" style="font-size: 0.7rem; color: rgba(26,26,46,0.7); margin: 0;">
+                    ${formatDate(weekStartDate)} - ${formatDate(weekEndDate)}
+                </p>
+            </div>
+            <button class="secondary-btn" type="button" onclick="if(typeof openGroupCodeSettings==='function') openGroupCodeSettings(); else if(typeof showAppSettingsModal==='function') showAppSettingsModal();" style="padding: 6px 10px; font-size: 0.8rem; white-space: nowrap;">
+                🔑 Grup kodu
+            </button>
         </div>
     `;
 

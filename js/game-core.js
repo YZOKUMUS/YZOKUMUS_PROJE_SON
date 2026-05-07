@@ -1810,6 +1810,21 @@ function saveAppSettingsFromUI() {
     }
 }
 
+function openGroupCodeSettings() {
+    try {
+        showAppSettingsModal();
+        setTimeout(() => {
+            const input = document.getElementById('settings-group-code-input');
+            if (input) {
+                input.focus();
+                input.select?.();
+            }
+        }, 50);
+    } catch (e) {
+        console.warn('openGroupCodeSettings error:', e);
+    }
+}
+
 /**
  * Setup keyboard navigation for accessibility
  */
@@ -8085,6 +8100,7 @@ if (typeof window !== 'undefined') {
     window.updateStatsDisplay = updateStatsDisplay;
     window.showAppSettingsModal = showAppSettingsModal;
     window.saveAppSettingsFromUI = saveAppSettingsFromUI;
+    window.openGroupCodeSettings = openGroupCodeSettings;
     
     // Test Tools (also exported immediately after function definitions)
     window.clearStorageData = clearStorageData;
