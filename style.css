@@ -471,6 +471,17 @@ body::before {
     overflow: hidden;
 }
 
+/* Featured card (10 dk plan) */
+.featured-card {
+    border: 1px solid rgba(0, 122, 255, 0.25);
+    background: linear-gradient(135deg, rgba(0, 122, 255, 0.08) 0%, rgba(90, 200, 250, 0.08) 100%);
+}
+
+body[data-theme="dark"] .featured-card {
+    border-color: rgba(56, 189, 248, 0.28);
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.12) 0%, rgba(14, 165, 233, 0.10) 100%);
+}
+
 .game-card::after {
     content: '';
     position: absolute;
@@ -849,6 +860,25 @@ body::before {
     font-size: 1.125rem;
     color: var(--text-secondary);
     margin-bottom: var(--spacing-lg);
+}
+
+.micro-context {
+    margin-top: var(--spacing-sm);
+    padding: 0.6rem 0.75rem;
+    border-radius: var(--radius-md);
+    background: rgba(157, 138, 255, 0.10);
+    border: 1px solid rgba(157, 138, 255, 0.18);
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.55;
+    text-align: center;
+    font-family: var(--font-arabic);
+    letter-spacing: var(--arabic-letter-spacing);
+}
+
+body[data-theme="dark"] .micro-context {
+    background: rgba(56, 189, 248, 0.10);
+    border-color: rgba(56, 189, 248, 0.16);
 }
 
 .dinle-practice-hint {

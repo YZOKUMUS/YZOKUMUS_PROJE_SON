@@ -136,6 +136,15 @@
 
         <!-- Game Cards -->
         <div class="game-cards-container">
+            <!-- 0. 10 Dakika Planı (önerilen rota) -->
+            <div class="game-card featured-card" data-game="daily-plan-10">
+                <div class="game-icon">
+                    <span>⏱️</span>
+                </div>
+                <h3>10 Dakika Çalış</h3>
+                <p>Bugün tekrar → Dinle Bul → Boşluk Doldur</p>
+            </div>
+
             <!-- 1. Kelime Çevir -->
             <div class="game-card" data-game="kelime-cevir">
                 <div class="game-icon">
@@ -319,6 +328,7 @@
                 </div>
                 <div class="arabic-word" id="kelime-arabic">بِسْمِ</div>
                 <div class="word-info" id="kelime-info"></div>
+                <div class="micro-context hidden" id="kelime-context" dir="rtl"></div>
                 <div id="kelime-word-id" style="position: absolute; bottom: 5px; left: 5px; font-size: 8px; color: rgba(0,0,0,0.6); font-weight: 500;">ID: -</div>
             </div>
 
@@ -349,6 +359,7 @@
                 <button class="big-audio-btn" id="dinle-audio-btn" title="Dinle" aria-label="Ses dosyasını dinle">
                     <span style="font-size: 1.5rem; margin-right: 0.5rem;">🎧</span> Dinle
                 </button>
+                <div class="micro-context hidden" id="dinle-context" dir="rtl"></div>
                 <p class="dinle-practice-hint">Kendi telaffuzunu dene (-skor):</p>
                 <div class="dinle-practice-row">
                     <button type="button" class="secondary-btn dinle-practice-btn" id="dinle-practice-record-btn" title="Mikrofon izni gerekebilir">🎙️ Kayda başla</button>
@@ -677,7 +688,8 @@
                 </div>
             </div>
             <div class="result-actions">
-                <button class="primary-btn" onclick="playAgain()">Tekrar Oyna</button>
+                <button class="primary-btn hidden" id="result-plan-continue-btn" onclick="continueDailyPlan()">Devam (Plan)</button>
+                <button class="primary-btn" id="result-play-again-btn" onclick="playAgain()">Tekrar Oyna</button>
                 <button class="secondary-btn" onclick="closeResultAndGoHome()">Ana Menü</button>
             </div>
         </div>
@@ -1182,6 +1194,18 @@
                         <div style="font-size: 0.85rem; color: var(--text-secondary);">Arayüzü koyu veya açık tema olarak kullan</div>
                     </div>
                     <input type="checkbox" id="settings-theme-dark-checkbox" style="width: 24px; height: 24px; cursor: pointer;">
+                </div>
+
+                <!-- Group Code (Leaderboard filter) -->
+                <div style="display: flex; flex-direction: column; gap: 8px; padding: var(--spacing-md); background: rgba(157, 138, 255, 0.1); border-radius: var(--radius-md);">
+                    <div style="display:flex; align-items: center; justify-content: space-between; gap: 12px;">
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; margin-bottom: 4px;">Grup Kodu (Lig)</div>
+                            <div style="font-size: 0.85rem; color: var(--text-secondary);">Sınıf/hoca ligini görmek için aynı kodu girin (opsiyonel)</div>
+                        </div>
+                    </div>
+                    <input id="settings-group-code-input" type="text" inputmode="latin" autocomplete="off" spellcheck="false" placeholder="Örn: HASENE-101" style="padding: 10px 12px; border-radius: 12px; border: 2px solid rgba(157, 138, 255, 0.25); background: rgba(255,255,255,0.25); color: var(--text-primary);">
+                    <div style="font-size: 0.75rem; color: var(--text-secondary);">Boş bırakırsanız genel sıralama görünür.</div>
                 </div>
 
                 <div style="margin-top: var(--spacing-md); padding: var(--spacing-sm) 0; border-top: 1px solid rgba(0,0,0,0.08);">

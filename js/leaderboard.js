@@ -169,6 +169,7 @@ async function updateWeeklyXP(points) {
     if (user && typeof window.firestoreSet === 'function' && window.firestore) {
         const username = localStorage.getItem('hasene_username') || user.username || 'Anonim Kullanıcı';
         const usernameDisplay = localStorage.getItem('hasene_username_display') || username;
+        const groupCode = (localStorage.getItem('hasene_group_code') || '').trim();
         
         // Use username instead of user.id for consistency with other collections
         const docId = `${username}_${weekStart}`;
@@ -178,6 +179,7 @@ async function updateWeeklyXP(points) {
                 user_id: user.id, // Keep for reference
                 username: username, // Lowercase for consistency
                 usernameDisplay: usernameDisplay, // Original case for display
+                group_code: groupCode,
                 weekly_xp: newXP,
                 week_start: weekStart,
                 updated_at: new Date().toISOString()
@@ -267,6 +269,7 @@ async function loadLeaderboard() {
                             user_id: data.user_id || parts.slice(0, -1).join('_'), // Username part
                             username: data.username || parts.slice(0, -1).join('_'),
                             usernameDisplay: data.usernameDisplay || data.username || parts.slice(0, -1).join('_'),
+                            group_code: data.group_code || '',
                             weekly_xp: data.weekly_xp || 0,
                             league: calculateLeague(data.weekly_xp || 0)
                         });
@@ -309,6 +312,8 @@ async function loadLeaderboard() {
                     rankings.push({
                         user_id: data.user_id || doc.id.split('_')[0],
                         username: data.username || 'Anonim Kullanıcı',
+                        usernameDisplay: data.usernameDisplay || data.username || 'Anonim Kullanıcı',
+                        group_code: data.group_code || '',
                         weekly_xp: data.weekly_xp || 0,
                         league: calculateLeague(data.weekly_xp || 0)
                     });
@@ -435,6 +440,7 @@ function renderLeaderboard(leaderboard, userPos) {
     const weekEndDate = new Date(weekStartDate);
     weekEndDate.setDate(weekEndDate.getDate() + 6);
     
+    const groupCode = (localStorage.getItem('hasene_group_code') || '').trim();
     let html = `
         <div class="leaderboard-header" style="margin-bottom: 8px;">
             <h2 style="font-size: 1rem; margin: 0 0 2px 0;">🏆 Haftalık Liderlik Tablosu</h2>
@@ -443,6 +449,14 @@ function renderLeaderboard(leaderboard, userPos) {
             </p>
         </div>
     `;
+
+    if (groupCode) {
+        html += `
+            <div style="margin: 6px 0 10px; font-size: 0.78rem; color: rgba(26,26,46,0.75);">
+                🔒 Grup kodu filtresi aktif: <b>${groupCode}</b>
+            </div>
+        `;
+    }
     
     // User's current league and position
     if (userPos) {
@@ -503,10 +517,17 @@ function renderLeaderboardList(leaderboard, userPos, mode = 'all') {
     const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : null;
     
     let filtered = [...leaderboard];
+    const groupCode = (localStorage.getItem('hasene_group_code') || '').trim();
+    if (groupCode) {
+        filtered = filtered.filter(u => (u.group_code || '').trim() === groupCode);
+    }
     
     // Filter by league if mode is 'league'
     if (mode === 'league' && userPos) {
         filtered = leaderboard.filter(u => u.league.id === userPos.league.id);
+        if (groupCode) {
+            filtered = filtered.filter(u => (u.group_code || '').trim() === groupCode);
+        }
     }
     
     // Sort by weekly_xp descending

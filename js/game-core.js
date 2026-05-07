@@ -27,6 +27,13 @@ let currentQuestions = [];
 let currentQuestion = null;
 let currentOptions = []; // Current answer options for hint system
 
+// Daily plan (10 dk çalışma rotası)
+let dailyPlanState = {
+    active: false,
+    steps: [],
+    index: 0
+};
+
 // Reading Mode Indices
 let currentAyetIndex = 0;
 let currentDuaIndex = 0;
@@ -56,6 +63,7 @@ let userSettings = {
     soundEnabled: typeof CONFIG !== 'undefined' ? CONFIG.AUDIO.enabled : true,
     animationsEnabled: typeof CONFIG !== 'undefined' ? (CONFIG.UI?.animationsEnabled ?? true) : true,
     theme: typeof CONFIG !== 'undefined' ? (CONFIG.UI?.theme || 'light') : 'light',
+    groupCode: '',
     styleExpPattern: false,
     styleExpFocus: false,
     styleExpTypography: false,
@@ -1693,6 +1701,7 @@ function showAppSettingsModal() {
         const soundCheckbox = document.getElementById('settings-sound-checkbox');
         const animationsCheckbox = document.getElementById('settings-animations-checkbox');
         const themeDarkCheckbox = document.getElementById('settings-theme-dark-checkbox');
+        const groupCodeInput = document.getElementById('settings-group-code-input');
         
         if (soundCheckbox) {
             soundCheckbox.checked = !!userSettings.soundEnabled;
@@ -1702,6 +1711,9 @@ function showAppSettingsModal() {
         }
         if (themeDarkCheckbox) {
             themeDarkCheckbox.checked = userSettings.theme === 'dark';
+        }
+        if (groupCodeInput) {
+            groupCodeInput.value = (userSettings.groupCode || '').toString();
         }
 
         const sp = document.getElementById('settings-style-pattern-checkbox');
@@ -1740,6 +1752,7 @@ function saveAppSettingsFromUI() {
         const soundCheckbox = document.getElementById('settings-sound-checkbox');
         const animationsCheckbox = document.getElementById('settings-animations-checkbox');
         const themeDarkCheckbox = document.getElementById('settings-theme-dark-checkbox');
+        const groupCodeInput = document.getElementById('settings-group-code-input');
         
         if (soundCheckbox) {
             userSettings.soundEnabled = !!soundCheckbox.checked;
@@ -1749,6 +1762,15 @@ function saveAppSettingsFromUI() {
         }
         if (themeDarkCheckbox) {
             userSettings.theme = themeDarkCheckbox.checked ? 'dark' : 'light';
+        }
+        if (groupCodeInput) {
+            userSettings.groupCode = String(groupCodeInput.value || '')
+                .trim()
+                .replace(/\s+/g, ' ')
+                .slice(0, 32);
+            try {
+                localStorage.setItem('hasene_group_code', userSettings.groupCode);
+            } catch (e) {}
         }
 
         const sp = document.getElementById('settings-style-pattern-checkbox');
@@ -1901,6 +1923,9 @@ async function startGame(gameMode) {
     
     // Start appropriate game
     switch (gameMode) {
+        case 'daily-plan-10':
+            await startDailyPlan10();
+            break;
         case 'dinle-bul':
             await startDinleBulGame();
             break;
@@ -1930,6 +1955,104 @@ async function startGame(gameMode) {
             showToast('Bilinmeyen oyun modu', 'error');
             goToMainMenu();
     }
+}
+
+function cancelDailyPlan() {
+    dailyPlanState.active = false;
+    dailyPlanState.steps = [];
+    dailyPlanState.index = 0;
+}
+
+function getDailyPlanNextLabel() {
+    const next = dailyPlanState.steps[dailyPlanState.index + 1];
+    if (!next) return '';
+    switch (next.mode) {
+        case 'kelime-cevir':
+            return 'Sonraki: Kelime Çevir';
+        case 'dinle-bul':
+            return 'Sonraki: Dinle Bul';
+        case 'bosluk-doldur':
+            return 'Sonraki: Boşluk Doldur';
+        default:
+            return 'Sonraki';
+    }
+}
+
+async function startDailyPlan10() {
+    if (!requireUserLogin()) {
+        return;
+    }
+
+    cancelDailyPlan();
+    dailyPlanState.active = true;
+    dailyPlanState.steps = [
+        { mode: 'kelime-cevir', submode: 'review', count: 5 },
+        { mode: 'dinle-bul', count: 5 },
+        { mode: 'bosluk-doldur', count: 5 }
+    ];
+    dailyPlanState.index = 0;
+
+    showToast('⏱️ 10 dk plan başladı', 'info', 1200);
+    await startDailyPlanStep();
+}
+
+async function startDailyPlanStep() {
+    const step = dailyPlanState.steps[dailyPlanState.index];
+    if (!step) {
+        cancelDailyPlan();
+        return;
+    }
+
+    // Ortak başlangıç hazırlığı
+    currentGameMode = step.mode;
+    gameCompleted = false;
+    document.getElementById('main-container')?.classList.add('hidden');
+
+    // Reset session
+    sessionScore = 0;
+    questionIndex = 0;
+    correctCount = 0;
+    wrongCount = 0;
+    comboCount = 0;
+    maxCombo = 0;
+
+    if (step.mode === 'kelime-cevir') {
+        // Plan, alt-mod ekranını pas geçer
+        try {
+            document.getElementById('kelime-submode-screen')?.classList.add('hidden');
+        } catch (e) {}
+        await startKelimeCevirGame(step.submode || 'classic', step.count);
+        return;
+    }
+
+    if (step.mode === 'dinle-bul') {
+        await startDinleBulGame(step.count);
+        return;
+    }
+
+    if (step.mode === 'bosluk-doldur') {
+        await startBoslukDoldurGame(step.count);
+        return;
+    }
+
+    // Fallback
+    cancelDailyPlan();
+    await startGame(step.mode);
+}
+
+async function continueDailyPlan() {
+    closeModal('game-result-modal');
+    if (!dailyPlanState.active) {
+        return;
+    }
+    dailyPlanState.index += 1;
+    if (dailyPlanState.index >= dailyPlanState.steps.length) {
+        cancelDailyPlan();
+        showToast('✅ Plan tamamlandı', 'success', 1500);
+        goToMainMenu(true);
+        return;
+    }
+    await startDailyPlanStep();
 }
 
 /**
@@ -2357,6 +2480,29 @@ function showResultModal(perfectBonus = 0) {
     } else {
         title.textContent = '💪 İyi Deneme!';
     }
+
+    // Daily plan UI tweaks
+    const planBtn = document.getElementById('result-plan-continue-btn');
+    const playAgainBtn = document.getElementById('result-play-again-btn');
+    if (dailyPlanState.active && dailyPlanState.index < dailyPlanState.steps.length - 1) {
+        if (title) {
+            title.textContent = `✅ Adım ${dailyPlanState.index + 1}/${dailyPlanState.steps.length} tamamlandı`;
+        }
+        if (planBtn) {
+            planBtn.classList.remove('hidden');
+            planBtn.textContent = `Devam (Plan) · ${getDailyPlanNextLabel()}`;
+        }
+        if (playAgainBtn) {
+            playAgainBtn.classList.add('hidden');
+        }
+    } else {
+        if (planBtn) {
+            planBtn.classList.add('hidden');
+        }
+        if (playAgainBtn) {
+            playAgainBtn.classList.remove('hidden');
+        }
+    }
     
     openModal('game-result-modal');
 }
@@ -2386,6 +2532,7 @@ function playAgain() {
  */
 function closeResultAndGoHome() {
     closeModal('game-result-modal');
+    cancelDailyPlan();
     goToMainMenu();
 }
 
@@ -2393,12 +2540,13 @@ function closeResultAndGoHome() {
 // KELIME ÇEVIR GAME
 // ========================================
 
-async function startKelimeCevirGame(submode = 'classic') {
+async function startKelimeCevirGame(submode = 'classic', questionCountOverride = null) {
     // Check if user is logged in
     if (!requireUserLogin()) {
         return;
     }
     
+    currentGameMode = 'kelime-cevir';
     currentKelimeSubmode = submode;
     gameCompleted = false; // Reset game completed flag
     
@@ -2413,6 +2561,7 @@ async function startKelimeCevirGame(submode = 'classic') {
     const data = await loadKelimeData();
     if (data.length === 0) {
         showToast('Kelime verisi yüklenemedi', 'error');
+        cancelDailyPlan();
         goToMainMenu();
         return;
     }
@@ -2515,17 +2664,18 @@ async function startKelimeCevirGame(submode = 'classic') {
     }
     
     // Select questions using intelligent algorithm or random
-    if (useIntelligentSelection && filtered.length > CONFIG.QUESTIONS_PER_GAME) {
-        currentQuestions = selectIntelligentWords(filtered, CONFIG.QUESTIONS_PER_GAME, isReviewMode);
+    const questionCount = questionCountOverride ?? CONFIG.QUESTIONS_PER_GAME;
+    if (useIntelligentSelection && filtered.length > questionCount) {
+        currentQuestions = selectIntelligentWords(filtered, questionCount, isReviewMode);
         console.log('🧠 Akıllı kelime seçimi kullanıldı');
     } else {
-        currentQuestions = getRandomItems(filtered, CONFIG.QUESTIONS_PER_GAME);
+        currentQuestions = getRandomItems(filtered, questionCount);
     }
     
     // Hide submode screen, show game screen
     document.getElementById('kelime-submode-screen').classList.add('hidden');
     document.getElementById('kelime-cevir-screen').classList.remove('hidden');
-    document.getElementById('kelime-total-questions').textContent = CONFIG.QUESTIONS_PER_GAME;
+    document.getElementById('kelime-total-questions').textContent = questionCount;
     
     // Load first question
     loadKelimeQuestion();
@@ -2551,6 +2701,7 @@ function loadKelimeQuestion() {
     document.getElementById('kelime-question-number').textContent = questionIndex + 1;
     document.getElementById('kelime-arabic').textContent = currentQuestion.kelime || currentQuestion.arabic;
     document.getElementById('kelime-info').textContent = currentQuestion.sure_adi || '';
+    updateMicroContextUI('kelime-context', currentQuestion);
     document.getElementById('kelime-combo').textContent = comboCount;
     document.getElementById('kelime-session-score').textContent = formatNumber(sessionScore);
     
@@ -2602,6 +2753,58 @@ function loadKelimeQuestion() {
             ${option}
         </button>
     `).join('');
+}
+
+function getMicroContextTextFromQuestion(q) {
+    if (!q || typeof q !== 'object') return '';
+
+    // Prefer explicit context fields if your JSON has them
+    const direct = q.context_ar || q.context || q.baglam_ar || q.ayet_parcasi_ar || q.ayet_parcasi || q.ayet_metni_parca || '';
+    if (direct && String(direct).trim()) {
+        return String(direct).trim();
+    }
+
+    // Fallback: build from id ("sure:ayet:kelime") or surah/ayah fields
+    const wordId = q.kelime_id || q.id || '';
+    let sureFromId = '';
+    let ayetFromId = '';
+    let kelimeFromId = '';
+    if (wordId && typeof wordId === 'string' && wordId.includes(':')) {
+        const parts = wordId.split(':');
+        sureFromId = parts[0] || '';
+        ayetFromId = parts[1] || '';
+        kelimeFromId = parts[2] || '';
+    }
+
+    const sureName = q.sure_adi || q.sure || q.surah || '';
+    const sure = sureFromId || q.sure_no || q.sure_num || q.surah_no || '';
+    const ayetNo = ayetFromId || q.ayet_no || q.ayet || q.ayah || '';
+    const kelimeNo = kelimeFromId || q.kelime_no || q.kelime_sirasi || q.word_no || '';
+
+    const parts = [];
+    if (sureName) {
+        parts.push(String(sureName).trim());
+    } else if (sure) {
+        parts.push(`Sûre ${String(sure).trim()}`);
+    }
+    if (ayetNo) parts.push(`:${String(ayetNo).trim()}`);
+    if (kelimeNo) parts.push(`#${String(kelimeNo).trim()}`);
+
+    const label = parts.join(' ').replace(/\s+:/g, ':').trim();
+    return label;
+}
+
+function updateMicroContextUI(elementId, q) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+    const txt = getMicroContextTextFromQuestion(q);
+    if (txt && txt.trim() && txt !== '#') {
+        el.textContent = txt;
+        el.classList.remove('hidden');
+    } else {
+        el.textContent = '';
+        el.classList.add('hidden');
+    }
 }
 
 function checkKelimeAnswer(index, selectedAnswer) {
@@ -3869,7 +4072,7 @@ function playCurrentWordAudio() {
 // DINLE BUL GAME
 // ========================================
 
-async function startDinleBulGame() {
+async function startDinleBulGame(questionCountOverride = null) {
     // Check if user is logged in
     if (!requireUserLogin()) {
         return;
@@ -3891,15 +4094,16 @@ async function startDinleBulGame() {
     }
     
     // Use intelligent word selection if enough words available
-    if (filtered.length > CONFIG.QUESTIONS_PER_GAME) {
-        currentQuestions = selectIntelligentWords(filtered, CONFIG.QUESTIONS_PER_GAME, false);
+    const questionCount = questionCountOverride ?? CONFIG.QUESTIONS_PER_GAME;
+    if (filtered.length > questionCount) {
+        currentQuestions = selectIntelligentWords(filtered, questionCount, false);
         console.log('🧠 Dinle Bul: Akıllı kelime seçimi kullanıldı');
     } else {
-        currentQuestions = getRandomItems(filtered, CONFIG.QUESTIONS_PER_GAME);
+        currentQuestions = getRandomItems(filtered, questionCount);
     }
     
     document.getElementById('dinle-bul-screen').classList.remove('hidden');
-    document.getElementById('dinle-total-questions').textContent = CONFIG.QUESTIONS_PER_GAME;
+    document.getElementById('dinle-total-questions').textContent = questionCount;
     
     loadDinleQuestion();
 }
@@ -3918,6 +4122,7 @@ function loadDinleQuestion() {
     document.getElementById('dinle-question-number').textContent = questionIndex + 1;
     document.getElementById('dinle-combo').textContent = comboCount;
     document.getElementById('dinle-session-score').textContent = formatNumber(sessionScore);
+    updateMicroContextUI('dinle-context', currentQuestion);
     
     const correctAnswer = currentQuestion.anlam || currentQuestion.translation;
     const allWords = window.kelimeData || currentQuestions || [];
@@ -3994,7 +4199,7 @@ function checkDinleAnswer(index, selectedAnswer) {
 // BOŞLUK DOLDUR GAME
 // ========================================
 
-async function startBoslukDoldurGame() {
+async function startBoslukDoldurGame(questionCountOverride = null) {
     // Check if user is logged in
     if (!requireUserLogin()) {
         return;
@@ -4014,10 +4219,11 @@ async function startBoslukDoldurGame() {
         return words.length >= 3;
     });
     
-    currentQuestions = getRandomItems(filtered, CONFIG.QUESTIONS_PER_GAME);
+    const questionCount = questionCountOverride ?? CONFIG.QUESTIONS_PER_GAME;
+    currentQuestions = getRandomItems(filtered, questionCount);
     
     document.getElementById('bosluk-doldur-screen').classList.remove('hidden');
-    document.getElementById('bosluk-total-questions').textContent = CONFIG.QUESTIONS_PER_GAME;
+    document.getElementById('bosluk-total-questions').textContent = questionCount;
     
     loadBoslukQuestion();
 }
@@ -7804,6 +8010,7 @@ if (typeof window !== 'undefined') {
     window.goToMainMenu = goToMainMenu;
     window.playAgain = playAgain;
     window.closeResultAndGoHome = closeResultAndGoHome;
+    window.continueDailyPlan = continueDailyPlan;
     window.showStatsModal = showStatsModal;
     window.showTasksModal = showTasksModal;
     window.showGoalSettings = showGoalSettings;
