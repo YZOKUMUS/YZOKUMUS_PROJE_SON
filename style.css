@@ -1358,49 +1358,6 @@ body[data-theme="dark"] .word-chip {
 }
 
 /* Kompakt kullanıcı adı giriş penceresi (ilk açılış) */
-/* Kelime Çevir — SM-2 kalite (hatırlama zorluğu) */
-.kelime-sm2-quality {
-    margin-top: var(--spacing-md);
-    padding: var(--spacing-md);
-    border-radius: var(--radius-md);
-    background: rgba(255, 255, 255, 0.55);
-    border: 1px solid rgba(157, 138, 255, 0.25);
-    text-align: center;
-}
-
-body[data-theme="dark"] .kelime-sm2-quality {
-    background: rgba(30, 30, 48, 0.75);
-    border-color: rgba(157, 138, 255, 0.35);
-}
-
-.kelime-sm2-quality-label {
-    display: block;
-    font-size: 0.88rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 10px;
-}
-
-.kelime-sm2-quality-btns {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    justify-content: center;
-}
-
-.kelime-sm2-quality-btns .sm2-q-btn {
-    flex: 1 1 88px;
-    min-height: 42px;
-    font-size: 0.85rem;
-}
-
-.kelime-sm2-quality-hint {
-    display: block;
-    margin-top: 8px;
-    font-size: 0.72rem;
-    color: var(--text-secondary);
-}
-
 .modal-login-popup {
     padding: var(--spacing-md);
     align-items: center;

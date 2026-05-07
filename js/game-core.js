@@ -2378,8 +2378,6 @@ function goToMainMenu(skipWarning = false) {
         }
     }
 
-    flushKelimeSm2PendingQuality();
-    
     // Sesi durdur
     stopAllAudio();
     
@@ -2721,8 +2719,6 @@ async function startKelimeCevirGame(submode = 'classic', questionCountOverride =
 }
 
 function loadKelimeQuestion() {
-    clearKelimeSm2QualityUi();
-
     if (questionIndex >= currentQuestions.length) {
         endGame();
         return;
@@ -2930,22 +2926,7 @@ function checkKelimeAnswer(index, selectedAnswer) {
         sessionScore += gained;
 
         if (checkUserLoggedIn()) {
-            const wrap = document.getElementById('kelime-sm2-quality');
-            if (wrap) {
-                kelimeSm2PendingWordId = wordId;
-                wrap.querySelectorAll('.sm2-q-btn').forEach((b) => {
-                    b.disabled = false;
-                });
-                wrap.classList.remove('hidden');
-                kelimeSm2QualityFallbackTimer = setTimeout(() => submitKelimeQuality(4), 10000);
-            } else {
-                updateWordStats(wordId, 4);
-                setTimeout(() => {
-                    questionIndex++;
-                    loadKelimeQuestion();
-                }, 1200);
-            }
-            return;
+            updateWordStats(wordId, true);
         }
     } else {
         wrongCount++;
@@ -2954,7 +2935,7 @@ function checkKelimeAnswer(index, selectedAnswer) {
         buttons[index].classList.add('wrong');
 
         if (checkUserLoggedIn()) {
-            updateWordStats(wordId, 2);
+            updateWordStats(wordId, false);
         }
     }
 
@@ -2970,66 +2951,6 @@ function checkKelimeAnswer(index, selectedAnswer) {
 let hintUsedThisQuestion = false;
 let hintsUsedToday = 0;
 const MAX_HINTS_PER_DAY = 10;
-
-/** SM-2: doğru cevaptan sonra kalite seçimi beklenirken kelime id */
-let kelimeSm2PendingWordId = null;
-let kelimeSm2QualityFallbackTimer = null;
-
-function clearKelimeSm2QualityUi() {
-    const wrap = document.getElementById('kelime-sm2-quality');
-    if (wrap) {
-        wrap.classList.add('hidden');
-        wrap.querySelectorAll('.sm2-q-btn').forEach((b) => {
-            b.disabled = false;
-        });
-    }
-    if (kelimeSm2QualityFallbackTimer) {
-        clearTimeout(kelimeSm2QualityFallbackTimer);
-        kelimeSm2QualityFallbackTimer = null;
-    }
-    kelimeSm2PendingWordId = null;
-}
-
-/** Çıkışta veya ekran değişiminde bekleyen doğru cevap için SM-2 kaydı (varsayılan: İyi) */
-function flushKelimeSm2PendingQuality() {
-    if (kelimeSm2PendingWordId == null || !checkUserLoggedIn()) {
-        clearKelimeSm2QualityUi();
-        return;
-    }
-    const wid = kelimeSm2PendingWordId;
-    if (kelimeSm2QualityFallbackTimer) {
-        clearTimeout(kelimeSm2QualityFallbackTimer);
-        kelimeSm2QualityFallbackTimer = null;
-    }
-    kelimeSm2PendingWordId = null;
-    document.getElementById('kelime-sm2-quality')?.classList.add('hidden');
-    updateWordStats(wid, 4);
-}
-
-/**
- * Kelime doğru cevabından sonra SM-2 kalitesi (3=zor, 4=iyi, 5=kolay)
- */
-function submitKelimeQuality(quality) {
-    if (kelimeSm2PendingWordId == null) return;
-    if (kelimeSm2QualityFallbackTimer) {
-        clearTimeout(kelimeSm2QualityFallbackTimer);
-        kelimeSm2QualityFallbackTimer = null;
-    }
-    const wordId = kelimeSm2PendingWordId;
-    kelimeSm2PendingWordId = null;
-    const wrap = document.getElementById('kelime-sm2-quality');
-    if (wrap) {
-        wrap.classList.add('hidden');
-        wrap.querySelectorAll('.sm2-q-btn').forEach((b) => {
-            b.disabled = true;
-        });
-    }
-    updateWordStats(wordId, quality);
-    setTimeout(() => {
-        questionIndex++;
-        loadKelimeQuestion();
-    }, 420);
-}
 
 function useHint() {
     if (hintUsedThisQuestion) {
@@ -8231,7 +8152,6 @@ if (typeof window !== 'undefined') {
     window.showGoalSettings = showGoalSettings;
     window.startGame = startGame;
     window.checkKelimeAnswer = checkKelimeAnswer;
-    window.submitKelimeQuality = submitKelimeQuality;
     window.checkDinleAnswer = checkDinleAnswer;
     window.checkBoslukAnswer = checkBoslukAnswer;
     window.checkElifAnswer = checkElifAnswer;
