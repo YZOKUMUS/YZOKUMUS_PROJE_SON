@@ -584,6 +584,7 @@ async function initApp() {
     // Setup UI
     setupEventListeners();
     updateStatsDisplay();
+    updateRecommendedStudyCard();
     
     // Update user status UI
     if (typeof window.updateUserStatusUI === 'function') {
@@ -2022,7 +2023,9 @@ async function startDailyPlanStep() {
     // Ortak başlangıç hazırlığı
     currentGameMode = step.mode;
     gameCompleted = false;
-    document.getElementById('main-container')?.classList.add('hidden');
+    // Plan adımları arasında ekranların üst üste binmesini önle
+    hideAllScreens();
+    resetViewportScroll();
 
     // Reset session
     sessionScore = 0;
@@ -2033,10 +2036,6 @@ async function startDailyPlanStep() {
     maxCombo = 0;
 
     if (step.mode === 'kelime-cevir') {
-        // Plan, alt-mod ekranını pas geçer
-        try {
-            document.getElementById('kelime-submode-screen')?.classList.add('hidden');
-        } catch (e) {}
         await startKelimeCevirGame(step.submode || 'classic', step.count);
         return;
     }
@@ -2705,9 +2704,8 @@ async function startKelimeCevirGame(submode = 'classic', questionCountOverride =
         currentQuestions = getRandomItems(filtered, questionCount);
     }
     
-    // Hide submode screen, show game screen
-    document.getElementById('kelime-submode-screen').classList.add('hidden');
-    document.getElementById('kelime-cevir-screen').classList.remove('hidden');
+    // Hide other screens, show game screen
+    showOnlyScreen('kelime-cevir-screen');
     document.getElementById('kelime-total-questions').textContent = questionCount;
     
     // Load first question
@@ -2735,6 +2733,7 @@ function loadKelimeQuestion() {
     document.getElementById('kelime-arabic').textContent = currentQuestion.kelime || currentQuestion.arabic;
     document.getElementById('kelime-info').textContent = currentQuestion.sure_adi || '';
     updateMicroContextUI('kelime-context', currentQuestion);
+    updateWordChipsUI(currentQuestion);
     document.getElementById('kelime-combo').textContent = comboCount;
     document.getElementById('kelime-session-score').textContent = formatNumber(sessionScore);
     
@@ -2838,6 +2837,48 @@ function updateMicroContextUI(elementId, q) {
         el.textContent = '';
         el.classList.add('hidden');
     }
+}
+
+function updateWordChipsUI(q) {
+    const el = document.getElementById('kelime-chips');
+    if (!el) return;
+    if (!q || typeof q !== 'object') {
+        el.innerHTML = '';
+        el.classList.add('hidden');
+        return;
+    }
+
+    const chips = [];
+
+    const root = q.root || q.kok || q.kök || '';
+    if (root && String(root).trim()) {
+        chips.push({ cls: 'root', text: `Kök: ${String(root).trim()}` });
+    }
+
+    const family = q.family || q.aile || q.kelime_ailesi || '';
+    if (family && String(family).trim()) {
+        chips.push({ cls: 'family', text: `Aile: ${String(family).trim()}` });
+    }
+
+    const tags = q.tags || q.etiketler || q.tag || [];
+    const tagList = Array.isArray(tags)
+        ? tags
+        : (typeof tags === 'string' ? tags.split(',').map(s => s.trim()).filter(Boolean) : []);
+
+    tagList.slice(0, 5).forEach(t => {
+        chips.push({ cls: 'tag', text: `#${String(t).trim()}` });
+    });
+
+    if (chips.length === 0) {
+        el.innerHTML = '';
+        el.classList.add('hidden');
+        return;
+    }
+
+    el.innerHTML = chips
+        .map(c => `<span class="word-chip ${c.cls}">${escapeHtmlReviewQueue(c.text)}</span>`)
+        .join('');
+    el.classList.remove('hidden');
 }
 
 function checkKelimeAnswer(index, selectedAnswer) {
@@ -4135,7 +4176,7 @@ async function startDinleBulGame(questionCountOverride = null) {
         currentQuestions = getRandomItems(filtered, questionCount);
     }
     
-    document.getElementById('dinle-bul-screen').classList.remove('hidden');
+    showOnlyScreen('dinle-bul-screen');
     document.getElementById('dinle-total-questions').textContent = questionCount;
     
     loadDinleQuestion();
@@ -4255,7 +4296,7 @@ async function startBoslukDoldurGame(questionCountOverride = null) {
     const questionCount = questionCountOverride ?? CONFIG.QUESTIONS_PER_GAME;
     currentQuestions = getRandomItems(filtered, questionCount);
     
-    document.getElementById('bosluk-doldur-screen').classList.remove('hidden');
+    showOnlyScreen('bosluk-doldur-screen');
     document.getElementById('bosluk-total-questions').textContent = questionCount;
     
     loadBoslukQuestion();
@@ -6592,6 +6633,45 @@ function updateStatsDisplay() {
     document.getElementById('level-display').textContent = currentLevel;
     
     updateDailyGoalDisplay();
+    updateRecommendedStudyCard();
+}
+
+function updateRecommendedStudyCard() {
+    const card = document.getElementById('recommended-study-card');
+    const desc = document.getElementById('recommended-study-desc');
+    const badge = document.getElementById('recommended-study-badge');
+    if (!card || !desc || !badge) {
+        return;
+    }
+
+    // Giriş yoksa: yine göster ama CTA girişe yönlensin
+    const isLoggedIn = checkUserLoggedIn();
+    if (!isLoggedIn) {
+        badge.textContent = '👤 Giriş';
+        desc.textContent = 'Önerilen çalışma için giriş yapın (10 dk plan + tekrar listesi).';
+        card.onclick = () => {
+            requireUserLogin();
+        };
+        return;
+    }
+
+    const due = (typeof getReviewQueueEntries === 'function') ? getReviewQueueEntries(9999) : [];
+    const dueCount = Array.isArray(due) ? due.length : 0;
+
+    if (dueCount >= 5) {
+        badge.textContent = `🔄 ${dueCount} tekrar`;
+        desc.textContent = `Bugün ${dueCount} kelime tekrar zamanı geldi. 10 dk plan ile hızlıca çalış.`;
+    } else if (dueCount > 0) {
+        badge.textContent = `🔄 ${dueCount} tekrar`;
+        desc.textContent = `Bugün ${dueCount} kelime tekrar zamanı geldi. Biraz daha pratik yapınca “Tekrar modu” açılır.`;
+    } else {
+        badge.textContent = '⏱️ 10 dk';
+        desc.textContent = 'Bugün tekrarın az. 10 dk plan ile yeni kelime + dinleme + boşluk alıştırması yap.';
+    }
+
+    card.onclick = () => {
+        startGame('daily-plan-10');
+    };
 }
 
 function updateDailyGoalDisplay() {
