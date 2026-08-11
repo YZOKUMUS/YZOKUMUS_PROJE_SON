@@ -585,6 +585,10 @@ async function initApp() {
     setupEventListeners();
     updateStatsDisplay();
     updateRecommendedStudyCard();
+
+    if (typeof window.updateJuzMainMenuWidget === 'function') {
+        window.updateJuzMainMenuWidget();
+    }
     
     // Update user status UI
     if (typeof window.updateUserStatusUI === 'function') {
@@ -1917,6 +1921,13 @@ async function startGame(gameMode) {
         showOnlyScreen('elif-ba-submode-screen');
         return;
     }
+
+    if (gameMode === 'juz-yolculugu') {
+        if (typeof window.openJuzJourney === 'function') {
+            window.openJuzJourney();
+        }
+        return;
+    }
     
     // Reset session
     sessionScore = 0;
@@ -2291,6 +2302,20 @@ function handleGameBackButton() {
         goToMainMenu(true); // skipWarning = true
         return;
     }
+
+    const juzJourneyScreen = document.getElementById('juz-journey-screen');
+    if (juzJourneyScreen && !juzJourneyScreen.classList.contains('hidden')) {
+        goToMainMenu(true);
+        return;
+    }
+
+    if (currentKelimeSubmode && currentKelimeSubmode.startsWith('juz-')
+        && questionIndex === 0 && correctCount === 0 && wrongCount === 0 && sessionScore === 0) {
+        if (typeof window.goToJuzJourney === 'function') {
+            window.goToJuzJourney(true);
+            return;
+        }
+    }
     
     // Okuma modları için popup gösterme (dua-et, ayet-oku, hadis-oku)
     if (['dua-et', 'ayet-oku', 'hadis-oku'].includes(currentGameMode)) {
@@ -2307,6 +2332,10 @@ function handleGameBackButton() {
  */
 function goToMainMenu(skipWarning = false) {
     cleanupDinlePracticeRecording();
+
+    if (typeof window.clearJuzReturnFlag === 'function') {
+        window.clearJuzReturnFlag();
+    }
 
     // Oyun tamamlandıysa (endGame çağrıldıysa) uyarı gösterme
     if (gameCompleted) {
@@ -2379,6 +2408,10 @@ function goToMainMenu(skipWarning = false) {
     
     // Update displays
     updateStatsDisplay();
+
+    if (typeof window.updateJuzMainMenuWidget === 'function') {
+        window.updateJuzMainMenuWidget();
+    }
     
     // Reset session state (oyun bitmediği için kaydedilmemiş)
     currentGameMode = null;
@@ -2443,7 +2476,8 @@ function endGame() {
     const stats = { 
         stars, 
         bestStreak: streakData.bestStreak,
-        perfectLessons: gameStats.perfectLessons 
+        perfectLessons: gameStats.perfectLessons,
+        juzCompleted: typeof window.getCompletedJuzCount === 'function' ? window.getCompletedJuzCount() : 0
     };
     const newAchievements = checkAchievements(stats);
     
@@ -2454,6 +2488,13 @@ function endGame() {
     
     // Check badges based on total points
     checkBadges();
+
+    if (currentKelimeSubmode && currentKelimeSubmode.startsWith('juz-')) {
+        const juzNum = parseInt(currentKelimeSubmode.replace('juz-', ''), 10);
+        if (juzNum >= 1 && juzNum <= 30 && typeof window.checkJuzRewardsAfterGame === 'function') {
+            window.checkJuzRewardsAfterGame(juzNum);
+        }
+    }
     
     // Check daily goal
     checkDailyGoal();
@@ -2523,6 +2564,15 @@ function showResultModal(perfectBonus = 0) {
             playAgainBtn.classList.remove('hidden');
         }
     }
+
+    const homeBtn = document.querySelector('#game-result-modal .result-actions .secondary-btn');
+    if (homeBtn) {
+        if (typeof window.shouldReturnToJuzAfterGame === 'function' && window.shouldReturnToJuzAfterGame()) {
+            homeBtn.textContent = 'Haritaya Dön';
+        } else {
+            homeBtn.textContent = 'Ana Menü';
+        }
+    }
     
     openModal('game-result-modal');
 }
@@ -2553,7 +2603,27 @@ function playAgain() {
 function closeResultAndGoHome() {
     closeModal('game-result-modal');
     cancelDailyPlan();
+    if (typeof window.shouldReturnToJuzAfterGame === 'function' && window.shouldReturnToJuzAfterGame()) {
+        if (typeof window.closeResultAndReturnToJuz === 'function') {
+            window.closeResultAndReturnToJuz();
+            return;
+        }
+    }
     goToMainMenu();
+}
+
+/**
+ * Bonus Hasene (cüz ödülü vb.)
+ */
+function addBonusHasene(amount, reason) {
+    if (!amount || amount <= 0) return;
+    totalPoints += amount;
+    dailyProgress += amount;
+    debouncedSaveStats();
+    updateStatsDisplay();
+    if (reason) {
+        showToast(`+${formatNumber(amount)} Hasene — ${reason}`, 'success', 3500);
+    }
 }
 
 // ========================================
@@ -2594,18 +2664,44 @@ async function startKelimeCevirGame(submode = 'classic', questionCountOverride =
     
     let useIntelligentSelection = false;
     let isReviewMode = false;
+
+    if (typeof submode === 'string' && submode.startsWith('juz-')) {
+        const juzNum = parseInt(submode.replace('juz-', ''), 10);
+        if (juzNum >= 1 && juzNum <= 30 && typeof window.filterKelimeByJuz === 'function') {
+            filtered = window.filterKelimeByJuz(filtered, juzNum);
+            if (filtered.length < 5) {
+                filtered = window.filterKelimeByJuz(data, juzNum);
+            }
+            console.log(`🗺️ Cüz ${juzNum} kelimeleri: ${filtered.length}`);
+            if (filtered.length < 5) {
+                showToast('Bu cüzde yeterli kelime yok', 'error');
+                if (typeof window.goToJuzJourney === 'function') {
+                    window.goToJuzJourney(true);
+                } else {
+                    goToMainMenu(true);
+                }
+                return;
+            }
+            useIntelligentSelection = true;
+        }
+    } else {
     
     // Apply submode filter
     switch (submode) {
         case 'juz30':
-            // Filter 30th Juz words (Surah 78-114)
-            // id format is "sure:ayet:kelime" e.g. "82:8:6"
-            filtered = filtered.filter(word => {
-                const wordId = word.id || '';
-                const parts = wordId.split(':');
-                const sureNum = parts.length > 0 ? parseInt(parts[0]) : 0;
-                return sureNum >= 78 && sureNum <= 114;
-            });
+            if (typeof window.filterKelimeByJuz === 'function') {
+                filtered = window.filterKelimeByJuz(filtered, 30);
+                if (filtered.length < 5) {
+                    filtered = window.filterKelimeByJuz(data, 30);
+                }
+            } else {
+                filtered = filtered.filter(word => {
+                    const wordId = word.id || '';
+                    const parts = wordId.split(':');
+                    const sureNum = parts.length > 0 ? parseInt(parts[0]) : 0;
+                    return sureNum >= 78 && sureNum <= 114;
+                });
+            }
             console.log(`🕌 30. Cüz kelimeleri bulundu: ${filtered.length}`);
             if (filtered.length < 10) {
                 showToast('30. cüz kelimesi yeterli değil, tüm kelimeler kullanılıyor', 'info');
@@ -2682,6 +2778,7 @@ async function startKelimeCevirGame(submode = 'classic', questionCountOverride =
             useIntelligentSelection = true;
             break;
     }
+    }
     
     // Select questions using intelligent algorithm or random
     const questionCount = questionCountOverride ?? CONFIG.QUESTIONS_PER_GAME;
@@ -2721,12 +2818,16 @@ function loadKelimeQuestion() {
     document.getElementById('kelime-arabic').textContent = currentQuestion.kelime || currentQuestion.arabic;
     const kelimeInfoEl = document.getElementById('kelime-info');
     const microPreview = getMicroContextTextFromQuestion(currentQuestion);
+    const juzLabel = (currentKelimeSubmode && currentKelimeSubmode.startsWith('juz-'))
+        ? `🗺️ Cüz ${currentKelimeSubmode.replace('juz-', '')}`
+        : '';
     if (kelimeInfoEl) {
         if (microPreview && microPreview.trim()) {
-            kelimeInfoEl.textContent = '';
-            kelimeInfoEl.classList.add('hidden');
+            kelimeInfoEl.textContent = juzLabel;
+            kelimeInfoEl.classList.toggle('hidden', !juzLabel);
         } else {
-            kelimeInfoEl.textContent = currentQuestion.sure_adi || '';
+            const sureLabel = currentQuestion.sure_adi || '';
+            kelimeInfoEl.textContent = juzLabel && sureLabel ? `${juzLabel} · ${sureLabel}` : (juzLabel || sureLabel);
             if (kelimeInfoEl.textContent.trim()) {
                 kelimeInfoEl.classList.remove('hidden');
             } else {
@@ -8128,6 +8229,24 @@ if (typeof window !== 'undefined') {
     window.goToMainMenu = goToMainMenu;
     window.playAgain = playAgain;
     window.closeResultAndGoHome = closeResultAndGoHome;
+    window.addBonusHasene = addBonusHasene;
+    window.getJuzWordStats = () => wordStats;
+    window.onJuzCompleted = function onJuzCompleted() {
+        const stars = calculateStars(totalPoints);
+        const stats = {
+            stars,
+            bestStreak: streakData.bestStreak,
+            perfectLessons: gameStats.perfectLessons || 0,
+            juzCompleted: typeof window.getCompletedJuzCount === 'function' ? window.getCompletedJuzCount() : 0
+        };
+        const newAchievements = checkAchievements(stats);
+        if (newAchievements.length > 0) {
+            newAchievements.forEach((ach) => saveAchievement(ach.id));
+            setTimeout(() => showAchievementModal(newAchievements[0]), 1200);
+        }
+        debouncedSaveStats();
+        updateStatsDisplay();
+    };
     window.continueDailyPlan = continueDailyPlan;
     window.showStatsModal = showStatsModal;
     window.showTasksModal = showTasksModal;

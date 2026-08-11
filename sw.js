@@ -21,6 +21,7 @@ const urlsToCache = [
     './js/leaderboard.js',
     './js/notifications.js',
     './js/charts.js',
+    './js/juz-journey.js',
     './js/game-core.js',
     './js/pronunciation-fix.js',
     './ASSETS/badges/icon-512.png',

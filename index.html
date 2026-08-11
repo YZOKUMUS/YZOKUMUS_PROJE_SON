@@ -35,7 +35,7 @@
     <link rel="apple-touch-icon" href="ASSETS/badges/icon-512.png">
     
     <!-- Styles -->
-    <link rel="stylesheet" href="style.css?v=4.1">
+    <link rel="stylesheet" href="style.css?v=4.2">
     <!-- Font preload - Arapça font kritik, erken yükle -->
     <link rel="preload" href="ASSETS/fonts/KFGQPC Uthmanic Script HAFS Regular.otf" as="font" type="font/otf" crossorigin>
 </head>
@@ -145,7 +145,16 @@
 
         <!-- Game Cards -->
         <div class="game-cards-container">
-            <!-- 0. 10 Dakika Planı (önerilen rota) -->
+            <!-- 0. Cüz Yolculuğu -->
+            <div class="game-card featured-card juz-journey-card" data-game="juz-yolculugu" id="juz-journey-card">
+                <div class="game-icon">
+                    <span>🗺️</span>
+                </div>
+                <h3>Cüz Yolculuğu</h3>
+                <p id="juz-journey-card-progress">30 cüzlük kelime haritası — ilerlemeni takip et</p>
+            </div>
+
+            <!-- 1. 10 Dakika Planı (önerilen rota) -->
             <div class="game-card featured-card" data-game="daily-plan-10">
                 <div class="game-icon">
                     <span>⏱️</span>
@@ -263,6 +272,54 @@
                 </div>
                 <h3>Kart Modu</h3>
                 <p>Tam ekran kartlarla kelime ezberi yap</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cüz Yolculuğu Haritası -->
+    <div id="juz-journey-screen" class="game-screen hidden">
+        <div class="game-header">
+            <button class="back-btn" onclick="goToMainMenu(true)" aria-label="Ana menüye dön">← Geri</button>
+            <h2>🗺️ Cüz Yolculuğu</h2>
+        </div>
+        <div class="juz-journey-content">
+            <div class="juz-hero glass-card">
+                <div class="juz-hero-row">
+                    <div class="juz-hero-copy">
+                        <p class="juz-hero-kicker">Kur'an Kelime Haritası</p>
+                        <p class="juz-hero-stat" id="juz-overall-progress-text">0/30 cüz tamam</p>
+                    </div>
+                    <div id="juz-hero-ring-slot" class="juz-hero-ring-slot" aria-hidden="true"></div>
+                </div>
+                <div class="juz-hero-bar">
+                    <div class="juz-hero-bar-fill" id="juz-overall-progress-bar" style="width: 0%"></div>
+                </div>
+                <p class="juz-hero-hint">Her cüzdeki kelimeleri ustalaştıkça harita parlar. %100 olunca bonus Hasene kazanırsın.</p>
+                <div class="juz-hero-chips">
+                    <span class="juz-chip" id="juz-chip-completed">🏆 0 tamamlandı</span>
+                    <span class="juz-chip juz-chip-accent" id="juz-chip-recommended">✨ Önerilen: 1. cüz</span>
+                </div>
+            </div>
+            <div class="juz-journey-grid" id="juz-journey-grid" role="list" aria-label="30 cüz haritası"></div>
+            <div id="juz-detail-panel" class="juz-detail-panel glass-card hidden">
+                <div class="juz-detail-head">
+                    <div id="juz-detail-ring-slot" class="juz-detail-ring-slot" aria-hidden="true"></div>
+                    <div class="juz-detail-head-text">
+                        <h3 id="juz-detail-title">Cüz seç</h3>
+                        <p class="juz-detail-hint" id="juz-detail-hint"></p>
+                    </div>
+                </div>
+                <div class="juz-detail-progress-wrap">
+                    <div class="juz-detail-progress-bar-bg">
+                        <div class="juz-detail-progress-bar-fill" id="juz-detail-progress-bar" style="width: 0%"></div>
+                    </div>
+                    <span id="juz-detail-progress-text">%0</span>
+                </div>
+                <p class="juz-detail-stats" id="juz-detail-stats"></p>
+                <p class="juz-detail-bonus" id="juz-detail-bonus"></p>
+                <button type="button" class="primary-btn juz-play-btn" id="juz-play-btn" onclick="startJuzPractice(parseInt(document.getElementById('juz-detail-panel').dataset.juz, 10))">
+                    Bu Cüzden Oyna
+                </button>
             </div>
         </div>
     </div>
@@ -671,6 +728,16 @@
             <div class="harf-isimler-grid" id="harf-isimler-grid">
                 <!-- Harfler ve isimleri dinamik olarak yüklenecek -->
             </div>
+        </div>
+    </div>
+
+    <!-- Cüz Tamamlandı Modal -->
+    <div id="juz-complete-modal" class="modal hidden">
+        <div class="modal-content glass-card celebration">
+            <h2 id="juz-complete-title">🎉 Cüz Tamamlandı!</h2>
+            <p id="juz-complete-desc"></p>
+            <p class="juz-complete-bonus highlight" id="juz-complete-bonus"></p>
+            <button type="button" class="primary-btn" onclick="closeModal('juz-complete-modal'); goToJuzJourney(true);">Haritaya Dön</button>
         </div>
     </div>
 
@@ -1430,6 +1497,7 @@
     <script src="js/leaderboard.js" defer></script>
     <script src="js/notifications.js" defer></script>
     <script src="js/charts.js" defer></script>
+    <script src="js/juz-journey.js" defer></script>
     <script src="js/game-core.js" defer></script>
     <script src="js/pronunciation-fix.js" defer></script>
     <!-- Debug/Test Scripts (Only loaded in development mode) -->

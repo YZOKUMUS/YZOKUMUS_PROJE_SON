@@ -150,7 +150,13 @@ const ACHIEVEMENTS = [
     { id: 'five_thousand_correct', name: '🕋 Beş Bin Doğru', description: '5000 doğru cevap ver', check: (stats) => stats.totalCorrect >= 5000 },
     { id: 'diamond_master_final', name: '✨ Elmas Mertebe II', description: '5000 Yıldız kazan', check: (stats) => stats.stars >= 5000 },
     { id: 'master_of_masters_final', name: '📖 Ustalar Ustası II', description: '6000 Yıldız kazan', check: (stats) => stats.stars >= 6000 },
-    { id: 'hafiz', name: '🕋 Kurra Hafız', description: '10000 Yıldız kazan (≈2.5M Hasene)', check: (stats) => stats.stars >= 10000 }
+    { id: 'hafiz', name: '🕋 Kurra Hafız', description: '10000 Yıldız kazan (≈2.5M Hasene)', check: (stats) => stats.stars >= 10000 },
+
+    // Cüz Yolculuğu
+    { id: 'juz_first', name: '🗺️ İlk Cüz', description: 'Bir cüzü %100 tamamla', check: (stats) => (stats.juzCompleted || 0) >= 1 },
+    { id: 'juz_five', name: '📖 Beş Cüz', description: '5 cüzü tamamla', check: (stats) => (stats.juzCompleted || 0) >= 5 },
+    { id: 'juz_fifteen', name: '🕌 On Beş Cüz', description: '15 cüzü tamamla', check: (stats) => (stats.juzCompleted || 0) >= 15 },
+    { id: 'juz_all', name: '🕋 Kelime Hatmi', description: '30 cüzün tamamını bitir', check: (stats) => (stats.juzCompleted || 0) >= 30 }
 ];
 
 // Badge Definitions - Daha fazla rozet
