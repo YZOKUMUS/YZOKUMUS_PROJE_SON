@@ -35,6 +35,16 @@ function getLocalDateString(date = new Date()) {
 }
 
 /**
+ * Add days to a YYYY-MM-DD date string (local calendar, no UTC shift)
+ */
+function addDaysToLocalDateString(dateStr, days) {
+    const parts = dateStr.split('-').map(Number);
+    const date = new Date(parts[0], parts[1] - 1, parts[2]);
+    date.setDate(date.getDate() + days);
+    return getLocalDateString(date);
+}
+
+/**
  * Format number with thousand separators
  * @param {number} num - Number to format
  * @param {string} separator - Separator to use (default: ',', can be '.' for Turkish locale)
@@ -252,6 +262,7 @@ function generateId() {
 // Make functions globally available
 if (typeof window !== 'undefined') {
     window.getLocalDateString = getLocalDateString;
+    window.addDaysToLocalDateString = addDaysToLocalDateString;
     window.formatNumber = formatNumber;
     window.shuffleArray = shuffleArray;
     window.shuffleWithEqualDistribution = shuffleWithEqualDistribution;

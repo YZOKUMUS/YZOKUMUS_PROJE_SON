@@ -35,7 +35,7 @@
     <link rel="apple-touch-icon" href="ASSETS/badges/icon-512.png">
     
     <!-- Styles -->
-    <link rel="stylesheet" href="style.css?v=4.2">
+    <link rel="stylesheet" href="style.css?v=4.5">
     <!-- Font preload - Arapça font kritik, erken yükle -->
     <link rel="preload" href="ASSETS/fonts/KFGQPC Uthmanic Script HAFS Regular.otf" as="font" type="font/otf" crossorigin>
 </head>
@@ -825,6 +825,14 @@
                     <span class="stat-title">Yıldız</span>
                     <span class="stat-number" id="modal-total-stars">0</span>
                 </div>
+                <div class="stat-box stat-box-juz">
+                    <span class="stat-title">🗺️ Tamamlanan Cüz</span>
+                    <span class="stat-number" id="modal-juz-completed">0/30</span>
+                </div>
+                <div class="stat-box stat-box-juz">
+                    <span class="stat-title">🗺️ Cüz İlerleme</span>
+                    <span class="stat-number" id="modal-juz-progress">0%</span>
+                </div>
                 <div class="stat-box">
                     <span class="stat-title">Toplam Doğru</span>
                     <span class="stat-number" id="modal-total-correct">0</span>
@@ -834,6 +842,14 @@
                     <span class="stat-number" id="modal-total-wrong">0</span>
                 </div>
                 <div class="stat-box">
+                    <span class="stat-title">Başarı Oranı</span>
+                    <span class="stat-number" id="modal-success-rate">—</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-title">Güncel Seri</span>
+                    <span class="stat-number" id="modal-current-streak">0</span>
+                </div>
+                <div class="stat-box">
                     <span class="stat-title">En Yüksek Seri</span>
                     <span class="stat-number" id="modal-best-streak">0</span>
                 </div>
@@ -841,11 +857,20 @@
                     <span class="stat-title">Oyun Günü</span>
                     <span class="stat-number" id="modal-total-days">0</span>
                 </div>
+                <div class="stat-box">
+                    <span class="stat-title">Mükemmel Ders</span>
+                    <span class="stat-number" id="modal-perfect-lessons">0</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-title">Ustalaşılan Kelime</span>
+                    <span class="stat-number" id="modal-mastered-words">0</span>
+                </div>
             </div>
             <div class="modal-actions">
                 <button class="primary-btn" onclick="if(typeof showReviewQueueModal === 'function') showReviewQueueModal(); else showToast('Liste yükleniyor...', 'info');">📋 Bugün tekrar listesi</button>
                 <button class="primary-btn" onclick="showWordAnalysisModal()">📈 Kelime Analizi</button>
                 <button class="primary-btn" onclick="if(typeof showChartsModal === 'function') showChartsModal(); else showToast('Grafikler yükleniyor...', 'info');">📊 Grafikler</button>
+                <button class="primary-btn" onclick="closeModal('stats-modal'); if(typeof openJuzJourney==='function') openJuzJourney();">🗺️ Cüz Haritası</button>
                 <button class="secondary-btn" onclick="showAppSettingsModal()">⚙️ Ayarlar</button>
                 <button class="secondary-btn" onclick="if(typeof showNotificationSettings === 'function') showNotificationSettings(); else showToast('Bildirim ayarları yükleniyor...', 'info');">🔔 Bildirimler</button>
                 <button class="secondary-btn" onclick="closeModal('stats-modal')">Kapat</button>

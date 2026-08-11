@@ -256,8 +256,11 @@ async function signOut() {
     if (user && window.FIREBASE_ENABLED && typeof window.firestoreDelete === 'function') {
         try {
             const username = localStorage.getItem('hasene_username') || user.username;
-            const weekStart = typeof window.getWeekStartString === 'function' ? 
-                window.getWeekStartString() : new Date().toISOString().split('T')[0];
+            const weekStart = typeof window.getWeekStartString === 'function'
+                ? window.getWeekStartString()
+                : (typeof window.getLocalDateString === 'function'
+                    ? window.getLocalDateString()
+                    : new Date().toISOString().split('T')[0]);
             const docId = `${username}_${weekStart}`;
             await window.firestoreDelete('weekly_leaderboard', docId);
             console.log('✅ Firebase leaderboard verisi silindi');

@@ -1525,6 +1525,11 @@ body[data-theme="dark"] .word-chip {
     border-radius: var(--radius-md);
 }
 
+.stat-box-juz {
+    background: rgba(76, 175, 80, 0.12);
+    border: 1px solid rgba(76, 175, 80, 0.25);
+}
+
 .stat-title {
     display: block;
     font-size: 0.75rem;

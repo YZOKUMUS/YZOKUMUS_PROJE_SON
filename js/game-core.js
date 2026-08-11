@@ -1216,7 +1216,7 @@ async function resetAllData() {
             const day = now.getDay();
             const diff = now.getDate() - day + (day === 0 ? -6 : 1); // Monday
             const monday = new Date(now.getFullYear(), now.getMonth(), diff);
-            weekStart = monday.toISOString().split('T')[0];
+            weekStart = getLocalDateString(monday);
         }
         
         console.log('🔄 Firebase silme işlemi başlatılıyor:', { userId: user.id, username, docId, weekStart });
@@ -1301,7 +1301,7 @@ async function resetAllData() {
                         try {
                             const prevWeekDate = new Date(weekStart + 'T00:00:00');
                             prevWeekDate.setDate(prevWeekDate.getDate() - (i * 7));
-                            const prevWeekStart = prevWeekDate.toISOString().split('T')[0];
+                            const prevWeekStart = getLocalDateString(prevWeekDate);
                             const prevLeaderboardDocId = `${username}_${prevWeekStart}`;
                             deletePromises.push(
                                 window.firestoreDelete('weekly_leaderboard', prevLeaderboardDocId).catch((e) => {
@@ -1320,7 +1320,7 @@ async function resetAllData() {
                     try {
                         const prevWeekDate = new Date(weekStart + 'T00:00:00');
                         prevWeekDate.setDate(prevWeekDate.getDate() - (i * 7));
-                        const prevWeekStart = prevWeekDate.toISOString().split('T')[0];
+                        const prevWeekStart = getLocalDateString(prevWeekDate);
                         const prevLeaderboardDocId = `${username}_${prevWeekStart}`;
                         deletePromises.push(
                             window.firestoreDelete('weekly_leaderboard', prevLeaderboardDocId).catch((e) => {
@@ -3233,9 +3233,13 @@ function addToReviewList(wordId) {
  * @returns {string} New date string
  */
 function addDaysToDate(dateStr, days) {
-    const date = new Date(dateStr);
+    if (typeof addDaysToLocalDateString === 'function') {
+        return addDaysToLocalDateString(dateStr, days);
+    }
+    const parts = dateStr.split('-').map(Number);
+    const date = new Date(parts[0], parts[1] - 1, parts[2]);
     date.setDate(date.getDate() + days);
-    return date.toISOString().split('T')[0];
+    return getLocalDateString(date);
 }
 
 /**
@@ -6812,9 +6816,33 @@ function showStatsModal() {
     document.getElementById('modal-total-stars').textContent = calculateStars(totalPoints);
     document.getElementById('modal-total-correct').textContent = formatNumber(gameStats.totalCorrect || 0);
     document.getElementById('modal-total-wrong').textContent = formatNumber(gameStats.totalWrong || 0);
+    document.getElementById('modal-current-streak').textContent = streakData.currentStreak || 0;
     document.getElementById('modal-best-streak').textContent = streakData.bestStreak;
     document.getElementById('modal-total-days').textContent = streakData.totalPlayDays;
-    
+    document.getElementById('modal-perfect-lessons').textContent = gameStats.perfectLessons || 0;
+
+    const masteredCount = wordStats
+        ? Object.values(wordStats).filter((s) => s && (s.masteryLevel || 0) >= 8).length
+        : 0;
+    document.getElementById('modal-mastered-words').textContent = formatNumber(masteredCount);
+
+    const correct = gameStats.totalCorrect || 0;
+    const wrong = gameStats.totalWrong || 0;
+    const attempts = correct + wrong;
+    document.getElementById('modal-success-rate').textContent =
+        attempts > 0 ? `${Math.round((correct / attempts) * 100)}%` : '—';
+
+    const juzCompletedEl = document.getElementById('modal-juz-completed');
+    const juzProgressEl = document.getElementById('modal-juz-progress');
+    if (typeof getOverallJuzSummary === 'function' && juzCompletedEl && juzProgressEl) {
+        const juz = getOverallJuzSummary();
+        juzCompletedEl.textContent = `${juz.completed}/30`;
+        juzProgressEl.textContent = `${juz.avgMastered}%`;
+    } else {
+        if (juzCompletedEl) juzCompletedEl.textContent = '—';
+        if (juzProgressEl) juzProgressEl.textContent = '—';
+    }
+
     openModal('stats-modal');
 }
 
@@ -8537,7 +8565,7 @@ async function nuclearClear() {
                         const diff = weekDate.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
                         weekDate.setDate(diff);
                         weekDate.setHours(0, 0, 0, 0);
-                        const weekStart = weekDate.toISOString().split('T')[0];
+                        const weekStart = getLocalDateString(weekDate);
                         
                         // Try both username and userId formats
                         if (hasRealUsername) {
@@ -8614,9 +8642,9 @@ async function nuclearClear() {
         const today = new Date();
         const dayOfWeek = today.getDay();
         const diff = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
-        const monday = new Date(today.setDate(diff));
+        const monday = new Date(today.getFullYear(), today.getMonth(), diff);
         monday.setHours(0, 0, 0, 0);
-        const weekStart = monday.toISOString().split('T')[0];
+        const weekStart = getLocalDateString(monday);
         const weeklyXPKey = `hasene_weekly_xp_${weekStart}`;
         
         // Then clear everything else
