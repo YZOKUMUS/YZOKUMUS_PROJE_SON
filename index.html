@@ -6,27 +6,50 @@
     <meta name="theme-color" content="#9d8aff">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="description" content="Hasene Arapça Dersi - Kuran kelimeleri ile eğlenceli öğrenme oyunu">
+    <meta name="description" content="Hasene — Kur'an kelimelerini oyunla öğren. Kelime çevir, Cüz Yolculuğu haritası, akıllı tekrar, rozetler ve günlük hedefler. Ücretsiz Arapça dersi. Quran vocabulary learning app.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://yzokumus.github.io/YZOKUMUS_PROJE_SON/">
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://yzokumus.github.io/YZOKUMUS_PROJE_SON/">
-    <meta property="og:title" content="Hasene Arapça Dersi">
-    <meta property="og:description" content="Kuran kelimeleri ile eğlenceli öğrenme oyunu - Hasene puan sistemi, rozetler ve günlük görevler ile Arapça öğrenin">
+    <meta property="og:site_name" content="Hasene Arapça Dersi">
+    <meta property="og:locale" content="tr_TR">
+    <meta property="og:title" content="Hasene — Kur'an Kelimelerini Oyunla Öğren">
+    <meta property="og:description" content="14.000+ Kur'an kelimesi, Cüz Yolculuğu, SM-2 tekrar sistemi, rozetler ve lig. Ücretsiz, telefona eklenebilir.">
     <meta property="og:image" content="https://yzokumus.github.io/YZOKUMUS_PROJE_SON/ASSETS/badges/icon-512.png">
+    <meta property="og:image:width" content="512">
+    <meta property="og:image:height" content="512">
     
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:url" content="https://yzokumus.github.io/YZOKUMUS_PROJE_SON/">
-    <meta name="twitter:title" content="Hasene Arapça Dersi">
-    <meta name="twitter:description" content="Kuran kelimeleri ile eğlenceli öğrenme oyunu">
+    <meta name="twitter:title" content="Hasene — Kur'an Kelimelerini Oyunla Öğren">
+    <meta name="twitter:description" content="Kuran kelimelerini oyunla öğren. Cüz haritası, akıllı tekrar, rozetler. Ücretsiz!">
     <meta name="twitter:image" content="https://yzokumus.github.io/YZOKUMUS_PROJE_SON/ASSETS/badges/icon-512.png">
     
     <!-- Additional Meta -->
     <meta name="author" content="YZOKUMUS">
-    <meta name="keywords" content="Arapça, Kuran, kelime öğrenme, eğitim, oyun, Hasene, İslam, dini eğitim">
+    <meta name="keywords" content="Arapça, Kuran, Kur'an, kelime öğrenme, Quran vocabulary, Arabic learning, Islamic education, Hasene, Cüz, flashcard, eğitim oyunu, Arapça dersi, Kuran kelimeleri">
     
-    <title>Hasene Arapça Dersi</title>
+    <title>Hasene — Kur'an Kelimelerini Oyunla Öğren | Ücretsiz Arapça Dersi</title>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Hasene Arapça Dersi",
+        "alternateName": "Hasene Quran Vocabulary",
+        "url": "https://yzokumus.github.io/YZOKUMUS_PROJE_SON/",
+        "description": "Kur'an kelimelerini oyunla öğrenin. Kelime çevir, Cüz Yolculuğu, dinle-bul, boşluk doldur ve akıllı tekrar sistemi.",
+        "applicationCategory": "EducationalApplication",
+        "operatingSystem": "Web, Android",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "inLanguage": ["tr", "ar"],
+        "image": "https://yzokumus.github.io/YZOKUMUS_PROJE_SON/ASSETS/badges/icon-512.png",
+        "author": { "@type": "Organization", "name": "YZOKUMUS" }
+    }
+    </script>
     
     <!-- PWA -->
     <link rel="manifest" href="manifest.json">
@@ -35,7 +58,7 @@
     <link rel="apple-touch-icon" href="ASSETS/badges/icon-512.png">
     
     <!-- Styles -->
-    <link rel="stylesheet" href="style.css?v=4.5">
+    <link rel="stylesheet" href="style.css?v=4.6">
     <!-- Font preload - Arapça font kritik, erken yükle -->
     <link rel="preload" href="ASSETS/fonts/KFGQPC Uthmanic Script HAFS Regular.otf" as="font" type="font/otf" crossorigin>
 </head>
@@ -80,6 +103,7 @@
                     <span id="user-status-indicator" class="user-status-indicator hidden" aria-hidden="true"></span>
                 </div>
                 <div class="user-actions">
+                    <button type="button" onclick="shareHaseneApp()" class="secondary-btn user-action-btn" title="Arkadaşına öner" aria-label="Uygulamayı paylaş">📤</button>
                     <button onclick="showTestToolsModal()" class="secondary-btn user-action-btn" title="Test Araçları" style="padding: 8px 12px; font-size: 0.9rem; background: rgba(255, 200, 0, 0.2); border: 1px solid rgba(255, 200, 0, 0.5);">🧪</button>
                 </div>
             </div>
@@ -871,6 +895,7 @@
                 <button class="primary-btn" onclick="showWordAnalysisModal()">📈 Kelime Analizi</button>
                 <button class="primary-btn" onclick="if(typeof showChartsModal === 'function') showChartsModal(); else showToast('Grafikler yükleniyor...', 'info');">📊 Grafikler</button>
                 <button class="primary-btn" onclick="closeModal('stats-modal'); if(typeof openJuzJourney==='function') openJuzJourney();">🗺️ Cüz Haritası</button>
+                <button class="secondary-btn" onclick="shareHaseneApp()">📤 Arkadaşına Öner</button>
                 <button class="secondary-btn" onclick="showAppSettingsModal()">⚙️ Ayarlar</button>
                 <button class="secondary-btn" onclick="if(typeof showNotificationSettings === 'function') showNotificationSettings(); else showToast('Bildirim ayarları yükleniyor...', 'info');">🔔 Bildirimler</button>
                 <button class="secondary-btn" onclick="closeModal('stats-modal')">Kapat</button>
@@ -1304,6 +1329,10 @@
             </div>
             
             <div style="display: flex; gap: var(--spacing-sm); margin-top: var(--spacing-lg);">
+                <button type="button" class="secondary-btn" onclick="shareHaseneApp()" style="flex: 1;">📤 Arkadaşına Öner</button>
+            </div>
+
+            <div style="display: flex; gap: var(--spacing-sm); margin-top: var(--spacing-sm);">
                 <button class="primary-btn" onclick="saveAppSettingsFromUI()" style="flex: 1;">💾 Kaydet</button>
                 <button class="secondary-btn" onclick="closeModal('app-settings-modal')" style="flex: 1;">İptal</button>
             </div>

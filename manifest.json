@@ -2,7 +2,7 @@
     "id": "/YZOKUMUS_PROJE_SON/",
     "name": "Hasene Arapça Dersi",
     "short_name": "Hasene",
-    "description": "Kuran kelimeleri ile eğlenceli öğrenme oyunu",
+    "description": "Kur'an kelimelerini oyunla öğren — 14.000+ kelime, Cüz Yolculuğu, akıllı tekrar. Ücretsiz Quran vocabulary app.",
     "start_url": "./index.html",
     "scope": "./",
     "display": "standalone",

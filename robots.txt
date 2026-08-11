@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://yzokumus.github.io/YZOKUMUS_PROJE_SON/sitemap.xml

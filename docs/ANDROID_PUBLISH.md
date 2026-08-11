@@ -1,12 +1,14 @@
 # Android yayınlama kılavuzu — Hasene
 
-Bu proje **Capacitor** ile Android uygulamasına sarılır; aynı zamanda **PWA** olarak GitHub Pages’te çalışır.
+Bu proje **Capacitor** ile Android uygulamasına sarılır; aynı zamanda **PWA** olarak GitHub Pages'te çalışır.
 
 | Bilgi | Değer |
 |--------|--------|
 | Paket adı | `com.yzokumus.hasene` |
 | Web adresi | https://yzokumus.github.io/YZOKUMUS_PROJE_SON/ |
 | Gizlilik | https://yzokumus.github.io/YZOKUMUS_PROJE_SON/privacy.html |
+| Mağaza metinleri | [PLAY_STORE_LISTING.md](./PLAY_STORE_LISTING.md) |
+| Sosyal tanıtım | [SOCIAL_PROMO.md](./SOCIAL_PROMO.md) |
 
 ---
 

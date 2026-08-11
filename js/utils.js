@@ -255,6 +255,51 @@ function loadFromStorage(key, defaultValue = null) {
 /**
  * Generate unique ID
  */
+const HASENE_SHARE_URL = 'https://yzokumus.github.io/YZOKUMUS_PROJE_SON/';
+const HASENE_SHARE_TITLE = 'Hasene — Kur\'an Kelimelerini Oyunla Öğren';
+const HASENE_SHARE_TEXT = 'Kur\'an kelimelerini oyunla öğren! Cüz Yolculuğu, akıllı tekrar, rozetler ve lig. Ücretsiz — hemen dene:';
+
+/**
+ * Uygulamayı paylaş (Web Share API veya panoya kopyala)
+ */
+async function shareHaseneApp() {
+    const payload = {
+        title: HASENE_SHARE_TITLE,
+        text: `${HASENE_SHARE_TEXT}\n${HASENE_SHARE_URL}`,
+        url: HASENE_SHARE_URL
+    };
+
+    if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
+        try {
+            await navigator.share({
+                title: payload.title,
+                text: HASENE_SHARE_TEXT,
+                url: payload.url
+            });
+            return;
+        } catch (err) {
+            if (err && err.name === 'AbortError') {
+                return;
+            }
+        }
+    }
+
+    const copyText = `${HASENE_SHARE_TEXT}\n${HASENE_SHARE_URL}`;
+    try {
+        if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+            await navigator.clipboard.writeText(copyText);
+            showToast('Link kopyalandı! WhatsApp veya mesajla gönderebilirsin.', 'success', 3500);
+            return;
+        }
+    } catch (e) {
+        // fallback below
+    }
+
+    if (typeof window.prompt === 'function') {
+        window.prompt('Linki kopyala:', HASENE_SHARE_URL);
+    }
+}
+
 function generateId() {
     return Date.now().toString(36) + Math.random().toString(36).substring(2);
 }
@@ -277,6 +322,8 @@ if (typeof window !== 'undefined') {
     window.saveToStorage = saveToStorage;
     window.loadFromStorage = loadFromStorage;
     window.generateId = generateId;
+    window.shareHaseneApp = shareHaseneApp;
+    window.HASENE_SHARE_URL = HASENE_SHARE_URL;
     // Production-safe logging functions
     window.debugLog = debugLog;
     window.debugWarn = debugWarn;

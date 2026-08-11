@@ -1,13 +1,14 @@
 {
   "name": "hasene-arapca-dersi",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Hasene Arapça Dersi - Kuran kelimeleri ile eğlenceli öğrenme",
   "private": true,
   "scripts": {
     "www:prepare": "node scripts/prepare-www.js",
     "cap:sync": "npm run www:prepare && npx cap sync android",
     "cap:open": "npx cap open android",
-    "android:prepare": "npm run cap:sync"
+    "android:prepare": "npm run cap:sync",
+    "android:release:check": "node scripts/prepare-www.js && echo Sonraki: npm run cap:open - Android Studio ile signed AAB olustur"
   },
   "capacitor": {
     "platforms": [

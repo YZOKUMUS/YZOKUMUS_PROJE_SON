@@ -13,6 +13,8 @@ const COPY_ITEMS = [
   'manifest.json',
   'sw.js',
   'privacy.html',
+  'robots.txt',
+  'sitemap.xml',
   'js',
   'data',
   'ASSETS',
