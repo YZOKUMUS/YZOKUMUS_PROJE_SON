@@ -14,6 +14,7 @@ Alt ayrıntılar için ayrıca `docs/sistem/HASENE_OYUN_TAM_DOKUMANTASYON.md` do
 - **Veri kaynağı**: Statik JSON dosyaları (`data/*.json`)
 - **Depolama**: `localStorage` + (opsiyonel) `IndexedDB`
 - **PWA**: `manifest.json` + `sw.js` ile offline ve ana ekrana eklenebilir uygulama
+- **Android**: Capacitor ile native paket (`android/`, `npm run cap:sync`) — bkz. [ANDROID_QUICKSTART.md](ANDROID_QUICKSTART.md) ve [docs/ANDROID_PUBLISH.md](docs/ANDROID_PUBLISH.md)
 - **Hedef cihaz**: Özellikle **mobil** (iOS/Android), ama tablet ve masaüstü de destekleniyor
 
 Temel özellikler:

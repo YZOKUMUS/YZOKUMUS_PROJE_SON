@@ -49,9 +49,8 @@ function getCurrentUser() {
     const usernameDisplay = localStorage.getItem('hasene_username_display');
     const email = localStorage.getItem('hasene_user_email') || '';
     
-    // Only return user if userId exists (user has logged in)
     if (!userId || !username) {
-        return null; // No user logged in
+        return ensureDefaultUser();
     }
     
     return {
@@ -120,9 +119,31 @@ function updateLocalUser(username, email = '') {
  * @returns {boolean}
  */
 function isLoggedIn() {
+    ensureDefaultUser();
+    return true;
+}
+
+/**
+ * Otomatik misafir kullanıcı (giriş ekranı yok)
+ * @returns {Object} User object
+ */
+function ensureDefaultUser() {
     const userId = localStorage.getItem('hasene_user_id');
     const username = localStorage.getItem('hasene_username');
-    return !!(userId && username);
+    if (userId && username) {
+        return {
+            id: userId,
+            username: username,
+            usernameDisplay: localStorage.getItem('hasene_username_display') || username,
+            email: localStorage.getItem('hasene_user_email') || '',
+            type: 'local'
+        };
+    }
+    const user = createLocalUser('Misafir');
+    if (!localStorage.getItem('hasene_user_gender')) {
+        localStorage.setItem('hasene_user_gender', 'male');
+    }
+    return user;
 }
 
 /**
@@ -302,626 +323,85 @@ async function signInWithFirebaseAnonymous() {
 }
 
 // ========================================
-// UI FUNCTIONS
+// UI (giriş kaldırıldı — misafir otomatik)
 // ========================================
 
-/**
- * Show username login modal
- */
 function showUsernameLoginModal() {
-    // Eğer logout işlemi devam ediyorsa, modal açma
-    if (isLoggingOut) {
-        console.log('⚠️ Logout in progress, cannot open login modal');
-        return;
-    }
-    
-    try {
-        const modal = document.getElementById('username-login-modal');
-        if (!modal) {
-            console.error('Username login modal not found in DOM');
-            alert('Modal bulunamadı. Sayfayı yenileyin.');
-            return;
-        }
-        
-        // Önce tüm modalları kapat
-        if (typeof window.closeAllModals === 'function') {
-            window.closeAllModals();
-        }
-        
-        // Modal'ı göster
-        if (typeof window.openModal === 'function') {
-            window.openModal('username-login-modal');
-        } else {
-            // Fallback: manually show modal
-            modal.classList.remove('hidden');
-            console.warn('openModal function not available, using fallback');
-        }
-        
-        // Mobilde modal'ın görünür olduğundan emin ol
-        setTimeout(() => {
-            if (modal.classList.contains('hidden')) {
-                modal.classList.remove('hidden');
-            }
-            // Z-index kontrolü (mobilde bazen sorun olabilir)
-            if (modal.style) {
-                modal.style.display = 'flex';
-                modal.style.zIndex = '1000';
-            }
-        }, 50);
-        
-        // Wait for modal to be visible before accessing DOM elements
-        setTimeout(() => {
-            try {
-                // Restore previously selected gender if exists, default to 'male'
-                const savedGender = localStorage.getItem('hasene_user_gender') || 'male';
-                selectGender(savedGender);
-                
-                // Pre-fill username if user exists
-                const savedUsername = localStorage.getItem('hasene_username');
-                const input = document.getElementById('username-input');
-                if (input) {
-                    if (savedUsername && savedUsername !== 'Kullanıcı') {
-                        input.value = savedUsername;
-                    } else {
-                        input.value = '';
-                    }
-                    // Focus on input (mobilde bazen çalışmaz, bu normal)
-                    try {
-                        input.focus();
-                    } catch (e) {
-                        // Mobilde focus bazen çalışmaz, bu normal
-                        console.log('Input focus failed (mobile may not support):', e);
-                    }
-                } else {
-                    console.warn('Username input not found');
-                }
-            } catch (error) {
-                console.error('Error initializing modal content:', error);
-            }
-        }, 150);
-    } catch (error) {
-        console.error('Error showing username login modal:', error);
-        alert('Modal açılırken bir hata oluştu. Sayfayı yenileyin.');
+    ensureDefaultUser();
+    if (typeof window.updateUserStatusUI === 'function') {
+        updateUserStatusUI();
     }
 }
 
-/**
- * Select gender for user
- * @param {string} gender - 'male' or 'female'
- */
 function selectGender(gender) {
-    try {
-        // Remove active class from all gender buttons
-        const genderButtons = document.querySelectorAll('.gender-btn');
-        if (genderButtons.length === 0) {
-            console.warn('Gender buttons not found in DOM');
-            return;
-        }
-        
-        genderButtons.forEach(btn => {
-            btn.classList.remove('active');
-        });
-        
-        // Add active class to selected button
-        const buttonId = `gender-${gender}-btn`;
-        const button = document.getElementById(buttonId);
-        if (button) {
-            button.classList.add('active');
-        } else {
-            console.warn(`Gender button not found: ${buttonId}`);
-        }
-        
-        // Store selected gender
-        localStorage.setItem('hasene_user_gender', gender);
-    } catch (error) {
-        console.error('Error in selectGender:', error);
+    localStorage.setItem('hasene_user_gender', gender);
+    if (typeof window.updateUserStatusUI === 'function') {
+        updateUserStatusUI();
     }
 }
 
-/**
- * Confirm username and login
- */
 async function confirmUsername() {
-    try {
-        const usernameInput = document.getElementById('username-input');
-        if (!usernameInput) {
-            console.error('Username input not found');
-            alert('Kullanıcı adı alanı bulunamadı.');
-            return;
-        }
-        
-        // Normalize username to lowercase for consistency
-        // Get original username for display, normalize to lowercase for database operations
-        const usernameOriginal = usernameInput.value.trim();
-        const username = usernameOriginal.toLowerCase(); // Lowercase for consistency in DB
-        
-        if (!username || username.length === 0) {
-            if (typeof window.showToast === 'function') {
-                window.showToast('Lütfen bir kullanıcı adı girin', 'error');
-            } else {
-                alert('Lütfen bir kullanıcı adı girin');
-            }
-            usernameInput.focus();
-            return;
-        }
-        
-        if (username.length > 50) {
-            if (typeof window.showToast === 'function') {
-                window.showToast('Kullanıcı adı en fazla 50 karakter olabilir', 'error');
-            } else {
-                alert('Kullanıcı adı en fazla 50 karakter olabilir');
-            }
-            usernameInput.focus();
-            return;
-        }
-        
-        // Get selected gender (default to 'male' if none selected)
-        let gender = 'male';
-        try {
-            const activeGenderBtn = document.querySelector('.gender-btn.active');
-            if (activeGenderBtn) {
-                const buttonId = activeGenderBtn.id;
-                gender = buttonId.replace('gender-', '').replace('-btn', '');
-            }
-        } catch (error) {
-            console.warn('Error getting selected gender:', error);
-        }
-        
-        // Get current user
-        const currentUser = getCurrentUser();
-        const previousUsername = currentUser ? currentUser.username : null;
-        const previousUserId = currentUser ? currentUser.id : null;
-        
-        // Check if this is a different user logging in (compare lowercase versions)
-        const isDifferentUser = previousUsername && previousUsername.toLowerCase() !== username;
-        
-        // Update or create user
-        let newUserId = null;
-        try {
-            if (currentUser && currentUser.id && !isDifferentUser) {
-                // Update existing user (same user, just updating username)
-                if (currentUser.type === 'local') {
-                    updateLocalUser(usernameOriginal); // Pass original to preserve case
-                    newUserId = currentUser.id;
-                } else {
-                    // For Firebase users, just update username in localStorage
-                    localStorage.setItem('hasene_username', username); // Lowercase for DB
-                    localStorage.setItem('hasene_username_display', usernameOriginal); // Original for display
-                    newUserId = currentUser.id;
-                }
-            } else {
-                // Create new user (user is logging in for the first time OR different user)
-                if (isDifferentUser) {
-                    // Different user is logging in - clear all game data first
-                    console.log('🔄 Farklı kullanıcı giriş yapıyor, oyun verileri temizleniyor...');
-                    
-                    if (typeof window.CONFIG !== 'undefined' && window.CONFIG.STORAGE_KEYS) {
-                        const storageKeys = [
-                            window.CONFIG.STORAGE_KEYS.TOTAL_POINTS,
-                            window.CONFIG.STORAGE_KEYS.STREAK_DATA,
-                            window.CONFIG.STORAGE_KEYS.DAILY_TASKS,
-                            window.CONFIG.STORAGE_KEYS.GAME_STATS,
-                            window.CONFIG.STORAGE_KEYS.DAILY_GOAL,
-                            window.CONFIG.STORAGE_KEYS.DAILY_PROGRESS,
-                            'hasene_word_stats',
-                            'hasene_favorites',
-                            'hasene_achievements',
-                            'hasene_badges'
-                        ];
-                        
-                        storageKeys.forEach(key => {
-                            localStorage.removeItem(key);
-                        });
-                        
-                        // Clear all weekly XP data
-                        Object.keys(localStorage).forEach(key => {
-                            if (key.startsWith('hasene_weekly_xp_')) {
-                                localStorage.removeItem(key);
-                            }
-                        });
-                        
-                        console.log('✅ Önceki kullanıcının oyun verileri temizlendi');
-                    }
-                }
-                
-                const newUser = createLocalUser(usernameOriginal); // Pass original to preserve case
-                newUserId = newUser.id;
-            }
-        } catch (error) {
-            console.error('Error updating/creating user:', error);
-            alert('Kullanıcı bilgileri kaydedilirken bir hata oluştu.');
-            return;
-        }
-        
-        // Save gender
-        try {
-            localStorage.setItem('hasene_user_gender', gender);
-        } catch (error) {
-            console.warn('Error saving gender:', error);
-        }
-        
-        // Update UI
-        try {
-            updateUserStatusUI();
-        } catch (error) {
-            console.warn('Error updating UI:', error);
-        }
-        
-        // Close modal - önce tüm modalları kapat
-        try {
-            // Önce tüm modalları kapat
-            if (typeof window.closeAllModals === 'function') {
-                window.closeAllModals();
-            } else if (typeof window.closeModal === 'function') {
-                window.closeModal('username-login-modal');
-            } else {
-                // Fallback: manually hide modal
-                const modal = document.getElementById('username-login-modal');
-                if (modal) {
-                    modal.classList.add('hidden');
-                    if (modal.style) {
-                        modal.style.display = 'none';
-                    }
-                }
-            }
-        } catch (error) {
-            console.warn('Error closing modal:', error);
-            // Fallback: force close
-            const modal = document.getElementById('username-login-modal');
-            if (modal) {
-                modal.classList.add('hidden');
-                if (modal.style) {
-                    modal.style.display = 'none';
-                }
-            }
-        }
-        
-        // Clear input
-        usernameInput.value = '';
-        
-        // Show success message
-        if (typeof window.showToast === 'function') {
-            window.showToast(`Hoş geldiniz, ${username}!`, 'success');
-        }
-        
-        // Reload stats after login (for both same and different users)
-        // This ensures Firebase data is synced to localStorage
-        console.log('🔄 Kullanıcı giriş yaptı, istatistikler Firebase\'den yükleniyor...');
-        
-        if (typeof window.loadStats === 'function') {
-            // For different users, skip streak check to reset properly
-            const skipStreakCheck = isDifferentUser;
-            
-            await window.loadStats(skipStreakCheck);
-            
-            // Force update stats display multiple times to ensure UI refresh
-            if (typeof window.updateStatsDisplay === 'function') {
-                window.updateStatsDisplay();
-                console.log('✅ UI güncellendi (ilk)');
-                
-                // Update again after a short delay to ensure DOM is ready
-                setTimeout(() => {
-                    window.updateStatsDisplay();
-                    console.log('✅ UI güncellendi (ikinci)');
-                }, 100);
-                
-                // One more update after a longer delay
-                setTimeout(() => {
-                    window.updateStatsDisplay();
-                    console.log('✅ UI güncellendi (üçüncü - final)');
-                }, 500);
-            }
-            
-            if (isDifferentUser) {
-                console.log('✅ Yeni kullanıcı için istatistikler sıfırlandı');
-            } else {
-                console.log('✅ Kullanıcı istatistikleri Firebase\'den yüklendi');
-            }
-        }
-        
-        // Backend'e senkronize et (Firebase'e veri gönder)
-        try {
-            // Kullanıcı istatistiklerini senkronize et
-            if (typeof window.saveUserStats === 'function') {
-                const currentPoints = parseInt(localStorage.getItem('hasene_totalPoints') || '0');
-                window.saveUserStats({ total_points: currentPoints }).catch(err => {
-                    console.warn('User stats sync to Firebase failed:', err);
-                });
-            }
-            
-            // Günlük görevleri senkronize et
-            if (typeof window.saveDailyTasks === 'function' && typeof window.loadDailyTasks === 'function') {
-                window.loadDailyTasks().then(tasks => {
-                    if (tasks) {
-                        window.saveDailyTasks(tasks).catch(err => {
-                            console.warn('Daily tasks sync to Firebase failed:', err);
-                        });
-                    }
-                }).catch(err => {
-                    console.warn('Daily tasks load failed:', err);
-                });
-            }
-        } catch (error) {
-            console.warn('Backend sync error (non-critical):', error);
-        }
-        
-        console.log('✅ Kullanıcı giriş yaptı:', username);
-
-        if (!localStorage.getItem('hasene_onboarding_complete') && typeof window.scheduleOnboardingIfNeeded === 'function') {
-            window.scheduleOnboardingIfNeeded(650);
-        }
-    } catch (error) {
-        console.error('Error in confirmUsername:', error);
-        alert('Giriş yapılırken bir hata oluştu. Lütfen tekrar deneyin.');
-    }
+    ensureDefaultUser();
 }
 
-// Logout işlemi devam ederken modal açılmasını engellemek için flag
-let isLoggingOut = false;
-
-/**
- * Handle user logout
- */
 async function handleUserLogout() {
-    // Eğer zaten logout işlemi devam ediyorsa, tekrar çalıştırma
-    if (isLoggingOut) {
-        console.log('⚠️ Logout already in progress, skipping...');
-        return;
-    }
-    
-    isLoggingOut = true;
-    
-    try {
-        // Önce tüm modalları kapat (giriş modalı dahil)
-        if (typeof window.closeAllModals === 'function') {
-            window.closeAllModals();
-        }
-        
-        // Giriş modalını özellikle kapat
-        const loginModal = document.getElementById('username-login-modal');
-        if (loginModal) {
-            loginModal.classList.add('hidden');
-            if (loginModal.style) {
-                loginModal.style.display = 'none';
-            }
-        }
-        
-        // Tüm modalları da kapat (ekstra güvenlik)
-        document.querySelectorAll('.modal').forEach(modal => {
-            modal.classList.add('hidden');
-            if (modal.style) {
-                modal.style.display = 'none';
-            }
-        });
-        
-        await signOut();
-        
-        // UI'ı güncelle
-        if (typeof window.updateUserStatusUI === 'function') {
-            updateUserStatusUI();
-        }
-        
-        // Toast göster
-        if (typeof window.showToast === 'function') {
-            window.showToast('Çıkış yapıldı', 'info');
-        }
-        
-        console.log('✅ Kullanıcı çıkış yaptı');
-    } catch (error) {
-        console.error('Logout error:', error);
-        // Hata olsa bile UI'ı güncelle
-        if (typeof window.updateUserStatusUI === 'function') {
-            updateUserStatusUI();
-        }
-    } finally {
-        // Flag'i sıfırla (kısa bir gecikme ile, modal açılmasını engellemek için)
-        setTimeout(() => {
-            isLoggingOut = false;
-        }, 500);
-    }
+    /* giriş/çıkış kaldırıldı */
 }
 
-/**
- * Handle user authentication (login/logout toggle)
- */
 async function handleUserAuth() {
-    // Eğer logout işlemi devam ediyorsa, hiçbir şey yapma
-    if (isLoggingOut) {
-        console.log('⚠️ Logout in progress, ignoring auth request');
-        return;
-    }
-    
-    try {
-        const userId = localStorage.getItem('hasene_user_id');
-        const username = localStorage.getItem('hasene_username');
-        const isLoggedIn = !!(userId && username);
-        
-        console.log('🔐 handleUserAuth called. isLoggedIn:', isLoggedIn, 'userId:', userId, 'username:', username);
-        
-        if (isLoggedIn) {
-            // User is logged in, logout (no modal needed)
-            await handleUserLogout();
-            // Return early to prevent any modal from opening
-            return;
-        } else {
-            // User is not logged in, show login modal
-            console.log('📱 Opening login modal...');
-            // Önce tüm modalları kapat
-            if (typeof window.closeAllModals === 'function') {
-                window.closeAllModals();
-            }
-            // Sonra giriş modalını aç
-            showUsernameLoginModal();
-        }
-    } catch (error) {
-        console.error('Error in handleUserAuth:', error);
-        // Only show login modal if there's an error and user is not logged in
-        const userId = localStorage.getItem('hasene_user_id');
-        const username = localStorage.getItem('hasene_username');
-        const isLoggedIn = !!(userId && username);
-        
-        if (!isLoggedIn && !isLoggingOut) {
-            try {
-                // Önce tüm modalları kapat
-                if (typeof window.closeAllModals === 'function') {
-                    window.closeAllModals();
-                }
-                showUsernameLoginModal();
-            } catch (e) {
-                console.error('Failed to show login modal:', e);
-                alert('Giriş yapılırken bir hata oluştu. Sayfayı yenileyin.');
-            }
-        }
-    }
+    /* giriş/çıkış kaldırıldı */
 }
 
 /**
  * Update user status UI
  */
 function updateUserStatusUI() {
-    // Check if user is actually logged in by checking localStorage directly
-    const userId = localStorage.getItem('hasene_user_id');
-    const username = localStorage.getItem('hasene_username');
-    const usernameDisplayText = localStorage.getItem('hasene_username_display') || username; // Get display version
-    const isLoggedIn = !!(userId && username);
-    
+    ensureDefaultUser();
+
+    const usernameDisplayText = localStorage.getItem('hasene_username_display')
+        || localStorage.getItem('hasene_username')
+        || 'Misafir';
+
     const usernameDisplay = document.getElementById('current-username-display');
     const statusIndicator = document.getElementById('user-status-indicator');
-    const authBtn = document.getElementById('user-auth-btn');
     const userAvatar = document.getElementById('user-avatar');
     const userActions = document.querySelector('.user-actions');
-    
-    // Force remove old buttons if they exist (check by ID and also by text content)
-    const oldLoginBtn = document.getElementById('user-login-btn');
-    const oldLogoutBtn = document.getElementById('user-logout-btn');
-    
-    // Remove old buttons immediately
-    if (oldLoginBtn) {
-        console.log('🗑️ Removing old login button');
-        oldLoginBtn.remove();
-    }
-    if (oldLogoutBtn) {
-        console.log('🗑️ Removing old logout button');
-        oldLogoutBtn.remove();
-    }
-    
-    // Also check for buttons by their text content and onclick handlers
+
+    document.getElementById('user-auth-btn')?.remove();
+    document.getElementById('user-login-btn')?.remove();
+    document.getElementById('user-logout-btn')?.remove();
+
     if (userActions) {
-        const allButtons = Array.from(userActions.querySelectorAll('button'));
-        let authButtonCount = 0;
-        
-        allButtons.forEach(btn => {
+        userActions.querySelectorAll('button').forEach(btn => {
             const btnText = btn.textContent.trim();
-            const btnId = btn.id;
             const onclickAttr = btn.getAttribute('onclick') || '';
-            
-            // Count auth buttons
-            if (btnId === 'user-auth-btn' || 
-                btnText === 'Giriş yap' || btnText === 'Giriş Yap' || 
-                btnText === 'Çıkış yap' || btnText === 'Çıkış Yap' ||
-                onclickAttr.includes('handleUserAuth') ||
-                onclickAttr.includes('showUsernameLoginModal') ||
-                onclickAttr.includes('handleUserLogout')) {
-                authButtonCount++;
-            }
-            
-            // Remove if it's an old login/logout button
-            if (btnId === 'user-login-btn' || btnId === 'user-logout-btn') {
-                console.log('🗑️ Removing old button by ID:', btnId);
+            if (btnText === 'Giriş yap' || btnText === 'Giriş Yap'
+                || btnText === 'Çıkış yap' || btnText === 'Çıkış Yap'
+                || onclickAttr.includes('handleUserAuth')
+                || onclickAttr.includes('showUsernameLoginModal')
+                || onclickAttr.includes('handleUserLogout')) {
                 btn.remove();
-                return;
-            }
-            
-            // Remove duplicate auth buttons (keep only the first one with id="user-auth-btn")
-            if ((btnText === 'Giriş yap' || btnText === 'Giriş Yap' || btnText === 'Çıkış yap' || btnText === 'Çıkış Yap') && btnId !== 'user-auth-btn') {
-                console.log('🗑️ Removing duplicate auth button:', btnId, btnText);
-                btn.remove();
-                return;
-            }
-            
-            // Remove if it has old onclick handlers but wrong ID
-            if ((onclickAttr.includes('showUsernameLoginModal') || onclickAttr.includes('handleUserLogout')) && btnId !== 'user-auth-btn') {
-                console.log('🗑️ Removing button with old onclick:', btnId, onclickAttr);
-                btn.remove();
-                return;
             }
         });
-        
-        console.log('📊 Auth button count:', authButtonCount);
-    }
-    
-    if (oldLoginBtn) {
-        console.log('Removing old login button');
-        oldLoginBtn.remove();
-    }
-    if (oldLogoutBtn) {
-        console.log('Removing old logout button');
-        oldLogoutBtn.remove();
-    }
-    
-    if (!usernameDisplay || !statusIndicator) {
-        console.warn('User status UI elements not found');
-        return;
-    }
-    
-    if (!authBtn) {
-        if (userActions && isLoggedIn) {
-            const newBtn = document.createElement('button');
-            newBtn.type = 'button';
-            newBtn.id = 'user-auth-btn';
-            newBtn.className = 'secondary-btn user-action-btn';
-            newBtn.onclick = handleUserAuth;
-            newBtn.textContent = 'Çıkış yap';
-            newBtn.setAttribute('aria-label', 'Çıkış yap');
-            userActions.insertBefore(newBtn, userActions.firstChild);
-            console.log('Created user-auth-btn');
-        }
-    }
-    
-    const authBtnEl = document.getElementById('user-auth-btn');
-    const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
-    const isFirebaseUser = currentUser && currentUser.type === 'firebase';
-    
-    if (isLoggedIn) {
-        usernameDisplay.textContent = usernameDisplayText;
-        statusIndicator.textContent = isFirebaseUser ? '🟢 Bulut' : '🟢 Yerel';
-        statusIndicator.style.color = '#10b981';
-        statusIndicator.classList.remove('hidden');
-        statusIndicator.setAttribute('aria-hidden', 'false');
-        
-        // Update avatar based on gender
-        const gender = localStorage.getItem('hasene_user_gender') || 'male';
-        if (gender === 'male') {
-            if (userAvatar) userAvatar.textContent = '👨';
-        } else if (gender === 'female') {
-            if (userAvatar) userAvatar.textContent = '👩';
-        } else {
-            if (userAvatar) userAvatar.textContent = '👨';
-        }
-    } else {
-        usernameDisplay.textContent = 'Misafir';
-        statusIndicator.textContent = '';
-        statusIndicator.classList.add('hidden');
-        statusIndicator.setAttribute('aria-hidden', 'true');
-        if (userAvatar) userAvatar.textContent = '👤';
     }
 
-    if (authBtnEl) {
-        authBtnEl.onclick = handleUserAuth;
-        authBtnEl.setAttribute('onclick', 'handleUserAuth()');
-        if (isLoggedIn) {
-            authBtnEl.textContent = 'Çıkış yap';
-            authBtnEl.setAttribute('aria-label', 'Çıkış yap');
-            authBtnEl.classList.remove('hidden');
-        } else {
-            authBtnEl.classList.add('hidden');
-            authBtnEl.setAttribute('aria-label', 'Çıkış yap');
-        }
-    } else if (isLoggedIn) {
-        console.warn('user-auth-btn bulunamadı (giriş yapılmış)');
+    if (!usernameDisplay || !statusIndicator) {
+        return;
     }
-    
-    console.log('✅ User status UI updated.');
+
+    const currentUser = getCurrentUser();
+    const isFirebaseUser = currentUser && currentUser.type === 'firebase';
+
+    usernameDisplay.textContent = usernameDisplayText;
+    statusIndicator.textContent = isFirebaseUser ? '🟢 Bulut' : '🟢 Yerel';
+    statusIndicator.style.color = '#10b981';
+    statusIndicator.classList.remove('hidden');
+    statusIndicator.setAttribute('aria-hidden', 'false');
+
+    const gender = localStorage.getItem('hasene_user_gender') || 'male';
+    if (userAvatar) {
+        userAvatar.textContent = gender === 'female' ? '👩' : '👨';
+    }
 }
 
 // Make functions globally available
@@ -938,34 +418,20 @@ if (typeof window !== 'undefined') {
     window.selectGender = selectGender;
     window.handleUserLogout = handleUserLogout;
     window.handleUserAuth = handleUserAuth;
+    window.ensureDefaultUser = ensureDefaultUser;
     window.updateUserStatusUI = updateUserStatusUI;
-    
-    // Setup auth button click handler
-    function setupAuthButton() {
-        const authBtn = document.getElementById('user-auth-btn');
-        if (authBtn) {
-            // Remove any existing onclick attribute
-            authBtn.removeAttribute('onclick');
-            // Add event listener
-            authBtn.addEventListener('click', handleUserAuth);
-            console.log('✅ Auth button event listener attached');
-        }
+
+    function initGuestUserUI() {
+        ensureDefaultUser();
+        updateUserStatusUI();
     }
-    
-    // Ensure UI is updated when DOM is ready
+
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {
-            setupAuthButton();
-            setTimeout(() => {
-                updateUserStatusUI();
-            }, 100);
+            setTimeout(initGuestUserUI, 100);
         });
     } else {
-        // DOM already loaded
-        setupAuthButton();
-        setTimeout(() => {
-            updateUserStatusUI();
-        }, 100);
+        setTimeout(initGuestUserUI, 100);
     }
     
     // Also update when page becomes visible (in case of tab switching)

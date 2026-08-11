@@ -1,0 +1,13 @@
+{
+  "appId": "com.yzokumus.hasene",
+  "appName": "Hasene",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https",
+    "cleartext": true
+  },
+  "android": {
+    "allowMixedContent": true,
+    "backgroundColor": "#a8b5ff"
+  }
+}

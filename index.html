@@ -30,6 +30,7 @@
     
     <!-- PWA -->
     <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="ASSETS/badges/icon-192.png">
     <link rel="icon" type="image/png" sizes="512x512" href="ASSETS/badges/icon-512.png">
     <link rel="apple-touch-icon" href="ASSETS/badges/icon-512.png">
     
@@ -79,7 +80,6 @@
                     <span id="user-status-indicator" class="user-status-indicator hidden" aria-hidden="true"></span>
                 </div>
                 <div class="user-actions">
-                    <button type="button" id="user-auth-btn" class="secondary-btn user-action-btn hidden" aria-label="Çıkış yap">Çıkış yap</button>
                     <button onclick="showTestToolsModal()" class="secondary-btn user-action-btn" title="Test Araçları" style="padding: 8px 12px; font-size: 0.9rem; background: rgba(255, 200, 0, 0.2); border: 1px solid rgba(255, 200, 0, 0.5);">🧪</button>
                 </div>
             </div>
@@ -1004,44 +1004,6 @@
         </div>
     </div>
 
-    <!-- Username Login Modal (kompakt giriş penceresi) -->
-    <div id="username-login-modal" class="modal modal-login-popup hidden">
-        <div class="modal-content glass-card login-popup-card">
-            <h2>👤 Kullanıcı adın</h2>
-            <p class="modal-description login-popup-hint">Adını yaz ve giriş yap. Veriler bu cihazda saklanır.</p>
-            <input 
-                type="text" 
-                id="username-input" 
-                class="username-input" 
-                placeholder="Kullanıcı adınızı girin..."
-                maxlength="50"
-                onkeypress="if(event.key === 'Enter') confirmUsername();"
-            />
-            <!-- Cinsiyet Seçimi -->
-            <div class="login-popup-gender-block">
-                <label class="gender-select-label">Cinsiyet</label>
-                <div class="gender-select-buttons">
-                    <button 
-                        id="gender-male-btn" 
-                        class="gender-btn active" 
-                        onclick="selectGender('male')"
-                        title="Erkek"
-                    >👨</button>
-                    <button 
-                        id="gender-female-btn" 
-                        class="gender-btn" 
-                        onclick="selectGender('female')"
-                        title="Kadın"
-                    >👩</button>
-                </div>
-            </div>
-            <div style="display: flex; gap: 10px;">
-                <button class="primary-btn" onclick="confirmUsername()" style="flex: 1;">Giriş Yap</button>
-                <button class="secondary-btn" onclick="closeModal('username-login-modal')" style="flex: 1;">İptal</button>
-            </div>
-        </div>
-    </div>
-
     <!-- Onboarding Modal -->
     <div id="onboarding-modal" class="modal hidden">
         <div class="modal-content glass-card onboarding-content">
@@ -1255,8 +1217,11 @@
             </div>
             
             <div style="margin-top: var(--spacing-md); padding: var(--spacing-sm); background: rgba(148, 163, 184, 0.15); border-radius: var(--radius-sm); font-size: 0.85rem; color: var(--text-secondary);">
-                💡 Tercihleriniz bu cihazda saklanır ve tekrar giriş yaptığınızda otomatik uygulanır.
+                💡 Tercihleriniz bu cihazda saklanır.
             </div>
+            <p style="margin-top: var(--spacing-md); text-align: center; font-size: 0.85rem;">
+                <a href="privacy.html" target="_blank" rel="noopener" style="color: var(--accent-primary, #7c6cf0);">Gizlilik politikası</a>
+            </p>
         </div>
     </div>
 

@@ -1,3 +1,10 @@
 node_modules/
+www/
+ios/
+.capacitor/
 *.backup
 *.bak
+*.keystore
+*.jks
+local.properties
+.DS_Store
