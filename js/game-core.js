@@ -3105,6 +3105,52 @@ function toggleCurrentWordFavorite() {
 }
 
 /**
+ * Arapça kelime eşleştirmesi için hareke temizleme
+ */
+function normalizeArabicForWordMatch(text) {
+    return (text || '').replace(/[\u064B-\u065F\u0670\u064E\u0650\u064F\u0652\u0651\u064B\u064D\u064C\u0640]/g, '').trim();
+}
+
+/**
+ * Boşluk Doldur / ayet metninden kelime ID çözümle (kelimebul.json)
+ */
+function resolveWordIdFromArabicText(arabicWord, ayetHint) {
+    if (!arabicWord) {
+        return null;
+    }
+    const kelimeList = (typeof window !== 'undefined' && window.kelimeData && window.kelimeData.length)
+        ? window.kelimeData
+        : [];
+    if (!kelimeList.length) {
+        return null;
+    }
+
+    const clean = normalizeArabicForWordMatch(arabicWord);
+    let candidates = kelimeList.filter((k) => {
+        const kClean = normalizeArabicForWordMatch(k.kelime || k.arabic || '');
+        return kClean === clean || (k.kelime || k.arabic || '') === arabicWord;
+    });
+
+    if (candidates.length === 0) {
+        return null;
+    }
+    if (candidates.length === 1) {
+        return candidates[0].id || candidates[0].kelime_id || null;
+    }
+
+    if (ayetHint && ayetHint.ayet_kimligi) {
+        const surah = String(ayetHint.ayet_kimligi).split(':')[0];
+        const inSurah = candidates.filter((c) => String(c.id || c.kelime_id || '').startsWith(`${surah}:`));
+        if (inSurah.length >= 1) {
+            candidates = inSurah;
+        }
+    }
+
+    const picked = candidates[0];
+    return picked.id || picked.kelime_id || null;
+}
+
+/**
  * SM-2 kalite: 0–5. Eski çağrılar: true→4 (iyi), false→2 (yanlış şık).
  */
 function normalizeSm2Quality(payload) {
@@ -3165,8 +3211,12 @@ function updateWordStats(wordId, payload) {
             interval: 0,
             nextReviewDate: null,
             lastReview: null,
-            sm2Repetitions: 0
+            sm2Repetitions: 0,
+            firstSeen: today
         };
+    } else if (!wordStats[wordId].firstSeen) {
+        const existing = wordStats[wordId];
+        existing.firstSeen = existing.lastReview || existing.lastCorrect || existing.lastWrong || today;
     }
 
     const stats = wordStats[wordId];
@@ -3410,8 +3460,11 @@ function getLearningWords() {
             const stats = wordStats[wordId];
             if (!stats) return false;
             const masteryLevel = stats.masteryLevel || 0;
-            // Öğreniliyor kelimeler: masteryLevel >= 4 && masteryLevel < 8
-            return masteryLevel >= 4 && masteryLevel < 8;
+            const attempts = stats.attempts || 0;
+            const successRate = stats.successRate || 0;
+            const isStruggling = attempts >= 2 && successRate < 50;
+            // Öğreniliyor: mastery 4–7 ve zorlanılan değil (özet kartlarla uyumlu)
+            return masteryLevel >= 4 && masteryLevel < 8 && !isStruggling;
         })
         .map(wordId => ({
             id: wordId,
@@ -3709,30 +3762,30 @@ function getWordLearningSpeed() {
     Object.entries(wordStats).forEach(([wordId, stats]) => {
         if (!stats) return;
         
-        // İlk deneme tarihini bul: lastReview, lastCorrect veya lastWrong
-        const firstReviewDate = stats.lastReview || stats.lastCorrect || stats.lastWrong;
-        if (!firstReviewDate) return; // Hiç deneme yoksa atla
+        // İlk görülme tarihi (firstSeen); eski kayıtlar için geriye dönük uyumluluk
+        const firstSeenDate = stats.firstSeen || stats.lastReview || stats.lastCorrect || stats.lastWrong;
+        if (!firstSeenDate) return; // Hiç deneme yoksa atla
         
         try {
-            const firstReview = new Date(firstReviewDate);
+            const firstSeen = new Date(firstSeenDate);
             
             // Weekly (last 7 days)
-            if (firstReview >= weekAgo) {
+            if (firstSeen >= weekAgo) {
                 weeklyNewWords++;
             }
             
             // Previous week (7-14 days ago)
-            if (firstReview >= twoWeeksAgo && firstReview < weekAgo) {
+            if (firstSeen >= twoWeeksAgo && firstSeen < weekAgo) {
                 previousWeeklyNewWords++;
             }
             
             // Monthly (last 30 days)
-            if (firstReview >= monthAgo) {
+            if (firstSeen >= monthAgo) {
                 monthlyNewWords++;
             }
             
             // Previous month (30-60 days ago)
-            if (firstReview >= twoMonthsAgo && firstReview < monthAgo) {
+            if (firstSeen >= twoMonthsAgo && firstSeen < monthAgo) {
                 previousMonthlyNewWords++;
             }
         } catch (e) {
@@ -3827,6 +3880,8 @@ async function showWordAnalysisModal() {
     const learningSpeed = getWordLearningSpeed();
     const hardestWords = getHardestWords(20);
     const mostWrongWords = getWordsWithMostWrongs(20);
+    const hardestTotal = Object.values(wordStats || {}).filter((s) => s && (s.attempts || 0) >= 2).length;
+    const mostWrongTotal = Object.values(wordStats || {}).filter((s) => s && (s.wrong || 0) > 0).length;
     
     // Load kelime data to get word details
     const kelimeData = await loadKelimeData();
@@ -4008,27 +4063,27 @@ async function showWordAnalysisModal() {
                 <button class="category-tab active" data-category="mastered" onclick="switchWordCategory('mastered')">
                     <span class="tab-icon">✅</span>
                     <span class="tab-label">Ustalaşılan</span>
-                    <span class="tab-count">${mastered.length}</span>
+                    <span class="tab-count">${analysis.mastered}</span>
                 </button>
                 <button class="category-tab" data-category="learning" onclick="switchWordCategory('learning')">
                     <span class="tab-icon">🟡</span>
                     <span class="tab-label">Öğreniliyor</span>
-                    <span class="tab-count">${learning.length}</span>
+                    <span class="tab-count">${analysis.learning}</span>
                 </button>
                 <button class="category-tab" data-category="struggling" onclick="switchWordCategory('struggling')">
                     <span class="tab-icon">🔴</span>
                     <span class="tab-label">Zorlanılan</span>
-                    <span class="tab-count">${struggling.length}</span>
+                    <span class="tab-count">${analysis.struggling}</span>
                 </button>
                 <button class="category-tab" data-category="hardest" onclick="switchWordCategory('hardest')">
                     <span class="tab-icon">🔥</span>
                     <span class="tab-label">En Zor</span>
-                    <span class="tab-count">${hardestWords.length}</span>
+                    <span class="tab-count">${hardestTotal}</span>
                 </button>
                 <button class="category-tab" data-category="most-wrong" onclick="switchWordCategory('most-wrong')">
                     <span class="tab-icon">❌</span>
                     <span class="tab-label">Çok Yanlış</span>
-                    <span class="tab-count">${mostWrongWords.length}</span>
+                    <span class="tab-count">${mostWrongTotal}</span>
                 </button>
             </div>
             
@@ -4037,7 +4092,7 @@ async function showWordAnalysisModal() {
                     ${mastered.length > 0 ? `
                         <div class="category-header">
                             <h4>✅ Ustalaştığın Kelimeler</h4>
-                            <span class="category-badge">${mastered.length} kelime</span>
+                            <span class="category-badge">${analysis.mastered} kelime</span>
                         </div>
                         <div class="word-list">
                             ${renderWordList(mastered, 10, 'mastered')}
@@ -4049,7 +4104,7 @@ async function showWordAnalysisModal() {
                     ${learning.length > 0 ? `
                         <div class="category-header">
                             <h4>🟡 Öğrendiğin Kelimeler</h4>
-                            <span class="category-badge">${learning.length} kelime</span>
+                            <span class="category-badge">${analysis.learning} kelime</span>
                         </div>
                         <div class="word-list">
                             ${renderWordList(learning, 10, 'learning')}
@@ -4061,7 +4116,7 @@ async function showWordAnalysisModal() {
                     ${struggling.length > 0 ? `
                         <div class="category-header">
                             <h4>🔴 Zorlandığın Kelimeler</h4>
-                            <span class="category-badge">${struggling.length} kelime</span>
+                            <span class="category-badge">${analysis.struggling} kelime</span>
                         </div>
                         <div class="word-list">
                             ${renderWordList(struggling, 10, 'struggling')}
@@ -4073,7 +4128,7 @@ async function showWordAnalysisModal() {
                     ${hardestWordsWithDetails.length > 0 ? `
                         <div class="category-header">
                             <h4>🔥 En Zor Kelimeler (En Düşük Başarı Oranı)</h4>
-                            <span class="category-badge">${hardestWordsWithDetails.length} kelime</span>
+                            <span class="category-badge">${hardestTotal} kelime</span>
                         </div>
                         <div class="word-list">
                             ${hardestWordsWithDetails.slice(0, 20).map((w, index) => {
@@ -4128,7 +4183,7 @@ async function showWordAnalysisModal() {
                     ${mostWrongWordsWithDetails.length > 0 ? `
                         <div class="category-header">
                             <h4>❌ En Çok Yanlış Yapılan Kelimeler</h4>
-                            <span class="category-badge">${mostWrongWordsWithDetails.length} kelime</span>
+                            <span class="category-badge">${mostWrongTotal} kelime</span>
                         </div>
                         <div class="word-list">
                             ${mostWrongWordsWithDetails.slice(0, 20).map((w, index) => {
@@ -4360,10 +4415,20 @@ function checkDinleAnswer(index, selectedAnswer) {
         const basePoints = getBasePoints(currentDifficulty);
         const gained = basePoints + CONFIG.COMBO_BONUS_PER_CORRECT;
         sessionScore += gained;
+
+        if (checkUserLoggedIn()) {
+            const wordId = currentQuestion.kelime_id || currentQuestion.id;
+            updateWordStats(wordId, true);
+        }
     } else {
         wrongCount++;
         comboCount = 0;
         buttons[index].classList.add('wrong');
+
+        if (checkUserLoggedIn()) {
+            const wordId = currentQuestion.kelime_id || currentQuestion.id;
+            updateWordStats(wordId, false);
+        }
     }
     
     setTimeout(() => {
@@ -4381,6 +4446,8 @@ async function startBoslukDoldurGame(questionCountOverride = null) {
     if (!requireUserLogin()) {
         return;
     }
+
+    await loadKelimeData();
     
     const data = await loadAyetData();
     if (data.length === 0) {
@@ -4505,6 +4572,7 @@ function loadBoslukQuestion() {
     
     // Store correct word for checking
     currentQuestion._correctWord = correctWord;
+    currentQuestion._wordId = resolveWordIdFromArabicText(correctWord, currentQuestion);
     
     const options = shuffleArray([correctWord, ...wrongOptions.slice(0, 3)]);
     
@@ -4564,10 +4632,18 @@ function checkBoslukAnswer(index, selectedWord) {
         
         const gained = 10 + CONFIG.COMBO_BONUS_PER_CORRECT;
         sessionScore += gained;
+
+        if (checkUserLoggedIn() && currentQuestion._wordId) {
+            updateWordStats(currentQuestion._wordId, true);
+        }
     } else {
         wrongCount++;
         comboCount = 0;
         buttons[index].classList.add('wrong');
+
+        if (checkUserLoggedIn() && currentQuestion._wordId) {
+            updateWordStats(currentQuestion._wordId, false);
+        }
     }
     
     setTimeout(() => {
@@ -8204,7 +8280,8 @@ function checkKarmaAnswer(selected, correct) {
     });
     
     const question = karmaQuestions[karmaQuestionIndex];
-    const wordId = question.data?.id;
+    const wordId = question.data?.id
+        || resolveWordIdFromArabicText(question.correctAnswer, question.data);
     
     if (selected === correct) {
         correctCount++;
