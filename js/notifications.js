@@ -141,25 +141,25 @@ function checkStreakWarning() {
     const hour = now.getHours();
     
     if (hour >= 18) {
-        // Check if user hasn't played today
-        const lastPlayDate = localStorage.getItem('hasene_lastPlayDate');
-        const today = new Date().toISOString().split('T')[0];
-        
-        if (lastPlayDate !== today) {
-            // Get streak data
-            const streakDataStr = localStorage.getItem('hasene_streakData');
-            if (streakDataStr) {
-                try {
-                    const streakData = JSON.parse(streakDataStr);
-                    if (streakData.currentStreak > 0) {
-                        showNotification('🔥 Serin Kırılmasın!', {
-                            body: `${streakData.currentStreak} günlük serini korumak için bugün oyun oyna!`,
-                            requireInteraction: true
-                        });
-                    }
-                } catch (e) {
-                    // Ignore
+        const today = typeof getLocalDateString === 'function'
+            ? getLocalDateString()
+            : new Date().toLocaleDateString('sv-SE');
+        const streakKey = (typeof CONFIG !== 'undefined' && CONFIG.STORAGE_KEYS?.STREAK_DATA)
+            ? CONFIG.STORAGE_KEYS.STREAK_DATA
+            : 'hasene_streakData';
+        const streakDataStr = localStorage.getItem(streakKey);
+
+        if (streakDataStr) {
+            try {
+                const streakData = JSON.parse(streakDataStr);
+                if (streakData.currentStreak > 0 && streakData.lastPlayDate !== today) {
+                    showNotification('🔥 Serin Kırılmasın!', {
+                        body: `${streakData.currentStreak} günlük serini korumak için bugün oyun oyna!`,
+                        requireInteraction: true
+                    });
                 }
+            } catch (e) {
+                // Ignore
             }
         }
     }

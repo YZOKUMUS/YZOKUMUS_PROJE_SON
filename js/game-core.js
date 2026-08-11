@@ -439,9 +439,6 @@ function closeModal(modalId) {
     if (currentOpenModal === modalId) {
         currentOpenModal = null;
     }
-    if (modalId === 'username-login-modal' && typeof scheduleOnboardingIfNeeded === 'function') {
-        scheduleOnboardingIfNeeded(450);
-    }
 }
 
 /**
@@ -608,12 +605,12 @@ async function initApp() {
         document.getElementById('loadingScreen').classList.add('hidden');
         document.getElementById('main-container').classList.remove('hidden');
 
-        const onboardingComplete = localStorage.getItem('hasene_onboarding_complete');
-        const loggedIn = typeof checkUserLoggedIn === 'function' && checkUserLoggedIn();
+        if (typeof window.ensureDefaultUser === 'function') {
+            window.ensureDefaultUser();
+        }
 
-        if (!loggedIn && typeof window.showUsernameLoginModal === 'function') {
-            window.showUsernameLoginModal();
-        } else if (!onboardingComplete) {
+        const onboardingComplete = localStorage.getItem('hasene_onboarding_complete');
+        if (!onboardingComplete) {
             setTimeout(() => showOnboarding(), 500);
         }
         // Günlük ödül artık otomatik gösterilmiyor
@@ -983,7 +980,7 @@ function getAllDailyStats() {
     for (let i = 0; i < 90; i++) {
         const date = new Date(today);
         date.setDate(date.getDate() - i);
-        const dateStr = date.toISOString().split('T')[0];
+        const dateStr = getLocalDateString(date);
         const key = `hasene_daily_${dateStr}`;
         
         try {
@@ -1528,35 +1525,20 @@ function registerServiceWorker() {
  * @returns {boolean} True if user is logged in
  */
 function checkUserLoggedIn() {
+    if (typeof window.ensureDefaultUser === 'function') {
+        window.ensureDefaultUser();
+    }
     const userId = localStorage.getItem('hasene_user_id');
     const username = localStorage.getItem('hasene_username');
-    
-    // Check if user has valid credentials
-    if (!userId || !username) {
-        return false;
-    }
-    
-    // Check if username is not a default/empty value
-    const defaultUsernames = ['Kullanıcı', 'Anonim Kullanıcı', ''];
-    if (defaultUsernames.includes(username.trim())) {
-        return false;
-    }
-    
-    return true;
+    return !!(userId && username);
 }
 
 /**
- * Require user login before proceeding
- * Shows login modal if user is not logged in
- * @returns {boolean} True if user is logged in, false otherwise
+ * @returns {boolean} Always true (login removed; guest user auto-created)
  */
 function requireUserLogin() {
-    if (!checkUserLoggedIn()) {
-        showToast('Oyun oynamak için lütfen giriş yapın', 'warning');
-        if (typeof window.showUsernameLoginModal === 'function') {
-            window.showUsernameLoginModal();
-        }
-        return false;
+    if (typeof window.ensureDefaultUser === 'function') {
+        window.ensureDefaultUser();
     }
     return true;
 }

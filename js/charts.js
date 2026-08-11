@@ -18,7 +18,7 @@ function getDailyStatsForCharts() {
     for (let i = 29; i >= 0; i--) {
         const date = new Date(today);
         date.setDate(date.getDate() - i);
-        const dateStr = date.toISOString().split('T')[0];
+        const dateStr = getLocalDateString(date);
         const key = `hasene_daily_${dateStr}`;
         
         try {
@@ -91,7 +91,7 @@ function getWeeklyStatsForCharts() {
         for (let d = 0; d < 7; d++) {
             const checkDate = new Date(weekStart);
             checkDate.setDate(checkDate.getDate() + d);
-            const dateStr = checkDate.toISOString().split('T')[0];
+            const dateStr = getLocalDateString(checkDate);
             const key = `hasene_daily_${dateStr}`;
             
             try {
@@ -145,7 +145,7 @@ function getMonthlyStatsForCharts() {
         // Aggregate daily stats for the month
         for (let d = 1; d <= monthEnd.getDate(); d++) {
             const checkDate = new Date(month.getFullYear(), month.getMonth(), d);
-            const dateStr = checkDate.toISOString().split('T')[0];
+            const dateStr = getLocalDateString(checkDate);
             const key = `hasene_daily_${dateStr}`;
             
             try {
