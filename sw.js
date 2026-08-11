@@ -1,6 +1,7 @@
-// Hasene Service Worker - Offline + Cache
-const CACHE_NAME = 'hasene-v6';
-const DATA_CACHE_NAME = 'hasene-data-v6';
+// Hasene Service Worker - Offline + otomatik güncelleme
+// Yeni sürüm yayınlarken CACHE_NAME sürümünü artır (ör. hasene-v8)
+const CACHE_NAME = 'hasene-v7';
+const DATA_CACHE_NAME = 'hasene-data-v7';
 
 const urlsToCache = [
     './',
@@ -36,21 +37,59 @@ const dataUrlsToCache = [
     './data/harf.json'
 ];
 
+function networkFirst(request, cacheName) {
+    return fetch(request)
+        .then((networkResponse) => {
+            if (networkResponse && networkResponse.status === 200) {
+                const clone = networkResponse.clone();
+                caches.open(cacheName).then((cache) => cache.put(request, clone));
+            }
+            return networkResponse;
+        })
+        .catch(() => caches.match(request));
+}
+
+function cacheFirst(request, cacheName) {
+    return caches.match(request).then((response) => {
+        if (response) {
+            return response;
+        }
+        return fetch(request).then((networkResponse) => {
+            if (networkResponse && networkResponse.status === 200) {
+                const clone = networkResponse.clone();
+                caches.open(cacheName).then((cache) => cache.put(request, clone));
+            }
+            return networkResponse;
+        });
+    });
+}
+
+function isNetworkFirstPath(pathname) {
+    if (pathname.endsWith('sw.js')) {
+        return true;
+    }
+    if (pathname.endsWith('/') || pathname.endsWith('.html')) {
+        return true;
+    }
+    if (pathname.endsWith('.js') || pathname.endsWith('.css')) {
+        return true;
+    }
+    return false;
+}
+
 // Install Event
 self.addEventListener('install', (event) => {
     event.waitUntil(
         Promise.all([
             caches.open(CACHE_NAME).then(async (cache) => {
                 console.log('Caching app shell');
-                // Tek tek ekle - bir dosya başarısız olsa bile diğerleri cache'lensin
-                const cachePromises = urlsToCache.map(url => {
-                    return fetch(url).then(response => {
+                const cachePromises = urlsToCache.map((url) => {
+                    return fetch(url).then((response) => {
                         if (response.ok) {
                             return cache.put(url, response);
-                        } else {
-                            console.warn(`Failed to cache: ${url} (${response.status})`);
                         }
-                    }).catch(err => {
+                        console.warn(`Failed to cache: ${url} (${response.status})`);
+                    }).catch((err) => {
                         console.warn(`Error caching ${url}:`, err);
                     });
                 });
@@ -58,15 +97,13 @@ self.addEventListener('install', (event) => {
             }),
             caches.open(DATA_CACHE_NAME).then(async (cache) => {
                 console.log('Caching data files');
-                // Tek tek ekle - bir dosya başarısız olsa bile diğerleri cache'lensin
-                const cachePromises = dataUrlsToCache.map(url => {
-                    return fetch(url).then(response => {
+                const cachePromises = dataUrlsToCache.map((url) => {
+                    return fetch(url).then((response) => {
                         if (response.ok) {
                             return cache.put(url, response);
-                        } else {
-                            console.warn(`Failed to cache: ${url} (${response.status})`);
                         }
-                    }).catch(err => {
+                        console.warn(`Failed to cache: ${url} (${response.status})`);
+                    }).catch((err) => {
                         console.warn(`Error caching ${url}:`, err);
                     });
                 });
@@ -94,18 +131,32 @@ self.addEventListener('activate', (event) => {
     self.clients.claim();
 });
 
+self.addEventListener('message', (event) => {
+    if (event.data && event.data.type === 'SKIP_WAITING') {
+        self.skipWaiting();
+    }
+});
+
 // Fetch Event
 self.addEventListener('fetch', (event) => {
     const url = new URL(event.request.url);
 
-    // Data files - Cache First, then Network
-    // Sadece GET isteklerini cache'le (POST, PUT, DELETE desteklenmiyor)
-    if (url.pathname.includes('/data/') && event.request.method === 'GET') {
+    if (event.request.method !== 'GET') {
+        event.respondWith(fetch(event.request));
+        return;
+    }
+
+    if (url.origin !== self.location.origin) {
+        event.respondWith(fetch(event.request));
+        return;
+    }
+
+    // Data files - cache first, arka planda ağdan güncelle
+    if (url.pathname.includes('/data/')) {
         event.respondWith(
             caches.open(DATA_CACHE_NAME).then((cache) => {
                 return cache.match(event.request).then((response) => {
                     const fetchPromise = fetch(event.request).then((networkResponse) => {
-                        // Sadece başarılı GET isteklerini cache'le
                         if (networkResponse && networkResponse.status === 200) {
                             cache.put(event.request, networkResponse.clone());
                         }
@@ -118,32 +169,16 @@ self.addEventListener('fetch', (event) => {
         );
         return;
     }
-    
-    // POST/PUT/DELETE gibi non-GET istekleri direkt network'e git
-    if (event.request.method !== 'GET') {
-        event.respondWith(fetch(event.request));
+
+    // HTML / JS / CSS — önce ağ (otomatik güncelleme)
+    if (isNetworkFirstPath(url.pathname)) {
+        event.respondWith(networkFirst(event.request, CACHE_NAME));
         return;
     }
 
-    // App shell - Cache First
-    // Buraya sadece GET istekleri gelir (non-GET istekleri yukarıda handle edildi)
+    // Görseller, fontlar — önbellek öncelikli (offline)
     event.respondWith(
-        caches.match(event.request).then((response) => {
-            if (response) {
-                return response;
-            }
-            return fetch(event.request).then((networkResponse) => {
-                // Sadece başarılı GET isteklerini cache'le
-                if (networkResponse && networkResponse.status === 200) {
-                    const responseClone = networkResponse.clone();
-                    caches.open(CACHE_NAME).then((cache) => {
-                        cache.put(event.request, responseClone);
-                    });
-                }
-                return networkResponse;
-            });
-        }).catch(() => {
-            // Offline fallback
+        cacheFirst(event.request, CACHE_NAME).catch(() => {
             if (event.request.destination === 'document') {
                 return caches.match('./index.html');
             }

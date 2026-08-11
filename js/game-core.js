@@ -1510,14 +1510,60 @@ function setupBackButtonHandler() {
 }
 
 /**
- * Register service worker
+ * Service worker — açılışta güncelleme kontrolü, yeni sürümde otomatik yenileme
  */
 function registerServiceWorker() {
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js')
-            .then(reg => console.log('✅ Service Worker registered'))
-            .catch(err => console.warn('⚠️ Service Worker registration failed:', err));
+    if (!('serviceWorker' in navigator)) {
+        return;
     }
+
+    let updateDetected = false;
+
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!updateDetected) {
+            return;
+        }
+        window.location.reload();
+    });
+
+    const attachWorkerListeners = (registration) => {
+        const trackWorker = (worker) => {
+            if (!worker) {
+                return;
+            }
+            worker.addEventListener('statechange', () => {
+                if (worker.state === 'installed' && navigator.serviceWorker.controller) {
+                    updateDetected = true;
+                }
+            });
+        };
+
+        if (registration.waiting && navigator.serviceWorker.controller) {
+            updateDetected = true;
+            registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+        }
+        trackWorker(registration.installing);
+        registration.addEventListener('updatefound', () => trackWorker(registration.installing));
+
+        const checkForUpdates = () => {
+            registration.update().catch(() => {});
+        };
+
+        checkForUpdates();
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                checkForUpdates();
+            }
+        });
+        window.addEventListener('focus', checkForUpdates);
+    };
+
+    navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' })
+        .then((registration) => {
+            console.log('✅ Service Worker registered');
+            attachWorkerListeners(registration);
+        })
+        .catch((err) => console.warn('⚠️ Service Worker registration failed:', err));
 }
 
 // ========================================
