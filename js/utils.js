@@ -304,6 +304,75 @@ function generateId() {
     return Date.now().toString(36) + Math.random().toString(36).substring(2);
 }
 
+const DEV_MODE_STORAGE_KEY = 'hasene_dev_mode';
+const DEV_MODE_TAP_TARGET = 7;
+const DEV_MODE_TAP_WINDOW_MS = 2500;
+
+let devModeTapCount = 0;
+let devModeTapTimer = null;
+
+function isDeveloperMode() {
+    if (window.CONFIG && window.CONFIG.DEBUG) {
+        return true;
+    }
+    try {
+        return localStorage.getItem(DEV_MODE_STORAGE_KEY) === '1';
+    } catch (err) {
+        return false;
+    }
+}
+
+function enableDeveloperMode() {
+    try {
+        localStorage.setItem(DEV_MODE_STORAGE_KEY, '1');
+    } catch (err) {
+        // ignore
+    }
+    updateDeveloperToolsVisibility();
+    if (typeof showToast === 'function') {
+        showToast('Geliştirici araçları etkinleştirildi', 'info', 2500);
+    }
+}
+
+function updateDeveloperToolsVisibility() {
+    const btn = document.getElementById('dev-tools-btn');
+    if (!btn) {
+        return;
+    }
+    if (isDeveloperMode()) {
+        btn.classList.remove('hidden');
+    } else {
+        btn.classList.add('hidden');
+    }
+}
+
+function initDeveloperModeSecretTap() {
+    const avatar = document.getElementById('user-avatar');
+    if (!avatar || avatar.dataset.devTapBound === '1') {
+        return;
+    }
+    avatar.dataset.devTapBound = '1';
+
+    avatar.addEventListener('click', () => {
+        if (isDeveloperMode()) {
+            return;
+        }
+
+        devModeTapCount += 1;
+        clearTimeout(devModeTapTimer);
+
+        if (devModeTapCount >= DEV_MODE_TAP_TARGET) {
+            devModeTapCount = 0;
+            enableDeveloperMode();
+            return;
+        }
+
+        devModeTapTimer = setTimeout(() => {
+            devModeTapCount = 0;
+        }, DEV_MODE_TAP_WINDOW_MS);
+    });
+}
+
 // Make functions globally available
 if (typeof window !== 'undefined') {
     window.getLocalDateString = getLocalDateString;
@@ -324,6 +393,10 @@ if (typeof window !== 'undefined') {
     window.generateId = generateId;
     window.shareHaseneApp = shareHaseneApp;
     window.HASENE_SHARE_URL = HASENE_SHARE_URL;
+    window.isDeveloperMode = isDeveloperMode;
+    window.enableDeveloperMode = enableDeveloperMode;
+    window.updateDeveloperToolsVisibility = updateDeveloperToolsVisibility;
+    window.initDeveloperModeSecretTap = initDeveloperModeSecretTap;
     // Production-safe logging functions
     window.debugLog = debugLog;
     window.debugWarn = debugWarn;

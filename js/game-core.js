@@ -421,6 +421,10 @@ function openModal(modalId) {
  * Modal kapatma
  */
 function showTestToolsModal() {
+    if (typeof window.isDeveloperMode === 'function' && !window.isDeveloperMode()) {
+        return;
+    }
+
     const modal = document.getElementById('test-tools-modal');
     if (modal) {
         modal.classList.remove('hidden');
@@ -593,6 +597,13 @@ async function initApp() {
     // Update user status UI
     if (typeof window.updateUserStatusUI === 'function') {
         window.updateUserStatusUI();
+    }
+
+    if (typeof window.initDeveloperModeSecretTap === 'function') {
+        window.initDeveloperModeSecretTap();
+    }
+    if (typeof window.updateDeveloperToolsVisibility === 'function') {
+        window.updateDeveloperToolsVisibility();
     }
     
     // Browser geri tuşu dinleyicisi
@@ -1005,6 +1016,10 @@ function getAllDailyStats() {
  * Reset all game data (TEST function)
  */
 async function resetAllData() {
+    if (typeof window.isDeveloperMode === 'function' && !window.isDeveloperMode()) {
+        return;
+    }
+
     if (!confirm('Tüm oyun verilerini sıfırlamak istediğinizden emin misiniz? Bu işlem geri alınamaz!')) {
         return;
     }
@@ -8486,6 +8501,10 @@ if (typeof window !== 'undefined') {
  * Clear storage data (TEST function)
  */
 function clearStorageData() {
+    if (typeof window.isDeveloperMode === 'function' && !window.isDeveloperMode()) {
+        return;
+    }
+
     if (!confirm('Storage verilerini temizlemek istediğinize emin misiniz?')) {
         return;
     }
@@ -8536,6 +8555,10 @@ function clearStorageData() {
  * Test points function (TEST function)
  */
 function testPoints() {
+    if (typeof window.isDeveloperMode === 'function' && !window.isDeveloperMode()) {
+        return;
+    }
+
     const points = prompt('Kaç puan eklemek istersiniz?', '1000');
     if (points === null) return;
     
@@ -8570,6 +8593,10 @@ function testPoints() {
  * Nuclear clear - Delete everything (TEST function)
  */
 async function nuclearClear() {
+    if (typeof window.isDeveloperMode === 'function' && !window.isDeveloperMode()) {
+        return;
+    }
+
     if (!confirm('⚠️ DİKKAT: TÜM VERİLER KALICI OLARAK SİLİNECEK!\n\nBu işlem:\n- Tüm puanları\n- Tüm rozetleri\n- Tüm kullanıcı verilerini\n- Tüm localStorage verilerini\n- Tüm Firebase verilerini\n\nSİLECEK!\n\nDevam etmek istiyor musunuz?')) {
         return;
     }
