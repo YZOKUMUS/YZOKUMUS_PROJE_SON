@@ -337,13 +337,23 @@ function enableDeveloperMode() {
 
 function updateDeveloperToolsVisibility() {
     const btn = document.getElementById('dev-tools-btn');
-    if (!btn) {
-        return;
+    const styleExperiments = document.getElementById('settings-style-experiments');
+    const devMode = isDeveloperMode();
+
+    if (btn) {
+        if (devMode) {
+            btn.classList.remove('hidden');
+        } else {
+            btn.classList.add('hidden');
+        }
     }
-    if (isDeveloperMode()) {
-        btn.classList.remove('hidden');
-    } else {
-        btn.classList.add('hidden');
+
+    if (styleExperiments) {
+        if (devMode) {
+            styleExperiments.classList.remove('hidden');
+        } else {
+            styleExperiments.classList.add('hidden');
+        }
     }
 }
 

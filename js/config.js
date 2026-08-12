@@ -53,8 +53,7 @@ const CONFIG = {
 
     // UI Defaults
     UI: {
-        animationsEnabled: true,
-        theme: 'light' // 'light' | 'dark'
+        animationsEnabled: true
     }
 };
 

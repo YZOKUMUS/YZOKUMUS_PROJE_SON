@@ -62,14 +62,12 @@ let onboardingSlideIndex = 0;
 let userSettings = {
     soundEnabled: typeof CONFIG !== 'undefined' ? CONFIG.AUDIO.enabled : true,
     animationsEnabled: typeof CONFIG !== 'undefined' ? (CONFIG.UI?.animationsEnabled ?? true) : true,
-    theme: typeof CONFIG !== 'undefined' ? (CONFIG.UI?.theme || 'light') : 'light',
     groupCode: '',
     styleExpPattern: false,
     styleExpFocus: false,
     styleExpTypography: false,
     styleExpMicro: false,
-    styleExpGoalDetail: false,
-    styleExpDarkRefine: false
+    styleExpGoalDetail: false
 };
 
 function applyUserSettings() {
@@ -83,13 +81,12 @@ function applyUserSettings() {
         const body = document.body;
         if (body) {
             body.classList.toggle('animations-disabled', !userSettings.animationsEnabled);
-            // Tema
-            body.setAttribute('data-theme', userSettings.theme === 'dark' ? 'dark' : 'light');
+            body.setAttribute('data-theme', 'light');
+            body.classList.remove('style-exp-dark-refine');
             body.classList.toggle('style-exp-pattern', !!userSettings.styleExpPattern);
             body.classList.toggle('style-exp-focus', !!userSettings.styleExpFocus);
             body.classList.toggle('style-exp-type', !!userSettings.styleExpTypography);
             body.classList.toggle('style-exp-micro', !!userSettings.styleExpMicro);
-            body.classList.toggle('style-exp-dark-refine', !!userSettings.styleExpDarkRefine && userSettings.theme === 'dark');
         }
         if (typeof updateDailyGoalDisplay === 'function') {
             updateDailyGoalDisplay();
@@ -110,6 +107,8 @@ function loadUserSettings() {
                 };
             }
         }
+        delete userSettings.theme;
+        delete userSettings.styleExpDarkRefine;
     } catch (e) {
         console.warn('loadUserSettings error:', e);
     }
@@ -1768,7 +1767,6 @@ function showAppSettingsModal() {
         
         const soundCheckbox = document.getElementById('settings-sound-checkbox');
         const animationsCheckbox = document.getElementById('settings-animations-checkbox');
-        const themeDarkCheckbox = document.getElementById('settings-theme-dark-checkbox');
         const groupCodeInput = document.getElementById('settings-group-code-input');
         
         if (soundCheckbox) {
@@ -1776,9 +1774,6 @@ function showAppSettingsModal() {
         }
         if (animationsCheckbox) {
             animationsCheckbox.checked = !!userSettings.animationsEnabled;
-        }
-        if (themeDarkCheckbox) {
-            themeDarkCheckbox.checked = userSettings.theme === 'dark';
         }
         if (groupCodeInput) {
             groupCodeInput.value = (userSettings.groupCode || '').toString();
@@ -1789,7 +1784,6 @@ function showAppSettingsModal() {
         const st = document.getElementById('settings-style-type-checkbox');
         const sm = document.getElementById('settings-style-micro-checkbox');
         const sg = document.getElementById('settings-style-goal-checkbox');
-        const sd = document.getElementById('settings-style-dark-refine-checkbox');
         if (sp) {
             sp.checked = !!userSettings.styleExpPattern;
         }
@@ -1805,9 +1799,6 @@ function showAppSettingsModal() {
         if (sg) {
             sg.checked = !!userSettings.styleExpGoalDetail;
         }
-        if (sd) {
-            sd.checked = !!userSettings.styleExpDarkRefine;
-        }
         
         openModal('app-settings-modal');
     } catch (e) {
@@ -1819,7 +1810,6 @@ function saveAppSettingsFromUI() {
     try {
         const soundCheckbox = document.getElementById('settings-sound-checkbox');
         const animationsCheckbox = document.getElementById('settings-animations-checkbox');
-        const themeDarkCheckbox = document.getElementById('settings-theme-dark-checkbox');
         const groupCodeInput = document.getElementById('settings-group-code-input');
         
         if (soundCheckbox) {
@@ -1827,9 +1817,6 @@ function saveAppSettingsFromUI() {
         }
         if (animationsCheckbox) {
             userSettings.animationsEnabled = !!animationsCheckbox.checked;
-        }
-        if (themeDarkCheckbox) {
-            userSettings.theme = themeDarkCheckbox.checked ? 'dark' : 'light';
         }
         if (groupCodeInput) {
             userSettings.groupCode = String(groupCodeInput.value || '')
@@ -1846,7 +1833,6 @@ function saveAppSettingsFromUI() {
         const st = document.getElementById('settings-style-type-checkbox');
         const sm = document.getElementById('settings-style-micro-checkbox');
         const sg = document.getElementById('settings-style-goal-checkbox');
-        const sd = document.getElementById('settings-style-dark-refine-checkbox');
         if (sp) {
             userSettings.styleExpPattern = !!sp.checked;
         }
@@ -1862,9 +1848,8 @@ function saveAppSettingsFromUI() {
         if (sg) {
             userSettings.styleExpGoalDetail = !!sg.checked;
         }
-        if (sd) {
-            userSettings.styleExpDarkRefine = !!sd.checked;
-        }
+        delete userSettings.theme;
+        delete userSettings.styleExpDarkRefine;
         
         saveUserSettings();
         applyUserSettings();

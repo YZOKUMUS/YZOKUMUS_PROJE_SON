@@ -8,7 +8,8 @@
     "cap:sync": "npm run www:prepare && npx cap sync android",
     "cap:open": "npx cap open android",
     "android:prepare": "npm run cap:sync",
-    "android:release:check": "node scripts/prepare-www.js && echo Sonraki: npm run cap:open - Android Studio ile signed AAB olustur"
+    "android:release:check": "node scripts/prepare-www.js && echo Sonraki: npm run cap:open - Android Studio ile signed AAB olustur",
+    "smoke:test": "node scripts/smoke-test-all-modes.mjs"
   },
   "capacitor": {
     "platforms": [
@@ -18,6 +19,7 @@
   "devDependencies": {
     "@capacitor/android": "^7.2.0",
     "@capacitor/cli": "^7.2.0",
-    "@capacitor/core": "^7.2.0"
+    "@capacitor/core": "^7.2.0",
+    "playwright": "^1.62.1"
   }
 }

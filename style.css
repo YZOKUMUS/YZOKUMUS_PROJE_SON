@@ -88,27 +88,6 @@
     --answer-option-min-height: 56px;                  /* Minimum yükseklik */
 }
 
-/* Dark Theme Overrides */
-body[data-theme="dark"] {
-    --bg-primary: #020617;
-    --bg-secondary: rgba(15, 23, 42, 0.95);
-    --text-primary: #f9fafb;
-    --text-secondary: rgba(148, 163, 184, 0.9);
-
-    --accent-primary: #38bdf8;
-    --accent-secondary: #0ea5e9;
-    --accent-success: #22c55e;
-    --accent-warning: #eab308;
-    --accent-error: #f97373;
-    --accent-gold: #eab308;
-
-    /* Dark mode cam kartlar: arka plandan bir ton daha açık olsun ki rozetler ve kartlar belirginleşsin */
-    --glass-bg: rgba(15, 23, 42, 0.8);
-    --glass-bg-dark: rgba(15, 23, 42, 0.94);
-    --glass-border: rgba(148, 163, 184, 0.35);
-    --glass-shadow: 0 12px 40px rgba(15, 23, 42, 0.85);
-}
-
 /* Font Face */
 @font-face {
     font-family: 'KFGQPC Uthmanic Script HAFS';
@@ -344,11 +323,6 @@ body::before {
     transition: transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
-body[data-theme="dark"] .recommended-study-card {
-    border-color: rgba(34, 197, 94, 0.28);
-    background: linear-gradient(135deg, rgba(34, 197, 94, 0.14) 0%, rgba(56, 189, 248, 0.10) 100%);
-}
-
 .recommended-study-card:hover {
     transform: translateY(-1px);
     box-shadow: var(--shadow-medium);
@@ -374,12 +348,6 @@ body[data-theme="dark"] .recommended-study-card {
     border: 1px solid rgba(0, 0, 0, 0.08);
     color: rgba(26, 26, 46, 0.9);
     white-space: nowrap;
-}
-
-body[data-theme="dark"] .recommended-study-badge {
-    background: rgba(15, 23, 42, 0.65);
-    border-color: rgba(148, 163, 184, 0.25);
-    color: rgba(248, 250, 252, 0.92);
 }
 
 .recommended-study-desc {
@@ -562,11 +530,6 @@ body[data-theme="dark"] .recommended-study-badge {
     background: linear-gradient(135deg, rgba(0, 122, 255, 0.08) 0%, rgba(90, 200, 250, 0.08) 100%);
 }
 
-body[data-theme="dark"] .featured-card {
-    border-color: rgba(56, 189, 248, 0.28);
-    background: linear-gradient(135deg, rgba(56, 189, 248, 0.12) 0%, rgba(14, 165, 233, 0.10) 100%);
-}
-
 .game-card::after {
     content: '';
     position: absolute;
@@ -736,10 +699,6 @@ body[data-theme="dark"] .featured-card {
     background: linear-gradient(to top, var(--glass-bg) 75%, rgba(255, 255, 255, 0));
     backdrop-filter: var(--glass-blur);
     -webkit-backdrop-filter: var(--glass-blur);
-}
-
-body[data-theme="dark"] #karma-game-screen:not(.hidden) .karma-options {
-    background: linear-gradient(to top, rgba(30, 41, 59, 0.96) 75%, rgba(30, 41, 59, 0));
 }
 
 #flashcard-screen.game-screen {
@@ -1045,11 +1004,6 @@ body[data-theme="dark"] #karma-game-screen:not(.hidden) .karma-options {
     letter-spacing: var(--arabic-letter-spacing);
 }
 
-body[data-theme="dark"] .micro-context {
-    background: rgba(56, 189, 248, 0.10);
-    border-color: rgba(56, 189, 248, 0.16);
-}
-
 .word-chips {
     display: flex;
     flex-wrap: wrap;
@@ -1067,12 +1021,6 @@ body[data-theme="dark"] .micro-context {
     border: 1px solid rgba(0, 0, 0, 0.08);
     color: rgba(26, 26, 46, 0.9);
     line-height: 1.2;
-}
-
-body[data-theme="dark"] .word-chip {
-    background: rgba(15, 23, 42, 0.55);
-    border-color: rgba(148, 163, 184, 0.22);
-    color: rgba(248, 250, 252, 0.92);
 }
 
 .word-chip.root {
@@ -5982,11 +5930,6 @@ body.style-exp-pattern::after {
     background-size: 96px 96px;
 }
 
-body[data-theme="dark"].style-exp-pattern::after {
-    opacity: 0.065;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Cpath fill='none' stroke='%23ffffff' stroke-width='0.75' d='M48 4l4.5 26L76 48l-23.5 18L48 92l-4.5-26L20 48l23.5-18z'/%3E%3C/svg%3E");
-}
-
 /* Okuma / odak: daha ferah içerik, alt nav üzerine gelince netleşir */
 body.style-exp-focus .main-container {
     max-width: 540px;
@@ -6022,13 +5965,6 @@ body.style-exp-type .question-card .arabic-verse {
     display: inline-block;
     width: 100%;
     box-sizing: border-box;
-}
-
-body[data-theme="dark"].style-exp-type .question-card .arabic-word,
-body[data-theme="dark"].style-exp-type .question-card .arabic-verse {
-    background: linear-gradient(160deg, rgba(30, 41, 59, 0.92) 0%, rgba(15, 23, 42, 0.88) 100%);
-    color: #f1f5f9 !important;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 body.style-exp-type .question-card .word-info,
@@ -6083,19 +6019,6 @@ body.style-exp-micro:not(.animations-disabled) .answer-option.wrong {
     }
 }
 
-/* Koyu tema: daha az blur, sıcak çerçeve, ikincil metin biraz güçlü */
-body[data-theme="dark"].style-exp-dark-refine {
-    --glass-blur: blur(18px) saturate(165%);
-    --glass-bg: rgba(32, 28, 58, 0.82);
-    --glass-bg-dark: rgba(30, 26, 54, 0.92);
-    --glass-border: rgba(232, 213, 255, 0.28);
-    --text-secondary: rgba(203, 213, 225, 0.94);
-}
-
-body[data-theme="dark"].style-exp-dark-refine .bottom-nav {
-    background: rgba(30, 26, 54, 0.9);
-}
-
 /* Cüz Yolculuğu — premium glass map */
 .juz-journey-card {
     border: 1px solid rgba(157, 138, 255, 0.35);
@@ -6140,11 +6063,6 @@ body[data-theme="dark"].style-exp-dark-refine .bottom-nav {
     border: 1px solid rgba(157, 138, 255, 0.28);
     background: linear-gradient(135deg, rgba(157, 138, 255, 0.18) 0%, rgba(255, 255, 255, 0.82) 55%, rgba(99, 102, 241, 0.1) 100%);
     box-shadow: var(--shadow-medium);
-}
-
-body[data-theme="dark"] .juz-hero {
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.22) 0%, rgba(30, 26, 54, 0.92) 55%, rgba(157, 138, 255, 0.12) 100%);
-    border-color: rgba(157, 138, 255, 0.22);
 }
 
 .juz-hero::before {
@@ -6225,18 +6143,10 @@ body[data-theme="dark"] .juz-hero {
     backdrop-filter: blur(8px);
 }
 
-body[data-theme="dark"] .juz-chip {
-    background: rgba(255, 255, 255, 0.08);
-}
-
 .juz-chip-accent {
     background: linear-gradient(135deg, rgba(245, 158, 11, 0.18), rgba(251, 191, 36, 0.12));
     border-color: rgba(245, 158, 11, 0.35);
     color: #b45309;
-}
-
-body[data-theme="dark"] .juz-chip-accent {
-    color: #fcd34d;
 }
 
 /* Progress rings */
@@ -6317,11 +6227,6 @@ body[data-theme="dark"] .juz-chip-accent {
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
     overflow: hidden;
-}
-
-body[data-theme="dark"] .juz-card {
-    background: rgba(36, 32, 62, 0.82);
-    border-color: rgba(157, 138, 255, 0.16);
 }
 
 .juz-card::after {

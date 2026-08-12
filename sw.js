@@ -1,7 +1,7 @@
 // Hasene Service Worker - Offline + otomatik güncelleme
 // Yeni sürüm yayınlarken CACHE_NAME sürümünü artır (ör. hasene-v8)
-const CACHE_NAME = 'hasene-v11';
-const DATA_CACHE_NAME = 'hasene-data-v11';
+const CACHE_NAME = 'hasene-v12';
+const DATA_CACHE_NAME = 'hasene-data-v12';
 
 const urlsToCache = [
     './',
@@ -35,7 +35,15 @@ const dataUrlsToCache = [
     './data/ayetoku.json',
     './data/duaet.json',
     './data/hadisoku.json',
-    './data/harf.json'
+    './data/harf.json',
+    './data/ustn.json',
+    './data/esre.json',
+    './data/otre.json',
+    './data/tenvin.json',
+    './data/uc_harfli_kelimeler.json',
+    './data/sedde.json',
+    './data/cezm.json',
+    './data/uzatma_med.json'
 ];
 
 function networkFirst(request, cacheName) {
