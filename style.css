@@ -632,6 +632,90 @@ body[data-theme="dark"] .featured-card {
     margin: 0 auto;
 }
 
+/* Quiz ekranları: soru alanı kayar, şıklar altta sabit kalır */
+#kelime-cevir-screen:not(.hidden),
+#dinle-bul-screen:not(.hidden),
+#bosluk-doldur-screen:not(.hidden),
+#elif-ba-screen:not(.hidden),
+#karma-game-screen:not(.hidden) {
+    display: flex;
+    flex-direction: column;
+    height: calc(100dvh - var(--safe-area-top) - 80px - var(--safe-area-bottom));
+    max-height: calc(100dvh - var(--safe-area-top) - 80px - var(--safe-area-bottom));
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+#kelime-cevir-screen:not(.hidden) .game-header,
+#dinle-bul-screen:not(.hidden) .game-header,
+#bosluk-doldur-screen:not(.hidden) .game-header,
+#elif-ba-screen:not(.hidden) .game-header,
+#karma-game-screen:not(.hidden) .game-header,
+#karma-game-screen:not(.hidden) .game-stats-bar {
+    flex-shrink: 0;
+}
+
+#kelime-cevir-screen:not(.hidden) .game-content,
+#dinle-bul-screen:not(.hidden) .game-content,
+#bosluk-doldur-screen:not(.hidden) .game-content,
+#elif-ba-screen:not(.hidden) .game-content,
+#karma-game-screen:not(.hidden) .game-content {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    max-height: none;
+    padding-bottom: 0;
+}
+
+#kelime-cevir-screen:not(.hidden) .question-card,
+#dinle-bul-screen:not(.hidden) .question-card,
+#bosluk-doldur-screen:not(.hidden) .question-card,
+#elif-ba-screen:not(.hidden) .question-card,
+#karma-game-screen:not(.hidden) #karma-question-container {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    margin-bottom: var(--spacing-md);
+}
+
+#kelime-cevir-screen:not(.hidden) .answer-options,
+#dinle-bul-screen:not(.hidden) .answer-options,
+#bosluk-doldur-screen:not(.hidden) .answer-options,
+#elif-ba-screen:not(.hidden) .answer-options {
+    flex-shrink: 0;
+    margin-bottom: var(--spacing-sm);
+}
+
+#kelime-cevir-screen:not(.hidden) .session-score,
+#dinle-bul-screen:not(.hidden) .session-score,
+#bosluk-doldur-screen:not(.hidden) .session-score,
+#elif-ba-screen:not(.hidden) .session-score {
+    flex-shrink: 0;
+}
+
+/* Talim Et: şıklar soru kartının içinde — alta yapışır */
+#karma-game-screen:not(.hidden) .karma-options {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-md);
+    padding-top: var(--spacing-sm);
+    background: linear-gradient(to top, var(--glass-bg) 75%, rgba(255, 255, 255, 0));
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+}
+
+body[data-theme="dark"] #karma-game-screen:not(.hidden) .karma-options {
+    background: linear-gradient(to top, rgba(30, 41, 59, 0.96) 75%, rgba(30, 41, 59, 0));
+}
+
 #flashcard-screen.game-screen {
     max-width: none;
     width: 100vw;
@@ -1851,18 +1935,22 @@ body[data-theme="dark"] .word-chip {
 
 /* Game Screen Container İyileştirmeleri */
 .game-content {
-    overflow-y: auto;
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
-    max-height: calc(100vh - 200px);
+}
+
+/* Quiz ekranları yukarıdaki flex düzenini kullanır; diğer ekranlar kaydırılabilir */
+.game-screen:not(#kelime-cevir-screen):not(#dinle-bul-screen):not(#bosluk-doldur-screen):not(#elif-ba-screen):not(#karma-game-screen):not(#flashcard-screen) .game-content {
+    overflow-y: auto;
+    max-height: calc(100dvh - 200px);
     padding-bottom: var(--spacing-lg);
 }
 
-.game-screen {
+.game-screen:not(#kelime-cevir-screen):not(#dinle-bul-screen):not(#bosluk-doldur-screen):not(#elif-ba-screen):not(#karma-game-screen):not(#flashcard-screen) {
     overflow-y: auto;
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
-    max-height: 100vh;
+    max-height: 100dvh;
 }
 
 /* Bottom Nav İyileştirmeleri */

@@ -2335,6 +2335,25 @@ function resetViewportScroll() {
     } catch (e) {}
 }
 
+function ensureQuizLayoutVisible() {
+    requestAnimationFrame(() => {
+        const screen = document.querySelector('.game-screen:not(.hidden)');
+        if (!screen) {
+            return;
+        }
+
+        const questionCard = screen.querySelector('.question-card, #karma-question-container');
+        if (questionCard) {
+            questionCard.scrollTop = 0;
+        }
+
+        const options = screen.querySelector('.answer-options, .karma-options');
+        if (options && typeof options.scrollIntoView === 'function') {
+            options.scrollIntoView({ block: 'nearest', behavior: 'instant' });
+        }
+    });
+}
+
 function showOnlyScreen(screenId) {
     hideAllScreens();
     resetViewportScroll();
@@ -2344,6 +2363,15 @@ function showOnlyScreen(screenId) {
         try {
             screen.scrollTop = 0;
         } catch (e) {}
+        if ([
+            'kelime-cevir-screen',
+            'dinle-bul-screen',
+            'bosluk-doldur-screen',
+            'elif-ba-screen',
+            'karma-game-screen'
+        ].includes(screenId)) {
+            ensureQuizLayoutVisible();
+        }
     }
 }
 
@@ -2948,6 +2976,8 @@ function loadKelimeQuestion() {
             ${option}
         </button>
     `).join('');
+
+    ensureQuizLayoutVisible();
 }
 
 function getMicroContextTextFromQuestion(q) {
@@ -4456,6 +4486,8 @@ function loadDinleQuestion() {
     
     // Auto play audio
     setTimeout(() => playCurrentWordAudio(), 500);
+
+    ensureQuizLayoutVisible();
 }
 
 function checkDinleAnswer(index, selectedAnswer) {
@@ -4667,6 +4699,8 @@ function loadBoslukQuestion() {
             ${option}
         </button>
     `).join('');
+
+    ensureQuizLayoutVisible();
 }
 
 function checkBoslukAnswer(index, selectedWord) {
@@ -6402,6 +6436,8 @@ function loadElifQuestion() {
             ${option}
         </button>
     `).join('');
+
+    ensureQuizLayoutVisible();
 }
 
 function checkElifAnswer(index, selectedAnswer) {
@@ -7976,6 +8012,8 @@ function loadKarmaQuestion() {
             renderBaglamsalOgrenmeKarma(container, question);
             break;
     }
+
+    ensureQuizLayoutVisible();
 }
 
 function renderKelimeCevirKarma(container, question) {
