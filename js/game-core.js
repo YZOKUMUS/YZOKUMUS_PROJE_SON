@@ -884,12 +884,14 @@ async function loadStats(skipStreakCheck = false) {
  * Save all stats
  */
 function saveStats() {
-    // Check if user is logged in
-    if (!checkUserLoggedIn()) {
+    if (typeof window.ensureDefaultUser === 'function') {
+        window.ensureDefaultUser();
+    }
+    if (!localStorage.getItem('hasene_user_id')) {
         return;
     }
-    
-    // Save to localStorage
+
+    // Save to localStorage (username seçilmeden de — misafir onboarding öncesi dahil)
     saveToStorage(CONFIG.STORAGE_KEYS.TOTAL_POINTS, totalPoints);
     saveToStorage(CONFIG.STORAGE_KEYS.STREAK_DATA, streakData);
     saveToStorage(CONFIG.STORAGE_KEYS.GAME_STATS, gameStats);
@@ -903,7 +905,12 @@ function saveStats() {
     saveToStorage('hasene_favorites', favorites);
     saveToStorage('hasene_achievements', unlockedAchievements);
     saveToStorage('hasene_badges', badgesUnlocked);
-    
+
+    // Firebase yalnızca tam oturum (userId + username) varken
+    if (!checkUserLoggedIn()) {
+        return;
+    }
+
     // Sync to Firebase backend
     // saveUserStats and saveDailyTasks functions have their own user checks
     if (typeof window.saveUserStats === 'function') {
@@ -2836,10 +2843,10 @@ async function startKelimeCevirGame(submode = 'classic', questionCountOverride =
                 return;
             }
             
-            // 1. Zorlanılan kelimeler (başarı oranı < 50%)
+            // 1. Zorlanılan kelimeler (masteryLevel < 4, en az 2 deneme)
             const strugglingIds = Object.keys(wordStats).filter(id => {
                 const stats = wordStats[id];
-                return stats && stats.attempts >= 2 && stats.successRate < 50;
+                return stats && isStrugglingWord(stats);
             });
             reviewWordIds.push(...strugglingIds);
             
@@ -3124,18 +3131,14 @@ function checkKelimeAnswer(index, selectedAnswer) {
         
         sessionScore += gained;
 
-        if (checkUserLoggedIn()) {
-            updateWordStats(wordId, true);
-        }
+        updateWordStats(wordId, true);
     } else {
         wrongCount++;
         comboCount = 0;
         
         buttons[index].classList.add('wrong');
 
-        if (checkUserLoggedIn()) {
-            updateWordStats(wordId, false);
-        }
+        updateWordStats(wordId, false);
     }
 
     setTimeout(() => {
@@ -3266,6 +3269,36 @@ function resolveWordIdFromArabicText(arabicWord, ayetHint) {
     return picked.id || picked.kelime_id || null;
 }
 
+/** Kelime kategorileri: zorlanılan = en az 2 deneme ve masteryLevel < 4 (%0–39) */
+const WORD_STRUGGLING_MIN_ATTEMPTS = 2;
+const WORD_STRUGGLING_MAX_MASTERY = 3;
+
+function getStatsMasteryLevel(stats) {
+    if (!stats) {
+        return 0;
+    }
+    if (stats.masteryLevel != null && stats.masteryLevel !== undefined) {
+        return stats.masteryLevel;
+    }
+    return Math.min(10, Math.floor((stats.successRate || 0) / 10));
+}
+
+function isStrugglingWord(stats) {
+    if (!stats) {
+        return false;
+    }
+    const attempts = stats.attempts || 0;
+    return attempts >= WORD_STRUGGLING_MIN_ATTEMPTS
+        && getStatsMasteryLevel(stats) <= WORD_STRUGGLING_MAX_MASTERY;
+}
+
+function isNewWord(stats) {
+    if (!stats) {
+        return false;
+    }
+    return (stats.attempts || 0) < WORD_STRUGGLING_MIN_ATTEMPTS;
+}
+
 /**
  * SM-2 kalite: 0–5. Eski çağrılar: true→4 (iyi), false→2 (yanlış şık).
  */
@@ -3307,7 +3340,10 @@ function ensureSm2Repetitions(stats) {
 function updateWordStats(wordId, payload) {
     if (!wordId) return;
 
-    if (!checkUserLoggedIn()) {
+    if (typeof window.ensureDefaultUser === 'function') {
+        window.ensureDefaultUser();
+    }
+    if (!localStorage.getItem('hasene_user_id')) {
         return;
     }
 
@@ -3488,7 +3524,7 @@ function selectIntelligentWords(words, count, isReviewMode = false) {
             }
             
             // 3. Zorlanılan Kelimeler
-            if (stats.attempts >= 2 && stats.successRate < 50) {
+            if (isStrugglingWord(stats)) {
                 priority = Math.max(priority, isReviewMode ? 10 : 3);
             }
             
@@ -3547,11 +3583,8 @@ function getStrugglingWords() {
         .filter(wordId => {
             const stats = wordStats[wordId];
             if (!stats) return false;
-            const attempts = stats.attempts || 0;
-            const successRate = stats.successRate || 0;
-            // Zorlanılan kelimeler: En az 2 deneme VE başarı oranı < 50%
-            // README ve selectIntelligentWords ile uyumlu
-            return attempts >= 2 && successRate < 50;
+            // Zorlanılan: en az 2 deneme, masteryLevel < 4 (KELIME_OGRENME_SISTEMI.md ile uyumlu)
+            return isStrugglingWord(stats);
         })
         .map(wordId => ({
             id: wordId,
@@ -3575,12 +3608,9 @@ function getLearningWords() {
         .filter(wordId => {
             const stats = wordStats[wordId];
             if (!stats) return false;
-            const masteryLevel = stats.masteryLevel || 0;
-            const attempts = stats.attempts || 0;
-            const successRate = stats.successRate || 0;
-            const isStruggling = attempts >= 2 && successRate < 50;
+            const masteryLevel = getStatsMasteryLevel(stats);
             // Öğreniliyor: mastery 4–7 ve zorlanılan değil (özet kartlarla uyumlu)
-            return masteryLevel >= 4 && masteryLevel < 8 && !isStruggling;
+            return masteryLevel >= 4 && masteryLevel < 8 && !isStrugglingWord(stats);
         })
         .map(wordId => ({
             id: wordId,
@@ -3588,6 +3618,29 @@ function getLearningWords() {
             successRate: wordStats[wordId].successRate || 0
         }))
         .sort((a, b) => (b.successRate || 0) - (a.successRate || 0))
+        .slice(0, 20);
+}
+
+/**
+ * Get new words (fewer than 2 attempts)
+ * @returns {Array} Array of new words with stats
+ */
+function getNewWords() {
+    if (!wordStats || Object.keys(wordStats).length === 0) {
+        return [];
+    }
+
+    return Object.keys(wordStats)
+        .filter(wordId => {
+            const stats = wordStats[wordId];
+            return stats && isNewWord(stats);
+        })
+        .map(wordId => ({
+            id: wordId,
+            ...wordStats[wordId],
+            successRate: wordStats[wordId].successRate || 0
+        }))
+        .sort((a, b) => (b.attempts || 0) - (a.attempts || 0))
         .slice(0, 20);
 }
 
@@ -3604,8 +3657,7 @@ function getMasteredWords() {
         .filter(wordId => {
             const stats = wordStats[wordId];
             if (!stats) return false;
-            const masteryLevel = stats.masteryLevel || 0;
-            // Ustalaşılan kelimeler: masteryLevel >= 8
+            const masteryLevel = getStatsMasteryLevel(stats);
             return masteryLevel >= 8;
         })
         .map(wordId => ({
@@ -3632,7 +3684,7 @@ function getReviewQueueEntries(limit = 40) {
         if (!stats) {
             continue;
         }
-        const isStruggling = (stats.attempts || 0) >= 2 && (stats.successRate || 0) < 50;
+        const isStruggling = isStrugglingWord(stats);
         let isDue = false;
         let overdueDays = 0;
         if (stats.nextReviewDate) {
@@ -3787,6 +3839,7 @@ async function getWordAnalysis() {
             mastered: 0,
             learning: 0,
             struggling: 0,
+            newWords: 0,
             averageSuccessRate: 0,
             dueForReview: 0
         };
@@ -3797,6 +3850,7 @@ async function getWordAnalysis() {
     let mastered = 0;
     let learning = 0;
     let struggling = 0;
+    let newWords = 0;
     let dueForReview = 0;
     let totalSuccessRate = 0;
     
@@ -3804,25 +3858,21 @@ async function getWordAnalysis() {
         if (!stats) return;
         
         const successRate = stats.successRate || 0;
-        const masteryLevel = stats.masteryLevel || 0;
-        const attempts = stats.attempts || 0;
+        const masteryLevel = getStatsMasteryLevel(stats);
         
         totalSuccessRate += successRate;
         
         // Kategorilere ayır (getStrugglingWords, getLearningWords, getMasteredWords ile uyumlu)
-        // Öncelik sırası: Struggling > Mastered > Learning
-        if (attempts >= 2 && successRate < 50) {
-            // Zorlanılan kelimeler: En az 2 deneme ve başarı oranı < 50%
-            // getStrugglingWords ile uyumlu (öncelikli kategori)
+        // Öncelik sırası: Struggling > Mastered > Learning > Yeni
+        if (isStrugglingWord(stats)) {
             struggling++;
         } else if (masteryLevel >= 8) {
-            // Ustalaşılan kelimeler: successRate >= 80%
             mastered++;
         } else if (masteryLevel >= 4 && masteryLevel < 8) {
-            // Öğreniliyor kelimeler: successRate 40-79% (ve struggling değil)
             learning++;
+        } else if (isNewWord(stats)) {
+            newWords++;
         }
-        // attempts < 2 olan kelimeler hiçbir kategoriye dahil edilmez (yeni kelimeler)
         
         if (stats.nextReviewDate) {
             try {
@@ -3841,6 +3891,7 @@ async function getWordAnalysis() {
         mastered,
         learning,
         struggling,
+        newWords,
         averageSuccessRate: totalWords > 0 ? Math.round(totalSuccessRate / totalWords) : 0,
         dueForReview
     };
@@ -3993,6 +4044,7 @@ async function showWordAnalysisModal() {
     const struggling = getStrugglingWords();
     const learning = getLearningWords();
     const mastered = getMasteredWords();
+    const newWords = getNewWords();
     const learningSpeed = getWordLearningSpeed();
     const hardestWords = getHardestWords(20);
     const mostWrongWords = getWordsWithMostWrongs(20);
@@ -4102,6 +4154,7 @@ async function showWordAnalysisModal() {
     const masteredPercent = analysis.totalWords > 0 ? Math.round((analysis.mastered / analysis.totalWords) * 100) : 0;
     const learningPercent = analysis.totalWords > 0 ? Math.round((analysis.learning / analysis.totalWords) * 100) : 0;
     const strugglingPercent = analysis.totalWords > 0 ? Math.round((analysis.struggling / analysis.totalWords) * 100) : 0;
+    const newWordsPercent = analysis.totalWords > 0 ? Math.round((analysis.newWords / analysis.totalWords) * 100) : 0;
     
     let content = `
         <div class="analysis-summary-compact">
@@ -4136,6 +4189,14 @@ async function showWordAnalysisModal() {
                     <span class="stat-percent-compact">${strugglingPercent}%</span>
                 </div>
             </div>
+            <div class="analysis-stat-card-compact new-words">
+                <div class="stat-icon-compact">🆕</div>
+                <div class="stat-content-compact">
+                    <span class="stat-value-compact">${analysis.newWords}</span>
+                    <span class="stat-label-compact">Yeni</span>
+                    <span class="stat-percent-compact">${newWordsPercent}%</span>
+                </div>
+            </div>
         </div>
         
         <div class="analysis-progress-section-compact">
@@ -4162,11 +4223,13 @@ async function showWordAnalysisModal() {
                     <div class="progress-mastered" style="width: ${masteredPercent}%"></div>
                     <div class="progress-learning" style="width: ${learningPercent}%"></div>
                     <div class="progress-struggling" style="width: ${strugglingPercent}%"></div>
+                    <div class="progress-new-words" style="width: ${newWordsPercent}%"></div>
                 </div>
                 <div class="progress-legend-compact">
                     <span class="legend-item-compact"><span class="legend-color mastered"></span> Ustalaşılan</span>
                     <span class="legend-item-compact"><span class="legend-color learning"></span> Öğreniliyor</span>
                     <span class="legend-item-compact"><span class="legend-color struggling"></span> Zorlanılan</span>
+                    <span class="legend-item-compact"><span class="legend-color new-words"></span> Yeni</span>
                 </div>
             </div>
         </div>
@@ -4190,6 +4253,11 @@ async function showWordAnalysisModal() {
                     <span class="tab-icon">🔴</span>
                     <span class="tab-label">Zorlanılan</span>
                     <span class="tab-count">${analysis.struggling}</span>
+                </button>
+                <button class="category-tab" data-category="new-words" onclick="switchWordCategory('new-words')">
+                    <span class="tab-icon">🆕</span>
+                    <span class="tab-label">Yeni</span>
+                    <span class="tab-count">${analysis.newWords}</span>
                 </button>
                 <button class="category-tab" data-category="hardest" onclick="switchWordCategory('hardest')">
                     <span class="tab-icon">🔥</span>
@@ -4238,6 +4306,18 @@ async function showWordAnalysisModal() {
                             ${renderWordList(struggling, 10, 'struggling')}
                         </div>
                     ` : '<div class="empty-state">Harika! Zorlandığın kelime yok. 🎉</div>'}
+                </div>
+
+                <div class="category-panel" id="category-new-words">
+                    ${newWords.length > 0 ? `
+                        <div class="category-header">
+                            <h4>🆕 Yeni Kelimeler (henüz az denendi)</h4>
+                            <span class="category-badge">${analysis.newWords} kelime</span>
+                        </div>
+                        <div class="word-list">
+                            ${renderWordList(newWords, 10, 'new-words')}
+                        </div>
+                    ` : '<div class="empty-state">Tüm kelimeler en az 2 kez denendi. 🎯</div>'}
                 </div>
                 
                 <div class="category-panel" id="category-hardest">
@@ -4534,19 +4614,15 @@ function checkDinleAnswer(index, selectedAnswer) {
         const gained = basePoints + CONFIG.COMBO_BONUS_PER_CORRECT;
         sessionScore += gained;
 
-        if (checkUserLoggedIn()) {
-            const wordId = currentQuestion.kelime_id || currentQuestion.id;
-            updateWordStats(wordId, true);
-        }
+        const wordId = currentQuestion.kelime_id || currentQuestion.id;
+        updateWordStats(wordId, true);
     } else {
         wrongCount++;
         comboCount = 0;
         buttons[index].classList.add('wrong');
 
-        if (checkUserLoggedIn()) {
-            const wordId = currentQuestion.kelime_id || currentQuestion.id;
-            updateWordStats(wordId, false);
-        }
+        const wordId = currentQuestion.kelime_id || currentQuestion.id;
+        updateWordStats(wordId, false);
     }
     
     setTimeout(() => {
@@ -4753,7 +4829,7 @@ function checkBoslukAnswer(index, selectedWord) {
         const gained = 10 + CONFIG.COMBO_BONUS_PER_CORRECT;
         sessionScore += gained;
 
-        if (checkUserLoggedIn() && currentQuestion._wordId) {
+        if (currentQuestion._wordId) {
             updateWordStats(currentQuestion._wordId, true);
         }
     } else {
@@ -4761,7 +4837,7 @@ function checkBoslukAnswer(index, selectedWord) {
         comboCount = 0;
         buttons[index].classList.add('wrong');
 
-        if (checkUserLoggedIn() && currentQuestion._wordId) {
+        if (currentQuestion._wordId) {
             updateWordStats(currentQuestion._wordId, false);
         }
     }
