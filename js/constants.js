@@ -365,6 +365,11 @@ const ONBOARDING_SLIDES = [
         icon: '🏆',
         title: '44 Başarım & 42 Rozet',
         description: 'Başarımlar kazanın, rozetler toplayın ve seviyenizi yükseltin. Hedef: Kurra Hafız olmak!'
+    },
+    {
+        icon: '📱',
+        title: 'Telefona Ekleyin',
+        description: 'Linki her seferinde aramamak için uygulamayı ana ekrana ekleyin. Bitince size adım adım göstereceğiz — tek seferlik kurulum!'
     }
 ];
 

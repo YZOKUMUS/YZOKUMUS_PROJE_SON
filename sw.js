@@ -1,7 +1,7 @@
 // Hasene Service Worker - Offline + otomatik güncelleme
 // Yeni sürüm yayınlarken CACHE_NAME sürümünü artır (ör. hasene-v8)
-const CACHE_NAME = 'hasene-v7';
-const DATA_CACHE_NAME = 'hasene-data-v7';
+const CACHE_NAME = 'hasene-v8';
+const DATA_CACHE_NAME = 'hasene-data-v8';
 
 const urlsToCache = [
     './',
@@ -23,6 +23,7 @@ const urlsToCache = [
     './js/notifications.js',
     './js/charts.js',
     './js/juz-journey.js',
+    './js/pwa-install.js',
     './js/game-core.js',
     './js/pronunciation-fix.js',
     './ASSETS/badges/icon-512.png',

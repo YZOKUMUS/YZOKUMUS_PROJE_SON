@@ -605,6 +605,10 @@ async function initApp() {
     if (typeof window.updateDeveloperToolsVisibility === 'function') {
         window.updateDeveloperToolsVisibility();
     }
+
+    if (typeof window.initPwaInstall === 'function') {
+        window.initPwaInstall();
+    }
     
     // Browser geri tuşu dinleyicisi
     setupBackButtonHandler();
@@ -7509,6 +7513,9 @@ function nextOnboardingSlide() {
         // Finish onboarding
         closeModal('onboarding-modal');
         localStorage.setItem('hasene_onboarding_complete', 'true');
+        if (typeof window.scheduleInstallPrompt === 'function') {
+            window.scheduleInstallPrompt(600);
+        }
     }
 }
 

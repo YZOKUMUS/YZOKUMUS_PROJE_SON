@@ -1121,6 +1121,21 @@
         </div>
     </div>
 
+    <!-- PWA Install Guide Modal -->
+    <div id="pwa-install-modal" class="modal hidden">
+        <div class="modal-content glass-card pwa-install-content">
+            <div class="pwa-install-icon">📱</div>
+            <h2 id="pwa-install-title">Telefona ekle</h2>
+            <p class="pwa-install-lead">Linki her seferinde aramayın — bir kez ekleyin, uygulama gibi açılsın.</p>
+            <ol id="pwa-install-steps" class="pwa-install-steps"></ol>
+            <p id="pwa-install-note" class="pwa-install-note"></p>
+            <div class="pwa-install-actions">
+                <button id="pwa-install-primary-btn" class="primary-btn" type="button">Şimdi Ekle</button>
+                <button id="pwa-install-dismiss-btn" class="secondary-btn" type="button">Daha sonra</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Onboarding Modal -->
     <div id="onboarding-modal" class="modal hidden">
         <div class="modal-content glass-card onboarding-content">
@@ -1552,6 +1567,7 @@
     <script src="js/notifications.js" defer></script>
     <script src="js/charts.js" defer></script>
     <script src="js/juz-journey.js" defer></script>
+    <script src="js/pwa-install.js" defer></script>
     <script src="js/game-core.js" defer></script>
     <script src="js/pronunciation-fix.js" defer></script>
     <!-- Debug/Test Scripts (Only loaded in development mode) -->

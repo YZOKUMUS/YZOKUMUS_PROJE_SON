@@ -5678,6 +5678,48 @@ body[data-theme="dark"] .word-chip {
     opacity: 0.8;
 }
 
+.pwa-install-content {
+    max-width: 420px;
+    text-align: center;
+}
+
+.pwa-install-icon {
+    font-size: 3rem;
+    margin-bottom: 8px;
+}
+
+.pwa-install-lead {
+    color: var(--text-secondary, #666);
+    font-size: 0.95rem;
+    margin: 8px 0 16px;
+    line-height: 1.5;
+}
+
+.pwa-install-steps {
+    text-align: left;
+    margin: 0 0 16px;
+    padding-left: 1.25rem;
+    line-height: 1.6;
+    font-size: 0.95rem;
+}
+
+.pwa-install-steps li {
+    margin-bottom: 10px;
+}
+
+.pwa-install-note {
+    font-size: 0.85rem;
+    color: var(--text-secondary, #666);
+    margin-bottom: 16px;
+    line-height: 1.45;
+}
+
+.pwa-install-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
 /* User Status Bar Styles */
 .user-status-bar {
     display: flex;
