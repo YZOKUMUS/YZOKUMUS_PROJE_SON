@@ -292,6 +292,32 @@ body::before {
     z-index: 1;
 }
 
+.app-credit-footer {
+    margin: var(--spacing-lg) 0 var(--spacing-md);
+    padding: var(--spacing-md) var(--spacing-sm);
+    text-align: center;
+}
+
+.app-credit-line {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    margin: 0 0 4px;
+    line-height: 1.4;
+}
+
+.app-credit-line strong {
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+.app-credit-sub {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    opacity: 0.85;
+    margin: 0;
+    line-height: 1.35;
+}
+
 /* Stats Header */
 .stats-header {
     padding: var(--spacing-md);

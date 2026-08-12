@@ -257,7 +257,8 @@ function loadFromStorage(key, defaultValue = null) {
  */
 const HASENE_SHARE_URL = 'https://yzokumus.github.io/YZOKUMUS_PROJE_SON/';
 const HASENE_SHARE_TITLE = 'Hasene — Kur\'an Kelimelerini Oyunla Öğren';
-const HASENE_SHARE_TEXT = 'Kur\'an kelimelerini oyunla öğren! Cüz Yolculuğu, akıllı tekrar, rozetler ve lig. Ücretsiz — hemen dene:';
+const HASENE_SHARE_TEXT = 'Kur\'an kelimelerini oyunla öğren! Cüz Yolculuğu, akıllı tekrar, rozetler ve lig. YZOKUMUS tarafından geliştirildi · Allah rızası için ücretsiz — hemen dene:';
+const HASENE_DEVELOPER_CREDIT = 'Geliştirici: YZOKUMUS · Allah rızası için ücretsiz';
 
 /**
  * Uygulamayı paylaş (Web Share API veya panoya kopyala)
@@ -393,6 +394,7 @@ if (typeof window !== 'undefined') {
     window.generateId = generateId;
     window.shareHaseneApp = shareHaseneApp;
     window.HASENE_SHARE_URL = HASENE_SHARE_URL;
+    window.HASENE_DEVELOPER_CREDIT = HASENE_DEVELOPER_CREDIT;
     window.isDeveloperMode = isDeveloperMode;
     window.enableDeveloperMode = enableDeveloperMode;
     window.updateDeveloperToolsVisibility = updateDeveloperToolsVisibility;
