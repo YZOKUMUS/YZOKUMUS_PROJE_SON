@@ -55,6 +55,10 @@ async function preparePage(page) {
   await page.evaluate(() => {
     localStorage.setItem('hasene_onboarding_complete', '1');
     localStorage.setItem('hasene_pwa_install_dismissed', '1');
+    localStorage.setItem('hasene_username_setup_skipped', '1');
+    localStorage.setItem('hasene_user_id', 'local-smoke-test');
+    localStorage.setItem('hasene_username', 'smoke_test');
+    localStorage.setItem('hasene_username_display', 'Smoke Test');
   });
   await page.reload({ waitUntil: 'domcontentloaded' });
   await page.waitForFunction(

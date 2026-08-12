@@ -58,7 +58,7 @@
     <link rel="apple-touch-icon" href="ASSETS/badges/icon-512.png">
     
     <!-- Styles -->
-    <link rel="stylesheet" href="style.css?v=4.6">
+    <link rel="stylesheet" href="style.css?v=4.7">
     <!-- Font preload - Arapça font kritik, erken yükle -->
     <link rel="preload" href="ASSETS/fonts/KFGQPC Uthmanic Script HAFS Regular.otf" as="font" type="font/otf" crossorigin>
 </head>
@@ -256,11 +256,17 @@
                     </div>
                 </div>
                 <h3>Günlük Okumalar</h3>
-                <p>Ayet, dua ve hadisleri oku</p>
+                <p>Ayet, dua ve hadisleri karışık oku</p>
             </div>
+
+            <button type="button" class="menu-section-toggle" id="reading-modes-toggle" aria-expanded="false" aria-controls="reading-modes-body">
+                <span>📖 Ayrı okuma modları</span>
+                <span class="menu-section-chevron" aria-hidden="true">▼</span>
+            </button>
+            <div class="menu-section-body hidden" id="reading-modes-body">
             
-            <!-- 7. Ayet Oku -->
-            <div class="game-card" data-game="ayet-oku">
+            <!-- Ayet Oku -->
+            <div class="game-card menu-secondary-card" data-game="ayet-oku">
                 <div class="game-icon">
                     <img src="ASSETS/game-icons/ayet-oku.png" alt="Ayet Oku" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                     <span style="display:none;">📖</span>
@@ -269,8 +275,8 @@
                 <p>Kuran ayetlerini oku ve meâlini öğren</p>
             </div>
             
-            <!-- 8. Dua Et -->
-            <div class="game-card" data-game="dua-et">
+            <!-- Dua Et -->
+            <div class="game-card menu-secondary-card" data-game="dua-et">
                 <div class="game-icon">
                     <img src="ASSETS/game-icons/dua-et.png" alt="Dua Et" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                     <span style="display:none;">🤲</span>
@@ -279,8 +285,8 @@
                 <p>Kuran'dan duaları öğren</p>
             </div>
             
-            <!-- 9. Hadis Oku -->
-            <div class="game-card" data-game="hadis-oku">
+            <!-- Hadis Oku -->
+            <div class="game-card menu-secondary-card" data-game="hadis-oku">
                 <div class="game-icon">
                     <img src="ASSETS/game-icons/hadis-oku.png" alt="Hadis Oku" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                     <span style="display:none;">📜</span>
@@ -289,7 +295,9 @@
                 <p>Hz. Peygamber'in hadislerini oku</p>
             </div>
 
-            <!-- 10. Kart Modu -->
+            </div>
+
+            <!-- Kart Modu -->
             <div class="game-card" data-game="flashcards">
                 <div class="game-icon">
                     <span>🃏</span>
@@ -1155,6 +1163,23 @@
             <div class="onboarding-nav">
                 <button id="onboarding-prev" onclick="prevOnboardingSlide()">← Geri</button>
                 <button id="onboarding-next" onclick="nextOnboardingSlide()">İleri →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Username Setup Modal (lig / profil) -->
+    <div id="username-setup-modal" class="modal hidden">
+        <div class="modal-content glass-card" style="max-width: 420px;">
+            <div style="text-align: center; margin-bottom: var(--spacing-md);">
+                <div style="font-size: 2.5rem; margin-bottom: var(--spacing-sm);">👋</div>
+                <h2 style="font-size: 1.15rem; margin: 0 0 8px;">Adınızı seçin</h2>
+                <p style="font-size: 0.9rem; color: var(--text-secondary); margin: 0;">Lig tablosunda ve profilinizde bu isim görünür.</p>
+            </div>
+            <label for="username-setup-input" style="display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 6px;">Görünen ad</label>
+            <input id="username-setup-input" type="text" maxlength="24" autocomplete="nickname" spellcheck="false" placeholder="Örn: Ahmet" style="width: 100%; box-sizing: border-box; padding: 12px 14px; border-radius: 12px; border: 2px solid rgba(157, 138, 255, 0.3); margin-bottom: var(--spacing-md); font-size: 1rem;">
+            <div style="display: flex; flex-direction: column; gap: var(--spacing-sm);">
+                <button type="button" class="primary-btn" onclick="saveUsernameFromSetup()">Kaydet ve devam et</button>
+                <button type="button" class="secondary-btn" onclick="skipUsernameSetup()">Şimdilik atla</button>
             </div>
         </div>
     </div>

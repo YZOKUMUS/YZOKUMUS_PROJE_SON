@@ -6470,3 +6470,53 @@ body.style-exp-micro:not(.animations-disabled) .answer-option.wrong {
         grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 }
+
+/* Ana menü — katlanabilir okuma modları */
+.menu-section-toggle {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin: 0.35rem 0 0.5rem;
+    padding: 0.85rem 1rem;
+    border: 1px dashed rgba(157, 138, 255, 0.35);
+    border-radius: var(--radius-md);
+    background: rgba(157, 138, 255, 0.06);
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.menu-section-toggle:hover {
+    background: rgba(157, 138, 255, 0.12);
+    border-color: rgba(157, 138, 255, 0.5);
+}
+
+.menu-section-chevron {
+    display: inline-block;
+    transition: transform var(--transition-fast);
+    font-size: 0.75rem;
+}
+
+.menu-section-chevron.is-open {
+    transform: rotate(180deg);
+}
+
+.menu-section-body {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-sm);
+}
+
+.menu-section-body.hidden {
+    display: none;
+}
+
+.menu-secondary-card {
+    opacity: 0.96;
+}

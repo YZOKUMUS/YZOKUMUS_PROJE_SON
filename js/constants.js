@@ -367,6 +367,11 @@ const ONBOARDING_SLIDES = [
         description: 'Başarımlar kazanın, rozetler toplayın ve seviyenizi yükseltin. Hedef: Kurra Hafız olmak!'
     },
     {
+        icon: '👤',
+        title: 'Adınızı Seçin',
+        description: 'Lig tablosunda görünecek adınızı belirleyin. İsterseniz sonra da ayarlardan değiştirebilirsiniz.'
+    },
+    {
         icon: '📱',
         title: 'Telefona Ekleyin',
         description: 'Linki her seferinde aramamak için uygulamayı ana ekrana ekleyin. Bitince size adım adım göstereceğiz — tek seferlik kurulum!'

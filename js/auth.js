@@ -128,9 +128,17 @@ function isLoggedIn() {
  * @returns {Object} User object
  */
 function ensureDefaultUser() {
-    const userId = localStorage.getItem('hasene_user_id');
+    let userId = localStorage.getItem('hasene_user_id');
+    if (!userId) {
+        userId = `local-${Date.now()}`;
+        localStorage.setItem('hasene_user_id', userId);
+        if (!localStorage.getItem('hasene_user_gender')) {
+            localStorage.setItem('hasene_user_gender', 'male');
+        }
+    }
+
     const username = localStorage.getItem('hasene_username');
-    if (userId && username) {
+    if (username) {
         return {
             id: userId,
             username: username,
@@ -139,11 +147,25 @@ function ensureDefaultUser() {
             type: 'local'
         };
     }
-    const user = createLocalUser('Misafir');
-    if (!localStorage.getItem('hasene_user_gender')) {
-        localStorage.setItem('hasene_user_gender', 'male');
+
+    return {
+        id: userId,
+        username: null,
+        usernameDisplay: 'Misafir',
+        email: localStorage.getItem('hasene_user_email') || '',
+        type: 'local'
+    };
+}
+
+function needsUsernameSetup() {
+    if (localStorage.getItem('hasene_username_setup_skipped') === '1') {
+        return false;
     }
-    return user;
+    const username = localStorage.getItem('hasene_username');
+    if (!username) {
+        return true;
+    }
+    return username.toLowerCase() === 'misafir';
 }
 
 /**
@@ -422,6 +444,7 @@ if (typeof window !== 'undefined') {
     window.handleUserLogout = handleUserLogout;
     window.handleUserAuth = handleUserAuth;
     window.ensureDefaultUser = ensureDefaultUser;
+    window.needsUsernameSetup = needsUsernameSetup;
     window.updateUserStatusUI = updateUserStatusUI;
 
     function initGuestUserUI() {

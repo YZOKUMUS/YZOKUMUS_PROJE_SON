@@ -39,6 +39,7 @@ let dataLoaded = {
 
 const loadPromises = {};
 let preloadPromise = null;
+let backgroundPreloadScheduled = false;
 const FETCH_RETRIES = 3;
 
 function sleep(ms) {
@@ -433,7 +434,7 @@ async function loadUzatmaMedData() {
 }
 
 /**
- * Preload all data in background
+ * Preload all data in background (explicit — e.g. Talim Et, smoke tests)
  */
 async function preloadAllData() {
     if (!preloadPromise) {
@@ -451,6 +452,42 @@ async function preloadAllData() {
         })();
     }
     return preloadPromise;
+}
+
+/**
+ * Staggered background preload after app is interactive (faster first paint)
+ */
+function scheduleBackgroundPreload() {
+    if (backgroundPreloadScheduled) {
+        return;
+    }
+    backgroundPreloadScheduled = true;
+
+    const runStaggered = () => {
+        console.log('📦 Arka plan veri yüklemesi başlıyor (lazy)...');
+        const tasks = [
+            { fn: loadHarfData, delay: 0 },
+            { fn: loadKelimeData, delay: 800 },
+            { fn: loadDuaData, delay: 3500 },
+            { fn: loadAyetData, delay: 5500 },
+            { fn: loadHadisData, delay: 7500 },
+            { fn: loadUzatmaMedData, delay: 9500 }
+        ];
+        tasks.forEach(({ fn, delay }) => {
+            setTimeout(() => {
+                fn().catch((err) => console.warn('Background preload:', err));
+            }, delay);
+        });
+    };
+
+    const startDelay = 2500;
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+        setTimeout(() => {
+            window.requestIdleCallback(runStaggered, { timeout: 8000 });
+        }, startDelay);
+    } else {
+        setTimeout(runStaggered, startDelay);
+    }
 }
 
 /**
@@ -492,6 +529,7 @@ if (typeof window !== 'undefined') {
     window.loadTenvinData = loadTenvinData;
     window.loadUzatmaMedData = loadUzatmaMedData;
     window.preloadAllData = preloadAllData;
+    window.scheduleBackgroundPreload = scheduleBackgroundPreload;
     window.getDataStatus = getDataStatus;
     
     // Expose data arrays

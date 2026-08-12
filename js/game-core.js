@@ -622,8 +622,10 @@ async function initApp() {
     // Browser geri tuşu dinleyicisi
     setupBackButtonHandler();
     
-    // Preload data in background
-    preloadAllData();
+    // Lazy background preload — açılış hızını korur, modlar kendi verisini yükler
+    if (typeof scheduleBackgroundPreload === 'function') {
+        scheduleBackgroundPreload();
+    }
     
     // Register service worker
     registerServiceWorker();
@@ -640,6 +642,8 @@ async function initApp() {
         const onboardingComplete = localStorage.getItem('hasene_onboarding_complete');
         if (!onboardingComplete) {
             setTimeout(() => showOnboarding(), 500);
+        } else {
+            scheduleUsernameSetupIfNeeded(800);
         }
         // Günlük ödül artık otomatik gösterilmiyor
         // Kullanıcı bir aktivite yaptıktan sonra (oyun tamamlandığında veya görevler tamamlandığında) gösterilecek
@@ -1545,6 +1549,14 @@ function registerServiceWorker() {
         return;
     }
 
+    const isLocalDev = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+    if (isLocalDev) {
+        navigator.serviceWorker.getRegistrations().then((registrations) => {
+            registrations.forEach((registration) => registration.unregister());
+        }).catch(() => {});
+        return;
+    }
+
     let updateDetected = false;
 
     navigator.serviceWorker.addEventListener('controllerchange', () => {
@@ -1669,6 +1681,20 @@ function setupEventListeners() {
             }
         });
     });
+
+    const readingToggle = document.getElementById('reading-modes-toggle');
+    const readingBody = document.getElementById('reading-modes-body');
+    if (readingToggle && readingBody) {
+        readingToggle.addEventListener('click', () => {
+            const expanded = readingToggle.getAttribute('aria-expanded') === 'true';
+            readingToggle.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+            readingBody.classList.toggle('hidden', expanded);
+            const chevron = readingToggle.querySelector('.menu-section-chevron');
+            if (chevron) {
+                chevron.classList.toggle('is-open', !expanded);
+            }
+        });
+    }
     
     // Goal settings button
     document.getElementById('goal-settings-btn')?.addEventListener('click', showGoalSettings);
@@ -7547,7 +7573,71 @@ function nextOnboardingSlide() {
         if (typeof window.scheduleInstallPrompt === 'function') {
             window.scheduleInstallPrompt(600);
         }
+        scheduleUsernameSetupIfNeeded(400);
     }
+}
+
+function scheduleUsernameSetupIfNeeded(delayMs = 500) {
+    if (typeof window.needsUsernameSetup !== 'function' || !window.needsUsernameSetup()) {
+        return;
+    }
+    setTimeout(() => {
+        if (typeof window.needsUsernameSetup === 'function' && window.needsUsernameSetup()) {
+            showUsernameSetupModal();
+        }
+    }, delayMs);
+}
+
+function showUsernameSetupModal() {
+    const input = document.getElementById('username-setup-input');
+    if (input) {
+        const display = localStorage.getItem('hasene_username_display');
+        input.value = display && display !== 'Misafir' ? display : '';
+    }
+    openModal('username-setup-modal');
+}
+
+function saveUsernameFromSetup() {
+    const input = document.getElementById('username-setup-input');
+    const raw = (input?.value || '').trim().replace(/\s+/g, ' ');
+    if (raw.length < 2) {
+        showToast('Lütfen en az 2 karakterlik bir ad girin', 'warning');
+        return;
+    }
+    if (raw.length > 24) {
+        showToast('Ad en fazla 24 karakter olabilir', 'warning');
+        return;
+    }
+
+    const userId = localStorage.getItem('hasene_user_id');
+    if (userId && typeof window.updateLocalUser === 'function') {
+        window.updateLocalUser(raw);
+    } else if (typeof window.createLocalUser === 'function') {
+        window.createLocalUser(raw);
+    }
+
+    localStorage.removeItem('hasene_username_setup_skipped');
+    if (typeof window.updateUserStatusUI === 'function') {
+        window.updateUserStatusUI();
+    }
+    closeModal('username-setup-modal');
+    showToast(`Hoş geldin, ${raw}!`, 'success');
+}
+
+function skipUsernameSetup() {
+    localStorage.setItem('hasene_username_setup_skipped', '1');
+    if (!localStorage.getItem('hasene_username')) {
+        const userId = localStorage.getItem('hasene_user_id');
+        if (userId && typeof window.updateLocalUser === 'function') {
+            window.updateLocalUser('Misafir');
+        } else if (typeof window.createLocalUser === 'function') {
+            window.createLocalUser('Misafir');
+        }
+        if (typeof window.updateUserStatusUI === 'function') {
+            window.updateUserStatusUI();
+        }
+    }
+    closeModal('username-setup-modal');
 }
 
 function prevOnboardingSlide() {
@@ -8498,6 +8588,9 @@ if (typeof window !== 'undefined') {
     window.scheduleOnboardingIfNeeded = scheduleOnboardingIfNeeded;
     window.nextOnboardingSlide = nextOnboardingSlide;
     window.prevOnboardingSlide = prevOnboardingSlide;
+    window.showUsernameSetupModal = showUsernameSetupModal;
+    window.saveUsernameFromSetup = saveUsernameFromSetup;
+    window.skipUsernameSetup = skipUsernameSetup;
     window.showDailyReward = showDailyReward;
     // claimDailyReward zaten yukarıda tanımlı (günlük görevler sistemi için)
     // window.claimDailyReward = claimDailyReward; // Bu satır kaldırıldı - çakışmayı önlemek için
