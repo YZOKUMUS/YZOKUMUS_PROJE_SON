@@ -37,6 +37,41 @@ let dataLoaded = {
     uzatmaMed: false
 };
 
+const loadPromises = {};
+let preloadPromise = null;
+const FETCH_RETRIES = 3;
+
+function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function fetchDataJson(url, label) {
+    let lastError;
+    for (let attempt = 1; attempt <= FETCH_RETRIES; attempt++) {
+        try {
+            const response = await fetch(url, {
+                cache: attempt > 1 ? 'reload' : 'default'
+            });
+            if (!response.ok) {
+                throw new Error(`${label} fetch failed (${response.status})`);
+            }
+            return await response.json();
+        } catch (err) {
+            lastError = err;
+            if (attempt < FETCH_RETRIES) {
+                await sleep(400 * attempt);
+            }
+        }
+    }
+    throw lastError;
+}
+
+function markDataLoaded(flagKey, arr) {
+    if (arr.length > 0) {
+        dataLoaded[flagKey] = true;
+    }
+}
+
 /**
  * Load Kelime data
  */
@@ -44,26 +79,29 @@ async function loadKelimeData() {
     if (dataLoaded.kelime && kelimeData.length > 0) {
         return kelimeData;
     }
-    
-    try {
-        const response = await fetch('./data/kelimebul.json');
-        if (!response.ok) throw new Error('Kelime data fetch failed');
-        
-        const data = await response.json();
-        kelimeData = Array.isArray(data) ? data : [];
-        dataLoaded.kelime = true;
-        
-        // Update global reference
-        if (typeof window !== 'undefined') {
-            window.kelimeData = kelimeData;
-        }
-        
-        console.log(`✅ Kelime data loaded: ${kelimeData.length} words`);
-        return kelimeData;
-    } catch (err) {
-        console.error('❌ Kelime data load error:', err);
-        return [];
+    if (loadPromises.kelime) {
+        return loadPromises.kelime;
     }
+
+    loadPromises.kelime = (async () => {
+        try {
+            const data = await fetchDataJson('./data/kelimebul.json', 'Kelime');
+            kelimeData = Array.isArray(data) ? data : [];
+            markDataLoaded('kelime', kelimeData);
+            if (typeof window !== 'undefined') {
+                window.kelimeData = kelimeData;
+            }
+            console.log(`✅ Kelime data loaded: ${kelimeData.length} words`);
+            return kelimeData;
+        } catch (err) {
+            console.error('❌ Kelime data load error:', err);
+            return kelimeData.length > 0 ? kelimeData : [];
+        } finally {
+            loadPromises.kelime = null;
+        }
+    })();
+
+    return loadPromises.kelime;
 }
 
 /**
@@ -73,26 +111,29 @@ async function loadAyetData() {
     if (dataLoaded.ayet && ayetData.length > 0) {
         return ayetData;
     }
-    
-    try {
-        const response = await fetch('./data/ayetoku.json');
-        if (!response.ok) throw new Error('Ayet data fetch failed');
-        
-        const data = await response.json();
-        ayetData = Array.isArray(data) ? data : [];
-        dataLoaded.ayet = true;
-        
-        // Update global reference
-        if (typeof window !== 'undefined') {
-            window.ayetData = ayetData;
-        }
-        
-        console.log(`✅ Ayet data loaded: ${ayetData.length} verses`);
-        return ayetData;
-    } catch (err) {
-        console.error('❌ Ayet data load error:', err);
-        return [];
+    if (loadPromises.ayet) {
+        return loadPromises.ayet;
     }
+
+    loadPromises.ayet = (async () => {
+        try {
+            const data = await fetchDataJson('./data/ayetoku.json', 'Ayet');
+            ayetData = Array.isArray(data) ? data : [];
+            markDataLoaded('ayet', ayetData);
+            if (typeof window !== 'undefined') {
+                window.ayetData = ayetData;
+            }
+            console.log(`✅ Ayet data loaded: ${ayetData.length} verses`);
+            return ayetData;
+        } catch (err) {
+            console.error('❌ Ayet data load error:', err);
+            return ayetData.length > 0 ? ayetData : [];
+        } finally {
+            loadPromises.ayet = null;
+        }
+    })();
+
+    return loadPromises.ayet;
 }
 
 /**
@@ -104,14 +145,10 @@ async function loadDuaData() {
     }
     
     try {
-        const response = await fetch('./data/duaet.json');
-        if (!response.ok) throw new Error('Dua data fetch failed');
-        
-        const data = await response.json();
+        const data = await fetchDataJson('./data/duaet.json', 'Dua');
         duaData = Array.isArray(data) ? data : [];
-        dataLoaded.dua = true;
+        markDataLoaded('dua', duaData);
         
-        // Update global reference
         if (typeof window !== 'undefined') {
             window.duaData = duaData;
         }
@@ -120,7 +157,7 @@ async function loadDuaData() {
         return duaData;
     } catch (err) {
         console.error('❌ Dua data load error:', err);
-        return [];
+        return duaData.length > 0 ? duaData : [];
     }
 }
 
@@ -131,26 +168,29 @@ async function loadHadisData() {
     if (dataLoaded.hadis && hadisData.length > 0) {
         return hadisData;
     }
-    
-    try {
-        const response = await fetch('./data/hadisoku.json');
-        if (!response.ok) throw new Error('Hadis data fetch failed');
-        
-        const data = await response.json();
-        hadisData = Array.isArray(data) ? data : [];
-        dataLoaded.hadis = true;
-        
-        // Update global reference
-        if (typeof window !== 'undefined') {
-            window.hadisData = hadisData;
-        }
-        
-        console.log(`✅ Hadis data loaded: ${hadisData.length} hadiths`);
-        return hadisData;
-    } catch (err) {
-        console.error('❌ Hadis data load error:', err);
-        return [];
+    if (loadPromises.hadis) {
+        return loadPromises.hadis;
     }
+
+    loadPromises.hadis = (async () => {
+        try {
+            const data = await fetchDataJson('./data/hadisoku.json', 'Hadis');
+            hadisData = Array.isArray(data) ? data : [];
+            markDataLoaded('hadis', hadisData);
+            if (typeof window !== 'undefined') {
+                window.hadisData = hadisData;
+            }
+            console.log(`✅ Hadis data loaded: ${hadisData.length} hadiths`);
+            return hadisData;
+        } catch (err) {
+            console.error('❌ Hadis data load error:', err);
+            return hadisData.length > 0 ? hadisData : [];
+        } finally {
+            loadPromises.hadis = null;
+        }
+    })();
+
+    return loadPromises.hadis;
 }
 
 /**
@@ -160,26 +200,29 @@ async function loadHarfData() {
     if (dataLoaded.harf && harfData.length > 0) {
         return harfData;
     }
-    
-    try {
-        const response = await fetch('./data/harf.json');
-        if (!response.ok) throw new Error('Harf data fetch failed');
-        
-        const data = await response.json();
-        harfData = data.harfler || [];
-        dataLoaded.harf = true;
-        
-        // Update global reference
-        if (typeof window !== 'undefined') {
-            window.harfData = harfData;
-        }
-        
-        console.log(`✅ Harf data loaded: ${harfData.length} letters`);
-        return harfData;
-    } catch (err) {
-        console.error('❌ Harf data load error:', err);
-        return [];
+    if (loadPromises.harf) {
+        return loadPromises.harf;
     }
+
+    loadPromises.harf = (async () => {
+        try {
+            const data = await fetchDataJson('./data/harf.json', 'Harf');
+            harfData = data.harfler || [];
+            markDataLoaded('harf', harfData);
+            if (typeof window !== 'undefined') {
+                window.harfData = harfData;
+            }
+            console.log(`✅ Harf data loaded: ${harfData.length} letters`);
+            return harfData;
+        } catch (err) {
+            console.error('❌ Harf data load error:', err);
+            return harfData.length > 0 ? harfData : [];
+        } finally {
+            loadPromises.harf = null;
+        }
+    })();
+
+    return loadPromises.harf;
 }
 
 /**
@@ -197,14 +240,10 @@ async function loadUstnData() {
     }
     
     try {
-        const response = await fetch('./data/ustn.json');
-        if (!response.ok) throw new Error('Ustn data fetch failed');
-        
-        const data = await response.json();
+        const data = await fetchDataJson('./data/ustn.json', 'Ustun');
         ustnData = Array.isArray(data.harfler) ? data.harfler : [];
-        dataLoaded.ustn = true;
+        markDataLoaded('ustn', ustnData);
         
-        // Update global reference
         if (typeof window !== 'undefined') {
             window.ustnData = ustnData;
         }
@@ -213,7 +252,7 @@ async function loadUstnData() {
         return ustnData;
     } catch (err) {
         console.error('❌ Ustn data load error:', err);
-        return [];
+        return ustnData.length > 0 ? ustnData : [];
     }
 }
 
@@ -226,12 +265,9 @@ async function loadEsreData() {
     }
     
     try {
-        const response = await fetch('./data/esre.json');
-        if (!response.ok) throw new Error('Esre data fetch failed');
-        
-        const data = await response.json();
+        const data = await fetchDataJson('./data/esre.json', 'Esre');
         esreData = Array.isArray(data.harfler) ? data.harfler : [];
-        dataLoaded.esre = true;
+        markDataLoaded('esre', esreData);
         
         // Update global reference
         if (typeof window !== 'undefined') {
@@ -242,7 +278,7 @@ async function loadEsreData() {
         return esreData;
     } catch (err) {
         console.error('❌ Esre data load error:', err);
-        return [];
+        return esreData.length > 0 ? esreData : [];
     }
 }
 
@@ -255,14 +291,10 @@ async function loadOtreData() {
     }
     
     try {
-        const response = await fetch('./data/otre.json');
-        if (!response.ok) throw new Error('Otre data fetch failed');
-        
-        const data = await response.json();
+        const data = await fetchDataJson('./data/otre.json', 'Otre');
         otreData = Array.isArray(data.harfler) ? data.harfler : [];
-        dataLoaded.otre = true;
+        markDataLoaded('otre', otreData);
         
-        // Update global reference
         if (typeof window !== 'undefined') {
             window.otreData = otreData;
         }
@@ -271,7 +303,7 @@ async function loadOtreData() {
         return otreData;
     } catch (err) {
         console.error('❌ Otre data load error:', err);
-        return [];
+        return otreData.length > 0 ? otreData : [];
     }
 }
 
@@ -284,14 +316,10 @@ async function loadUcHarfliKelimelerData() {
     }
     
     try {
-        const response = await fetch('./data/uc_harfli_kelimeler.json');
-        if (!response.ok) throw new Error('UcHarfliKelimeler data fetch failed');
-        
-        const data = await response.json();
+        const data = await fetchDataJson('./data/uc_harfli_kelimeler.json', 'UcHarfliKelimeler');
         ucHarfliKelimelerData = Array.isArray(data.kelimeler) ? data.kelimeler : [];
-        dataLoaded.ucHarfliKelimeler = true;
+        markDataLoaded('ucHarfliKelimeler', ucHarfliKelimelerData);
         
-        // Update global reference
         if (typeof window !== 'undefined') {
             window.ucHarfliKelimelerData = ucHarfliKelimelerData;
         }
@@ -300,7 +328,7 @@ async function loadUcHarfliKelimelerData() {
         return ucHarfliKelimelerData;
     } catch (err) {
         console.error('❌ Üç Harfli Kelimeler data load error:', err);
-        return [];
+        return ucHarfliKelimelerData.length > 0 ? ucHarfliKelimelerData : [];
     }
 }
 
@@ -313,14 +341,10 @@ async function loadTenvinData() {
     }
     
     try {
-        const response = await fetch('./data/tenvin.json');
-        if (!response.ok) throw new Error('Tenvin data fetch failed');
-        
-        const data = await response.json();
+        const data = await fetchDataJson('./data/tenvin.json', 'Tenvin');
         tenvinData = Array.isArray(data.harfler) ? data.harfler : [];
-        dataLoaded.tenvin = true;
+        markDataLoaded('tenvin', tenvinData);
         
-        // Update global reference
         if (typeof window !== 'undefined') {
             window.tenvinData = tenvinData;
         }
@@ -329,7 +353,7 @@ async function loadTenvinData() {
         return tenvinData;
     } catch (err) {
         console.error('❌ Tenvin data load error:', err);
-        return [];
+        return tenvinData.length > 0 ? tenvinData : [];
     }
 }
 
@@ -342,14 +366,10 @@ async function loadSeddeData() {
     }
     
     try {
-        const response = await fetch('./data/sedde.json');
-        if (!response.ok) throw new Error('Sedde data fetch failed');
-        
-        const data = await response.json();
+        const data = await fetchDataJson('./data/sedde.json', 'Sedde');
         seddeData = Array.isArray(data.kelimeler) ? data.kelimeler : [];
-        dataLoaded.sedde = true;
+        markDataLoaded('sedde', seddeData);
         
-        // Update global reference
         if (typeof window !== 'undefined') {
             window.seddeData = seddeData;
         }
@@ -358,7 +378,7 @@ async function loadSeddeData() {
         return seddeData;
     } catch (err) {
         console.error('❌ Şedde data load error:', err);
-        return [];
+        return seddeData.length > 0 ? seddeData : [];
     }
 }
 
@@ -371,14 +391,10 @@ async function loadCezmData() {
     }
     
     try {
-        const response = await fetch('./data/cezm.json');
-        if (!response.ok) throw new Error('Cezm data fetch failed');
-        
-        const data = await response.json();
+        const data = await fetchDataJson('./data/cezm.json', 'Cezm');
         cezmData = Array.isArray(data.kelimeler) ? data.kelimeler : [];
-        dataLoaded.cezm = true;
+        markDataLoaded('cezm', cezmData);
         
-        // Update global reference
         if (typeof window !== 'undefined') {
             window.cezmData = cezmData;
         }
@@ -387,7 +403,7 @@ async function loadCezmData() {
         return cezmData;
     } catch (err) {
         console.error('❌ Cezm data load error:', err);
-        return [];
+        return cezmData.length > 0 ? cezmData : [];
     }
 }
 
@@ -400,14 +416,10 @@ async function loadUzatmaMedData() {
     }
     
     try {
-        const response = await fetch('./data/uzatma_med.json');
-        if (!response.ok) throw new Error('Uzatma Med data fetch failed');
-        
-        const data = await response.json();
+        const data = await fetchDataJson('./data/uzatma_med.json', 'UzatmaMed');
         uzatmaMedData = Array.isArray(data.kelimeler) ? data.kelimeler : [];
-        dataLoaded.uzatmaMed = true;
+        markDataLoaded('uzatmaMed', uzatmaMedData);
         
-        // Update global reference
         if (typeof window !== 'undefined') {
             window.uzatmaMedData = uzatmaMedData;
         }
@@ -416,7 +428,7 @@ async function loadUzatmaMedData() {
         return uzatmaMedData;
     } catch (err) {
         console.error('❌ Uzatma Med data load error:', err);
-        return [];
+        return uzatmaMedData.length > 0 ? uzatmaMedData : [];
     }
 }
 
@@ -424,19 +436,21 @@ async function loadUzatmaMedData() {
  * Preload all data in background
  */
 async function preloadAllData() {
-    console.log('📦 Preloading all data...');
-    
-    await Promise.all([
-        loadKelimeData(),
-        loadAyetData(),
-        loadDuaData(),
-        loadHadisData(),
-        loadHarfData(),
-        loadUzatmaMedData()
-        // Removed: loadHarf1Data() - not used
-    ]);
-    
-    console.log('✅ All data preloaded');
+    if (!preloadPromise) {
+        preloadPromise = (async () => {
+            console.log('📦 Preloading all data...');
+            await Promise.all([
+                loadKelimeData(),
+                loadAyetData(),
+                loadDuaData(),
+                loadHadisData(),
+                loadHarfData(),
+                loadUzatmaMedData()
+            ]);
+            console.log('✅ All data preloaded');
+        })();
+    }
+    return preloadPromise;
 }
 
 /**

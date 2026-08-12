@@ -576,6 +576,16 @@ async function initApp() {
     
     // Load user interface settings (sound, animations, theme)
     loadUserSettings();
+
+    if (window.location.protocol === 'file:') {
+        setTimeout(() => {
+            showToast(
+                'Dosyayı doğrudan açmak verileri yükleyemez. GitHub linki veya Live Server kullanın.',
+                'warning',
+                8000
+            );
+        }, 2000);
+    }
     
     // Initialize notifications
     if (typeof window.initNotifications === 'function') {
@@ -7676,15 +7686,30 @@ async function startKarmaGame() {
     karmaQuestionIndex = 0;
     karmaQuestions = [];
     
-    // Load all necessary data
-    const [kelimeData, ayetData, harfData] = await Promise.all([
-        loadKelimeData(),
-        loadAyetData(),
-        loadHarfData()
-    ]);
+    if (typeof preloadAllData === 'function') {
+        await preloadAllData();
+    }
+
+    let kelimeData = [];
+    let ayetData = [];
+    let harfData = [];
+    for (let attempt = 0; attempt < 2; attempt++) {
+        [kelimeData, ayetData, harfData] = await Promise.all([
+            loadKelimeData(),
+            loadAyetData(),
+            loadHarfData()
+        ]);
+        if (kelimeData.length > 0) break;
+        if (attempt === 0) {
+            await new Promise((resolve) => setTimeout(resolve, 500));
+        }
+    }
     
     if (kelimeData.length === 0) {
-        showToast('Veri yüklenemedi', 'error');
+        const msg = window.location.protocol === 'file:'
+            ? 'Veri yüklenemedi — index.html dosyasını çift tıklamayın, GitHub linkinden açın'
+            : 'Veri yüklenemedi';
+        showToast(msg, 'error');
         goToMainMenu();
         return;
     }

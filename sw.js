@@ -1,7 +1,7 @@
 // Hasene Service Worker - Offline + otomatik güncelleme
 // Yeni sürüm yayınlarken CACHE_NAME sürümünü artır (ör. hasene-v8)
-const CACHE_NAME = 'hasene-v10';
-const DATA_CACHE_NAME = 'hasene-data-v10';
+const CACHE_NAME = 'hasene-v11';
+const DATA_CACHE_NAME = 'hasene-data-v11';
 
 const urlsToCache = [
     './',
@@ -47,7 +47,10 @@ function networkFirst(request, cacheName) {
             }
             return networkResponse;
         })
-        .catch(() => caches.match(request));
+        .catch(() => caches.match(request).then((cached) => {
+            if (cached) return cached;
+            return new Response('Offline', { status: 503, statusText: 'Service Unavailable' });
+        }));
 }
 
 function cacheFirst(request, cacheName) {
@@ -156,15 +159,23 @@ self.addEventListener('fetch', (event) => {
     if (url.pathname.includes('/data/')) {
         event.respondWith(
             caches.open(DATA_CACHE_NAME).then((cache) => {
-                return cache.match(event.request).then((response) => {
-                    const fetchPromise = fetch(event.request).then((networkResponse) => {
+                return cache.match(event.request).then((cached) => {
+                    const networkFetch = fetch(event.request).then((networkResponse) => {
                         if (networkResponse && networkResponse.status === 200) {
                             cache.put(event.request, networkResponse.clone());
                         }
                         return networkResponse;
-                    }).catch(() => response);
+                    });
 
-                    return response || fetchPromise;
+                    if (cached) {
+                        networkFetch.catch(() => {});
+                        return cached;
+                    }
+
+                    return networkFetch.catch(() => new Response(
+                        JSON.stringify({ error: 'Offline and not cached' }),
+                        { status: 503, headers: { 'Content-Type': 'application/json' } }
+                    ));
                 });
             })
         );
