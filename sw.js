@@ -1,7 +1,7 @@
 // Hasene Service Worker - Offline + otomatik güncelleme
 // Yeni sürüm yayınlarken CACHE_NAME sürümünü artır (ör. hasene-v8)
-const CACHE_NAME = 'hasene-v12';
-const DATA_CACHE_NAME = 'hasene-data-v12';
+const CACHE_NAME = 'hasene-v13';
+const DATA_CACHE_NAME = 'hasene-data-v13';
 
 const urlsToCache = [
     './',

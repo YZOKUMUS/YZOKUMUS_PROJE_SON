@@ -2056,6 +2056,20 @@ body::before {
         width: calc(100% - 2 * var(--spacing-xs));
         max-width: calc(100vw - 2 * var(--spacing-xs));
     }
+
+    .category-tabs {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 6px;
+    }
+
+    .category-tab {
+        min-height: 44px;
+        padding: 0.45rem 0.25rem;
+    }
+
+    .category-tab .tab-label {
+        font-size: 0.72rem;
+    }
     
     .analysis-stat-card {
         padding: var(--spacing-sm);
@@ -3969,17 +3983,22 @@ body::before {
 }
 
 .category-tabs {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: var(--spacing-sm);
     margin-bottom: var(--spacing-md);
     background: var(--glass-bg);
     padding: var(--spacing-xs);
     border-radius: var(--radius-lg);
     border: 1px solid var(--glass-border);
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .category-tab {
-    flex: 1;
+    min-width: 0;
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -3992,6 +4011,7 @@ body::before {
     transition: all 0.2s;
     color: var(--text-secondary);
     font-size: 0.85rem;
+    box-sizing: border-box;
 }
 
 .category-tab:hover {
@@ -4011,6 +4031,10 @@ body::before {
 .category-tab .tab-label {
     font-weight: 500;
     font-size: 0.8rem;
+    text-align: center;
+    line-height: 1.2;
+    white-space: normal;
+    overflow-wrap: anywhere;
 }
 
 .category-tab .tab-count {
@@ -4936,6 +4960,23 @@ body::before {
         max-width: 95%;
         padding: var(--spacing-md);
     }
+
+    .category-tabs {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: var(--spacing-xs);
+    }
+
+    .category-tab {
+        padding: 0.4rem 0.2rem;
+    }
+
+    .category-tab .tab-icon {
+        font-size: 1.15rem;
+    }
+
+    .category-tab .tab-label {
+        font-size: 0.68rem;
+    }
     
     .analysis-summary-compact {
         grid-template-columns: repeat(2, 1fr);
@@ -5172,6 +5213,20 @@ body::before {
         padding: var(--spacing-md);
         margin: var(--spacing-xs);
         width: calc(100% - 2 * var(--spacing-xs));
+    }
+
+    .category-tabs {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 6px;
+    }
+
+    .category-tab {
+        min-height: 44px;
+        padding: 0.45rem 0.25rem;
+    }
+
+    .category-tab .tab-label {
+        font-size: 0.72rem;
     }
     
     .analysis-content {
