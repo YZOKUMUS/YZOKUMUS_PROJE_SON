@@ -3148,7 +3148,7 @@ function checkKelimeAnswer(index, selectedAnswer) {
 }
 
 /**
- * Use hint - eliminate 2 wrong answers
+ * Use hint - eliminate 1 wrong answer
  */
 let hintUsedThisQuestion = false;
 let hintsUsedToday = 0;
@@ -3171,16 +3171,27 @@ function useHint() {
         return;
     }
     
-    // Find wrong options to eliminate
+    const correctAnswer = (currentQuestion.anlam || currentQuestion.translation || '').trim();
+    if (!correctAnswer) {
+        showToast('İpucu kullanılamadı', 'warning');
+        return;
+    }
+
+    // Find wrong options to eliminate (never remove the correct answer)
     const wrongOptions = [];
-    options.forEach((option, index) => {
-        if (!option.classList.contains('correct') && currentOptions && currentOptions[index] !== currentQuestion.turkce_anlam && currentOptions[index] !== currentQuestion.translation) {
+    options.forEach((option) => {
+        if (option.textContent.trim() !== correctAnswer) {
             wrongOptions.push(option);
         }
     });
-    
-    // Eliminate 1 wrong option
-    const toEliminate = wrongOptions.slice(0, 1);
+
+    if (wrongOptions.length === 0) {
+        showToast('Yeterli şık yok', 'info');
+        return;
+    }
+
+    // Eliminate 1 random wrong option
+    const toEliminate = getRandomItems(wrongOptions, 1);
     toEliminate.forEach(option => {
         option.classList.add('eliminated');
         option.disabled = true;
