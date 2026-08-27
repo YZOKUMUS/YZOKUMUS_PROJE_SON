@@ -9,7 +9,6 @@ const WWW = path.join(ROOT, 'www');
 
 const COPY_ITEMS = [
   'index.html',
-  'test-kart.html',
   'style.css',
   'manifest.json',
   'sw.js',

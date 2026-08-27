@@ -32,7 +32,6 @@ Hasene ile Kur'an-ı Kerim kelimelerini oyun gibi öğren!
 • Dinle Bul — Kelimeyi dinle, doğru cevabı seç
 • Boşluk Doldur — Ayette eksik kelimeyi tamamla
 • Talim Et — Karışık pratik paketi
-• Kart Modu — Ezber için flash kartlar
 
 🗺️ CÜZ YOLCULUĞU
 30 cüzlük kelime haritası. Her cüzdeki ilerlemeni gör, tamamlayınca bonus Hasene kazan.

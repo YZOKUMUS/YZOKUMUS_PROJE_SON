@@ -149,10 +149,6 @@ async function runBrowserTests(page) {
     await p.evaluate(async () => startGame('kuran-okuma'));
   }, ['ayet-oku-screen', 'dua-et-screen', 'hadis-oku-screen']);
 
-  await startAndCheck(page, 'Kart Modu', async (p) => {
-    await p.evaluate(() => startGame('flashcards'));
-  }, ['flashcard-screen']);
-
   await startAndCheck(page, 'Cüz Yolculuğu', async (p) => {
     await p.evaluate(async () => startGame('juz-yolculugu'));
   }, ['juz-journey-screen']);

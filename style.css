@@ -701,30 +701,6 @@ body::before {
     -webkit-backdrop-filter: var(--glass-blur);
 }
 
-#flashcard-screen.game-screen {
-    max-width: none;
-    width: 100vw;
-    height: 100dvh;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-}
-
-#flashcard-screen .game-header {
-    margin: 0;
-    padding: var(--spacing-sm) var(--spacing-md);
-    background: var(--bg-secondary);
-    border-bottom: 1px solid var(--glass-border);
-}
-
-#flashcard-iframe {
-    width: 100%;
-    flex: 1;
-    border: 0;
-    background: #000;
-}
-
 .game-header {
     display: flex;
     align-items: center;
@@ -1914,13 +1890,13 @@ body::before {
 }
 
 /* Quiz ekranları yukarıdaki flex düzenini kullanır; diğer ekranlar kaydırılabilir */
-.game-screen:not(#kelime-cevir-screen):not(#dinle-bul-screen):not(#bosluk-doldur-screen):not(#elif-ba-screen):not(#karma-game-screen):not(#flashcard-screen) .game-content {
+.game-screen:not(#kelime-cevir-screen):not(#dinle-bul-screen):not(#bosluk-doldur-screen):not(#elif-ba-screen):not(#karma-game-screen) .game-content {
     overflow-y: auto;
     max-height: calc(100dvh - 200px);
     padding-bottom: var(--spacing-lg);
 }
 
-.game-screen:not(#kelime-cevir-screen):not(#dinle-bul-screen):not(#bosluk-doldur-screen):not(#elif-ba-screen):not(#karma-game-screen):not(#flashcard-screen) {
+.game-screen:not(#kelime-cevir-screen):not(#dinle-bul-screen):not(#bosluk-doldur-screen):not(#elif-ba-screen):not(#karma-game-screen) {
     overflow-y: auto;
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;

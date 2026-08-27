@@ -1992,7 +1992,7 @@ function setupNavigationButtons() {
  */
 async function startGame(gameMode) {
     // Check if user is logged in
-    if (gameMode !== 'flashcards' && !requireUserLogin()) {
+    if (!requireUserLogin()) {
         return;
     }
     
@@ -2056,9 +2056,6 @@ async function startGame(gameMode) {
         case 'kuran-okuma':
             // currentGameMode zaten 'kuran-okuma' olarak ayarlanmış (startGame'de)
             await startKuranOkumaMode();
-            break;
-        case 'flashcards':
-            startFlashcardMode();
             break;
         default:
             showToast('Bilinmeyen oyun modu', 'error');
@@ -2160,20 +2157,6 @@ async function continueDailyPlan() {
         return;
     }
     await startDailyPlanStep();
-}
-
-/**
- * Start flashcard mode (no scoring integration)
- */
-function startFlashcardMode() {
-    const screen = document.getElementById('flashcard-screen');
-    if (!screen) {
-        showToast('Kart modu ekranı bulunamadı', 'error');
-        goToMainMenu(true);
-        return;
-    }
-
-    screen.classList.remove('hidden');
 }
 
 /**
